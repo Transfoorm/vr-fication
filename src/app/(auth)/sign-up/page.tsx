@@ -31,12 +31,12 @@ export default function SignUpPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Silently redirect to dashboard if already signed in
+  // Silently redirect to dashboard if already signed in (but not during active submission)
   useEffect(() => {
-    if (signUpLoaded && isSignedIn) {
+    if (signUpLoaded && isSignedIn && !isSubmitting) {
       router.push("/");
     }
-  }, [signUpLoaded, isSignedIn, router]);
+  }, [signUpLoaded, isSignedIn, isSubmitting, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

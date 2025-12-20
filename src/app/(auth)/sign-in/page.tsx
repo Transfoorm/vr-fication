@@ -40,12 +40,12 @@ export default function SignInPage() {
     }
   }, []);
 
-  // FUSE: Redirect to session API to mint cookie before loading dashboard
+  // FUSE: Redirect to session API to mint cookie before loading dashboard (but not during active submission)
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
+    if (isLoaded && isSignedIn && !isSubmitting) {
       router.push("/api/session");
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [isLoaded, isSignedIn, isSubmitting, router]);
 
   // Timeout warning: Show message if authentication takes too long, then auto-refresh
   useEffect(() => {
