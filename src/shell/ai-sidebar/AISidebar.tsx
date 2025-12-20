@@ -13,7 +13,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from 'react';
-import { Icon, T } from '@/prebuilts';
+import { Icon, T } from '@/vr';
 import { useFuse } from '@/store/fuse';
 import { ENCHANTMENT_TIMINGS } from '@/fuse/constants/enchantment';
 import { MIROR_DEFAULTS } from '@/fuse/constants/coreThemeConfig';

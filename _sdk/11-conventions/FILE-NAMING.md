@@ -28,7 +28,7 @@ This doctrine applies to ALL directories under `src/`:
 |-----------|---------|-------------------|
 | `src/shell/` | Layout components | kebab-case |
 | `src/features/` | Feature components | kebab-case |
-| `src/prebuilts/` | Reusable components | kebab-case |
+| `src/vr/` | Reusable components | kebab-case |
 | `src/app/` | Next.js routes | kebab-case (Next.js conventions) |
 | `src/providers/` | React providers | flat (PascalCase files) |
 | `src/hooks/` | Custom hooks | flat (camelCase files) |

@@ -12,7 +12,7 @@
 import '../user-drawer.css';
 import { useState } from 'react';
 import { useAdminData } from '@/hooks/useAdminData';
-import { Field, T } from '@/prebuilts';
+import { Field, T } from '@/vr';
 import { sendRecoveryLink } from '@/app/(clerk)/actions/recovery';
 
 interface EmailTabProps {

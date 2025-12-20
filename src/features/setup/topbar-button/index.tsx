@@ -17,7 +17,7 @@
 
 import { useState, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
-import { Button } from '@/prebuilts/button';
+import { Button } from '@/vr/button';
 import { useFuse } from '@/store/fuse';
 import { useRankCheck } from '@/fuse/hydration/hooks/useRankCheck';
 import {

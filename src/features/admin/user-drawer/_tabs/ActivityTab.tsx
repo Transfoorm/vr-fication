@@ -12,9 +12,9 @@
 'use client';
 
 import '../user-drawer.css';
-import { Card, Badge, T } from '@/prebuilts';
+import { Card, Badge, T } from '@/vr';
 import { useAdminData } from '@/hooks/useAdminData';
-import type { RankType } from '@/prebuilts/badge/Rank';
+import type { RankType } from '@/vr/badge/Rank';
 
 interface ActivityTabProps {
   userId: string;

@@ -16,7 +16,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useUser, useSignUp } from '@clerk/nextjs';
-import { Modal } from '@/prebuilts/modal';
+import { Modal } from '@/vr/modal';
 
 export interface VerifySetupProps {
   /** Control visibility */

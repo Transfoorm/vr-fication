@@ -15,7 +15,7 @@
 
 import { usePageHeaderContext } from '@/shell/page-header/PageHeaderContext';
 import { useRef, useEffect } from 'react';
-import { T } from '@/prebuilts';
+import { T } from '@/vr';
 
 /**
  * PageHeader Component

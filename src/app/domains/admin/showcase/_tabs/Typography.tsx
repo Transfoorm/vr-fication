@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Divider, Typography } from '@/prebuilts';
+import { Card, Divider, Typography } from '@/vr';
 
 export default function TypographyShowcase() {
   return (

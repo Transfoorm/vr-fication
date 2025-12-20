@@ -1,0 +1,29 @@
+/*   PREBUILTS VARIABLES AND CLASSES PANEL */
+
+/* 🟦🟦🟦🟦🟦🟦 COMPONENT STYLES - All Prebuilt Components 🟦🟦🟦🟦🟦🟦
+   Import order: alphabetical for easy maintenance
+   NOTE: @import must come BEFORE all other CSS rules
+   * BASE CLASSES - Shared by all variants */ 
+@import url('../src/vr/actions/actions.css');               /* 1 ⬇️ */ 
+@import url('../src/vr/badge/badge.css');
+@import url('../src/vr/button/button.css');
+@import url('../src/vr/card/card.css');
+@import url('../src/vr/divider/divider.css');
+@import url('../src/vr/dropdown/dropdown.css');
+@import url('../src/vr/field/field.css');
+@import url('../src/vr/grid/grid.css');
+@import url('../src/vr/input/input.css');
+@import url('../src/vr/label/label.css');
+@import url('../src/vr/modal/modal.css');
+@import url('../src/vr/page/page.css');
+@import url('../src/vr/rank/rank.css');
+@import url('../src/vr/search/search.css');
+@import url('../src/vr/stack/stack.css');
+@import url('../src/vr/table/table.css');
+@import url('../src/vr/tabs/tabs.css');
+@import url('../src/vr/tooltip/tooltip.css');
+@import url('../src/vr/typography/typography.css');           /* 19 */ 
+
+/* Variables moved to styles/tokens.css - PREBUILT COMPONENT VARIABLES section */
+
+

@@ -30,7 +30,7 @@ module.exports = {
             if (classValue.includes('ut-')) return;
 
             // Prebuilts must use vr-* (Variant Robot architecture)
-            if (filename.includes('/prebuilts/') || filename.includes('/src/prebuilts/')) {
+            if (filename.includes('/prebuilts/') || filename.includes('/src/vr/')) {
               if (!classValue.match(/\bvr-/)) {
                 context.report({
                   node,

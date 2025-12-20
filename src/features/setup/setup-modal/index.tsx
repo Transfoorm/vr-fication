@@ -25,7 +25,7 @@
 import { useState, useEffect } from 'react';
 import { useFuse } from '@/store/fuse';
 import { Sparkles } from 'lucide-react';
-import { Button, T } from '@/prebuilts';
+import { Button, T } from '@/vr';
 import { VerifySetup } from '@/app/(clerk)/features/VerifySetup';
 import { skipFlow, reverseFlow } from '@/features/setup/flying-button/config';
 import { completeSetupAction } from '@/app/actions/user-mutations';

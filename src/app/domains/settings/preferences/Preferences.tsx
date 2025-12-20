@@ -10,7 +10,7 @@
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { usePageTiming } from '@/fuse/hooks/usePageTiming';
-import { Tabs, Stack, Icon } from '@/prebuilts';
+import { Tabs, Stack, Icon } from '@/vr';
 import MirorAI from './_tabs/MirorAI';
 import Theme from './_tabs/Theme';
 import Controls from './_tabs/Controls';

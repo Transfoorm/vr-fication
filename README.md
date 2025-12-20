@@ -15,8 +15,8 @@ This repo exists to complete a major architectural language change without riski
 ### 1. `prod-test2` (MAIN branch)
 - Refactored, stable, ready to ship
 - **Intentionally frozen**
-- Uses `src/prebuilts` folder
-- Imports from `@/prebuilts`
+- Uses `src/vr` folder
+- Imports from `@/vr`
 - All documentation references "prebuilts"
 
 ### 2. `vr-fication` (THIS repo)
@@ -35,8 +35,8 @@ This repo exists to complete a major architectural language change without riski
 We discovered that calling our component system "prebuilts" instead of "VR" (Variant Robots) wasn't just naming—it was **architectural identity**.
 
 **What we thought was a naming issue:**
-- `src/prebuilts` folder should be `src/vr`
-- `@/prebuilts` imports should be `@/vr`
+- `src/vr` folder should be `src/vr`
+- `@/vr` imports should be `@/vr`
 - Documentation should say "VR" not "prebuilts"
 
 **What it actually was:**
@@ -85,9 +85,9 @@ MAIN will NOT receive:
 
 | Aspect | MAIN (prod-test2) | VR-fication (this repo) |
 |--------|-------------------|-------------------------|
-| **Folder** | `src/prebuilts` | `src/vr` |
-| **Imports** | `@/prebuilts` | `@/vr` |
-| **CSS** | `styles/prebuilts.css` | `styles/vr.css` |
+| **Folder** | `src/vr` | `src/vr` |
+| **Imports** | `@/vr` | `@/vr` |
+| **CSS** | `styles/vr.css` | `styles/vr.css` |
 | **Docs** | References "prebuilts" | Pure VR terminology |
 | **Mental Model** | "Pre-built components" | "Variant Robot System" |
 
@@ -217,7 +217,7 @@ VRs are:
 ### When Building Features:
 
 1. **Ask first:** "Is there a VR for that?"
-2. **Import from `@/vr`** (not `@/prebuilts`)
+2. **Import from `@/vr`** (not `@/vr`)
 3. **Use VRs for all UI** (buttons, tables, text, cards)
 4. **Features handle logic** (data, state, events)
 5. **Pages stay thin** (just declare which Feature to show)
@@ -243,7 +243,7 @@ VRs are:
 
 **VR-fication is complete when:**
 
-1. ✅ All imports use `@/vr` (zero `@/prebuilts` references)
+1. ✅ All imports use `@/vr` (zero `@/vr` references)
 2. ✅ All documentation uses VR terminology
 3. ✅ All CSS files reference VR system
 4. ✅ New developers naturally say "VR" not "prebuilts"
@@ -266,7 +266,7 @@ VRs are:
 import { Button, Table, T } from '@/vr';
 
 // ❌ WRONG (old MAIN syntax)
-import { Button, Table, Typography } from '@/prebuilts';
+import { Button, Table, Typography } from '@/vr';
 ```
 
 ### File Structure
@@ -287,7 +287,7 @@ import { T } from '@/vr';
 <T.body size="md">Text here</T.body>
 
 // ❌ WRONG
-import { Typography } from '@/prebuilts';
+import { Typography } from '@/vr';
 ```
 
 ---

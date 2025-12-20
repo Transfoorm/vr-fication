@@ -17,7 +17,7 @@ import UserButton from '@/features/shell/user-button';
 import CompanyButton from '@/features/shell/company-button';
 import { useFuse } from '@/store/fuse';
 import type { DomainRoute } from '@/store/fuse';
-import { Icon, T } from '@/prebuilts';
+import { Icon, T } from '@/vr';
 import { getNavForRank } from './navigation';
 import { usePrism } from '@/fuse/hooks/usePrism';
 

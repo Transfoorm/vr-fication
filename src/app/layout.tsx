@@ -15,7 +15,7 @@ import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { ClerkProvider } from '@clerk/nextjs';
 import { ConvexClientProvider } from '@/providers/ConvexClientProvider';
-import { SideDrawerProvider, SideDrawerPortal } from '@/prebuilts/modal';
+import { SideDrawerProvider, SideDrawerPortal } from '@/vr/modal';
 import { VanishProvider, VanishPortal } from '@/features/vanish/VanishContext';
 import { PageHeaderProvider } from '@/shell/page-header/PageHeaderContext';
 import { headers } from 'next/headers';

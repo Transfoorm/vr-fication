@@ -80,7 +80,7 @@ export function UsersTable({ users }) {
 
 **The VR Way - 8 lines. Done.**
 ```tsx
-import { Table } from '@/prebuilts';
+import { Table } from '@/vr';
 
 export function UsersTable({ users }) {
   return (
@@ -346,7 +346,7 @@ VRs receive data, not context. Never check rank in VRs or handlers.
 'use client';
 
 import { useFuse } from '@/store/fuse';
-import { Table, Search, Stack } from '@/prebuilts';
+import { Table, Search, Stack } from '@/vr';
 
 export default function PeopleView() {
   // Data from FUSE (already rank-scoped by Convex)
@@ -418,7 +418,7 @@ FIX:
 ### ✅ THE VR WAY
 ```tsx
 // UsersTab.tsx - Complete admin interface
-import { Search, Table, Stack, Modal } from '@/prebuilts';
+import { Search, Table, Stack, Modal } from '@/vr';
 import { useFuse } from '@/store/fuse';
 
 export default function UsersTab() {
@@ -559,7 +559,7 @@ The prefixes tell you exactly where code belongs:
 .ft-setup-modal { }
 ```
 
-- `styles/prebuilts.css` → Imports all `.vr-*` CSS
+- `styles/vr.css` → Imports all `.vr-*` CSS
 - `styles/features.css` → Imports all `.ft-*` CSS (largest by design)
 - Tabs have NO CSS
 
@@ -569,7 +569,7 @@ The prefixes tell you exactly where code belongs:
 
 ### File Structure
 ```
-/prebuilts/
+/vr/
   ├── table/
   │   ├── sortable/
   │   │   ├── index.tsx           ← Complete sortable table
@@ -591,7 +591,7 @@ Every VR MUST:
 2. ✅ Render itself completely (no assembly required)
 3. ✅ Work immediately when imported (no setup)
 4. ✅ Have ALL CSS in ONE file alongside component
-5. ✅ Use CSS variables from `/styles/prebuilts.css`
+5. ✅ Use CSS variables from `/styles/vr.css`
 6. ✅ Have zero external margins
 7. ✅ Be rank-agnostic (no context checks)
 

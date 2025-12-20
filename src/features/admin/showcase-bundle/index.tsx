@@ -12,9 +12,9 @@
 
 import './showcase-bundle.css';
 import { useState } from 'react';
-import { Card } from '@/prebuilts/card';
-import { Input } from '@/prebuilts/input';
-import { T } from '@/prebuilts';
+import { Card } from '@/vr/card';
+import { Input } from '@/vr/input';
+import { T } from '@/vr';
 
 const RADIO_OPTIONS = [
   { value: 'option1', label: 'Option 1' },

@@ -38,7 +38,7 @@ This is achieved through the **5-File System** with **semantic prefixes** and **
 
 Each of the 5 files acts as an **import hub** that aggregates component-scoped CSS:
 
-- **`prebuilts.css`** → Imports 26 prebuilt components from `/src/prebuilts/*/`
+- **`prebuilts.css`** → Imports 26 prebuilt components from `/src/vr/*/`
 - **`layout.css`** → Imports `/src/shell/css/shell.css` (which imports 6 shell components)
 - **`features.css`** → Imports all feature components from `/src/features/*/`
 
@@ -50,7 +50,7 @@ Components keep their own CSS files (local definition for maintainability), but 
 
 ```
 LOCAL DEFINITION:
-/src/prebuilts/button/button.css  →  prebuilts.css  →  globals.css  →  GLOBALLY AVAILABLE
+/src/vr/button/button.css  →  prebuilts.css  →  globals.css  →  GLOBALLY AVAILABLE
 /src/shell/css/topbar.css         →  shell.css → layout.css → globals.css → GLOBALLY AVAILABLE
 /src/features/UserButton/user-button.css → features.css → globals.css → GLOBALLY AVAILABLE
 ```
@@ -150,9 +150,9 @@ The "Variant Robot" name reflects the systematic, automated nature of these comp
 
 **Purpose:** Reusable design system components
 
-**Location:** `/src/prebuilts/`
+**Location:** `/src/vr/`
 
-**CSS:** Component-scoped files imported via `/styles/prebuilts.css`
+**CSS:** Component-scoped files imported via `/styles/vr.css`
 
 **Examples:**
 ```css
@@ -170,7 +170,7 @@ The "Variant Robot" name reflects the systematic, automated nature of these comp
 - Often have child elements (header, content, footer)
 - Each component has its own CSS file
 - Complex components stay separate (Button: 200+ lines)
-- Import hub: `/styles/prebuilts.css`
+- Import hub: `/styles/vr.css`
 
 ---
 
@@ -238,7 +238,7 @@ The "Variant Robot" name reflects the systematic, automated nature of these comp
 ├── features.css            # ft-* import hub
 └── layout.css              # Imports /src/shell/css/shell.css
 
-/src/prebuilts/
+/src/vr/
 ├── button/
 │   ├── index.tsx
 │   └── button.css          # ✅ Component-scoped (complex, 200+ lines)
@@ -329,13 +329,13 @@ The "Variant Robot" name reflects the systematic, automated nature of these comp
 
 An import hub is a CSS file that imports other CSS files for organizational purposes.
 
-**Example: `/styles/prebuilts.css`**
+**Example: `/styles/vr.css`**
 ```css
 /* Prebuilts - Variant Robot Components */
-@import '../src/prebuilts/actions/actions.css';
-@import '../src/prebuilts/badge/badge.css';
-@import '../src/prebuilts/button/button.css';
-@import '../src/prebuilts/card/card.css';
+@import '../src/vr/actions/actions.css';
+@import '../src/vr/badge/badge.css';
+@import '../src/vr/button/button.css';
+@import '../src/vr/card/card.css';
 /* ... 25 more imports ... */
 ```
 
@@ -531,7 +531,7 @@ Component-specific variables follow this pattern:
 **Option 1: At top of component CSS file (Recommended)**
 
 ```css
-/* /src/prebuilts/toggle/toggle.css */
+/* /src/vr/toggle/toggle.css */
 
 /* Component-specific tokens */
 :root {
@@ -848,7 +848,7 @@ import './topbar.css';
 
 World Class CSS Convention - The **5-File System**:
 
-✅ **5 centralized files** - All CSS lives in tokens/prebuilts/layout/globals/features
+✅ **5 centralized files** - All CSS lives in tokens/vr/layout/globals/features
 ✅ **Semantic prefixes** - `vr-*`, `ly-*`, `ft-*` for instant discoverability
 ✅ **Component-scoped CSS** - Maintainability through separation, aggregated through hubs
 ✅ **Import hubs** - prebuilts.css, layout.css, features.css aggregate components
@@ -1051,7 +1051,7 @@ border-radius: 0.5rem;          /* 8px */
 Primary button is the **hero CTA** - intentionally has more visual weight than other variants (secondary, ghost, etc.)
 
 **Files Modified:**
-- `src/prebuilts/button/button.css`
+- `src/vr/button/button.css`
 
 **Result:** Proper button height and visual hierarchy
 

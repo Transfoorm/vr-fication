@@ -18,7 +18,7 @@
 import { useEffect } from 'react';
 import { useFuse } from '@/store/fuse';
 import SetupModal from '@/features/setup/setup-modal';
-import { Backdrop } from '@/prebuilts';
+import { Backdrop } from '@/vr';
 
 export default function ShadowKing() {
   const shadowKingActive = useFuse((s) => s.shadowKingActive);

@@ -17,7 +17,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSignIn, useAuth } from "@clerk/nextjs";
-import { Icon, Button, Spinner } from '@/prebuilts';
+import { Icon, Button, Spinner } from '@/vr';
 
 export default function SignInPage() {
   const { isLoaded, signIn, setActive } = useSignIn();

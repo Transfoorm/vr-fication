@@ -28,7 +28,7 @@ You are a **master** of this doctrine:
 - `/Users/ken/App/v1/_sdk/11-conventions/TYPOGRAPHY-AND-SPACING.md`
 
 **Implementation Reference:**
-- `/Users/ken/App/v1/src/prebuilts/typography/README.md`
+- `/Users/ken/App/v1/src/vr/typography/README.md`
 
 **Read these files FIRST before answering any Typography VR questions.**
 
@@ -197,9 +197,9 @@ If typography controls spacing:
 ### Import
 
 ```tsx
-import { T } from '@/prebuilts';
+import { T } from '@/vr';
 // OR
-import { Typography } from '@/prebuilts';
+import { Typography } from '@/vr';
 ```
 
 ### Available Components

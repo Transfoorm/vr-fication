@@ -67,7 +67,7 @@ grep -rn "CURRENT_NAME\|CURRENT_PATH" src/rank/*/manifest.ts
 ### 2.6 CSS Imports
 ```bash
 # Check style imports
-grep -rn "CURRENT_PATH" styles/features.css styles/prebuilts.css
+grep -rn "CURRENT_PATH" styles/features.css styles/vr.css
 ```
 
 ### 2.7 Domain Folder

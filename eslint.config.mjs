@@ -331,7 +331,7 @@ const eslintConfig = [
           patterns: [
             {
               group: ["**/page.css", "./page.css"],
-              message: "⛔ WCCC VIOLATION: Page-specific CSS files are forbidden. Use prebuilts or create a feature component instead.\n\nAllowed CSS hubs:\n  • /styles/prebuilts.css (vr-* components)\n  • /styles/features.css (ft-* components)\n  • /styles/layout.css (ly-* shell + layouts)\n\nIf you need custom styling:\n  1. Check if a prebuilt variant exists\n  2. Create new prebuilt variant in /src/prebuilts/\n  3. Last resort: Create feature component in /src/features/\n\nSee TTT-WCCC-PROTOCOL.md for details."
+              message: "⛔ WCCC VIOLATION: Page-specific CSS files are forbidden. Use prebuilts or create a feature component instead.\n\nAllowed CSS hubs:\n  • /styles/vr.css (vr-* components)\n  • /styles/features.css (ft-* components)\n  • /styles/layout.css (ly-* shell + layouts)\n\nIf you need custom styling:\n  1. Check if a prebuilt variant exists\n  2. Create new prebuilt variant in /src/vr/\n  3. Last resort: Create feature component in /src/features/\n\nSee TTT-WCCC-PROTOCOL.md for details."
             }
           ]
         }
@@ -364,21 +364,21 @@ const eslintConfig = [
     files: [
       // Portal components (Dynamic Law - getBoundingClientRect positioning)
       "src/components/features/CountrySelector/index.tsx",
-      "src/prebuilts/tooltip/Tooltip.tsx",
-      "src/prebuilts/modal/drawer/portal.tsx",
+      "src/vr/tooltip/Tooltip.tsx",
+      "src/vr/modal/drawer/portal.tsx",
 
       // Data-driven components (Dynamic Law - runtime values/metadata)
-      "src/prebuilts/input/range/index.tsx",      // Runtime percentage positioning
-      "src/prebuilts/fieldbox/Row.tsx",     // CSS custom property bridge for dynamic gap
-      "src/prebuilts/rank/Card.tsx",        // CSS custom property bridges from metadata
-      "src/prebuilts/divider/dashed/index.tsx",   // Runtime multiplier/color/height
-      "src/prebuilts/divider/default/index.tsx",  // Runtime multiplier/color/height
-      "src/prebuilts/divider/gradient/index.tsx", // Runtime multiplier/color/direction
-      "src/prebuilts/divider/line/index.tsx",     // Runtime multiplier/color/height
-      "src/prebuilts/card/standard/index.tsx",    // Runtime values
-      "src/prebuilts/search/Bar.tsx",       // Runtime width prop
-      "src/prebuilts/search/SearchBar.tsx", // Runtime width prop
-      "src/prebuilts/form/Inline.tsx",      // Runtime layout
+      "src/vr/input/range/index.tsx",      // Runtime percentage positioning
+      "src/vr/fieldbox/Row.tsx",     // CSS custom property bridge for dynamic gap
+      "src/vr/rank/Card.tsx",        // CSS custom property bridges from metadata
+      "src/vr/divider/dashed/index.tsx",   // Runtime multiplier/color/height
+      "src/vr/divider/default/index.tsx",  // Runtime multiplier/color/height
+      "src/vr/divider/gradient/index.tsx", // Runtime multiplier/color/direction
+      "src/vr/divider/line/index.tsx",     // Runtime multiplier/color/height
+      "src/vr/card/standard/index.tsx",    // Runtime values
+      "src/vr/search/Bar.tsx",       // Runtime width prop
+      "src/vr/search/SearchBar.tsx", // Runtime width prop
+      "src/vr/form/Inline.tsx",      // Runtime layout
       "src/appshell/PageHeader.tsx",              // Runtime values
       "src/features/setup/flying-button/index.tsx", // CSS custom properties for dynamic positioning
     ],

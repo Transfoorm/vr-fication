@@ -20,7 +20,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/prebuilts/*": ["./src/prebuilts/*"],
+      "@/vr/*": ["./src/vr/*"],
       "@/styles/*": ["./styles/*"],
       "@/convex/*": ["./convex/*"],
       "@/vanish/*": ["./vanish/*"]

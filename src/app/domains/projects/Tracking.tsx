@@ -1,8 +1,8 @@
 'use client';
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
-import { Card } from '@/prebuilts/card';
-import { Grid } from '@/prebuilts/grid';
+import { Card } from '@/vr/card';
+import { Grid } from '@/vr/grid';
 
 export default function Tracking() {
   useSetPageHeader('Tracking', 'Monitor project progress and timelines');

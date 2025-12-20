@@ -38,7 +38,7 @@ const featureFiles = stagedFiles.filter(file =>
   (file.includes('src/features/') ||
    file.includes('src/shell/') ||
    file.includes('src/app/domains/')) &&
-  !file.includes('src/prebuilts/typography/') &&
+  !file.includes('src/vr/typography/') &&
   !file.includes('styles/globals.css') &&
   !file.includes('styles/tokens.css')
 );

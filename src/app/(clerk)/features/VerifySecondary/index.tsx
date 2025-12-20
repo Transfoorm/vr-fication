@@ -16,7 +16,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { Modal } from '@/prebuilts/modal';
+import { Modal } from '@/vr/modal';
 import { addEmailAndSendCode, deleteEmail } from '@/app/(clerk)/actions/email';
 
 export interface VerifySecondaryProps {

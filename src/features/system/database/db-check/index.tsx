@@ -13,7 +13,7 @@
 'use client';
 
 import './db-check.css';
-import { Card, T } from '@/prebuilts';
+import { Card, T } from '@/vr';
 import { useAdminData } from '@/hooks/useAdminData';
 import { useAdminSync } from '@/hooks/useAdminSync';
 

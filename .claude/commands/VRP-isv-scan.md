@@ -32,11 +32,11 @@ These files have legitimate Dynamic Law exceptions - inline styles ARE permitted
 | File | Reason |
 |------|--------|
 | `src/features/setup/flying-button/index.tsx` | Phoenix Animation - runtime CSS custom properties |
-| `src/prebuilts/tooltip/TooltipBasic.tsx` | Portal positioning via getBoundingClientRect |
-| `src/prebuilts/input/range/index.tsx` | Runtime percentage positioning for slider |
+| `src/vr/tooltip/TooltipBasic.tsx` | Portal positioning via getBoundingClientRect |
+| `src/vr/input/range/index.tsx` | Runtime percentage positioning for slider |
 | `src/features/shell/user-button/index.tsx` | react-easy-crop library requires style prop |
-| `src/prebuilts/modal/drawer/portal.tsx` | Portal dynamic positioning |
-| `src/prebuilts/rank/card/index.tsx` | CSS custom property bridges from metadata |
+| `src/vr/modal/drawer/portal.tsx` | Portal dynamic positioning |
+| `src/vr/rank/card/index.tsx` | CSS custom property bridges from metadata |
 
 ---
 

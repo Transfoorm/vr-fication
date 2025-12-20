@@ -24,7 +24,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useFuse } from '@/store/fuse';
-import { Field, Card, T } from '@/prebuilts';
+import { Field, Card, T } from '@/vr';
 import { VerifyEmail } from '@/app/(clerk)/features/VerifyEmail';
 import { VerifySecondary } from '@/app/(clerk)/features/VerifySecondary';
 import { swapEmailsToPrimary, deleteSecondaryEmail } from '@/app/(clerk)/actions/email';

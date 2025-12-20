@@ -34,8 +34,8 @@ import { api } from '@/convex/_generated/api';
 import { refreshSessionAfterUpload } from '@/app/actions/user-mutations';
 import { Id } from "@/convex/_generated/dataModel";
 import { useFuse } from "@/store/fuse";
-import { Icon, Tooltip, Backdrop, T, Spinner } from "@/prebuilts";
-import { Button } from "@/prebuilts/button";
+import { Icon, Tooltip, Backdrop, T, Spinner } from "@/vr";
+import { Button } from "@/vr/button";
 import ThemeToggle from '@/features/shell/theme-toggle';
 
 export default function UserButton() {

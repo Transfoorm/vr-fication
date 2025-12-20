@@ -5,9 +5,9 @@
 
 'use client';
 
-import { Stack, Badge, T } from '@/prebuilts';
+import { Stack, Badge, T } from '@/vr';
 import { useAdminData } from '@/hooks/useAdminData';
-import type { RankType } from '@/prebuilts/badge/Rank';
+import type { RankType } from '@/vr/badge/Rank';
 
 interface SecurityTabProps {
   userId: string;

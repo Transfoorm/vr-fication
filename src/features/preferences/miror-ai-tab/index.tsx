@@ -12,8 +12,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, Tooltip } from '@/prebuilts';
-import { Input } from '@/prebuilts/input';
+import { Card, Tooltip } from '@/vr';
+import { Input } from '@/vr/input';
 import { useFuse } from '@/store/fuse';
 import { ENCHANTMENT_TIMINGS } from '@/fuse/constants/enchantment';
 import { AVATAR_OPTIONS, MIROR_DEFAULTS } from '@/fuse/constants/coreThemeConfig';

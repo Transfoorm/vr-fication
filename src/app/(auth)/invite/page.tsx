@@ -18,7 +18,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSignUp, useAuth } from '@clerk/nextjs';
-import { Icon, Button, Spinner } from '@/prebuilts';
+import { Icon, Button, Spinner } from '@/vr';
 
 export default function InvitePage() {
   const router = useRouter();

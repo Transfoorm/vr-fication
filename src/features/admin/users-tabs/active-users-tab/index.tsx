@@ -11,12 +11,12 @@
 'use client';
 
 import { useState, useMemo, useRef } from 'react';
-import { Search, Table, Badge, Modal, Stack } from '@/prebuilts';
-import { useSideDrawer } from '@/prebuilts/modal';
-import { useTableSearch } from '@/prebuilts/table';
-import type { SortableColumn } from '@/prebuilts/table/Sortable';
-import type { RankType } from '@/prebuilts/badge/Rank';
-import type { SetupStatusType } from '@/prebuilts/badge/Setup';
+import { Search, Table, Badge, Modal, Stack } from '@/vr';
+import { useSideDrawer } from '@/vr/modal';
+import { useTableSearch } from '@/vr/table';
+import type { SortableColumn } from '@/vr/table/Sortable';
+import type { RankType } from '@/vr/badge/Rank';
+import type { SetupStatusType } from '@/vr/badge/Setup';
 import { useVanish } from '@/features/vanish/VanishContext';
 import { useAdminData } from '@/hooks/useAdminData';
 import { useFuse } from '@/store/fuse';

@@ -14,7 +14,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Sparkles } from 'lucide-react';
-import { Button } from '@/prebuilts/button';
+import { Button } from '@/vr/button';
 import { skipFlow, reverseFlow, debug } from './config';
 
 interface Position {

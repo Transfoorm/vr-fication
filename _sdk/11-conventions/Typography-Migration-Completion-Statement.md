@@ -298,7 +298,7 @@ Stay conscious of this. Resist aesthetic expansion. Keep the system tight.
 
 ## Related Documentation
 
-- **Typography VR System** - `/src/prebuilts/typography/README.md`
+- **Typography VR System** - `/src/vr/typography/README.md`
 - **VR Doctrine** - `/_sdk/11-conventions/VR-DOCTRINE.md`
 - **Typography & Spacing Doctrine** - `/_sdk/11-conventions/TYPOGRAPHY-AND-SPACING.md`
 - **TTT Philosophy** - `/_sdk/10-TTT-philosophy/TTT-PHILOSOPHY.md`

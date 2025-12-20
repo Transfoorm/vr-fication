@@ -11,7 +11,7 @@
 
 'use client';
 
-import { Field, Dropdown, Card, T } from '@/prebuilts';
+import { Field, Dropdown, Card, T } from '@/vr';
 import { useFuse } from '@/store/fuse';
 import './genome-tab.css';
 

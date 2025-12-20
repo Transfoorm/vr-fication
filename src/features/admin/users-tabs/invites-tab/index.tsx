@@ -12,7 +12,7 @@
 
 import './invites-tab.css';
 import { useState, useRef } from 'react';
-import { Field, Card, T } from '@/prebuilts';
+import { Field, Card, T } from '@/vr';
 import { sendInviteLink } from '@/app/(clerk)/actions/invite';
 
 interface BatchResult {

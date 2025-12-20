@@ -102,7 +102,7 @@ src/app/domains/marketing/pricing/
 ```tsx
 'use client';
 
-import { Tabs } from '@/prebuilts';
+import { Tabs } from '@/vr';
 import Monthly from './_tabs/Monthly';
 import Annual from './_tabs/Annual';
 
@@ -120,7 +120,7 @@ export default function PricingPage() {
 
 **_tabs/Monthly.tsx** (Clean - just VRs):
 ```tsx
-import { Card, Stack, Button } from '@/prebuilts';
+import { Card, Stack, Button } from '@/vr';
 
 export default function Monthly() {
   return (
@@ -167,7 +167,7 @@ src/features/admin/
 ```tsx
 'use client';
 
-import { Tabs } from '@/prebuilts';
+import { Tabs } from '@/vr';
 import ActiveUsers from './_tabs/ActiveUsers';
 import DeletedUsers from './_tabs/DeletedUsers';
 
@@ -199,8 +199,8 @@ export default function ActiveUsers() {
 import { useState } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Table, Search, Modal } from '@/prebuilts';
-import { useSideDrawer } from '@/prebuilts/modal';
+import { Table, Search, Modal } from '@/vr';
+import { useSideDrawer } from '@/vr/modal';
 import { useAdminData } from '@/hooks/useAdminData';
 import { useFuse } from '@/store/fuse';
 import { UserDetailsFeature } from '@/features/admin/user-drawer';
@@ -254,7 +254,7 @@ src/features/admin/user-drawer/
 'use client';
 
 import { useState } from 'react';
-import { Tabs } from '@/prebuilts';
+import { Tabs } from '@/vr';
 import { useAdminData } from '@/hooks/useAdminData';
 import { ProfileTab } from './_tabs/ProfileTab';
 import { EmailTab } from './_tabs/EmailTab';
@@ -305,7 +305,7 @@ src/features/admin/showcase-bundle/
 
 import './showcase-bundle.css';
 import { useState } from 'react';
-import { Card, Input } from '@/prebuilts';
+import { Card, Input } from '@/vr';
 
 const RADIO_OPTIONS = [
   { value: 'option1', label: 'Option 1' },
@@ -410,7 +410,7 @@ export default function SomeTab() {
 ### Feature → VR (Direct import)
 ```tsx
 // Feature file
-import { Table, Modal, Field, Button } from '@/prebuilts';
+import { Table, Modal, Field, Button } from '@/vr';
 ```
 
 ### Feature → Feature (Allowed for composition)

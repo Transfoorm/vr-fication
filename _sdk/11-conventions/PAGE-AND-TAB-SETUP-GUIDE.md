@@ -119,7 +119,7 @@ export default function Users() {
 
 import { useAdminData } from '@/hooks/useAdminData';
 import { useAdminSync } from '@/hooks/useAdminSync';
-import { Tabs, Stack } from '@/prebuilts';
+import { Tabs, Stack } from '@/vr';
 import ActiveUsers from '@/app/domains/admin/users/_tabs/ActiveUsers';
 import DeletedUsers from '@/app/domains/admin/users/_tabs/DeletedUsers';
 import Invites from '@/app/domains/admin/users/_tabs/Invites';
@@ -204,9 +204,9 @@ export default function ActiveUsers() {
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, Table, Badge, Modal, Stack } from '@/prebuilts';
-import { useSideDrawer } from '@/prebuilts/modal';
-import { useTableSearch } from '@/prebuilts/table';
+import { Search, Table, Badge, Modal, Stack } from '@/vr';
+import { useSideDrawer } from '@/vr/modal';
+import { useTableSearch } from '@/vr/table';
 import { useVanish } from '@/features/vanish/VanishContext';
 import { useAdminData } from '@/hooks/useAdminData';
 import { useFuse } from '@/store/fuse';
@@ -342,7 +342,7 @@ src/
 'use client';
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
-import { Tabs } from '@/prebuilts/tabs';
+import { Tabs } from '@/vr/tabs';
 import Buttons from './_tabs/Buttons';
 import Cards from './_tabs/Cards';
 import Guide from './_tabs/Guide';
@@ -385,7 +385,7 @@ export default function Showcase() {
 ```tsx
 'use client';
 
-import { Card, Divider, T } from '@/prebuilts';
+import { Card, Divider, T } from '@/vr';
 
 export default function Guide() {
   return (
@@ -550,7 +550,7 @@ touch src/features/admin/invoices-page-tabs/index.tsx
 ```tsx
 'use client';
 
-import { Tabs, Stack } from '@/prebuilts';
+import { Tabs, Stack } from '@/vr';
 import PendingInvoices from '@/app/domains/admin/invoices/_tabs/PendingInvoices';
 import PaidInvoices from '@/app/domains/admin/invoices/_tabs/PaidInvoices';
 import Overdue from '@/app/domains/admin/invoices/_tabs/Overdue';
@@ -604,8 +604,8 @@ touch src/features/admin/invoices-tabs/pending-invoices-tab/index.tsx
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, Table, Badge, Stack, T } from '@/prebuilts';
-import { useTableSearch } from '@/prebuilts/table';
+import { Search, Table, Badge, Stack, T } from '@/vr';
+import { useTableSearch } from '@/vr/table';
 import { useFuse } from '@/store/fuse';
 
 export function PendingInvoicesFeature() {

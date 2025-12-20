@@ -16,7 +16,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSignIn } from '@clerk/nextjs';
-import { Icon, Button, Spinner } from '@/prebuilts';
+import { Icon, Button, Spinner } from '@/vr';
 import { VerifyForgot } from '@/app/(clerk)/features/VerifyForgot';
 
 export default function ForgotPasswordPage() {

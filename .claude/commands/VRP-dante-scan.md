@@ -136,17 +136,17 @@ grep -n "clerkId\|_id\|ensureUser" src/app/\(auth\)/actions/identity-handoff.ts
 - `src/features/**`
 - `src/fuse/**`
 - `src/shell/**`
-- `src/prebuilts/**`
+- `src/vr/**`
 - `convex/**`
 
 ### Run these searches:
 
 ```bash
 # A1-A5: Direct Clerk imports
-grep -rn "@clerk/nextjs" src/app/domains/ src/store/ src/features/ src/fuse/ src/shell/ src/prebuilts/ convex/
-grep -rn "@clerk/clerk-react" src/app/domains/ src/store/ src/features/ src/fuse/ src/shell/ src/prebuilts/ convex/
-grep -rn "from '@clerk" src/app/domains/ src/store/ src/features/ src/fuse/ src/shell/ src/prebuilts/ convex/
-grep -rn 'from "@clerk' src/app/domains/ src/store/ src/features/ src/fuse/ src/shell/ src/prebuilts/ convex/
+grep -rn "@clerk/nextjs" src/app/domains/ src/store/ src/features/ src/fuse/ src/shell/ src/vr/ convex/
+grep -rn "@clerk/clerk-react" src/app/domains/ src/store/ src/features/ src/fuse/ src/shell/ src/vr/ convex/
+grep -rn "from '@clerk" src/app/domains/ src/store/ src/features/ src/fuse/ src/shell/ src/vr/ convex/
+grep -rn 'from "@clerk' src/app/domains/ src/store/ src/features/ src/fuse/ src/shell/ src/vr/ convex/
 ```
 
 | Code | Violation |

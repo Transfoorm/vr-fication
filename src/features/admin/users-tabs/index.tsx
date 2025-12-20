@@ -13,7 +13,7 @@
 
 import { useAdminData } from '@/hooks/useAdminData';
 import { useAdminSync } from '@/hooks/useAdminSync';
-import { Tabs, Stack } from '@/prebuilts';
+import { Tabs, Stack } from '@/vr';
 import ActiveUsers from '@/app/domains/admin/users/_tabs/ActiveUsers';
 import DeletedUsers from '@/app/domains/admin/users/_tabs/DeletedUsers';
 import Invites from '@/app/domains/admin/users/_tabs/Invites';

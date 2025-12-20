@@ -23,7 +23,7 @@ import { refreshSessionAfterUpload } from '@/app/actions/user-mutations';
 import { Id } from '@/convex/_generated/dataModel';
 import CountrySelector from '@/features/shell/country-selector';
 import { useFuse } from '@/store/fuse';
-import { Icon, Tooltip, Backdrop, T } from '@/prebuilts';
+import { Icon, Tooltip, Backdrop, T } from '@/vr';
 import { formatSubscriptionStatus, type SubscriptionStatus } from '@/fuse/constants/ranks';
 
 export default function CompanyButton() {

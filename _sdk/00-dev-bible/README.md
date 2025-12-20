@@ -221,10 +221,10 @@ Each component variant is a **first-class citizen** with its own file.
 
 ### The Pattern
 
-Components live in `/src/prebuilts/`:
+Components live in `/src/vr/`:
 
 ```
-/src/prebuilts/
+/src/vr/
 └── button/
     ├── index.tsx          # Exports the robot registry
     ├── Primary.tsx        # Variant: primary
@@ -240,7 +240,7 @@ Components live in `/src/prebuilts/`:
 ### Usage
 
 ```tsx
-import { Button } from '@/prebuilts/button';
+import { Button } from '@/vr/button';
 
 // Use variants via dot notation
 <Button.primary onClick={...}>Save</Button.primary>

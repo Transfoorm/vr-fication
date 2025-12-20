@@ -244,14 +244,14 @@ export default function PrimaryButton({
 - `.ft-*` → Feature classes (features)
 
 ### File Cascade
-- `styles/prebuilts.css` → Imports all VR CSS
+- `styles/vr.css` → Imports all VR CSS
 - `styles/features.css` → Imports all Feature CSS (largest by design)
 - Tabs have no CSS - they just compose Features
 
 ### Example Styles
 
 ```css
-/* styles/prebuilts.css → imports prebuilts/button/button.css */
+/* styles/vr.css → imports prebuilts/button/button.css */
 
 .vr-button-primary {
   background: var(--color-primary);
@@ -328,7 +328,7 @@ export default function FieldLive({ value, onSave, label }) {
 ### Feature (features/account/ProfileTab/index.tsx)
 ```tsx
 // Smart wrapper - wires FUSE
-import { Field } from '@/prebuilts';
+import { Field } from '@/vr';
 import { useFuse } from '@/store/fuse';
 
 export function ProfileFields() {
@@ -361,7 +361,7 @@ export default function Profile() {
 ```tsx
 // Orchestrator - may use FUSE for coordination
 import { useFuse } from '@/store/fuse';
-import { Tabs } from '@/prebuilts';
+import { Tabs } from '@/vr';
 import Profile from './_tabs/Profile';
 import Email from './_tabs/Email';
 

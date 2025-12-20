@@ -179,7 +179,7 @@ function checkCrossContamination(): number {
   let violations = 0;
 
   const checks = [
-    { cmd: 'grep -rn "^\\.ft-" src/prebuilts/**/*.css 2>/dev/null || true', desc: 'ft-* in prebuilts' },
+    { cmd: 'grep -rn "^\\.ft-" src/vr/**/*.css 2>/dev/null || true', desc: 'ft-* in prebuilts' },
     { cmd: 'grep -rn "^\\.vr-" src/features/**/*.css 2>/dev/null || true', desc: 'vr-* in features' },
     { cmd: 'grep -rn "^\\.vr-\\|^\\.ft-" src/shell/**/*.css 2>/dev/null || true', desc: 'vr-*/ft-* in shell' },
     { cmd: 'grep -rn "^\\.vr-\\|^\\.ft-" src/app/domains/**/*.css 2>/dev/null || true', desc: 'vr-*/ft-* in domains' },

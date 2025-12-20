@@ -1,7 +1,7 @@
 'use client';
 
 import '@/features/admin/showcase-bundle/showcase-bundle.css';
-import { Card, Button, Input, Icon, Tooltip, T } from '@/prebuilts';
+import { Card, Button, Input, Icon, Tooltip, T } from '@/vr';
 
 export default function Tooltips() {
   return (

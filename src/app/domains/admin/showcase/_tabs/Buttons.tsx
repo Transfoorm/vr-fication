@@ -1,9 +1,9 @@
 'use client';
 
 import '@/features/admin/showcase-bundle/showcase-bundle.css';
-import { Card } from '@/prebuilts/card';
-import { Button } from '@/prebuilts/button';
-import { T } from '@/prebuilts';
+import { Card } from '@/vr/card';
+import { Button } from '@/vr/button';
+import { T } from '@/vr';
 
 export default function Buttons() {
   return (

@@ -10,7 +10,7 @@
 │  - Pure declaration                                                   │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-import { T } from '@/prebuilts';
+import { T } from '@/vr';
 
 export default function Theme() {
   return (

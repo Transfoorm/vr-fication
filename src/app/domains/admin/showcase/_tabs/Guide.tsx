@@ -1,7 +1,7 @@
 'use client';
 
 import '@/features/admin/showcase-bundle/showcase-bundle.css';
-import { Card, Divider, T } from '@/prebuilts';
+import { Card, Divider, T } from '@/vr';
 
 export default function Guide() {
   return (

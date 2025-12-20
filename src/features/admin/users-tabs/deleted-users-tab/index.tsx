@@ -13,12 +13,12 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { deleteDeletionLogAction } from '@/app/actions/admin-mutations';
 import type { Id, Doc } from '@/convex/_generated/dataModel';
-import { Table, Badge, Modal, Search, Stack } from '@/prebuilts';
-import { useTableSearch } from '@/prebuilts/table';
-import type { RankType } from '@/prebuilts/badge/Rank';
-import type { SetupStatusType } from '@/prebuilts/badge/Setup';
-import type { CascadeStatusType } from '@/prebuilts/badge/Cascade';
-import type { SortableColumn } from '@/prebuilts/table/Sortable';
+import { Table, Badge, Modal, Search, Stack } from '@/vr';
+import { useTableSearch } from '@/vr/table';
+import type { RankType } from '@/vr/badge/Rank';
+import type { SetupStatusType } from '@/vr/badge/Setup';
+import type { CascadeStatusType } from '@/vr/badge/Cascade';
+import type { SortableColumn } from '@/vr/table/Sortable';
 import { useAdminData } from '@/hooks/useAdminData';
 
 type DeletionLog = Doc<"admin_users_DeleteLog">;

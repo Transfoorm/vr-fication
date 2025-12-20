@@ -22,20 +22,20 @@ const EXCEPTION_FILES = new Set([
   'src/components/features/CountrySelector/index.tsx',
   'src/features/CountrySelector/index.tsx',
   'src/components/ui/Tooltip.tsx',
-  'src/prebuilts/modal/drawer/portal.tsx',
-  'src/prebuilts/tooltip/basic/index.tsx',
-  'src/prebuilts/tooltip/Basic.tsx',
-  'src/prebuilts/tooltip/TooltipBasic.tsx',  // VR tooltip with dynamic positioning
+  'src/vr/modal/drawer/portal.tsx',
+  'src/vr/tooltip/basic/index.tsx',
+  'src/vr/tooltip/Basic.tsx',
+  'src/vr/tooltip/TooltipBasic.tsx',  // VR tooltip with dynamic positioning
 
   // Dynamic gap configuration (CSS custom property for configurable spacing)
-  'src/prebuilts/fieldbox/row/index.tsx',
+  'src/vr/fieldbox/row/index.tsx',
 
   // Range slider (Dynamic Law - runtime percentage positioning)
-  'src/prebuilts/input/range/index.tsx',
+  'src/vr/input/range/index.tsx',
 
   // Data-driven components (Dynamic Law - runtime values/metadata)
-  'src/prebuilts/field/range/index.tsx',      // Runtime percentage positioning
-  'src/prebuilts/rank/card/index.tsx',        // CSS custom property bridges from metadata
+  'src/vr/field/range/index.tsx',      // Runtime percentage positioning
+  'src/vr/rank/card/index.tsx',        // CSS custom property bridges from metadata
 
   // Test/dev pages (temporary inline styles for quick testing)
   'src/app/domain/admin/tenant/page.tsx',     // VANISH 2 test page

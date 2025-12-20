@@ -15,7 +15,7 @@
 'use client';
 
 import { useFuse } from '@/store/fuse';
-import { Tabs, Stack, Icon } from '@/prebuilts';
+import { Tabs, Stack, Icon } from '@/vr';
 import Profile from '@/app/domains/settings/account/_tabs/Profile';
 import Email from '@/app/domains/settings/account/_tabs/Email';
 import Password from '@/app/domains/settings/account/_tabs/Password';

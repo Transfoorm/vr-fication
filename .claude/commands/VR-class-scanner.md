@@ -101,7 +101,7 @@ If a CSS file exists **ANYWHERE ELSE**, the scan **FAILS**.
 
 | # | Location Pattern | Required Class Prefix | Required Keyframe Prefix | Variable Rules | Content Rules |
 |---|------------------|----------------------|-------------------------|----------------|---------------|
-| 1 | `/src/prebuilts/**/*.css` | `.vr-{component}-*` | `vr-{component}-{action}` | `--{component}-*` | Classes, keyframes, variables |
+| 1 | `/src/vr/**/*.css` | `.vr-{component}-*` | `vr-{component}-{action}` | `--{component}-*` | Classes, keyframes, variables |
 | 2 | `/src/features/**/*.css` | `.ft-{feature}-*` | `ft-{feature}-{action}` | `--{feature}-*` | Classes, keyframes, variables |
 | 3 | `/src/shell/**/*.css` | `.ly-{area}-*` | `ly-{area}-{action}` | `--{area}-*` | Classes, keyframes, variables (includes `app.css` for God Layout frame) |
 | 4 | `/src/app/domains/**/*.css` | `.ly-{component}-*` | `ly-{component}-{action}` | `--{component}-*` | Classes, keyframes, variables |
@@ -109,7 +109,7 @@ If a CSS file exists **ANYWHERE ELSE**, the scan **FAILS**.
 | 6 | `/styles/tokens.css` | FORBIDDEN | FORBIDDEN | `--{token}-*` | Variables ONLY |
 | 7 | `/styles/animations.css` | FORBIDDEN | ANY (generic allowed) | FORBIDDEN | Keyframes ONLY |
 | 8 | `/styles/globals.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | Element selectors ONLY (html, body, *, ::selection) |
-| 9 | `/styles/prebuilts.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | @import statements ONLY |
+| 9 | `/styles/vr.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | @import statements ONLY |
 | 10 | `/styles/features.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | @import statements ONLY |
 | 11 | `/styles/layout.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | @import statements ONLY |
 | 12 | `/styles/themes/*.css` | FORBIDDEN | FORBIDDEN | `--{theme}-*` | Variables ONLY |
@@ -276,7 +276,7 @@ while IFS=: read -r file line content; do
   folder=$(basename "$dir" | tr "[:upper:]" "[:lower:]" | tr -d "-")
 
   # Determine required prefix based on location
-  if echo "$file" | grep -q "src/prebuilts/"; then
+  if echo "$file" | grep -q "src/vr/"; then
     required_prefix="vr-"
   elif echo "$file" | grep -q "src/features/"; then
     required_prefix="ft-"
@@ -455,8 +455,8 @@ For EACH variable definition found:
 **EXAMPLE ENFORCEMENT:**
 | File Path | Valid Prefix | Why |
 |-----------|--------------|-----|
-| `src/prebuilts/modal/modal.css` | `--modal-*` | Folder name match |
-| `src/prebuilts/input/checkbox/form/form.css` | `--checkbox-*` or `--form-*` | Parent or folder match |
+| `src/vr/modal/modal.css` | `--modal-*` | Folder name match |
+| `src/vr/input/checkbox/form/form.css` | `--checkbox-*` or `--form-*` | Parent or folder match |
 | `src/features/shell/user-button/user-button.css` | `--user-button-*` | Kebab-case folder match |
 | `src/features/shell/company-button/company-button.css` | `--company-button-*` | Kebab-case folder match |
 | `src/features/shell/country-selector/country-selector.css` | `--country-selector-*` | Kebab-case folder match |
@@ -519,7 +519,7 @@ PHASE 5: Variables         Scanned: [N] variables | Violations: [N] | [PASS/FAIL
 
 ```bash
 # Check 6.1: VR files defining feature classes
-grep -rn "^\.ft-" src/prebuilts/**/*.css 2>/dev/null
+grep -rn "^\.ft-" src/vr/**/*.css 2>/dev/null
 
 # Check 6.2: Feature files defining VR classes
 grep -rn "^\.vr-" src/features/**/*.css 2>/dev/null
@@ -531,7 +531,7 @@ grep -rn "^\.vr-\|^\.ft-" src/shell/**/*.css 2>/dev/null
 grep -rn "^\.vr-\|^\.ft-" src/app/domains/**/*.css 2>/dev/null
 
 # Check 6.5: Wrong keyframe prefix in VR files
-grep -rn "@keyframes ft-" src/prebuilts/**/*.css 2>/dev/null
+grep -rn "@keyframes ft-" src/vr/**/*.css 2>/dev/null
 
 # Check 6.6: Wrong keyframe prefix in feature files
 grep -rn "@keyframes vr-\|@keyframes ly-" src/features/**/*.css 2>/dev/null
@@ -603,7 +603,7 @@ If output is non-empty: **FAIL**
 ```bash
 # Must contain ONLY @import statements (and comments/whitespace)
 # Looks for violations: class selectors, id selectors, element selectors, CSS properties
-for file in styles/prebuilts.css styles/features.css styles/layout.css src/shell/shell.css; do
+for file in styles/vr.css styles/features.css styles/layout.css src/shell/shell.css; do
   if grep -E "^[\.#a-z\[]|^\s+[a-z-]+:" "$file" 2>/dev/null | grep -q .; then
     echo "VIOLATION: $file contains non-import content"
   fi

@@ -16,7 +16,7 @@
 
 import { useUserRank } from '@/hooks/useUserRank';
 import { ReactNode } from 'react';
-import { T } from '@/prebuilts';
+import { T } from '@/vr';
 
 type RankRouterProps = {
   captain?: ReactNode;

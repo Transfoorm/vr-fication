@@ -289,7 +289,7 @@ export function UsersTable() {
 
 **✅ The VR way (3 lines, zero CSS):**
 ```tsx
-import { Table } from '@/prebuilts';
+import { Table } from '@/vr';
 
 export function UsersTable({ users }) {
   return <Table.sortable columns={columns} data={users} />;

@@ -11,7 +11,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Tabs, T } from '@/prebuilts';
+import { Tabs, T } from '@/vr';
 import { useAdminData } from '@/hooks/useAdminData';
 import { ProfileTab } from './_tabs/ProfileTab';
 import { EmailTab } from './_tabs/EmailTab';

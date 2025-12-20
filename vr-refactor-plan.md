@@ -4,12 +4,12 @@
 
 **Complete language reboot from "prebuilts" to "VR" (Variant Robots)**
 
-- **207 source files** with `@/prebuilts` imports
-- **133 internal VR** cross-references within src/prebuilts/
+- **207 source files** with `@/vr` imports
+- **133 internal VR** cross-references within src/vr/
 - **22 documentation files** with prebuilts terminology
 - **6 configuration files** (tsconfig, eslint, husky, etc.)
-- **19 CSS @import** statements in styles/prebuilts.css
-- **1 folder rename** (src/prebuilts → src/vr)
+- **19 CSS @import** statements in styles/vr.css
+- **1 folder rename** (src/vr → src/vr)
 
 ## REPOSITORY STRUCTURE
 
@@ -70,10 +70,10 @@ npm install
 
 ```bash
 cd /Users/ken/App/vr
-mv src/prebuilts src/vr
+mv src/vr src/vr
 ```
 
-**Checkpoint:** src/vr/ exists, src/prebuilts/ gone
+**Checkpoint:** src/vr/ exists, src/vr/ gone
 
 ## PHASE 3: TYPESCRIPT PATH ALIASES
 
@@ -101,7 +101,7 @@ mv prebuilts.css vr.css
 ### Update all 19 @import paths in styles/vr.css
 ```bash
 # Replace all occurrences
-sed -i '' 's|../src/prebuilts/|../src/vr/|g' vr.css
+sed -i '' 's|../src/vr/|../src/vr/|g' vr.css
 ```
 
 **Verify:**
@@ -117,18 +117,18 @@ grep "src/vr" vr.css | wc -l
 ### Internal VR references (within src/vr/)
 ```bash
 cd /Users/ken/App/vr
-find src/vr -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i '' 's|@/prebuilts|@/vr|g' {} +
+find src/vr -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i '' 's|@/vr|@/vr|g' {} +
 ```
 
 ### External consumer imports (features, pages, etc.)
 ```bash
-find src -type f \( -name "*.tsx" -o -name "*.ts" \) ! -path "src/vr/*" -exec sed -i '' 's|from ['\''"]@/prebuilts|from '\''@/vr|g' {} +
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) ! -path "src/vr/*" -exec sed -i '' 's|from ['\''"]@/vr|from '\''@/vr|g' {} +
 ```
 
 **Verify:**
 ```bash
 # Should be 0
-grep -r "@/prebuilts" src/ | wc -l
+grep -r "@/vr" src/ | wc -l
 
 # Should be ~340+
 grep -r "@/vr" src/ | wc -l
@@ -142,12 +142,12 @@ grep -r "@/vr" src/ | wc -l
 
 **Line 324-335:** Update WCCC violation message
 - Change "prebuilts" → "VR"
-- Change "/styles/prebuilts.css" → "/styles/vr.css"
-- Change "/src/prebuilts/" → "/src/vr/"
+- Change "/styles/vr.css" → "/styles/vr.css"
+- Change "/src/vr/" → "/src/vr/"
 
 **Lines 365-383:** Update ISVEA exception paths
 ```bash
-sed -i '' 's|src/prebuilts/|src/vr/|g' eslint.config.mjs
+sed -i '' 's|src/vr/|src/vr/|g' eslint.config.mjs
 ```
 
 ### Update ESLint custom rules
@@ -191,7 +191,7 @@ const validPatterns = [
 
 Replace all prebuilts references in bash command permissions:
 ```bash
-sed -i '' 's|src/prebuilts|src/vr|g' .claude/settings.local.json
+sed -i '' 's|src/vr|src/vr|g' .claude/settings.local.json
 ```
 
 **Checkpoint:** Claude permissions reference src/vr
@@ -228,10 +228,10 @@ sed -i '' 's|src/prebuilts|src/vr|g' .claude/settings.local.json
 
 **Find and replace patterns:**
 - "prebuilts" → "VR" or "VRs" (context-dependent)
-- "@/prebuilts" → "@/vr"
-- "src/prebuilts" → "src/vr"
-- "styles/prebuilts.css" → "styles/vr.css"
-- "/prebuilts/" → "/vr/"
+- "@/vr" → "@/vr"
+- "src/vr" → "src/vr"
+- "styles/vr.css" → "styles/vr.css"
+- "/vr/" → "/vr/"
 - "prebuilt components" → "VR components"
 - "pre-built" → "VR"
 
@@ -288,9 +288,9 @@ git commit -m "feat: Complete prebuilts → VR language transformation
 BREAKING CHANGE: Complete architectural language reboot from 'prebuilts' to 'VR' (Variant Robots)
 
 Transformations:
-- Renamed: src/prebuilts → src/vr
-- Renamed: styles/prebuilts.css → styles/vr.css
-- Updated: All 340+ imports from @/prebuilts to @/vr
+- Renamed: src/vr → src/vr
+- Renamed: styles/vr.css → styles/vr.css
+- Updated: All 340+ imports from @/vr to @/vr
 - Updated: TypeScript path aliases in tsconfig files
 - Updated: ESLint rules and custom plugins
 - Updated: npm scripts and validation scripts
@@ -340,9 +340,9 @@ git push origin main
 
 ✅ Fresh git history (2 commits total)
 ✅ Zero "prebuilts" references in code
-✅ Zero "@/prebuilts" imports
-✅ src/vr/ folder exists (src/prebuilts/ gone)
-✅ styles/vr.css exists (styles/prebuilts.css gone)
+✅ Zero "@/vr" imports
+✅ src/vr/ folder exists (src/vr/ gone)
+✅ styles/vr.css exists (styles/vr.css gone)
 ✅ TypeScript compiles
 ✅ ESLint passes
 ✅ Build succeeds
@@ -376,7 +376,7 @@ git reset --hard HEAD~1  # Undo transformation commit, back to seed
 0. Clone vr-fication to /Users/ken/App/vr
 1. Copy codebase from prod-test2
 2. npm install
-3. Rename folder (src/prebuilts → src/vr)
+3. Rename folder (src/vr → src/vr)
 4. Update TypeScript paths
 5. Update CSS hub
 6. Update all imports (internal first, external second)

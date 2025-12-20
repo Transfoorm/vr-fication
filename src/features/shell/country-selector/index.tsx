@@ -19,7 +19,7 @@ import { createPortal } from "react-dom";
 import { useFuse } from "@/store/fuse";
 import { useMutation } from "convex/react";
 import { api } from '@/convex/_generated/api';
-import { Icon, T } from '@/prebuilts';
+import { Icon, T } from '@/vr';
 
 interface Country {
   code: string;

@@ -276,8 +276,8 @@ export function ProfileContent() {
 - [ ] Features control rhythm via wrappers
 
 **File locations:**
-- Typography VRs: `src/prebuilts/typography/`
-- Typography CSS: `src/prebuilts/typography/typography.css`
+- Typography VRs: `src/vr/typography/`
+- Typography CSS: `src/vr/typography/typography.css`
 - Implementation: Check header comment: `/* NO external margins - TTT Gap Model compliant */`
 
 ---
@@ -533,7 +533,7 @@ Keep VRs pure. Keep spacing explicit. Keep responsibility clear. **Keep variants
 
 ## Related Documentation
 
-- **Card Layout Authority** - `src/prebuilts/card/README.md` - Practical implementation of spacing principles
+- **Card Layout Authority** - `src/vr/card/README.md` - Practical implementation of spacing principles
 - **VR Doctrine** - `_sdk/11-conventions/VR-DOCTRINE.md` - Complete VR architecture and patterns
 - **TTT Philosophy** - `_sdk/10-TTT-philosophy/TTT-PHILOSOPHY.md` - Testing framework and principles
 

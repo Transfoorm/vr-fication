@@ -1,7 +1,7 @@
 'use client';
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
-import { Tabs } from '@/prebuilts/tabs';
+import { Tabs } from '@/vr/tabs';
 import Buttons from './_tabs/Buttons';
 import Cards from './_tabs/Cards';
 import Fields from './_tabs/Fields';

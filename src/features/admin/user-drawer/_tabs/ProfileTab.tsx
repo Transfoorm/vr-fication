@@ -20,8 +20,8 @@ import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useAdminData } from '@/hooks/useAdminData';
 import { useFuse } from '@/store/fuse';
-import { Field, Button, Icon, T } from '@/prebuilts';
-import { useSideDrawer } from '@/prebuilts/modal';
+import { Field, Button, Icon, T } from '@/vr';
+import { useSideDrawer } from '@/vr/modal';
 import { useVanish } from '@/features/vanish/VanishContext';
 import CountrySelector from '@/features/shell/country-selector';
 

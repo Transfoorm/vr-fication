@@ -32,7 +32,7 @@ All commands are **READ-ONLY**. Execute without asking:
 
 **Command:**
 ```bash
-find src/shell src/features src/prebuilts src/store src/fuse -type d 2>/dev/null | grep -E '[A-Z]' | head -50
+find src/shell src/features src/vr src/store src/fuse -type d 2>/dev/null | grep -E '[A-Z]' | head -50
 ```
 
 **PASS:** Empty output
@@ -60,7 +60,7 @@ find src -name "*.css" -type f 2>/dev/null | grep -E '/[A-Z][^/]*\.css$' | head 
 
 **Command:**
 ```bash
-for css in $(find src/shell src/features src/prebuilts -name "*.css" -type f 2>/dev/null); do
+for css in $(find src/shell src/features src/vr -name "*.css" -type f 2>/dev/null); do
   filename=$(basename "$css" .css)
   folder=$(basename "$(dirname "$css")")
   [ "$folder" = "shell" ] || [ "$folder" = "features" ] || [ "$folder" = "prebuilts" ] && continue
@@ -160,7 +160,7 @@ done
 
 **Check PascalCase files have matching export:**
 ```bash
-for f in $(find src/shell src/features src/prebuilts src/providers -name "*.tsx" -type f 2>/dev/null | grep -v '/index\.tsx$' | grep -v '/page\.tsx$' | grep -v 'Context\.tsx$'); do
+for f in $(find src/shell src/features src/vr src/providers -name "*.tsx" -type f 2>/dev/null | grep -v '/index\.tsx$' | grep -v '/page\.tsx$' | grep -v 'Context\.tsx$'); do
   name=$(basename "$f" .tsx)
   first=$(echo "$name" | cut -c1)
   # Only check PascalCase files
@@ -174,7 +174,7 @@ done
 
 **Check lowercase .ts files don't export React components:**
 ```bash
-for f in $(find src/shell src/features src/prebuilts -name "*.ts" -type f 2>/dev/null | grep -v '/index\.ts$'); do
+for f in $(find src/shell src/features src/vr -name "*.ts" -type f 2>/dev/null | grep -v '/index\.ts$'); do
   name=$(basename "$f" .ts)
   first=$(echo "$name" | cut -c1)
   # Only check lowercase files

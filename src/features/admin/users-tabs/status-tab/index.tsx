@@ -8,7 +8,7 @@
 
 'use client';
 
-import { Card, T } from '@/prebuilts';
+import { Card, T } from '@/vr';
 
 export function StatusTabFeature() {
   return (
