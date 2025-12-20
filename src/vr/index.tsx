@@ -37,6 +37,6 @@ export { Checkbox } from '@/vr/input/checkbox';
 export { Dropdown } from '@/vr/dropdown';
 
 // Shared Utilities (re-exported for convenience)
-export { Icon } from '@/vr/icon/IconRegistry';
-export type { IconVariant } from '@/vr/icon/IconRegistry';
+export { Icon } from '@/vr/icon/Icon';
+export type { IconVariant } from '@/vr/icon/Icon';
 export { Spinner } from '@/vr/icon/Spinner';

@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 ICON REGISTRY - Lucide React Wrapper                               │
-│  /src/vr/icon/IconRegistry.tsx                                 │
+│  /src/vr/icon/Icon.tsx                                                 │
 │                                                                        │
 │  Registry pattern wrapper around Lucide icons with size variants.     │
 │                                                                        │
