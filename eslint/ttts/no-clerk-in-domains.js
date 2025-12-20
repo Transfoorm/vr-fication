@@ -62,6 +62,7 @@ See: Golden Bridge Pattern, SRB-7`,
 
         // Exception zones - where Clerk IS allowed
         const exceptionPatterns = [
+          /\/app\/layout\.tsx$/,             // Root layout (ClerkProvider boundary)
           /\/app\/\(auth\)\//,              // Auth pages (login, register)
           /\/providers\//,                   // Providers (bridge Clerk → FUSE)
           /\/fuse\/hydration\//,             // Hydration utilities

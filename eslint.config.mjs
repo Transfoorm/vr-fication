@@ -321,7 +321,7 @@ const eslintConfig = [
   // ═══════════════════════════════════════════════════════════════════
   // 🛡️ WCCC PROTECTION - PREVENT PAGE-SPECIFIC CSS FILES
   // ═══════════════════════════════════════════════════════════════════
-  // Enforce 5-hub system: prebuilts, shell, features, layout, auth ONLY
+  // Enforce 5-hub system: VRs, shell, features, layout, auth ONLY
   {
     files: ["src/app/**/*.{ts,tsx}"],
     rules: {
@@ -331,7 +331,7 @@ const eslintConfig = [
           patterns: [
             {
               group: ["**/page.css", "./page.css"],
-              message: "⛔ WCCC VIOLATION: Page-specific CSS files are forbidden. Use prebuilts or create a feature component instead.\n\nAllowed CSS hubs:\n  • /styles/vr.css (vr-* components)\n  • /styles/features.css (ft-* components)\n  • /styles/layout.css (ly-* shell + layouts)\n\nIf you need custom styling:\n  1. Check if a prebuilt variant exists\n  2. Create new prebuilt variant in /src/vr/\n  3. Last resort: Create feature component in /src/features/\n\nSee TTT-WCCC-PROTOCOL.md for details."
+              message: "⛔ WCCC VIOLATION: Page-specific CSS files are forbidden. Use VRs or create a feature component instead.\n\nAllowed CSS hubs:\n  • /styles/vr.css (vr-* components)\n  • /styles/features.css (ft-* components)\n  • /styles/layout.css (ly-* shell + layouts)\n\nIf you need custom styling:\n  1. Check if a VR variant exists\n  2. Create new VR variant in /src/vr/\n  3. Last resort: Create feature component in /src/features/\n\nSee TTT-WCCC-PROTOCOL.md for details."
             }
           ]
         }
