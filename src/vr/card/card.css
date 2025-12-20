@@ -20,6 +20,7 @@
 
 .vr-card-standard {
   background-color: var(--card-content-bg);
+  border-radius: var(--card-radius); /* Match parent radius before clipping */
   overflow: hidden; /* Clip children to rounded corners */
 }
 

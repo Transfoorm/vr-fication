@@ -55,12 +55,14 @@ export default function SetupModal() {
   // ─────────────────────────────────────────────────────────────────────
   const user = useFuse((s) => s.user);
   const updateUser = useFuse((s) => s.updateUser);
+  const navigate = useFuse((s) => s.navigate);
   const showRedArrow = useFuse((s) => s.showRedArrow);
   const setShowRedArrow = useFuse((s) => s.setShowRedArrow);
   const modalSkipped = useFuse((s) => s.modalSkipped);
   const setModalSkipped = useFuse((s) => s.setModalSkipped);
   const modalReturning = useFuse((s) => s.modalReturning);
   const setModalReturning = useFuse((s) => s.setModalReturning);
+  const shadowKingActive = useFuse((s) => s.shadowKingActive);
 
   // ─────────────────────────────────────────────────────────────────────
   // Internal Animation State (VR-sovereign - no props from parent)
@@ -107,6 +109,19 @@ export default function SetupModal() {
       }, reverseFlow.modalFadeInDuration);
     }
   }, [modalReturning, setModalReturning]);
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Shadow King Activation Handler (cancel any ongoing transitions)
+  // ─────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (shadowKingActive) {
+      // Shadow King takes priority - immediately cancel any fade-out/fade-in
+      setIsModalFadingOut(false);
+      setIsModalFadingIn(false);
+      // Unskip the modal so it shows in Shadow King mode
+      setModalSkipped(false);
+    }
+  }, [shadowKingActive, setModalSkipped]);
 
   // ─────────────────────────────────────────────────────────────────────
   // bringModalBack Event Listener (reverse flow same page)
@@ -558,7 +573,7 @@ export default function SetupModal() {
             {/* Welcome message */}
             <div className="ft-setup-welcome">
               <T.caption size="xs" className="ft-setup-welcome-text">
-                <i>*Completing your setup will unlock personalised features with smarter AI assistance. Go to the <b>Account</b> page with changes to these details at any time.</i>
+                <i>*Completing your setup will unlock personalised features with smarter AI assistance and full site functionality. Go to <button type="button" onClick={() => navigate('settings/account')} className="ft-setup-welcome-link">Account</button> after setup to update your details at any time.</i>
               </T.caption>
             </div>
 

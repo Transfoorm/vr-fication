@@ -10,7 +10,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { ChevronRight, ChevronsUpDown } from 'lucide-react';
 import UserButton from '@/features/shell/user-button';
@@ -57,11 +57,39 @@ export default function Sidebar() {
 
   const navItems = getNavForRank(rank);
   const hydrateExpandedSections = useFuse((s) => s.hydrateExpandedSections);
+  const prevPathnameRef = useRef<string | null>(null);
+
+  const isActive = useCallback((path: string) => {
+    if (path === '/' && pathname === '/') return true;
+    if (path !== '/' && pathname.startsWith(path)) return true;
+    return false;
+  }, [pathname]);
 
   // Hydrate expanded sections from localStorage on mount
   useEffect(() => {
     hydrateExpandedSections();
   }, [hydrateExpandedSections]);
+
+  // Auto-expand sections when navigating to their child routes
+  useEffect(() => {
+    // Only run when pathname actually changes, not when expandedSections changes
+    if (prevPathnameRef.current === pathname) {
+      return;
+    }
+    prevPathnameRef.current = pathname;
+
+    navItems.forEach((item) => {
+      if (item.children) {
+        const sectionKey = item.label.toLowerCase();
+        const hasActiveChild = item.children.some((child) => isActive(child.path));
+
+        // If a child is active but section is not expanded, expand it
+        if (hasActiveChild && !expandedSections.includes(sectionKey)) {
+          toggleSection(sectionKey);
+        }
+      }
+    });
+  }, [pathname, navItems, isActive, expandedSections, toggleSection]);
 
   // Watch for UserButton menu open/close state
   useEffect(() => {
@@ -77,12 +105,6 @@ export default function Sidebar() {
 
     return () => observer.disconnect();
   }, []);
-
-  const isActive = (path: string) => {
-    if (path === '/' && pathname === '/') return true;
-    if (path !== '/' && pathname.startsWith(path)) return true;
-    return false;
-  };
 
   const hasOpenSections = expandedSections.length > 0;
 

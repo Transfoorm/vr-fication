@@ -95,11 +95,10 @@ export function MirorAiTabFeature() {
   }, [mounted, enchantmentEnabled, enchantmentTiming]);
 
   return (
-    <div className="ft-miror-ai-tab">
-      <Card.standard
-        title="Miror AI Assistant"
-        subtitle="Customise your AI assistant's appearance and enchantment effects"
-      >
+    <Card.standard
+      title="Miror AI Assistant"
+      subtitle="Customise your AI assistant's appearance and enchantment effects"
+    >
         {/* Avatar Grid + Preview wrapper */}
           <div className="ft-miror-ai-tab-avatar-row">
             {/* Avatar Grid */}
@@ -216,6 +215,5 @@ export function MirorAiTabFeature() {
           </div>
         </div>
       </Card.standard>
-    </div>
   );
 }
