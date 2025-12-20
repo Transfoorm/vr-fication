@@ -56,7 +56,7 @@ See: SRB-7, TTT-99-WAYS-CLERK-CAN-INFECT.md Category K`,
         const enforcePatterns = [
           /\/app\/domains\//,
           /\/features\/.*\.tsx$/,
-          /\/prebuilts\/.*\.tsx$/,
+          /\/vr\/.*\.tsx$/,
         ];
 
         const shouldEnforce = enforcePatterns.some(pattern => pattern.test(filename));

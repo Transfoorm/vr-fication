@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Input Showcase Card                               │
-│  /src/prebuilts/card/InputShowcase.tsx                                │
+│  /src/vr/card/InputShowcase.tsx                                │
 │                                                                        │
 │  Displays all Input variants for demonstration.                       │
 │  Self-contained - no props needed.                                    │

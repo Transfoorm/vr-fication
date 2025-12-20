@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Field.verify                                       │
-│  /src/prebuilts/field/Verify.tsx                                       │
+│  /src/vr/field/Verify.tsx                                       │
 │                                                                        │
 │  DUMB VR - Pure visual shell, NO FUSE.                                │
 │  Receives value, fires onCommit callback. That's it.                  │

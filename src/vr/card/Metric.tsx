@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Metric Card                                        │
-│  /src/components/prebuilts/card/metric/index.tsx                       │
+│  /src/vr/card/metric/index.tsx                       │
 │                                                                        │
 │  Dashboard metric display card. Big number. Trend indicator. Context.  │
 │                                                                        │

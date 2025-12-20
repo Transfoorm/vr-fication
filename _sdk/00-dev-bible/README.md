@@ -174,7 +174,7 @@ Pure CSS. CSS Variables. Zero runtime.
 1. **tokens.css** - Design system primitives (spacing, colors, typography)
 2. **layout.css** - Layout dimensions and z-index scale
 3. **globals.css** - Global resets and base styles
-4. **prebuilts.css** - VRS component base styles
+4. **vr.css** - VRS component base styles
 5. **features.css** - Feature-specific styles
 6. **themes/** - Theme-specific color values (light/dark)
 
@@ -611,7 +611,7 @@ v1/                         # Project root
 │   ├── store/             # Zustand state
 │   │   └── domains/       # Domain slices
 │   │
-│   ├── prebuilts/         # VRS Component System
+│   ├── VRs/         # VRS Component System
 │   │   ├── button/        # Button variants
 │   │   ├── card/          # Card variants
 │   │   ├── modal/         # Modal variants
@@ -619,7 +619,7 @@ v1/                         # Project root
 │   │   ├── input/         # Input variants
 │   │   ├── form/          # Form components
 │   │   ├── tabs/          # Tab components
-│   │   └── ...            # Other prebuilts
+│   │   └── ...            # Other VRs
 │   │
 │   ├── features/          # Feature components
 │   │   ├── UserButton/

@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Setup Status Badge                                │
-│  /src/prebuilts/badge/Setup.tsx                                       │
+│  /src/vr/badge/Setup.tsx                                       │
 │                                                                        │
 │  Border-only badge for setup status (complete, pending, invited, etc).│
 │                                                                        │

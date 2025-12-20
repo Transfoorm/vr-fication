@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 Tabs Component Registry                                            │
-│  /src/components/prebuilts/tabs/index.tsx                              │
+│  /src/vr/tabs/index.tsx                              │
 │                                                                        │
 │  Central dispatcher for all tabs variants.                             │
 │  Each variant is a first-class, autonomous component.                  │

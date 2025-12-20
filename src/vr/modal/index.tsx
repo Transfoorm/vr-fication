@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Modal Component Registry                           │
-│  /src/components/prebuilts/modal/index.tsx                             │
+│  /src/vr/modal/index.tsx                             │
 │                                                                        │
 │  Central dispatcher for all modal variants.                            │
 │  Each variant is a first-class, autonomous component.                  │

@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Dashboard Page                                     │
-│  /src/components/prebuilts/page/dashboard/index.tsx                    │
+│  /src/vr/page/dashboard/index.tsx                    │
 │                                                                        │
 │  Auto-responsive grid layout for dashboard widgets.                    │
 │  Intelligent reflow. Zero-decision widget placement.                   │

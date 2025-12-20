@@ -85,7 +85,7 @@ See: Golden Bridge Pattern, SRB-7`,
           /\/app\/domains\//,              // Domain views
           /\/components\/.*\.tsx$/,        // Component files
           /\/features\/.*\.tsx$/,          // Feature components
-          /\/prebuilts\/.*\.tsx$/,         // Prebuilt components
+          /\/vr\/.*\.tsx$/,         // VR components
         ];
 
         const shouldEnforce = enforcePatterns.some(pattern => pattern.test(filename));

@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Button Component Registry                          │
-│  /src/prebuilts/button/index.tsx                                       │
+│  /src/vr/button/index.tsx                                       │
 │                                                                        │
 │  Central dispatcher for all 9 button variants.                         │
 │  Each variant is a first-class, autonomous component.                  │

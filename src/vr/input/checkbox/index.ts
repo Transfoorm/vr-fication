@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  ☑️ CHECKBOX VR - Export Hub                                          │
-│  /src/prebuilts/input/checkbox/index.ts                               │
+│  /src/vr/input/checkbox/index.ts                               │
 │                                                                        │
 │  Checkbox controls for different contexts.                            │
 │                                                                        │

@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Bridge Page (Universal Feed Grid)                 │
-│  /src/components/prebuilts/page/bridge/index.tsx                      │
+│  /src/vr/page/bridge/index.tsx                      │
 │                                                                        │
 │  Universal content feed layout with auto-grid sections.                │
 │  Zero-decision feed structure for news, announcements, learning.       │

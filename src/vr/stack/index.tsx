@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Stack Component Registry                           │
-│  /src/prebuilts/stack/index.tsx                                       │
+│  /src/vr/stack/index.tsx                                       │
 │                                                                        │
 │  DEPRECATED: Stack variants removed as dead code.                     │
 │  This file kept for backward compatibility.                           │

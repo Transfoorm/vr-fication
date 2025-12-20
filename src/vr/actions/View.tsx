@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - View Actions                                       │
-│  /src/prebuilts/actions/View.tsx                                       │
+│  /src/vr/actions/View.tsx                                       │
 │                                                                         │
 │  Read-only action icons: View + Delete                                 │
 │  VR renders icons, page provides behavior via props.                   │

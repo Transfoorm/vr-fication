@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Confirmation Modal                                 │
-│  /src/components/prebuilts/modal/Confirmation.tsx                      │
+│  /src/vr/modal/Confirmation.tsx                      │
 │                                                                        │
 │  Brand-matched confirmation modal for important decisions.             │
 │                                                                        │

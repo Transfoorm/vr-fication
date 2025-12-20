@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Triple Page                                       │
-│  /src/components/prebuilts/page/triple/index.tsx                      │
+│  /src/vr/page/triple/index.tsx                      │
 │                                                                        │
 │  33/33/33 three-column layout. Equal distribution. Responsive stack.  │
 │                                                                        │

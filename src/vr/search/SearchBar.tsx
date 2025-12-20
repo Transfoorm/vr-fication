@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Search Bar                                        │
-│  /src/components/prebuilts/search/bar/index.tsx                       │
+│  /src/vr/search/bar/index.tsx                       │
 │                                                                        │
 │  Search bar for filtering tables and lists with result counts.        │
 │                                                                        │

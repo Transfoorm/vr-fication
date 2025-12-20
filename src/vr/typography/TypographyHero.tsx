@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Typography Hero                                    │
-│  /src/prebuilts/typography/TypographyHero.tsx                          │
+│  /src/vr/typography/TypographyHero.tsx                          │
 │                                                                        │
 │  Hero headlines - exceptionally large text for landing pages.         │
 │  Fixed at 48px (3rem) for maximum impact.                             │

@@ -27,7 +27,7 @@ All user-facing **content typography** has been migrated to Typography VR compon
 - ✅ Page Header (3 violations)
 - ✅ 7 small features (7 violations)
 
-**Prebuilts Layer - Content Typography:**
+**VR Layer - Content Typography:**
 - ✅ Card (all 6 variants) - titles, labels, descriptions
 - ✅ Modal (4 variants) - titles, messages, subtitles
 - ✅ Page (Bridge variant) - page titles, feed items
@@ -79,7 +79,7 @@ The following CSS properties remain **by architectural design** per FUSE princip
 - Component styling for UI chrome
 
 **Auth Pages** (`auth.css` - 17 properties):
-- Page-specific layouts, not prebuilts
+- Page-specific layouts, not VRs
 - Outside Typography VR scope
 
 **Typography Component Itself** (`typography.css` - 32 properties):

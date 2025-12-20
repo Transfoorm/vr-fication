@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Dialogue Modal                                     │
-│  /src/components/prebuilts/modal/Dialogue.tsx                          │
+│  /src/vr/modal/Dialogue.tsx                          │
 │                                                                        │
 │  Standard dialogue modal with header, content, and action buttons.     │
 │                                                                        │

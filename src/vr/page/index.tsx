@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Page Component Registry                            │
-│  /src/components/prebuilts/page/index.ts                               │
+│  /src/vr/page/index.ts                               │
 │                                                                        │
 │  Central dispatcher for all page variants.                             │
 │  Each variant is a first-class, autonomous component.                  │

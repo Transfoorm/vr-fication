@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Table Search Hook                                   │
-│  /src/prebuilts/table/useTableSearch.ts                                 │
+│  /src/vr/table/useTableSearch.ts                                 │
 │                                                                         │
 │  Auto-generates search filter from columns.                             │
 │  Excludes checkbox and actions variants automatically.                  │

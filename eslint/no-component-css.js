@@ -6,13 +6,13 @@
 //
 // WCCC 5-File System (Current Architecture - 2025-11-23):
 //   1. tokens.css     - Design system primitives
-//   2. prebuilts.css  - vr-* components (IMPORT HUB)
+//   2. vr.css  - vr-* components (IMPORT HUB)
 //   3. layout.css     - ly-* shell structure (IMPORT HUB)
 //   4. globals.css    - CSS reset + orchestrates imports
 //   5. features.css   - ft-* features (IMPORT HUB)
 //
 // Component-Scoped CSS Pattern (ALLOWED):
-//   ✅ /src/vr/button/button.css → prebuilts.css → globals.css
+//   ✅ /src/vr/button/button.css → vr.css → globals.css
 //   ✅ /src/shell/Topbar/topbar.css → shell.css → layout.css → globals.css
 //   ✅ /src/features/UserButton/user-button.css → features.css → globals.css
 //
@@ -67,18 +67,18 @@ module.exports = {
 
 WCCC 5-File System:
   1. tokens.css     - Design tokens
-  2. prebuilts.css  - vr-* components (hub)
+  2. vr.css  - vr-* components (hub)
   3. layout.css     - ly-* shell (hub)
   4. globals.css    - Reset + orchestration
   5. features.css   - ft-* features (hub)
 
 For custom styling:
-  1. Check if a prebuilt variant exists (vr-button-primary, vr-card-alert, etc.)
-  2. Create new prebuilt variant in /src/vr/[component]/
+  1. Check if a VR variant exists (vr-button-primary, vr-card-alert, etc.)
+  2. Create new VR variant in /src/vr/[component]/
   3. Last resort: Create feature component in /src/features/[Feature]/
 
 Component-scoped CSS IS allowed when imported through hubs:
-  ✅ /src/vr/button/button.css → prebuilts.css
+  ✅ /src/vr/button/button.css → vr.css
   ✅ /src/features/UserButton/user-button.css → features.css
   ❌ /src/app/domain/companies/page.css (route-level CSS)
 

@@ -46,7 +46,7 @@ If you need shared logic:
   1. Move to @/fuse/ (store, hooks, hydration)
   2. Move to @/lib/ (utilities)
   3. Move to @/utils/ (helpers)
-  4. Move to @/prebuilts/ (UI components)
+  4. Move to @/vr/ (UI components)
 
 Cross-domain DATA flows through FUSE store only:
   - Domain A writes to FUSE

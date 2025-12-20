@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Rank Card                                         │
-│  /src/prebuilts/rank/Card.tsx                                         │
+│  /src/vr/rank/Card.tsx                                         │
 │                                                                        │
 │  TRUE VR: Self-contained rank statistics card.                        │
 │  Reads from FUSE store (WARP preloaded), displays count.              │

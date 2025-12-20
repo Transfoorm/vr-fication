@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  > VARIANT ROBOT - Checkbox Form                                       │
-│  /src/prebuilts/input/checkbox/form/index.tsx                          │
+│  /src/vr/input/checkbox/form/index.tsx                          │
 │                                                                         │
 │  Self-contained checkbox styling for forms.                            │
 └─────────────────────────────────────────────────────────────────────────┘ */

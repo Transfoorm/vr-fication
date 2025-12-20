@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Dropdown with Avatars                             │
-│  /src/components/prebuilts/dropdown/withAvatars/index.tsx             │
+│  /src/vr/dropdown/withAvatars/index.tsx             │
 │                                                                        │
 │  User selection dropdown with avatars and names.                      │
 │  Perfect for assigning users, selecting team members, ownership.      │

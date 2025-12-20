@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 DROPDOWN VR - Barrel Export                                       │
-│  /src/components/prebuilts/dropdown/index.tsx                         │
+│  /src/vr/dropdown/index.tsx                         │
 │                                                                        │
 │  Complete dropdown system - 4 variants for all use cases.             │
 │                                                                        │

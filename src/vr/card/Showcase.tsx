@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Showcase Card                                     │
-│  /src/prebuilts/card/Showcase.tsx                                     │
+│  /src/vr/card/Showcase.tsx                                     │
 │                                                                        │
 │  Card variant with page-arch-color background for displaying          │
 │  component demos and visual showcases.                                 │

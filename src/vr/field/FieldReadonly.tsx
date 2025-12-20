@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Field.readonly                                    │
-│  /src/prebuilts/field/Readonly.tsx                                    │
+│  /src/vr/field/Readonly.tsx                                    │
 │                                                                        │
 │  Read-only field with label + content + messages.                     │
 │  Use Field.live for editable, Field.verify for verification-required. │

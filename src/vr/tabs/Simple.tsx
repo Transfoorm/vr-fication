@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Simple Tabs (FUSE-Enhanced)                        │
-│  /src/components/prebuilts/tabs/simple/index.tsx                       │
+│  /src/vr/tabs/simple/index.tsx                       │
 │                                                                        │
 │  Inconspicuous tabs with built-in FUSE stay-mounted pattern.           │
 │  Narrow, full-width, subtle navigation.                                │

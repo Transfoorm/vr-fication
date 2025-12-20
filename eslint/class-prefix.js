@@ -30,13 +30,13 @@ module.exports = {
             if (classValue.includes('ut-')) return;
 
             // Prebuilts must use vr-* (Variant Robot architecture)
-            if (filename.includes('/prebuilts/') || filename.includes('/src/vr/')) {
+            if (filename.includes('/vr/') || filename.includes('/src/vr/')) {
               if (!classValue.match(/\bvr-/)) {
                 context.report({
                   node,
                   messageId: 'wrongPrefix',
                   data: {
-                    message: '⛔ PREFIX VIOLATION: Prebuilt components must use vr-* class prefix (Variant Robot architecture). All VR classes follow strict parent-child naming hierarchy. Ref: 04-VRS-COMPONENT-SYSTEM.md',
+                    message: '⛔ PREFIX VIOLATION: VR components must use vr-* class prefix (Variant Robot architecture). All VR classes follow strict parent-child naming hierarchy. Ref: 04-VRS-COMPONENT-SYSTEM.md',
                   },
                 });
               }

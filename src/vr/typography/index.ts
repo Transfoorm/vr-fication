@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 TYPOGRAPHY VR COMPONENTS - Export Hub                             │
-│  /src/prebuilts/typography/index.ts                                   │
+│  /src/vr/typography/index.ts                                   │
 │                                                                        │
 │  Central export for all Typography VR components.                     │
 │                                                                        │

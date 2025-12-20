@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Rank Selector                                     │
-│  /src/prebuilts/rank/Selector.tsx                                     │
+│  /src/vr/rank/Selector.tsx                                     │
 │                                                                        │
 │  Rank-specific dropdown - thin composition layer over Dropdown.withIcons │
 │                                                                        │

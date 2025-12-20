@@ -81,7 +81,7 @@ See: 04-ADP-PATTERN.md, TTTS-ENFORCEMENT-PACK-(v1.0).md`,
           /\/app\/.*\/.*\.tsx$/,             // App directory components
           /\/components\/.*\.tsx$/,          // Component files
           /\/features\/.*\.tsx$/,            // Feature components
-          /\/prebuilts\/.*\.tsx$/,           // Prebuilt components
+          /\/vr\/.*\.tsx$/,           // VR components
         ];
 
         const shouldEnforce = enforcePatterns.some(pattern => pattern.test(filename));

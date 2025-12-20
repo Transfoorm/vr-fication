@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Table Component Registry                           │
-│  /src/prebuilts/table/index.tsx                                        │
+│  /src/vr/table/index.tsx                                        │
 │                                                                        │
 │  Central dispatcher for all table variants + utilities.                │
 │  Each variant is a first-class, autonomous component.                  │

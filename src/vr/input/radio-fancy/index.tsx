@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Input Radio Fancy                                  │
-│  /src/prebuilts/input/radio-fancy/index.tsx                            │
+│  /src/vr/input/radio-fancy/index.tsx                            │
 │                                                                        │
 │  Stylized radio button group with Uiverse-inspired design.            │
 │  Features bold uppercase labels with descriptions.                     │

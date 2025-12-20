@@ -63,7 +63,7 @@ find src -name "*.css" -type f 2>/dev/null | grep -E '/[A-Z][^/]*\.css$' | head 
 for css in $(find src/shell src/features src/vr -name "*.css" -type f 2>/dev/null); do
   filename=$(basename "$css" .css)
   folder=$(basename "$(dirname "$css")")
-  [ "$folder" = "shell" ] || [ "$folder" = "features" ] || [ "$folder" = "prebuilts" ] && continue
+  [ "$folder" = "shell" ] || [ "$folder" = "features" ] || [ "$folder" = "VRs" ] && continue
   [ "$filename" != "$folder" ] && echo "❌ $css (expected $folder.css)"
 done
 ```

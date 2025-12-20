@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Sidebar Page                                       │
-│  /src/components/prebuilts/page/sidebar/index.tsx                      │
+│  /src/vr/page/sidebar/index.tsx                      │
 │                                                                        │
 │  Fixed sidebar + flexible main content. Enterprise navigation pattern. │
 │                                                                        │

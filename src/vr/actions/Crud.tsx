@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - CRUD Actions                                       │
-│  /src/prebuilts/actions/Crud.tsx                                       │
+│  /src/vr/actions/Crud.tsx                                       │
 │                                                                         │
 │  Standard CRUD action icons: Edit + Delete                             │
 │  VR renders icons, page provides behavior via props.                   │

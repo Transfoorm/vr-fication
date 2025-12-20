@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🎯 SIDEDRAWER - Clean Architecture                                    │
-│  /src/prebuilts/modal/Drawer.tsx                                       │
+│  /src/vr/modal/Drawer.tsx                                       │
 │                                                                        │
 │  Merged context + portal in single file.                               │
 │  requestAnimationFrame for flicker-free animations.                    │

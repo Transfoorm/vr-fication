@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Panels Tabs (FUSE-Enhanced)                       │
-│  /src/components/prebuilts/tabs/Panels.tsx                            │
+│  /src/vr/tabs/Panels.tsx                            │
 │                                                                        │
 │  Modern elevated tabs with rounded pill container design.              │
 │  Smooth transitions and clean aesthetic.                               │

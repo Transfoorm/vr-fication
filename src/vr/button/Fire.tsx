@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Fire Button                                        │
-│  /src/components/prebuilts/button/fire/index.tsx                       │
+│  /src/vr/button/fire/index.tsx                       │
 │                                                                        │
 │  Fire gradient button for high-impact CTAs (Phoenix Flow compatible). │
 │                                                                        │

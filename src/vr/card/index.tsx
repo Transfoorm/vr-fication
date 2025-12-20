@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 Card Component Registry                                            │
-│  /src/components/prebuilts/card/index.tsx                              │
+│  /src/vr/card/index.tsx                              │
 │                                                                        │
 │  Central dispatcher for all card variants.                             │
 │  Each variant is a first-class, autonomous component.                  │

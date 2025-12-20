@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Paginated Table                                    │
-│  /src/components/prebuilts/table/paginated/index.tsx                   │
+│  /src/vr/table/paginated/index.tsx                   │
 │                                                                        │
 │  Table with pagination controls.                                       │
 │                                                                        │

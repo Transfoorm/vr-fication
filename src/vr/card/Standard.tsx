@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Standard Card                                      │
-│  /src/components/prebuilts/card/standard/index.tsx                     │
+│  /src/vr/card/standard/index.tsx                     │
 │                                                                        │
 │  Default card. Generic content container. Flexible use.                │
 │                                                                        │

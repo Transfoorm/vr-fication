@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  > VARIANT ROBOT - Checkbox Settings                                   │
-│  /src/prebuilts/input/checkbox/settings/index.tsx                      │
+│  /src/vr/input/checkbox/settings/index.tsx                      │
 │                                                                         │
 │  Self-contained checkbox styling for settings pages.                   │
 └─────────────────────────────────────────────────────────────────────────┘ */

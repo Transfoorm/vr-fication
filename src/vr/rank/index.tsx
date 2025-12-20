@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 Rank Components Registry                                           │
-│  /src/components/prebuilts/rank/index.tsx                              │
+│  /src/vr/rank/index.tsx                              │
 │                                                                        │
 │  Central registry for all Rank VR components.                         │
 │  TRUE VR Architecture - Intelligent, self-contained components.        │

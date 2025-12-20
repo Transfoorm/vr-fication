@@ -349,7 +349,7 @@ import Guide from './_tabs/Guide';
 import Typography from './_tabs/Typography';
 
 export default function Showcase() {
-  useSetPageHeader('Showcase', 'Variant Robots (VR) - Discover the sites prebuilts component registry');
+  useSetPageHeader('Showcase', 'Variant Robots (VR) - Discover the sites VRs component registry');
 
   return (
     <Tabs.panels

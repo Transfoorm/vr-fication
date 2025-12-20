@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Search Component Registry                         │
-│  /src/components/prebuilts/search/index.tsx                           │
+│  /src/vr/search/index.tsx                           │
 │                                                                        │
 │  Central dispatcher for all search variants.                          │
 │  Each variant is a first-class, autonomous component.                 │

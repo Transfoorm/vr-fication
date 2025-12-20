@@ -33,7 +33,7 @@ if (stagedFiles.length === 0) {
   process.exit(0);
 }
 
-// Filter for feature/shell/domain CSS (not prebuilts/typography, not globals)
+// Filter for feature/shell/domain CSS (not vr/typography, not globals)
 const featureFiles = stagedFiles.filter(file =>
   (file.includes('src/features/') ||
    file.includes('src/shell/') ||

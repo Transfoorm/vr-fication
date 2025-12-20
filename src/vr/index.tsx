@@ -1,8 +1,8 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 PREBUILTS - Central Export                                         │
-│  /src/components/prebuilts/index.tsx                                   │
+│  /src/vr/index.tsx                                   │
 │                                                                        │
-│  Single import for all prebuilt components across the entire app.      │
+│  Single import for all VR components across the entire app.      │
 │                                                                        │
 │  Usage:                                                                │
 │  import { Card, Page, Modal, Button, Table, Divider, Tabs, Search, Badge, Tooltip, Field, Input, Label, Checkbox } from '@/vr'; │

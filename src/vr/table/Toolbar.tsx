@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Table Toolbar                                       │
-│  /src/prebuilts/table/Toolbar.tsx                                       │
+│  /src/vr/table/Toolbar.tsx                                       │
 │                                                                         │
 │  Layout-only VR: Search left, actions right. Zero layout shift.         │
 │  No logic. No state. Pure layout composition.                           │

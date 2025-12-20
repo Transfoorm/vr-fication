@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  💬 TOOLTIP LABEL ICON VARIANT - Info Icon for Labels                │
-│  /src/prebuilts/tooltip/TooltipLabelIcon.tsx                          │
+│  /src/vr/tooltip/TooltipLabelIcon.tsx                          │
 │                                                                        │
 │  Renders an info icon with tooltip for use next to field labels.      │
 │  Consistent positioning and styling.                                   │

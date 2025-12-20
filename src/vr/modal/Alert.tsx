@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Alert Modal                                        │
-│  /src/components/prebuilts/modal/Alert.tsx                             │
+│  /src/vr/modal/Alert.tsx                             │
 │                                                                        │
 │  Brand-matched alert modal for notifications and results.              │
 │                                                                        │

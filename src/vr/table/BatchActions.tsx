@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Table Batch Actions                                 │
-│  /src/prebuilts/table/BatchActions.tsx                                  │
+│  /src/vr/table/BatchActions.tsx                                  │
 │                                                                         │
 │  Selection pill + delete button. Hard-wired visibility.                 │
 │  Zero layout shift - always rendered, opacity controlled.               │

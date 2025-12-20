@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - ActionPill                                        │
-│  /src/prebuilts/actions/ActionPill.tsx                                │
+│  /src/vr/actions/ActionPill.tsx                                │
 │                                                                        │
 │  Inline confirmation button with complete state machine:              │
 │  - idle: Gray pill, shows label                                       │

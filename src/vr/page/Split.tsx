@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Split Page                                         │
-│  /src/components/prebuilts/page/split/index.tsx                        │
+│  /src/vr/page/split/index.tsx                        │
 │                                                                        │
 │  50/50 two-column layout. Perfect symmetry. Responsive stacking.       │
 │                                                                        │

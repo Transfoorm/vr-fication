@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Secondary Button                                   │
-│  /src/components/prebuilts/button/secondary/index.tsx                  │
+│  /src/vr/button/secondary/index.tsx                  │
 │                                                                        │
 │  Outlined button for secondary actions.                                │
 │                                                                        │

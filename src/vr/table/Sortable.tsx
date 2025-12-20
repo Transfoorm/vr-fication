@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Sortable Table                                     │
-│  /src/prebuilts/table/sortable/index.tsx                               │
+│  /src/vr/table/sortable/index.tsx                               │
 │                                                                         │
 │  Self-contained sortable table with all styling in one CSS file.       │
 │  No scattered dependencies. True VR pattern.                           │

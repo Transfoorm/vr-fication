@@ -145,7 +145,7 @@ const ENFORCEMENT_PATTERNS = [
   /\/app\/actions\//,                // Server Actions
   /\/components\//,                  // Component files
   /\/features\//,                    // Feature components
-  /\/prebuilts\//,                   // Prebuilt components
+  /\/vr\//,                   // VR components
   /\/store\//,                       // FUSE store
   /\/convex\//,                      // Convex functions
 ];

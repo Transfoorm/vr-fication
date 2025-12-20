@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Multi-Select Dropdown                             │
-│  /src/components/prebuilts/dropdown/multiSelect/index.tsx             │
+│  /src/vr/dropdown/multiSelect/index.tsx             │
 │                                                                        │
 │  Multiple selection dropdown with checkboxes.                         │
 │  Perfect for tags, filters, permissions, categories.                  │

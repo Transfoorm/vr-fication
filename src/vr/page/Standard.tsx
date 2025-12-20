@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Standard Page                                      │
-│  /src/components/prebuilts/page/standard/index.tsx                     │
+│  /src/vr/page/standard/index.tsx                     │
 │                                                                        │
 │  Default page layout with enterprise padding.                          │
 │  Clean, professional, content-focused.                                 │

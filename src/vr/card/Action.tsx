@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Action Card                                        │
-│  /src/components/prebuilts/card/action/index.tsx                       │
+│  /src/vr/card/action/index.tsx                       │
 │                                                                        │
 │  Quick action buttons card. CTAs. Navigation shortcuts.                │
 │  Uses ButtonVC robots for consistent styling across the app.          │

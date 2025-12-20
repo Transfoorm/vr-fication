@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Activity Card                                      │
-│  /src/components/prebuilts/card/activity/index.tsx                     │
+│  /src/vr/card/activity/index.tsx                     │
 │                                                                        │
 │  Activity feed card. Timeline events. Status updates.                  │
 │                                                                        │

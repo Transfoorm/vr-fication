@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Full Page                                          │
-│  /src/components/prebuilts/page/full/index.tsx                         │
+│  /src/vr/page/full/index.tsx                         │
 │                                                                        │
 │  Edge-to-edge immersive layout. Zero padding. Maximum impact.         │
 │                                                                        │

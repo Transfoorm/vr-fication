@@ -14,7 +14,7 @@ import Tab9 from './_tabs/Tab9';
 import Tab10 from './_tabs/Tab10';
 
 export default function Showcase() {
-  useSetPageHeader('Showcase', 'Variant Robots (VR) - Discover the sites prebuilts component registry');
+  useSetPageHeader('Showcase', 'Variant Robots (VR) - Discover the sites VR component registry');
 
   return (
     <Tabs.panels

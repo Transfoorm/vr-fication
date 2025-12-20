@@ -1,6 +1,6 @@
 ---
 description: VR Doctrine Guru - Enforce Variant Robot purity at every keystroke
-tags: [vr, variant-robot, prebuilts, doctrine]
+tags: [vr, variant-robot, VRs, doctrine]
 ---
 
 # 🤖 VARIANT ROBOT DOCTRINE GURU
@@ -219,7 +219,7 @@ export default function CrudActions({ row, onEdit, onDelete }) {
 VR handles HOW things look. Page handles WHAT things do.
 
 ```tsx
-// The VR (in /prebuilts)
+// The VR (in /VRs)
 export function Sortable({ columns, data, onSort }) {
   // ALL rendering logic here
   // ALL styling here
@@ -548,7 +548,7 @@ export default function Profile() {
 The prefixes tell you exactly where code belongs:
 
 ```css
-/* VR - dumb visual shell (prebuilts) */
+/* VR - dumb visual shell (VRs) */
 .vr-field-live { }
 .vr-field-live--focused { }
 .vr-field-live__input { }

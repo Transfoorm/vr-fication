@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Divider Component Registry                         │
-│  /src/components/prebuilts/divider/index.tsx                          │
+│  /src/vr/divider/index.tsx                          │
 │                                                                        │
 │  DEPRECATED: Divider variants removed as dead code.                   │
 │  This file kept for backward compatibility.                           │

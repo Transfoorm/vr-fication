@@ -21,7 +21,7 @@ This is achieved through the **5-File System** with **semantic prefixes** and **
 **All CSS in the entire application lives in exactly 5 files:**
 
 1. **`tokens.css`** - Design system primitives (spacing, typography, radius, shadows)
-2. **`prebuilts.css`** - Variant Robot components (`vr-*` prefix) - Import hub for all prebuilt components
+2. **`vr.css`** - Variant Robot components (`vr-*` prefix) - Import hub for all VR components
 3. **`layout.css`** - Shell structure (`ly-*` prefix) - Imports `/src/shell/css/shell.css` hub
 4. **`globals.css`** - CSS reset, base styles, and orchestrates the import order
 5. **`features.css`** - Application features (`ft-*` prefix) - Import hub for all feature components
@@ -38,7 +38,7 @@ This is achieved through the **5-File System** with **semantic prefixes** and **
 
 Each of the 5 files acts as an **import hub** that aggregates component-scoped CSS:
 
-- **`prebuilts.css`** → Imports 26 prebuilt components from `/src/vr/*/`
+- **`vr.css`** → Imports 26 VR components from `/src/vr/*/`
 - **`layout.css`** → Imports `/src/shell/css/shell.css` (which imports 6 shell components)
 - **`features.css`** → Imports all feature components from `/src/features/*/`
 
@@ -50,7 +50,7 @@ Components keep their own CSS files (local definition for maintainability), but 
 
 ```
 LOCAL DEFINITION:
-/src/vr/button/button.css  →  prebuilts.css  →  globals.css  →  GLOBALLY AVAILABLE
+/src/vr/button/button.css  →  vr.css  →  globals.css  →  GLOBALLY AVAILABLE
 /src/shell/css/topbar.css         →  shell.css → layout.css → globals.css → GLOBALLY AVAILABLE
 /src/features/UserButton/user-button.css → features.css → globals.css → GLOBALLY AVAILABLE
 ```
@@ -73,7 +73,7 @@ LOCAL DEFINITION:
 
 Every CSS class starts with a prefix that tells you its **category** and **which of the 5 files** it belongs to:
 
-- `vr-*` → Lives in a component imported by **prebuilts.css**
+- `vr-*` → Lives in a component imported by **vr.css**
 - `ly-*` → Lives in a component imported by **layout.css**
 - `ft-*` → Lives in a component imported by **features.css**
 
@@ -217,7 +217,7 @@ The "Variant Robot" name reflects the systematic, automated nature of these comp
 
 **Characteristics:**
 - Application-specific behaviors
-- Not generic like prebuilts
+- Not generic like VRs
 - Tied to business logic
 - Each feature has its own CSS file
 - Import hub: `/styles/features.css`
@@ -234,7 +234,7 @@ The "Variant Robot" name reflects the systematic, automated nature of these comp
 ├── themes/
 │   └── transtheme.css      # Theme colors (--text-*, --bg-*, --brand-*)
 ├── globals.css             # CSS reset + base styles
-├── prebuilts.css           # vr-* import hub
+├── vr.css           # vr-* import hub
 ├── features.css            # ft-* import hub
 └── layout.css              # Imports /src/shell/css/shell.css
 
@@ -359,7 +359,7 @@ An import hub is a CSS file that imports other CSS files for organizational purp
 /* 1. Component CSS first */
 @import './features.css';
 @import './layout.css';
-@import './prebuilts.css';
+@import './vr.css';
 
 /* 2. Infrastructure (variables override components) */
 @import './tokens.css';
@@ -851,7 +851,7 @@ World Class CSS Convention - The **5-File System**:
 ✅ **5 centralized files** - All CSS lives in tokens/vr/layout/globals/features
 ✅ **Semantic prefixes** - `vr-*`, `ly-*`, `ft-*` for instant discoverability
 ✅ **Component-scoped CSS** - Maintainability through separation, aggregated through hubs
-✅ **Import hubs** - prebuilts.css, layout.css, features.css aggregate components
+✅ **Import hubs** - vr.css, layout.css, features.css aggregate components
 ✅ **Design tokens** - Primitives in tokens.css, never used directly in className
 ✅ **Zero inline styles** - ISV Protection enforced via ESLint
 
@@ -880,7 +880,7 @@ Shell CSS Flow Architecture:
   │       ├─ @import './PageHeader/pageheader.css' (only .ly-pageheader-* classes)
   │       ├─ @import './AISidebar/aisidebar.css' (only .ly-aisidebar-* classes)
   │       └─ @import './Sidebar/sidebar.css'  (only .ly-sidebar-* classes)
-  ├─ @import './prebuilts.css'       (prebuilts only)
+  ├─ @import './vr.css'       (VRs only)
   ├─ @import './tokens.css'          (design tokens only)
   └─ @import './themes/transtheme.css' (theme colors only)
 

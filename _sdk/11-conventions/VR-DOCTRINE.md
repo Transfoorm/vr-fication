@@ -77,7 +77,7 @@ Traditional components:
 VRS components:
 ```tsx
 <Button.primary />     // Variant IS the component
-<Card.metric />        // Self-contained, prebuilt
+<Card.metric />        // Self-contained, VR
 <Input.search />       // No configuration needed
 ```
 
@@ -188,7 +188,7 @@ Table.paginated    // With pagination
 ### Defining VRS Components
 
 ```tsx
-// prebuilts/button/index.tsx
+// VRs/button/index.tsx
 import PrimaryButton from './Primary';
 import SecondaryButton from './Secondary';
 import GhostButton from './Ghost';
@@ -205,7 +205,7 @@ export const Button = {
 ### Variant Implementation
 
 ```tsx
-// prebuilts/button/Primary.tsx
+// VRs/button/Primary.tsx
 
 interface PrimaryButtonProps {
   children: React.ReactNode;
@@ -240,7 +240,7 @@ export default function PrimaryButton({
 ## Part 6: CSS Architecture
 
 ### Class Prefixes
-- `.vr-*` → VR classes (prebuilts)
+- `.vr-*` → VR classes (VRs)
 - `.ft-*` → Feature classes (features)
 
 ### File Cascade
@@ -251,7 +251,7 @@ export default function PrimaryButton({
 ### Example Styles
 
 ```css
-/* styles/vr.css → imports prebuilts/button/button.css */
+/* styles/vr.css → imports VRs/button/button.css */
 
 .vr-button-primary {
   background: var(--color-primary);
@@ -293,13 +293,13 @@ Variables prefixed with `--anim-*` are **animation slot variables** - an intenti
   }
 }
 
-/* prebuilts/modal/modal.css - fills the slot */
+/* VRs/modal/modal.css - fills the slot */
 .vr-modal-alert {
   --anim-slide-distance: calc(-1 * var(--modal-alert-animation-distance));
   animation: slide-in var(--modal-alert-animation-duration) ease-out;
 }
 
-/* prebuilts/dropdown/dropdown.css - fills the same slot differently */
+/* VRs/dropdown/dropdown.css - fills the same slot differently */
 .vr-dropdown-simple-menu {
   --anim-slide-distance: calc(-1 * var(--dropdown-animation-distance));
   animation: slide-in var(--dropdown-animation-duration) ease-out;
@@ -315,7 +315,7 @@ Variables prefixed with `--anim-*` are **animation slot variables** - an intenti
 
 ## Part 7: Usage Examples
 
-### VR (prebuilts/field/Live.tsx)
+### VR (VRs/field/Live.tsx)
 ```tsx
 // Dumb shell - just UI states
 export default function FieldLive({ value, onSave, label }) {
@@ -424,7 +424,7 @@ Everything below VR is encapsulated. Everything above just composes it.
 4. Document use case
 
 ```tsx
-// prebuilts/button/Outline.tsx
+// VRs/button/Outline.tsx
 export default function OutlineButton({ children, onClick }) {
   return (
     <button className="vr-button-outline" onClick={onClick}>
@@ -433,7 +433,7 @@ export default function OutlineButton({ children, onClick }) {
   );
 }
 
-// prebuilts/button/index.tsx
+// VRs/button/index.tsx
 export const Button = {
   primary: PrimaryButton,
   secondary: SecondaryButton,
@@ -444,7 +444,7 @@ export const Button = {
 ### Creating New Component Families
 
 ```tsx
-// prebuilts/alert/index.tsx
+// VRs/alert/index.tsx
 import AlertSuccess from './Success';
 import AlertError from './Error';
 import AlertWarning from './Warning';

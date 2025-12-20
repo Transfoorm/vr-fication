@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Grid Component Registry                           │
-│  /src/prebuilts/grid/index.tsx                                        │
+│  /src/vr/grid/index.tsx                                        │
 │                                                                        │
 │  Universal layout system using CSS Grid.                              │
 │  Replaces Stack with more powerful and flexible layouts.              │

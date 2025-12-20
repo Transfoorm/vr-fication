@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Admin Actions                                      │
-│  /src/prebuilts/actions/Admin.tsx                                      │
+│  /src/vr/actions/Admin.tsx                                      │
 │                                                                         │
 │  Admin action icons: Edit + Delete + Flag                              │
 │  VR renders icons, page provides behavior via props.                   │

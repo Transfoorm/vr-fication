@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Simple Dropdown                                   │
-│  /src/components/prebuilts/dropdown/simple/index.tsx                  │
+│  /src/vr/dropdown/simple/index.tsx                  │
 │                                                                        │
 │  Basic custom dropdown with text-only options.                        │
 │  Replaces native <select> with better styling and control.            │

@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Primary Button                                     │
-│  /src/components/prebuilts/button/primary/index.tsx                    │
+│  /src/vr/button/primary/index.tsx                    │
 │                                                                        │
 │  Solid brand-colored button for primary actions.                       │
 │                                                                        │

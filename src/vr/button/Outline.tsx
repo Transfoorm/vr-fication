@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Outline Button                                     │
-│  /src/components/prebuilts/button/outline/index.tsx                    │
+│  /src/vr/button/outline/index.tsx                    │
 │                                                                        │
 │  Border-only button for secondary actions (Phoenix Flow compatible).  │
 │                                                                        │

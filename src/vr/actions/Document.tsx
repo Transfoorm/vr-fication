@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Document Actions                                   │
-│  /src/prebuilts/actions/Document.tsx                                   │
+│  /src/vr/actions/Document.tsx                                   │
 │                                                                         │
 │  Document action icons: View + Email + Delete                          │
 │  VR renders icons, page provides behavior via props.                   │

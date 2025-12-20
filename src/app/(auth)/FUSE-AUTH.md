@@ -223,7 +223,7 @@ features/auth/                 # Auth Features (Clerk dirty playground)
 ├── VerifySecondary/           # Add secondary email verification
 └── VerifyForgot/              # Password reset code verification
 
-prebuilts/modal/
+VRs/modal/
 └── Verify.tsx                 # Modal.verify VR (dumb shell)
 ```
 

@@ -1,6 +1,6 @@
 /**─────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Verify Modal                                      │
-│  /src/prebuilts/modal/Verify.tsx                                      │
+│  /src/vr/modal/Verify.tsx                                      │
 │                                                                       │
 │  Universal 6-digit code verification UI.                              │
 │  Used for: password reset, email verification, 2FA, etc.              │

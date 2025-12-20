@@ -85,7 +85,7 @@ const ALLOWED_TEXT_PARENTS = [
 
 // Paths exempt from Typography Sovereignty
 const EXEMPT_PATHS = [
-  '/src/prebuilts/typography/',
+  '/src/vr/typography/',
   '/test/',
   '/__tests__/',
   '.test.',
@@ -196,13 +196,13 @@ All text must pass through Typography VRs:
             const filename = context.getFilename();
             if (isExemptFile(filename)) return;
 
-            // Check files in app/domains, app/features, features/, shell/, prebuilts/
+            // Check files in app/domains, app/features, features/, shell/, vr/
             const isAppCode =
               filename.includes('/src/app/domains/') ||
               filename.includes('/src/app/features/') ||
               filename.includes('/src/features/') ||
               filename.includes('/src/shell/') ||
-              filename.includes('/src/prebuilts/');
+              filename.includes('/src/vr/');
 
             if (!isAppCode) return;
 

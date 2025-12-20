@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  ☑️ VARIANT ROBOT - Table Checkbox                                    │
-│  /src/prebuilts/table/Checkbox.tsx                                    │
+│  /src/vr/table/Checkbox.tsx                                    │
 │                                                                        │
 │  Accessible checkbox for table row selection.                         │
 │  Handles checked, indeterminate, and disabled states.                 │

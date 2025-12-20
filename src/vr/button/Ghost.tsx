@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Ghost Button                                       │
-│  /src/components/prebuilts/button/ghost/index.tsx                      │
+│  /src/vr/button/ghost/index.tsx                      │
 │                                                                        │
 │  Transparent button with hover background.                             │
 │                                                                        │

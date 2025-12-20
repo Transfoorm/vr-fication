@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Backdrop                                          │
-│  /src/prebuilts/backdrop/Backdrop.tsx                                 │
+│  /src/vr/backdrop/Backdrop.tsx                                 │
 │                                                                        │
 │  Unified dim layer for attention-capture overlays.                    │
 │  40% opacity. No blur. Site-wide consistency.                         │

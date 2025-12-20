@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Dropdown with Icons                               │
-│  /src/components/prebuilts/dropdown/withIcons/index.tsx               │
+│  /src/vr/dropdown/withIcons/index.tsx               │
 │                                                                        │
 │  Generic custom dropdown with icon/image support.                     │
 │  Replaces native <select> to support images in options.               │

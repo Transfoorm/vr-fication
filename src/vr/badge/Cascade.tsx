@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Cascade Status Badge                              │
-│  /src/prebuilts/badge/Cascade.tsx                                     │
+│  /src/vr/badge/Cascade.tsx                                     │
 │                                                                        │
 │  Border-only badge for cascade deletion status (completed, failed).   │
 │                                                                        │

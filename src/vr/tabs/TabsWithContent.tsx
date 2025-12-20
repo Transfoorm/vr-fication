@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Tabs with Content                                  │
-│  /src/prebuilts/tabs/WithContent.tsx                                   │
+│  /src/vr/tabs/WithContent.tsx                                   │
 │                                                                        │
 │  TRUE VR: Tabs that handle EVERYTHING - navigation, URL, content.      │
 │  The page just declares, the VR handles all complexity.                │

@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - User Rank Table                                   │
-│  /src/prebuilts/rank/Table.tsx                                        │
+│  /src/vr/rank/Table.tsx                                        │
 │                                                                        │
 │  TRUE VR: Complete user management table with rank controls.          │
 │  Reads from FUSE store (WARP preloaded), handles rank changes.        │

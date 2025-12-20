@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  💬 TOOLTIP CARET VARIANT - Simple Dark Tooltip                       │
-│  /src/prebuilts/tooltip/TooltipCaret.tsx                              │
+│  /src/vr/tooltip/TooltipCaret.tsx                              │
 │                                                                        │
 │  Dark tooltip with portal rendering to avoid DOM clipping.            │
 │                                                                        │
