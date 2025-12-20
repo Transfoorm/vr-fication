@@ -19,7 +19,7 @@
   --company-button-chevron-size: 14px;
 
   /* Menu Positioning */
-  --company-button-menu-top: 20px;   /* 🟥 Modal vertical height */
+  --company-button-menu-top: 12px;   /* 🟥 Modal vertical height */
   --company-button-menu-radius: 13px;
 
   /* Menu Animation */
@@ -145,7 +145,7 @@
   left: calc(var(--sidebar-width) + 8px);  /*  🟥 Outside sidebar edge */
   background-color: #fff;
   box-shadow: var(--user-button-menu-shadow);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border-normal);
   border-radius: var(--company-button-menu-radius);
   overflow: hidden; /* Ensure children respect border-radius */
   min-width: var(--user-button-menu-width); /* 240px min, expands like UserButton */
@@ -356,7 +356,7 @@
   z-index: 901;
   background-color: var(--bg-primary);
   box-shadow: var(--shadow-xl);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border-normal);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
   width: 320px;

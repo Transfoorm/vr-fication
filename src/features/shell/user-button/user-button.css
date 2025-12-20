@@ -139,7 +139,7 @@
   left: calc(var(--sidebar-width) + 8px);  /* 🟥  CompanyButton positioning */
   background-color: #fff;
   box-shadow: var(--user-button-menu-shadow);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border-normal);
   border-radius: var(--user-button-menu-radius);
   min-width: var(--user-button-menu-width); /* 240px min, expands for long emails */
   z-index: 50;
@@ -161,7 +161,7 @@
   top: var(--user-button-close-offset);
   right: var(--user-button-close-offset);
   background-color: var(--bg-primary);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border-normal);
   border-radius: var(--radius-full);
   width: var(--user-button-close-size);
   height: var(--user-button-close-size);
@@ -362,7 +362,7 @@
   z-index: 901;
   background-color: var(--bg-primary);
   box-shadow: var(--shadow-xl);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border-normal);
   border-radius: var(--radius-lg);
   padding: var(--user-button-padding-lg);
   width: var(--user-button-menu-width-modal);
