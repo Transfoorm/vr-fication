@@ -220,7 +220,6 @@
   white-space: nowrap;
   line-height: 1.3;
   margin: 0;
-  max-width: 100%;  /* T-VR fix: Constrain <p> tag to parent width for truncation */
   user-select: text;
   cursor: text;
 }

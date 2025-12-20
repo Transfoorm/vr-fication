@@ -211,7 +211,7 @@ export default function Sidebar() {
             </T.body>
           </div>
           <div className="ly-sidebar-footer-email">
-            <T.caption size="xs">{user?.email || ''}</T.caption>
+            <T.caption size="xs" className="ly-sidebar-footer-email-text">{user?.email || ''}</T.caption>
           </div>
         </div>
         <ChevronsUpDown

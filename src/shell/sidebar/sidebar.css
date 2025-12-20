@@ -40,8 +40,8 @@
   --sidebar-footer-avatar-size: 32px;
   --sidebar-footer-menu-bottom: 60px;   /* 🟨 Modal Vertical position */
   --sidebar-footer-text-gap: -10px;
-  --sidebar-footer-name-max-width: 15ch;
-  --sidebar-footer-email-max-width: 16ch;
+  --sidebar-footer-name-max-width: 14ch;    /* 🟨 Truncations */
+  --sidebar-footer-email-max-width: 13ch;
   --sidebar-footer-chevron-size: 16px;
 }
 
@@ -242,7 +242,7 @@
   transition: all 0.05s;
   display: flex;
   align-items: center;
-  gap: var(--space-sm);                    /* <-- gap between avatar and text */
+  gap: var(--space-xs);                    /* <-- gap between avatar and text */
   margin-top: var(--space-md);             /* <-- gap between footer and nav content */
   position: relative;
 }
@@ -332,15 +332,28 @@
   text-overflow: ellipsis;
 }
 
+.ly-sidebar-footer-name p {
+  max-width: 100%;  /* T-VR fix: Constrain <p> tag for truncation */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+}
+
 .ly-sidebar-footer-email {
   /* Typography handled by T.caption */
   color: var(--text-tertiary);
   line-height: 0.8;
   max-width: var(--sidebar-footer-email-max-width);
-  white-space: nowrap;
+  margin-top: 0;
+}
+
+.ly-sidebar-footer-email-text {
+  display: block !important;  /* T-VR fix: Override span default */
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 0;
+  white-space: nowrap;
 }
 
 .ly-sidebar-footer-chevron {
