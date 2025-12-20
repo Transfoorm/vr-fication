@@ -1,0 +1,6 @@
+/* Layout Components - App Frame Structure & Navigation (IMPORTS - Must come before all CSS rules) */
+
+/*  SHELL COMPONENTS (WCCC ly-* Compliant) */
+@import url('../src/shell/shell.css');
+
+/* Variables moved to styles/tokens.css - LAYOUT CONTROL VARIABLES section */

@@ -1,0 +1,125 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CHECKBOX VARIANT - TABLE CONTEXT
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────────────────────────────────────
+   BASE BUTTON
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-input-checkbox-table {
+  all: unset; /* Reset button styles */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  border: 1.5px solid var(--border-medium);
+  border-radius: 2px;
+  background-color: var(--page-arch-color);
+  vertical-align: middle;
+  transition: all 0.15s ease;
+}
+
+.vr-input-checkbox-table:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   SIZE VARIANTS
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-input-checkbox-table--xs {
+  width: 12px;
+  height: 12px;
+}
+
+.vr-input-checkbox-table--sm {
+  width: 16px;
+  height: 16px;
+}
+
+.vr-input-checkbox-table--md {
+  width: 20px;
+  height: 20px;
+}
+
+.vr-input-checkbox-table--lg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   CHECKMARK ICON
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-input-checkbox-table__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+  line-height: 1;
+  color: var(--text-inverse);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   CHECKED STATE
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-input-checkbox-table--checked {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   INDETERMINATE STATE
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-input-checkbox-table--indeterminate {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.vr-input-checkbox-table--indeterminate .vr-input-checkbox-table__icon {
+  font-size: var(--font-size-sm);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   FOCUS STATE
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-input-checkbox-table:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   HOVER STATE
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-input-checkbox-table:not(:disabled):hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 4px var(--shadow-sm);
+}
+
+.vr-input-checkbox-table--checked:not(:disabled):hover,
+.vr-input-checkbox-table--indeterminate:not(:disabled):hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   ACTIVE STATE
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-input-checkbox-table:not(:disabled):active {
+  transform: none;
+}
+
+.vr-input-checkbox-table--checked:not(:disabled):active,
+.vr-input-checkbox-table--indeterminate:not(:disabled):active {
+  background-color: var(--color-primary-active);
+  border-color: var(--color-primary-active);
+}

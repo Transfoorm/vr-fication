@@ -1,0 +1,93 @@
+# ═══════════════════════════════════════════════════════════════════
+# 🚨 EMERGENCY STOP: --no-verify GONORRHEA DETECTOR (RUNS FIRST)
+# ═══════════════════════════════════════════════════════════════════
+.husky/no-verify-detector || exit 1
+
+# ═══════════════════════════════════════════════════════════════════
+# 🛡️ VRP PURITY CHECK: Unstaged Files Detector
+# ═══════════════════════════════════════════════════════════════════
+.husky/unstaged-detector || exit 1
+
+# VRP Enforcement - Zero tolerance for violations
+echo "🔍 VRP Pre-Commit Checks..."
+
+# ═══════════════════════════════════════════════════════════════════
+# 🛡️ WCCC PROTECTION - Block page-specific CSS files
+# ═══════════════════════════════════════════════════════════════════
+if git diff --cached --name-only | grep -E 'src/app/.*/page\.css$'; then
+  echo ""
+  echo "⛔ WCCC VIOLATION: page.css files are not allowed!"
+  echo ""
+  echo "Page-specific CSS files violate the 5-hub architecture."
+  echo ""
+  echo "Allowed CSS hubs:"
+  echo "  • /styles/prebuilts.css (vr-* components)"
+  echo "  • /styles/features.css (ft-* components)"
+  echo "  • /styles/layout.css (ly-* shell + layouts)"
+  echo ""
+  echo "If you need custom styling:"
+  echo "  1. Check if a prebuilt variant exists"
+  echo "  2. Create new prebuilt variant in /src/prebuilts/"
+  echo "  3. Last resort: Create feature component in /src/features/"
+  echo ""
+  echo "See TTT-WCCC-PROTOCOL.md for architectural rationale."
+  echo ""
+  echo "Commit blocked."
+  exit 1
+fi
+
+# ═══════════════════════════════════════════════════════════════════
+# 🔒 SACRED CONFIG PROTECTION - Approval Bridge for protected files
+# ═══════════════════════════════════════════════════════════════════
+# Protected files: eslint.config.mjs, .stylelintrc.json, package.json, .husky/*
+PROTECTED_FILES="eslint.config.mjs|\.stylelintrc\.json|package\.json|\.husky/"
+
+if git diff --cached --name-only | grep -qE "^($PROTECTED_FILES)"; then
+  # Get the specific file(s) being modified
+  MODIFIED_PROTECTED=$(git diff --cached --name-only | grep -E "^($PROTECTED_FILES)")
+
+  # Check for approval token
+  if [ -f ".vrp-approval" ]; then
+    echo "✅ Approval token found - Protected file change authorized"
+    echo "   Files: $MODIFIED_PROTECTED"
+    rm -f .vrp-approval  # Consume token (single-use)
+    echo "🔥 Token consumed (single-use)"
+  else
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "  🛑 STOP! YOU ARE WASTING YOUR TIME!"
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+    echo "  Modified: $MODIFIED_PROTECTED"
+    echo ""
+    echo "  Even if you bypass this hook, GitHub will BLOCK your push."
+    echo "  These files are protected by CODEOWNERS - only @Metafoorm"
+    echo "  can approve changes. There is NO backdoor. NO bypass."
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "  🚫 --no-verify IS USELESS"
+    echo "  Go ahead, try it. GitHub will still reject your push."
+    echo "  Server-side enforcement. No local bypass possible."
+    echo "═══════════════════════════════════════════════════════════════"
+    echo ""
+    echo "  LEGITIMATE WORKFLOW:"
+    echo "    1. Create a feature branch"
+    echo "    2. Make your changes"
+    echo "    3. Create a Pull Request"
+    echo "    4. Wait for @Metafoorm approval"
+    echo ""
+    echo "  Commit blocked. Don't waste your time."
+    echo ""
+    exit 1
+  fi
+fi
+
+# Run critical VRP scripts (manifest validation skipped - legacy routes not yet in SRS manifests)
+npm run vrp:isv || exit 1
+npm run vrp:naming || exit 1
+npm run vrp:css || exit 1
+npm run vrp:class-scan || exit 1
+npm run vrp:typography || exit 1
+
+# Run lint-staged for TypeScript/ESLint checks
+npx lint-staged

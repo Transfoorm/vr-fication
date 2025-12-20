@@ -1,0 +1,68 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 SPINNER VR - CSS Border-Based Loading Indicator
+   ═══════════════════════════════════════════════════════════════════
+
+   CSS border trick - no SVG, perfect centering, no transform-origin issues.
+
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-spinner {
+  border-radius: 50%;
+  border-style: solid;
+  animation: vr-spinner-spin 0.8s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Size Variants */
+.vr-spinner--xs {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.vr-spinner--sm {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.vr-spinner--md {
+  width: 24px;
+  height: 24px;
+  border-width: 2px;
+}
+
+.vr-spinner--lg {
+  width: 28px;
+  height: 28px;
+  border-width: 2px;
+}
+
+.vr-spinner--xl {
+  width: 48px;
+  height: 48px;
+  border-width: 4px;
+}
+
+/* Color Variants */
+.vr-spinner--brand {
+  border-color: rgb(255 68 0 / 20%);
+  border-top-color: var(--brand-primary, #f40);
+}
+
+.vr-spinner--white {
+  border-color: rgb(255 255 255 / 20%);
+  border-top-color: #fff;
+}
+
+.vr-spinner--inherit {
+  border-color: rgb(128 128 128 / 20%);
+  border-top-color: currentcolor;
+}
+
+/* Spin animation */
+@keyframes vr-spinner-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

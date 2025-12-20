@@ -1,0 +1,34 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "src/app/(auth)/**/*.ts",
+    "src/app/(auth)/**/*.tsx",
+    "src/app/domain/**/*.ts",
+    "src/app/domain/**/*.tsx",
+    "src/app/api/**/*.ts",
+    "src/app/api/**/*.tsx",
+    "src/app/layout.tsx",
+    "src/components/**/*.ts",
+    "src/components/**/*.tsx",
+    "src/prebuilts/**/*.ts",
+    "src/prebuilts/**/*.tsx",
+    "src/contexts/**/*.ts",
+    "src/contexts/**/*.tsx",
+    "src/hooks/**/*.ts",
+    "src/hooks/**/*.tsx",
+    "src/store/**/*.ts",
+    "src/store/**/*.tsx",
+    "src/appshell/**/*.ts",
+    "src/appshell/**/*.tsx",
+    "convex/**/*.ts",
+    "convex/**/*.tsx",
+    "fuse/**/*.ts",
+    "fuse/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "convex/_generated"
+  ]
+}

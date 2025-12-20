@@ -1,0 +1,64 @@
+{
+  // ═══════════════════════════════════════════════════════════════════
+  // 🛡️ ISV PROTECTION - REAL-TIME INLINE STYLE DETECTION
+  // ═══════════════════════════════════════════════════════════════════
+
+  // ESLint runs CONTINUOUSLY (not just on save)
+  "eslint.lintTask.enable": true,
+  "eslint.run": "onType",  // ← KEY: Runs as you type!
+
+  // Show errors immediately in editor
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+
+  // Make ISV errors VERY visible
+  "eslint.rules.customizations": [
+    {
+      "rule": "react/forbid-dom-props",
+      "severity": "error"  // Red squiggly line + error message
+    }
+  ],
+
+  // Auto-fix on save
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // Formatting
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // Show problems prominently
+  "problems.decorations.enabled": true,
+  "problems.showCurrentInStatus": true,
+
+  // Visual error highlighting
+  "workbench.colorCustomizations": {
+    "editorError.foreground": "#ff0000",
+    "editorError.border": "#ff0000",
+    "editorWarning.foreground": "#ff8800"
+  },
+
+  // File associations
+  "files.associations": {
+    "*.css": "css",
+    ".eslintrc.cjs": "javascript"
+  },
+
+  // Search exclusions
+  "search.exclude": {
+    "**/.next": true,
+    "**/node_modules": true,
+    "**/build": true
+  }
+}

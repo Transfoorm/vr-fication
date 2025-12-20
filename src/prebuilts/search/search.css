@@ -1,0 +1,125 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 SEARCH BAR VARIANT - Table/List Filtering
+   ═══════════════════════════════════════════════════════════════════
+
+   FUSE-STYLE Compliant: All static layout/structure styles in CSS.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Container Dimensions */
+  --search-bar-width: 600px;
+  --search-bar-gap: 10px;
+
+  /* Spacing */
+  --search-bar-margin-top: 0;
+  --search-bar-margin-bottom: 0;
+
+  /* Input */
+  --search-input-padding-y: 8px;
+  --search-input-padding-x: 12px;
+
+  /* Clear Button */
+  --search-clear-padding: 8px;
+
+  /* Typography */
+  --search-count-font-size: 13px;
+
+  /* Responsive */
+  --search-bar-min-width-mobile: 320px;
+  --search-input-font-size-mobile: 13px;
+
+  /* Focus Shadow */
+  --search-focus-ring-size: 3px;
+}
+
+/* Container */
+.vr-search-bar {
+  display: flex;         /* Flexbox container - children sit in a row */
+  align-items: center;   /* Center children vertically */
+  gap: var(--search-bar-gap);
+  width: var(--search-bar-width);
+  margin-top: var(--search-bar-margin-top);
+  margin-bottom: var(--search-bar-margin-bottom);
+}
+
+/* Search Icon */
+.vr-search-bar .vr-search-bar-search-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+/* Input Field */
+.vr-search-bar .vr-search-bar-search-input {
+  flex: 1;
+  padding: var(--search-input-padding-y) var(--search-input-padding-x);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: var(--button-font-size);
+  font-weight: var(--button-font-weight);
+  line-height: 1.5;
+  outline: none;
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
+  transition: border-color var(--duration-fast) var(--easing);
+  box-sizing: border-box;
+}
+
+.vr-search-bar .vr-search-bar-search-input:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 var(--search-focus-ring-size) var(--brand-primary-alpha-10);
+}
+
+.vr-search-bar .vr-search-bar-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Clear Button */
+.vr-search-bar .vr-search-bar-search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--search-clear-padding);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  transition: color var(--duration-fast) var(--easing);
+  flex-shrink: 0;
+}
+
+.vr-search-bar .vr-search-bar-search-clear:hover {
+  color: var(--text-primary);
+}
+
+.vr-search-bar .vr-search-bar-search-clear:active {
+  transform: scale(0.95);
+}
+
+/* Results Count */
+.vr-search-bar .vr-search-bar-search-count {
+  font-size: var(--search-count-font-size);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (width <= 768px) {
+  .vr-search-bar {
+    padding: var(--space-sm);
+    flex-wrap: nowrap;
+    min-width: var(--search-bar-min-width-mobile);
+  }
+
+  .vr-search-bar .vr-search-bar-search-input {
+    min-width: 0;
+    font-size: var(--search-input-font-size-mobile);
+  }
+
+  .vr-search-bar .vr-search-bar-search-count {
+    font-size: var(--font-size-xs);
+  }
+}

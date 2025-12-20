@@ -1,0 +1,125 @@
+/* ═══════════════════════════════════════════════════════════════════
+   TOPBAR STYLES - WCCC ly-* Compliant
+   Full-width header with logo and user controls
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Spacing */
+  --topbar-container-gap: 12px;
+  --topbar-theme-margin-top: 4px;
+
+  /* Logo */
+  --topbar-logo-width: 120px;
+
+  /* Animations */
+  --topbar-animation-fade-in: 600ms;
+  --topbar-animation-fade-out: 600ms;
+  --topbar-animation-translate: -5px;
+}
+
+/* Main Header */
+.ly-topbar-header {
+  width: 100%;
+  height: var(--topbar-height);
+  background-color: var(--topbar-bg);
+  border-bottom: var(--topbar-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 0;
+  padding-right: var(--topbar-logo-padding);
+  position: relative;
+  z-index: 10;
+}
+
+/* Left Side Container */
+.ly-topbar-left-container {
+  display: flex;
+  align-items: center;
+  gap: var(--topbar-container-gap);
+  flex: 1;
+}
+
+/* Right Side Container */
+.ly-topbar-right-container {
+  display: flex;
+  align-items: center;
+  gap: var(--topbar-container-gap);
+}
+
+/* Adjust ThemeToggle vertical alignment in topbar */
+.ly-topbar-right-container .ft-theme-label {
+  margin-top: var(--topbar-theme-margin-top);
+}
+
+/* Logo Wrapper */
+.ly-topbar-logo-wrapper {
+  width: var(--topbar-logo-width);
+}
+
+.ly-topbar-logo-image {
+  width: 100%;
+  height: auto;
+}
+
+/* Phantom Button (Phoenix Animation) */
+.ly-topbar-phantom-button {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+  transform-origin: center;
+}
+
+.ly-topbar-phantom-button--absolute {
+  position: absolute;
+}
+
+.ly-topbar-phantom-button--relative {
+  position: relative;
+}
+
+/* Real topbar button - 80% size */
+.ly-topbar-setup-button {
+  transform: scale(0.8) !important;
+  transform-origin: center;
+}
+
+.ly-topbar-setup-button:hover {
+  box-shadow: var(--button-fire-shadow) !important;
+  opacity: 1 !important;
+}
+
+/* Fade-in animation for topbar button */
+.ly-topbar-setup-button--fade-in {
+  animation: ly-topbar-fade-in var(--topbar-animation-fade-in) ease-out forwards;
+}
+
+/* Fade-out animation for topbar button */
+.ly-topbar-setup-button--fade-out {
+  animation: ly-topbar-fade-out var(--topbar-animation-fade-out) ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ly-topbar-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(0.8) translateY(0);
+  }
+}
+
+@keyframes ly-topbar-fade-out {
+  from {
+    opacity: 1;
+    transform: scale(0.8) translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.8) translateY(5px);
+  }
+}

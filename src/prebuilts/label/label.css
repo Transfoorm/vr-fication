@@ -1,0 +1,277 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 LABEL COMPONENT - Consolidated CSS for All Variants
+   ═══════════════════════════════════════════════════════════════════
+
+   FUSE-STYLE Compliant: All static layout/structure styles in CSS.
+   TTT Gap Model: NO external margins - container controls spacing
+
+   Variants:
+   - basic: Form field labels
+   - error: Inline error messages
+   - hint: Helpful description text
+   - success: Success feedback messages
+   - warning: Caution feedback messages
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Warning Shadows */
+  --label-warning-shadow: 0 2px 4px rgb(251 146 60 / 10%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BASIC VARIANT - Form Field Labels
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-label-basic {
+  display: block;
+
+  /* NO external margins - TTT Gap Model compliant */
+
+  /* Typography handled by T.body size="sm" */
+}
+
+/* Required indicator */
+.vr-label-basic--required::after {
+  content: '*';
+  color: var(--error-600);
+  margin-left: 4px;
+}
+
+/* Disabled state */
+.vr-label-basic--disabled {
+  color: var(--text-tertiary);
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ERROR VARIANT - Inline Error Messages
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-label-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--error-600);
+
+  /* NO external margins - TTT Gap Model compliant */
+
+  /* Typography handled by T.body size="sm" */
+}
+
+.vr-label-error-icon {
+  flex-shrink: 0;
+  color: var(--error-500);
+}
+
+.vr-label-error-message {
+  line-height: 1.4;
+}
+
+/* Animation variants */
+.vr-label-error--slide {
+  animation: slide-down 0.2s ease-out;
+}
+
+.vr-label-error--fade {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* Critical error state with background */
+.vr-label-error--critical {
+  background-color: var(--error-50);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--error-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HINT VARIANT - Helpful Description Text
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-label-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  color: var(--text-tertiary);
+  line-height: 1.4;
+
+  /* NO external margins - TTT Gap Model compliant */
+
+  /* Typography handled by T.body size="sm" or size="xs" for inline */
+}
+
+.vr-label-hint-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--text-quaternary);
+}
+
+.vr-label-hint-text {
+  flex: 1;
+}
+
+/* Position variants */
+.vr-label-hint--below {
+  /* Default styling */
+}
+
+.vr-label-hint--inline {
+  display: inline-flex;
+
+  /* Typography size="xs" applied dynamically */
+}
+
+.vr-label-hint--tooltip {
+  position: relative;
+  cursor: help;
+}
+
+.vr-label-hint--tooltip .vr-label-hint-text {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + var(--space-xs));
+  left: 0;
+  background-color: var(--bg-tooltip);
+  color: var(--text-inverse);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+}
+
+.vr-label-hint--tooltip:hover .vr-label-hint-text {
+  display: block;
+}
+
+/* Emphasis variant */
+.vr-label-hint--emphasis {
+  color: var(--text-secondary);
+
+  /* font-weight can be added via T.body weight="medium" if needed */
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SUCCESS VARIANT - Success Feedback Messages
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-label-success {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--success-600);
+
+  /* NO external margins - TTT Gap Model compliant */
+
+  /* Typography handled by T.body size="sm" */
+}
+
+.vr-label-success-icon {
+  flex-shrink: 0;
+  color: var(--success-500);
+}
+
+.vr-label-success-message {
+  line-height: 1.4;
+}
+
+/* Animation variants */
+.vr-label-success--slide {
+  animation: slide-down 0.2s ease-out;
+}
+
+.vr-label-success--fade {
+  animation: fade-in 0.2s ease-out;
+}
+
+.vr-label-success--bounce {
+  animation: bounce-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Success state with background */
+.vr-label-success--highlighted {
+  background-color: var(--success-50);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--success-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   WARNING VARIANT - Caution Feedback Messages
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-label-warning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+
+  /* NO external margins - TTT Gap Model compliant */
+
+  /* Typography handled by T.body size="sm" */
+}
+
+.vr-label-warning-icon {
+  flex-shrink: 0;
+}
+
+.vr-label-warning-message {
+  line-height: 1.4;
+}
+
+/* Severity variants */
+.vr-label-warning--low {
+  color: var(--warning-500);
+}
+
+.vr-label-warning--low .vr-label-warning-icon {
+  color: var(--warning-400);
+}
+
+.vr-label-warning--medium {
+  color: var(--warning-600);
+}
+
+.vr-label-warning--medium .vr-label-warning-icon {
+  color: var(--warning-500);
+}
+
+.vr-label-warning--high {
+  color: var(--warning-700);
+
+  /* font-weight can be added via T.body weight="medium" if needed */
+}
+
+.vr-label-warning--high .vr-label-warning-icon {
+  color: var(--warning-600);
+}
+
+/* Animation variants */
+.vr-label-warning--slide {
+  animation: slide-down 0.2s ease-out;
+}
+
+.vr-label-warning--fade {
+  animation: fade-in 0.2s ease-out;
+}
+
+.vr-label-warning--pulse {
+  animation: pulse-warning 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Warning state with background */
+.vr-label-warning--highlighted {
+  background-color: var(--warning-50);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--warning-500);
+}
+
+/* Critical warning with stronger emphasis */
+.vr-label-warning--critical {
+  background-color: var(--warning-100);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--warning-300);
+  box-shadow: var(--label-warning-shadow);
+}
+

@@ -1,0 +1,67 @@
+/* ═══════════════════════════════════════════════════════════════════
+   👑 SHADOW KING - Sovereign Setup Enforcement
+   /src/features/setup/ShadowKing/shadow-king.css
+
+   Positioned above backdrop (z-index 900), below nothing.
+   This is the sovereign layer - nothing escapes.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-shadow-king {
+  position: fixed;
+  inset: 0;
+  z-index: 901;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ft-shadow-king-fade-in 200ms ease-out;
+  pointer-events: none;  /* Let clicks pass through to backdrop */
+}
+
+@keyframes ft-shadow-king-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Override SetupModal positioning when inside Shadow King */
+.ft-shadow-king .ft-setup-modal {
+  position: relative;
+  margin: auto;
+  max-width: min(1200px, 95vw);
+  overflow: hidden;  /* No scroll - scale to fit instead */
+  pointer-events: auto;  /* Re-enable clicks on modal itself */
+  transform-origin: center center;
+}
+
+/* Viewport-based scaling - modal fits without scroll */
+@media (min-height: 900px) {
+  .ft-shadow-king .ft-setup-modal { scale: 1; }
+}
+
+@media (max-height: 899px) and (min-height: 850px) {
+  .ft-shadow-king .ft-setup-modal { scale: 0.95; }
+}
+
+@media (max-height: 849px) and (min-height: 800px) {
+  .ft-shadow-king .ft-setup-modal { scale: 0.9; }
+}
+
+@media (max-height: 799px) and (min-height: 750px) {
+  .ft-shadow-king .ft-setup-modal { scale: 0.85; }
+}
+
+@media (max-height: 749px) and (min-height: 700px) {
+  .ft-shadow-king .ft-setup-modal { scale: 0.8; }
+}
+
+@media (max-height: 699px) and (min-height: 650px) {
+  .ft-shadow-king .ft-setup-modal { scale: 0.75; }
+}
+
+@media (max-height: 649px) {
+  .ft-shadow-king .ft-setup-modal { scale: 0.7; }
+}

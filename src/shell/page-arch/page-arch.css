@@ -1,0 +1,27 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE ARCH STYLES - WCCC ly-* Compliant
+   Foundational curved frame for page content
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Main Arch Container (Nano Planck Layer) */
+.ly-page-arch-container {
+  width: 100%;
+  min-height: 100%;
+  background-color: var(--page-arch-color);
+  border-radius: var(--curved-radius);
+  border: var(--page-arch-border);
+  position: relative;
+  z-index: 1;
+}
+
+/* Content Wrapper */
+.ly-page-arch-content {
+  max-width: var(--content-width);
+  width: 100%;
+  margin-left: var(--page-margin-left);
+  margin-right: var(--page-margin-right);
+  padding-left: var(--page-content-padding-left);
+  padding-right: var(--page-content-padding-right);
+  padding-bottom: var(--page-content-padding-bottom);
+  box-sizing: border-box;
+}

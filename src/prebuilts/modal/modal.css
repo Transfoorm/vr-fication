@@ -1,0 +1,1013 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 CONSOLIDATED MODAL CSS - Base + All Variants
+   ═══════════════════════════════════════════════════════════════════
+
+   This file contains:
+   1. Base modal styles (shared by all variants)
+   2. Alert modal variant (professional terminal/dashboard)
+   3. Confirmation modal variant (brand-matched decision dialog)
+   4. Dialogue modal variant (standard modal dialog)
+   5. Drawer modal variant (side panel)
+
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   MODAL VARIABLES - Component-Scoped Dimensions
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  /* Backdrop - unified 40% across site */
+  --modal-backdrop-bg: rgb(0 0 0 / 40%);
+  --modal-backdrop-bg-dialogue: rgb(0 0 0 / 40%);
+  --modal-backdrop-opacity: 0.4;
+  --modal-backdrop-transition: 500ms;
+
+  /* Alert Modal - Base Colors */
+  --modal-alert-container-bg: #fff;
+  --modal-alert-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%), 0 10px 10px -5px rgb(0 0 0 / 4%);
+  --modal-alert-message-text: #374151;
+  --modal-alert-details-bg: #f9fafb;
+  --modal-alert-details-border: #e5e7eb;
+  --modal-alert-details-header-text: #6b7280;
+  --modal-alert-details-item-text: #1f2937;
+  --modal-alert-button-text: #fff;
+  --modal-alert-button-hover-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
+
+  /* Alert Modal - Success Variant */
+  --modal-alert-success-border: #10b981;
+  --modal-alert-success-icon: #10b981;
+  --modal-alert-success-title: #059669;
+  --modal-alert-success-bg: #f0fdf4;
+  --modal-alert-success-button: #10b981;
+  --modal-alert-success-button-hover: #059669;
+
+  /* Alert Modal - Error Variant */
+  --modal-alert-error-border: #ef4444;
+  --modal-alert-error-icon: #ef4444;
+  --modal-alert-error-title: #dc2626;
+  --modal-alert-error-bg: #fef2f2;
+  --modal-alert-error-button: #ef4444;
+  --modal-alert-error-button-hover: #dc2626;
+
+  /* Alert Modal - Warning Variant */
+  --modal-alert-warning-border: #f40;
+  --modal-alert-warning-icon: #f40;
+  --modal-alert-warning-title: #d30;
+  --modal-alert-warning-bg: #fff7ed;
+  --modal-alert-warning-button: #f40;
+  --modal-alert-warning-button-hover: #d30;
+
+  /* Alert Modal - Info Variant */
+  --modal-alert-info-border: #3b82f6;
+  --modal-alert-info-icon: #3b82f6;
+  --modal-alert-info-title: #2563eb;
+  --modal-alert-info-bg: #eff6ff;
+  --modal-alert-info-button: #3b82f6;
+  --modal-alert-info-button-hover: #2563eb;
+
+  /* Confirmation Modal */
+  --modal-confirmation-bg: linear-gradient(135deg, #fff5f0 0%, #fff 50%, #fff0f0 100%);
+  --modal-confirmation-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+  --modal-confirmation-border: rgb(255 68 0 / 10%);
+  --modal-confirmation-icon-text: #fff;
+  --modal-confirmation-icon-danger-bg: linear-gradient(135deg, #f40 0%, #d30 100%);
+  --modal-confirmation-icon-danger-shadow: 0 10px 15px -3px rgb(255 68 0 / 30%);
+  --modal-confirmation-title-text: #d30;
+  --modal-confirmation-message-text: #6b7280;
+
+  /* Dialogue Modal */
+  --modal-dialogue-danger-text: #fff;
+
+  /* Drawer Modal */
+  --modal-drawer-panel-bg: #fff;
+  --modal-drawer-panel-border: #e5e7eb;
+  --modal-drawer-panel-shadow: -4px 0 24px rgb(0 0 0 / 10%);
+  --modal-drawer-subtitle-text: #6b7280;
+
+  /* Alert Modal */
+  --modal-alert-radius: 12px;
+  --modal-alert-max-width: 520px;
+  --modal-alert-margin: 20px;
+  --modal-alert-border-width: 4px;
+  --modal-alert-animation-duration: 0.25s;
+  --modal-alert-animation-distance: 10px;
+  --modal-alert-icon-size: 20px;
+  --modal-alert-header-padding-y: 20px;
+  --modal-alert-header-padding-x: 24px;
+  --modal-alert-header-gap: 12px;
+  --modal-alert-title-size: 18px;
+  --modal-alert-content-padding: 24px;
+  --modal-alert-message-size: 14px;
+  --modal-alert-message-margin: 16px;
+  --modal-alert-details-radius: 8px;
+  --modal-alert-details-padding-y: 12px;
+  --modal-alert-details-padding-x: 16px;
+  --modal-alert-details-margin: 20px;
+  --modal-alert-details-header-size: 11px;
+  --modal-alert-details-header-margin: 8px;
+  --modal-alert-details-gap: 6px;
+  --modal-alert-details-item-size: 13px;
+  --modal-alert-details-section-size: 11px;
+  --modal-alert-divider-height: 1px;
+  --modal-alert-divider-margin: 12px;
+  --modal-alert-button-padding-y: 12px;
+  --modal-alert-button-padding-x: 24px;
+  --modal-alert-button-radius: 8px;
+  --modal-alert-button-size: 14px;
+
+  /* Confirmation Modal */
+  --modal-confirmation-radius: 24px;
+  --modal-confirmation-padding: 48px;
+  --modal-confirmation-max-width: 480px;
+  --modal-confirmation-margin: 20px;
+  --modal-confirmation-icon-svg-size: 40px;
+  --modal-confirmation-icon-size: 80px;
+  --modal-confirmation-icon-margin: 24px;
+  --modal-confirmation-header-margin: 16px;
+  --modal-confirmation-title-size: 36px;
+  --modal-confirmation-message-margin: 32px;
+  --modal-confirmation-message-size: 16px;
+  --modal-confirmation-actions-gap: 12px;
+  --modal-confirmation-close-margin: 16px;
+  --modal-confirmation-scale-start: 0.95;
+
+  /* Drawer Modal */
+  --modal-drawer-width: 900px;
+  --modal-drawer-transition: 300ms;
+  --modal-drawer-header-padding-x: 24px;
+  --modal-drawer-header-title-size: 20px;
+  --modal-drawer-header-subtitle-size: 14px;
+  --modal-drawer-header-subtitle-margin: -3px;
+  --modal-drawer-close-padding: 8px;
+  --modal-drawer-close-radius: 4px;
+  --modal-drawer-close-transition: 200ms;
+  --modal-drawer-body-padding: 24px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   1. BASE MODAL CLASS - Shared by all ModalVR variants
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-modal {
+  position: relative;
+  width: 100%;
+  max-width: var(--modal-max-width);
+  background-color: var(--bg-primary);
+  border-radius: var(--modal-radius);
+  box-shadow: var(--modal-shadow);
+  padding: var(--modal-padding);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   2. ALERT MODAL VARIANT - Professional Terminal/Dashboard Modal
+   ═══════════════════════════════════════════════════════════════════
+
+   FUSE-STYLE Compliant: All static layout/structure styles in CSS.
+   Dynamic variant colors applied via CSS custom properties from JS.
+
+   Features:
+   - Variant-aware colors (success=green, error=red, warning=orange, info=blue)
+   - Clean white background with colored accent border
+   - Compact, data-dense layout
+   - Optional structured details display
+   - Single decisive button
+   - Terminal/dashboard aesthetic
+
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Modal backdrop */
+.vr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--modal-backdrop-bg);
+}
+
+/* Alert modal container */
+.vr-modal-alert {
+  --anim-slide-distance: calc(-1 * var(--modal-alert-animation-distance));
+
+  background-color: var(--modal-alert-container-bg);
+  border-radius: var(--modal-alert-radius);
+  padding: 0;
+  max-width: var(--modal-alert-max-width);
+  width: 100%;
+  margin: var(--modal-alert-margin);
+  box-shadow: var(--modal-alert-shadow);
+  border-left: var(--modal-alert-border-width) solid var(--modal-border-color);
+  animation: slide-in var(--modal-alert-animation-duration) ease-out;
+  overflow: hidden;
+}
+
+/* Variant-specific color schemes */
+.vr-alert-success {
+  --modal-border-color: var(--modal-alert-success-border);
+  --modal-icon-color: var(--modal-alert-success-icon);
+  --modal-title-color: var(--modal-alert-success-title);
+  --modal-bg-color: var(--modal-alert-success-bg);
+  --modal-button-bg: var(--modal-alert-success-button);
+  --modal-button-hover-bg: var(--modal-alert-success-button-hover);
+}
+
+.vr-alert-error {
+  --modal-border-color: var(--modal-alert-error-border);
+  --modal-icon-color: var(--modal-alert-error-icon);
+  --modal-title-color: var(--modal-alert-error-title);
+  --modal-bg-color: var(--modal-alert-error-bg);
+  --modal-button-bg: var(--modal-alert-error-button);
+  --modal-button-hover-bg: var(--modal-alert-error-button-hover);
+}
+
+.vr-alert-warning {
+  --modal-border-color: var(--modal-alert-warning-border);
+  --modal-icon-color: var(--modal-alert-warning-icon);
+  --modal-title-color: var(--modal-alert-warning-title);
+  --modal-bg-color: var(--modal-alert-warning-bg);
+  --modal-button-bg: var(--modal-alert-warning-button);
+  --modal-button-hover-bg: var(--modal-alert-warning-button-hover);
+}
+
+.vr-alert-info {
+  --modal-border-color: var(--modal-alert-info-border);
+  --modal-icon-color: var(--modal-alert-info-icon);
+  --modal-title-color: var(--modal-alert-info-title);
+  --modal-bg-color: var(--modal-alert-info-bg);
+  --modal-button-bg: var(--modal-alert-info-button);
+  --modal-button-hover-bg: var(--modal-alert-info-button-hover);
+}
+
+/* Icon SVG sizing */
+.vr-modal-alert svg {
+  width: var(--modal-alert-icon-size);
+  height: var(--modal-alert-icon-size);
+  color: var(--modal-icon-color);
+}
+
+/* Header */
+.vr-modal-alert-header {
+  background-color: var(--modal-bg-color);
+  padding: var(--modal-alert-header-padding-y) var(--modal-alert-header-padding-x);
+  border-bottom: 1px solid var(--modal-border-color);
+}
+
+.vr-modal-alert-header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--modal-alert-header-gap);
+}
+
+.vr-modal-alert-title {
+  margin: 0;
+  color: var(--modal-title-color);
+  letter-spacing: -0.01em;
+
+  /* Typography handled by T.title size="sm" weight="semibold" */
+}
+
+/* Content section */
+.vr-modal-alert-content {
+  padding: var(--modal-alert-content-padding);
+}
+
+.vr-modal-alert-message {
+  margin: 0 0 var(--modal-alert-message-margin) 0;
+  color: var(--modal-alert-message-text);
+  line-height: 1.6;
+
+  /* Typography handled by T.body size="sm" */
+}
+
+/* Details section */
+.vr-modal-alert-details {
+  background-color: var(--modal-alert-details-bg);
+  border: 1px solid var(--modal-alert-details-border);
+  border-radius: var(--modal-alert-details-radius);
+  padding: var(--modal-alert-details-padding-y) var(--modal-alert-details-padding-x);
+  margin-bottom: var(--modal-alert-details-margin);
+}
+
+.vr-modal-alert-details-header {
+  font-size: var(--modal-alert-details-header-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--modal-alert-details-header-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--modal-alert-details-header-margin);
+}
+
+.vr-modal-alert-details-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--modal-alert-details-gap);
+}
+
+.vr-modal-alert-details-item {
+  font-size: var(--modal-alert-details-item-size);
+  color: var(--modal-alert-details-item-text);
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+}
+
+.vr-modal-alert-details-bullet {
+  display: none;
+}
+
+/* Style for section headers within details (like "REASON") */
+.vr-modal-alert-details-item.vr-modal-alert-details-item-section-header {
+  font-size: var(--modal-alert-details-section-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--modal-alert-details-header-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: inherit;
+}
+
+/* Divider line */
+.vr-modal-alert-details-divider {
+  height: var(--modal-alert-divider-height);
+  background-color: var(--modal-border-color);
+  opacity: 0.3;
+  margin: var(--modal-alert-divider-margin) 0;
+  list-style: none;
+}
+
+/* Action button */
+.vr-modal-alert-button {
+  width: 100%;
+  padding: var(--modal-alert-button-padding-y) var(--modal-alert-button-padding-x);
+  background-color: var(--modal-button-bg);
+  color: var(--modal-alert-button-text);
+  border: none;
+  border-radius: var(--modal-alert-button-radius);
+  font-size: var(--modal-alert-button-size);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vr-modal-alert-button:hover {
+  background-color: var(--modal-button-hover-bg);
+  transform: translateY(-1px);
+  box-shadow: var(--modal-alert-button-hover-shadow);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   3. CONFIRMATION MODAL VARIANT - Brand-Matched Decision Dialog
+   ═══════════════════════════════════════════════════════════════════
+
+   FUSE-STYLE Compliant: All static layout/structure styles in CSS.
+
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Modal container */
+.vr-modal-confirmation {
+  --anim-scale-start: var(--modal-confirmation-scale-start);
+
+  background: var(--modal-confirmation-bg);
+  border-radius: var(--modal-confirmation-radius);
+  padding: var(--modal-confirmation-padding);
+  max-width: var(--modal-confirmation-max-width);
+  width: 100%;
+  margin: var(--modal-confirmation-margin);
+  box-shadow: var(--modal-confirmation-shadow);
+  border: 1px solid var(--modal-confirmation-border);
+  animation: scale-in 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Warning Icon (danger variant) */
+.vr-modal-confirmation svg {
+  width: var(--modal-confirmation-icon-svg-size);
+  height: var(--modal-confirmation-icon-svg-size);
+  color: var(--modal-confirmation-icon-text);
+}
+
+.vr-modal-confirmation .vr-modal-confirmation-icon {
+  width: var(--modal-confirmation-icon-size);
+  height: var(--modal-confirmation-icon-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: var(--modal-confirmation-icon-margin);
+}
+
+.vr-modal-confirmation .vr-modal-confirmation-icon-danger {
+  background: var(--modal-confirmation-icon-danger-bg);
+  box-shadow: var(--modal-confirmation-icon-danger-shadow);
+}
+
+/* Header */
+.vr-modal-confirmation .vr-modal-confirmation-header {
+  margin-bottom: var(--modal-confirmation-header-margin);
+  width: 100%;
+}
+
+.vr-modal-confirmation .vr-modal-confirmation-title {
+  margin: 0;
+  color: var(--modal-confirmation-title-text);
+
+  /* Typography handled by T.title size="2xl" weight="bold" */
+}
+
+/* Message */
+.vr-modal-confirmation .vr-modal-confirmation-message {
+  margin: 0 0 var(--modal-confirmation-message-margin) 0;
+  color: var(--modal-confirmation-message-text);
+  line-height: 1.5;
+
+  /* Typography handled by T.body size="md" */
+}
+
+/* Actions */
+.vr-modal-confirmation .vr-modal-confirmation-actions {
+  display: flex;
+  gap: var(--modal-confirmation-actions-gap);
+  width: 100%;
+}
+
+.vr-modal-confirmation .vr-modal-confirmation-actions > * {
+  flex: 1;
+}
+
+/* Close link button */
+.vr-modal-confirmation .vr-modal-confirmation-close-link {
+  width: 100%;
+  text-align: center;
+  margin-top: var(--modal-confirmation-close-margin);
+}
+
+/* Responsive */
+@media (width <= 768px) {
+  .vr-modal-confirmation .vr-modal-confirmation-actions {
+    flex-direction: column-reverse;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   4. DIALOGUE MODAL VARIANT - Standard Modal Dialog
+   ═══════════════════════════════════════════════════════════════════
+
+   FUSE-STYLE Compliant: All static layout/structure styles in CSS.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Backdrop */
+.vr-modal-dialogue-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: var(--modal-backdrop-bg-dialogue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-lg);
+}
+
+/* Modal container */
+.vr-modal-dialogue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-height: calc(100vh - calc(var(--space-2xl) * 2));
+  overflow-y: auto;
+
+  /* border-radius, box-shadow, padding inherited from .vr-modal */
+}
+
+/* Header */
+.vr-modal-dialogue .vr-modal-dialogue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--modal-header-gap);
+}
+
+.vr-modal-dialogue .vr-modal-dialogue-title {
+  margin: 0;
+
+  /* Typography handled by T.title size="md" weight="semibold" */
+}
+
+.vr-modal-dialogue .vr-modal-dialogue-close {
+  width: var(--space-2xl);
+  height: var(--space-2xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-2xl);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing);
+}
+
+.vr-modal-dialogue .vr-modal-dialogue-close:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Content */
+.vr-modal-dialogue .vr-modal-dialogue-content {
+  flex: 1;
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+}
+
+/* Actions */
+.vr-modal-dialogue .vr-modal-dialogue-actions {
+  display: flex;
+  gap: var(--modal-footer-gap);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.vr-modal-dialogue .vr-modal-dialogue-action-button {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing);
+  border: none;
+}
+
+/* Primary action */
+.vr-modal-dialogue .vr-modal-dialogue-action-button.vr-modal-dialogue-action-primary {
+  background-color: var(--brand-primary);
+  color: var(--text-on-brand);
+}
+
+.vr-modal-dialogue .vr-modal-dialogue-action-button.vr-modal-dialogue-action-primary:hover {
+  background-color: var(--brand-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Secondary action */
+.vr-modal-dialogue .vr-modal-dialogue-action-button.vr-modal-dialogue-action-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.vr-modal-dialogue .vr-modal-dialogue-action-button.vr-modal-dialogue-action-secondary:hover {
+  background-color: var(--bg-hover);
+}
+
+/* Danger action */
+.vr-modal-dialogue .vr-modal-dialogue-action-button.vr-modal-dialogue-action-danger {
+  background-color: var(--error-600);
+  color: var(--modal-dialogue-danger-text);
+}
+
+.vr-modal-dialogue .vr-modal-dialogue-action-button.vr-modal-dialogue-action-danger:hover {
+  background-color: var(--error-700);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Responsive */
+@media (width <= 768px) {
+  .vr-modal-backdrop {
+    padding: var(--space-md);
+  }
+
+  .vr-modal-dialogue .vr-modal-dialogue-actions {
+    flex-direction: column;
+  }
+
+  .vr-modal-dialogue .vr-modal-dialogue-action-button {
+    width: 100%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   5. DRAWER MODAL VARIANT - Side Panel
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Backdrop overlay */
+.vr-sidedrawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(0 0 0 / var(--modal-backdrop-opacity));
+  transition: opacity var(--modal-backdrop-transition) ease-out;
+  z-index: 9996;
+  cursor: pointer;
+}
+
+.vr-sidedrawer-backdrop--visible {
+  opacity: 1;
+}
+
+.vr-sidedrawer-backdrop--hidden {
+  opacity: 0;
+}
+
+/* Drawer panel */
+.vr-sidedrawer-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 80%; /* Match Vanish drawer responsive width */
+  max-width: var(--modal-drawer-width);
+  background-color: var(--modal-drawer-panel-bg);
+  border-left: 1px solid var(--modal-drawer-panel-border);
+  box-shadow: var(--modal-drawer-panel-shadow);
+  transition: transform var(--modal-drawer-transition) ease-out;
+  z-index: 9997;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.vr-sidedrawer-panel--visible {
+  transform: translateX(0);
+}
+
+.vr-sidedrawer-panel--hidden {
+  transform: translateX(100%);
+}
+
+/* Header */
+.vr-sidedrawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: calc(var(--topbar-height) + 1px);
+  padding: 0 var(--modal-drawer-header-padding-x);
+  border-bottom: 1px solid var(--page-arch-border-color);
+  background-color: var(--appshell-bg);
+  flex-shrink: 0;
+}
+
+.vr-sidedrawer-header-title {
+  margin: 0;
+
+  /* Typography handled by T.title size="md" weight="semibold" */
+}
+
+.vr-sidedrawer-header-subtitle {
+  color: var(--modal-drawer-subtitle-text);
+  margin: var(--modal-drawer-header-subtitle-margin) 0 0 0;
+
+  /* Typography handled by T.body size="sm" */
+}
+
+/* Close button */
+.vr-sidedrawer-close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--modal-drawer-close-padding);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--modal-drawer-close-radius);
+  color: var(--text-tertiary);
+  transition: background-color var(--modal-drawer-close-transition), color var(--modal-drawer-close-transition);
+}
+
+.vr-sidedrawer-close-button:hover {
+  background-color: var(--bg-active);
+  color: var(--text-primary);
+}
+
+/* Body - scrollable content */
+.vr-sidedrawer-body {
+  flex: 1;
+  overflow: auto;
+  padding: var(--modal-drawer-body-padding);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   6. VERIFY MODAL VARIANT - Universal 6-Digit Code Verification
+   ═══════════════════════════════════════════════════════════════════
+
+   Used for: password reset, email verification, 2FA, etc.
+
+   Variants:
+   - modal: Fixed overlay with backdrop
+   - inline: Embedded card without overlay
+
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Variables - Consume from transtheme.css tokens */
+.vr-modal-verify-overlay,
+.vr-modal-verify {
+  /* Verify Modal - Colors (from transtheme.css --verify-* tokens) */
+  --modal-verify-overlay-bg: rgb(0 0 0 / 40%);
+  --modal-verify-container-bg: linear-gradient(135deg, var(--verify-gradient-start) 0%, var(--verify-gradient-mid) 50%, var(--verify-gradient-end) 100%);
+  --modal-verify-container-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+  --modal-verify-border: rgb(255 68 0 / 10%);
+  --modal-verify-heading-color: var(--verify-heading);
+  --modal-verify-description-color: var(--verify-description);
+  --modal-verify-email-color: var(--verify-email);
+  --modal-verify-hint-color: var(--verify-hint);
+
+  /* Code Input */
+  --modal-verify-code-input-bg: var(--verify-input-bg);
+  --modal-verify-code-input-bg-focus: var(--verify-input-bg-focus);
+  --modal-verify-code-input-border: var(--verify-input-border);
+  --modal-verify-code-input-border-focus: var(--verify-input-border-focus);
+  --modal-verify-code-input-shadow-focus: 0 0 0 3px var(--verify-input-shadow-focus);
+
+  /* Error */
+  --modal-verify-error-bg: var(--verify-error-bg);
+  --modal-verify-error-border: var(--verify-error-border);
+  --modal-verify-error-text: var(--verify-error-text);
+
+  /* Success */
+  --modal-verify-success-icon-bg: linear-gradient(135deg, var(--verify-success-gradient-start) 0%, var(--verify-success-gradient-end) 100%);
+  --modal-verify-success-icon-shadow: 0 10px 15px -3px var(--verify-success-shadow);
+  --modal-verify-success-text: var(--verify-success-text);
+  --modal-verify-progress-bg: var(--verify-progress-track);
+  --modal-verify-progress-fill-bg: linear-gradient(90deg, var(--verify-progress-fill-start) 0%, var(--verify-progress-fill-end) 100%);
+
+  /* Resend */
+  --modal-verify-resend-text: var(--verify-resend-text);
+  --modal-verify-resend-link: var(--verify-resend-link);
+  --modal-verify-resend-link-hover: var(--verify-resend-link-hover);
+
+  /* Cancel */
+  --modal-verify-cancel-text: var(--verify-cancel-text);
+  --modal-verify-cancel-hover: var(--verify-cancel-hover);
+
+  /* Sizing */
+  --modal-verify-max-width: 500px;
+  --modal-verify-padding: 48px;
+  --modal-verify-radius: 24px;
+  --modal-verify-code-input-size: 48px;
+  --modal-verify-code-input-height: 56px;
+  --modal-verify-code-gap: 8px;
+}
+
+/* Overlay (modal variant only) */
+.vr-modal-verify-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--modal-verify-overlay-bg);
+}
+
+/* Container */
+.vr-modal-verify {
+  background: var(--modal-verify-container-bg);
+  border-radius: var(--modal-verify-radius);
+  padding: var(--modal-verify-padding);
+  width: 100%;
+  max-width: var(--modal-verify-max-width);
+  box-shadow: var(--modal-verify-container-shadow);
+  border: 1px solid var(--modal-verify-border);
+  text-align: center;
+}
+
+.vr-modal-verify--modal {
+  margin: 20px;
+  animation: scale-in 0.3s ease-out;
+}
+
+.vr-modal-verify--inline {
+  /* No animation for inline - inherits from parent card */
+  max-width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/* Logo slot */
+.vr-modal-verify-logo {
+  margin-bottom: 32px;
+}
+
+.vr-modal-verify-logo img {
+  max-width: 350px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+/* Heading */
+.vr-modal-verify-heading {
+  font-size: var(--font-size-4xl, 2.25rem);
+  font-weight: bold;
+  color: var(--modal-verify-heading-color);
+  margin: 0 0 12px;
+}
+
+/* Description */
+.vr-modal-verify-description {
+  color: var(--modal-verify-description-color);
+  margin: 0 0 32px;
+  line-height: 1.5;
+}
+
+/* 6-digit code inputs */
+.vr-modal-verify-code-inputs {
+  display: flex;
+  justify-content: center;
+  gap: var(--modal-verify-code-gap);
+  margin-bottom: 12px;
+}
+
+.vr-modal-verify-code-input {
+  width: var(--modal-verify-code-input-size);
+  height: var(--modal-verify-code-input-height);
+  text-align: center;
+  font-size: var(--font-size-2xl, 1.5rem);
+  font-weight: bold;
+  background: var(--modal-verify-code-input-bg);
+  border: 2px solid var(--modal-verify-code-input-border);
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.vr-modal-verify-code-input:focus {
+  border-color: var(--modal-verify-code-input-border-focus);
+  background: var(--modal-verify-code-input-bg-focus);
+  box-shadow: var(--modal-verify-code-input-shadow-focus);
+}
+
+.vr-modal-verify-code-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Email hint */
+.vr-modal-verify-email-hint {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--modal-verify-hint-color);
+  margin-bottom: 24px;
+}
+
+.vr-modal-verify-email-hint strong {
+  color: var(--modal-verify-email-color);
+  font-weight: var(--font-weight-semibold, 600);
+}
+
+/* Error */
+.vr-modal-verify-error {
+  padding: 12px;
+  background: var(--modal-verify-error-bg);
+  border: 1px solid var(--modal-verify-error-border);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.vr-modal-verify-error-text {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--modal-verify-error-text);
+  margin: 0;
+}
+
+/* Button content (spinner + text) */
+.vr-modal-verify-button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Resend section */
+.vr-modal-verify-resend {
+  text-align: center;
+  margin: 16px 0 12px;
+}
+
+.vr-modal-verify-resend-text {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--modal-verify-resend-text);
+}
+
+.vr-modal-verify-resend-button {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--modal-verify-resend-link);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: var(--font-weight-medium, 500);
+  transition: all 0.2s;
+  text-decoration: none;
+  padding: 0;
+}
+
+.vr-modal-verify-resend-button:hover {
+  color: var(--modal-verify-resend-link-hover);
+  text-decoration: underline;
+}
+
+.vr-modal-verify-resend-success {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--modal-verify-success-text);
+  font-weight: var(--font-weight-semibold, 600);
+  animation: bounce-in 0.3s ease-out;
+}
+
+/* Cancel button */
+.vr-modal-verify-cancel-button {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--modal-verify-cancel-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 8px 16px;
+}
+
+.vr-modal-verify-cancel-button:hover {
+  color: var(--modal-verify-cancel-hover);
+}
+
+/* Preparing state */
+.vr-modal-verify-preparing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+  gap: 24px;
+  min-height: 200px; /* Ensure visible height */
+}
+
+.vr-modal-verify-preparing-text {
+  color: var(--modal-verify-description-color) !important;
+  margin: 0 !important;
+  font-size: var(--font-size-md, 1rem) !important;
+  text-align: center !important;
+}
+
+/* Success state */
+.vr-modal-verify-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.vr-modal-verify-success-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--modal-verify-success-icon-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: var(--modal-verify-success-icon-shadow);
+}
+
+.vr-modal-verify-success-icon svg {
+  width: 40px;
+  height: 40px;
+  color: #fff;
+}
+
+/* Progress bar */
+.vr-modal-verify-progress {
+  width: 100%;
+  margin-top: 32px;
+}
+
+.vr-modal-verify-progress-track {
+  height: 4px;
+  background: var(--modal-verify-progress-bg);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.vr-modal-verify-progress-fill {
+  height: 100%;
+  background: var(--modal-verify-progress-fill-bg);
+  border-radius: 999px;
+  animation: loading 1.5s ease-in-out;
+}
+
+.vr-modal-verify-progress-text {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--modal-verify-description-color);
+  margin: 0;
+}
+
+/* Form wrapper (for inline variant structure) */
+.vr-modal-verify-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

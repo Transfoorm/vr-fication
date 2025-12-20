@@ -1,0 +1,42 @@
+/* ═══════════════════════════════════════════════════════════════════
+   INPUT SELECT VARIANT
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-input-select {
+  width: 100%;
+  padding: var(--space-md);
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  background-color: var(--bg-fieldbox-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+
+  /* NO external margins - TTT Gap Model compliant */
+
+  /* Remove default arrow */
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3e%3cpath fill='%23999' d='M6 9L1 4h10z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right var(--space-md) center;
+  padding-right: calc(var(--space-md) * 2 + 12px);
+}
+
+.vr-input-select:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-light);
+  background-color: var(--bg-fieldbox-primary);
+}
+
+/* Empty state */
+.vr-input-select--empty {
+  color: var(--text-tertiary);
+}
+
+/* Disabled state */
+.vr-input-select:disabled {
+  opacity: 0.5;
+  background-color: var(--bg-fieldbox-secondary);
+}

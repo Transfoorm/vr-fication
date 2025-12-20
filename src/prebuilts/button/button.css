@@ -1,0 +1,517 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 BUTTON COMPONENT - All variants consolidated
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Fire Button - Dual gradient system */
+  --button-fire-bg-padding: linear-gradient(140.14deg, #ec540e 15.05%, #d6361f 114.99%);
+  --button-fire-bg-border: linear-gradient(142.51deg, #ff9465 8.65%, #f63 88.82%);
+  --button-fire-bg-padding-hover: linear-gradient(140.14deg, #ff9465 15.05%, #ec540e 114.99%);
+  --button-fire-bg-border-hover: linear-gradient(142.51deg, #ffb894 8.65%, #ff9465 88.82%);
+  --button-fire-bg-padding-active: linear-gradient(140.14deg, #d92a00 15.05%, #b32400 114.99%);
+  --button-fire-bg-border-active: linear-gradient(142.51deg, #ec540e 8.65%, #d6361f 88.82%);
+  --button-fire-bg-padding-disabled: linear-gradient(140.14deg, #f5b299 15.05%, #f09d83 114.99%);
+  --button-fire-bg-border-disabled: linear-gradient(142.51deg, #ffd4c1 8.65%, #ffb894 88.82%);
+  --button-fire-shadow: 8px 8px 20px 0 rgb(69 9 0 / 35%);
+  --button-fire-text-shadow: 1px 1px 1px rgb(0 0 0 / 25%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BASE BUTTON - Shared styles for all button variants
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing);
+  font-family: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0; /* Prevent button from shrinking */
+  box-sizing: border-box; /* Include padding in width calculation */
+  min-height: var(--size-2xl); /* 🟡 48px - prevents height jump when icon/spinner appears */
+}
+
+/* Button icon spacing */
+.vr-button .vr-button-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+  min-width: 1.25rem; /* Ensure minimum width */
+}
+
+.vr-button .vr-button-text {
+  display: inline-block;
+  vertical-align: middle;
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+.vr-button .vr-button-spinner {
+  display: flex;
+  align-items: center;
+}
+
+/* Full width utility */
+.vr-button-full-width {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRIMARY BUTTON VARIANT - Orange gradient (matches sidebar active)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-button-primary {
+  /* Base structure - uses shared button variables */
+  padding: var(--button-padding-y) var(--button-padding-x);
+  border-radius: var(--button-radius);
+  font-size: var(--button-font-size);
+  font-weight: var(--button-font-weight);
+  min-width: var(--button-min-width);
+
+  /* Variant-specific styling - subtle diagonal warmth gradient */
+  background: var(--button-primary-bg);
+  opacity: 0.85;
+  color: #fff;
+  border: none;
+  box-shadow: none;
+  transition: all 150ms ease;
+}
+
+.vr-button-primary:disabled {
+  background-color: var(--bg-tertiary);
+  color: var(--text-disabled);
+  opacity: 0.6;
+}
+
+.vr-button-primary:hover:not(:disabled) {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.vr-button-primary:active:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* Loading spinner */
+.vr-button-primary .vr-button-spinner {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Full width variant */
+.vr-button-primary.vr-button-full-width {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SECONDARY BUTTON VARIANT - Outlined style
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-button-secondary {
+  /* Base structure */
+  padding: var(--button-padding-y) var(--button-padding-x);
+  border-radius: var(--button-radius);
+  font-size: var(--button-font-size);
+  font-weight: var(--button-font-weight);
+  min-width: var(--button-min-width);
+
+  /* Variant-specific styling */
+  background-color: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+  border: var(--card-border-width) solid var(--button-secondary-border);
+}
+
+.vr-button-secondary:disabled {
+  border-color: var(--border-light);
+  color: var(--text-disabled);
+  opacity: 0.6;
+}
+
+.vr-button-secondary:hover:not(:disabled) {
+  background-color: var(--button-secondary-hover-bg);
+  border-color: var(--button-secondary-hover-border);
+  color: var(--brand-primary);
+}
+
+.vr-button-secondary:active:not(:disabled) {
+  background-color: var(--button-secondary-active-bg);
+}
+
+/* Loading spinner */
+.vr-button-secondary .vr-button-spinner {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Full width variant */
+.vr-button-secondary.vr-button-full-width {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GHOST BUTTON VARIANT - Transparent with hover
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-button-ghost {
+  /* Base structure */
+  padding: var(--button-padding-y) var(--button-padding-x);
+  border-radius: var(--button-radius);
+  font-size: var(--button-font-size);
+  font-weight: 100; /* Ghost-specific light weight */
+  min-width: auto; /* Ghost-specific auto width */
+
+  /* Variant-specific styling */
+  background-color: var(--button-ghost-bg);
+  color: var(--button-ghost-text);
+  border: var(--card-border-width) solid var(--button-ghost-border);
+}
+
+.vr-button-ghost:disabled {
+  color: var(--text-disabled);
+  opacity: 0.6;
+}
+
+/* Loading spinner */
+.vr-button-ghost .vr-button-spinner {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.vr-button-ghost:hover:not(:disabled) {
+  background-color: var(--button-ghost-hover-bg);
+  color: var(--button-ghost-hover-text);
+}
+
+.vr-button-ghost:active:not(:disabled) {
+  background-color: var(--button-ghost-active-bg);
+}
+
+/* Full width variant */
+.vr-button-ghost.vr-button-full-width {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DANGER BUTTON VARIANT - Red for destructive actions
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-button-danger {
+  /* Base structure */
+  padding: var(--button-padding-y) var(--button-padding-x);
+  border: 1px solid transparent;
+  border-radius: var(--button-radius);
+  font-size: var(--button-font-size);
+  font-weight: var(--button-font-weight);
+  min-width: var(--button-min-width);
+  box-sizing: border-box;
+
+  /* Variant-specific styling */
+  background-color: var(--button-danger-bg);
+  color: var(--button-danger-text);
+  box-shadow: var(--button-danger-shadow);
+}
+
+.vr-button-danger:disabled {
+  background-color: var(--bg-tertiary);
+  color: var(--text-disabled);
+  opacity: 1;
+}
+
+/* Loading spinner */
+.vr-button-danger .vr-button-spinner {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.vr-button-danger:hover:not(:disabled) {
+  background-color: var(--button-danger-hover-bg);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.vr-button-danger:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--button-danger-shadow);
+}
+
+/* Full width variant */
+.vr-button-danger.vr-button-full-width {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BLUE BUTTON VARIANT - Classic website blue for info actions
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-button-blue {
+  /* Base structure */
+  padding: var(--button-padding-y) var(--button-padding-x);
+  border: none;
+  border-radius: var(--button-radius);
+  font-size: var(--button-font-size);
+  font-weight: var(--button-font-weight);
+  min-width: var(--button-min-width);
+  box-sizing: border-box;
+
+  /* Variant-specific styling - Classic website blue */
+  background-color: #2563eb;
+  color: #fff;
+  box-shadow: 0 2px 4px rgb(37 99 235 / 20%);
+  transition: all 150ms ease;
+}
+
+.vr-button-blue:disabled {
+  background-color: var(--bg-tertiary);
+  color: var(--text-disabled);
+  opacity: 0.6;
+}
+
+/* Loading spinner */
+.vr-button-blue .vr-button-spinner {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.vr-button-blue:hover:not(:disabled) {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.vr-button-blue:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgb(37 99 235 / 20%);
+}
+
+/* Full width variant */
+.vr-button-blue.vr-button-full-width {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GREEN BUTTON VARIANT - Classic website green for success actions
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-button-green {
+  /* Base structure */
+  padding: var(--button-padding-y) var(--button-padding-x);
+  border: none;
+  border-radius: var(--button-radius);
+  font-size: var(--button-font-size);
+  font-weight: var(--button-font-weight);
+  min-width: var(--button-min-width);
+  box-sizing: border-box;
+
+  /* Variant-specific styling - Classic website green */
+  background-color: #16a34a;
+  color: #fff;
+  box-shadow: 0 2px 4px rgb(22 163 74 / 20%);
+  transition: all 150ms ease;
+}
+
+.vr-button-green:disabled {
+  background-color: var(--bg-tertiary);
+  color: var(--text-disabled);
+  opacity: 0.6;
+}
+
+/* Loading spinner */
+.vr-button-green .vr-button-spinner {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.vr-button-green:hover:not(:disabled) {
+  background-color: #15803d;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.vr-button-green:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgb(22 163 74 / 20%);
+}
+
+/* Full width variant */
+.vr-button-green.vr-button-full-width {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LINK BUTTON VARIANT - Text-only link style
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-button-link {
+  /* Base structure */
+  padding: 0; /* Link-specific no padding */
+  font-size: var(--button-font-size);
+  font-weight: var(--button-font-weight);
+  min-width: auto; /* Link-specific auto width */
+
+  /* Variant-specific styling */
+  background-color: transparent;
+  color: var(--button-link-text);
+  border: none;
+  text-decoration: none;
+}
+
+.vr-button-link:disabled {
+  color: var(--text-disabled);
+  opacity: 0.6;
+}
+
+/* Loading spinner */
+.vr-button-link .vr-button-spinner {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.vr-button-link:hover:not(:disabled) {
+  text-decoration: underline;
+  color: var(--button-link-hover-text);
+}
+
+.vr-button-link:active:not(:disabled) {
+  color: var(--button-link-hover-text);
+  opacity: 0.8;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FIRE BUTTON VARIANT - Dramatic gradient for high-impact CTAs
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-button-fire {
+  /* Base structure */
+  padding: var(--button-padding-y) var(--button-padding-x);
+  border-radius: var(--button-radius);
+  font-size: var(--button-font-size);
+  font-weight: var(--font-weight-medium); /* Fire-specific medium weight */
+  min-width: var(--button-min-width);
+
+  /* Dual gradient: padding-box for background, border-box for border glow */
+  background: var(--button-fire-bg-padding) padding-box,
+              var(--button-fire-bg-border) border-box;
+  border: 2px solid transparent;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  color: #fff;
+
+  /* Dramatic shadow for depth */
+  box-shadow: var(--button-fire-shadow);
+
+  /* Text shadow for readability on gradient */
+  text-shadow: var(--button-fire-text-shadow);
+
+  /* Smooth transitions */
+  transition: all 300ms ease;
+}
+
+.vr-button-fire:disabled {
+  background: var(--button-fire-bg-padding-disabled) padding-box,
+              var(--button-fire-bg-border-disabled) border-box;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  color: #fff;
+  cursor: default;
+  box-shadow: none;
+  text-shadow: none;
+  border: 2px solid transparent;
+}
+
+/* Loading spinner */
+.vr-button-fire .vr-button-spinner {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Icon spacing */
+.vr-button-fire .vr-button-icon {
+  display: inline-flex;
+  align-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.vr-button-fire .vr-button-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.vr-button-fire:hover:not(:disabled) {
+  background: var(--button-fire-bg-padding-hover) padding-box,
+              var(--button-fire-bg-border-hover) border-box;
+  box-shadow: none;
+  transform: translateY(0);
+}
+
+.vr-button-fire:active:not(:disabled) {
+  background: var(--button-fire-bg-padding-active) padding-box,
+              var(--button-fire-bg-border-active) border-box;
+  transform: translateY(1px);
+}
+
+/* Full width variant */
+.vr-button-fire.vr-button-full-width {
+  width: 100%;
+}
+
+/* Phoenix Button Override - Critical for Houdini animation illusion
+   All phoenix buttons (modal, flying, topbar, phantom) must be pixel-identical */
+.vr-button-fire.vr-button-fire-phoenix-button,
+.vr-button-fire.vr-button-fire-flying-button {
+  padding: var(--phoenix-button-padding-y) var(--phoenix-button-padding-x);
+  font-size: var(--phoenix-button-font-size);
+  gap: var(--phoenix-button-icon-gap);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   OUTLINE BUTTON VARIANT - Border-only for secondary actions
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-button-outline {
+  /* Base structure */
+  padding: var(--button-padding-y) var(--button-padding-x);
+  border-radius: var(--button-radius);
+  font-size: var(--button-font-size);
+  font-weight: var(--button-font-weight);
+  min-width: var(--button-min-width);
+
+  /* Variant-specific styling */
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  box-shadow: var(--button-outline-glow);
+  transition: all 200ms ease;
+}
+
+.vr-button-outline:disabled {
+  background: transparent;
+  border-color: var(--border-light);
+  color: var(--text-disabled);
+  opacity: 0.6;
+}
+
+/* Loading spinner */
+.vr-button-outline .vr-button-spinner {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Icon spacing */
+.vr-button-outline .vr-button-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.vr-button-outline:hover:not(:disabled) {
+  border-color: var(--border-dark);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.vr-button-outline:active:not(:disabled) {
+  transform: translateY(0);
+  background: var(--bg-active);
+}
+
+/* Full width variant */
+.vr-button-outline.vr-button-full-width {
+  width: 100%;
+}
+

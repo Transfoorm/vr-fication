@@ -1,0 +1,50 @@
+/** ──────────────────────────────────────────────────────────────────────┐
+│  APP FRAME - Root Container Structure (WCCC ly-* Compliant)            │
+│  /src/shell/app.css                                                    │
+│                                                                        │
+│  The CSS skeleton for the entire app. Visual equivalent of God Layout. │
+│  Positions Sidebar, Topbar, and main content area.                     │
+└────────────────────────────────────────────────────────────────────────┘ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   APP FRAME - Root Container Structure
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ly-app-container {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
+
+.ly-app-right-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-left: 200px;
+}
+
+.ly-app-main-container {
+  display: flex;
+  flex: 1;
+}
+
+.ly-app-content-with-arch {
+  flex: 1;
+  transition: all 0.2s ease;
+  position: relative;
+  background: var(--page-arch-foundation);
+}
+
+.ly-app-content-without-arch {
+  flex: 1;
+  transition: all 0.2s ease;
+  position: relative;
+  background: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RANK-BASED SHELL STYLING
+   ═══════════════════════════════════════════════════════════════════
+   Admiral rank overrides moved to /styles/themes/transtheme.css
+   (Light mode + Dark mode Admiral sections)
+   ═══════════════════════════════════════════════════════════════════ */

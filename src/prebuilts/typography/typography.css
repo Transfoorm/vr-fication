@@ -1,0 +1,272 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 TYPOGRAPHY CONSOLIDATED STYLES - All Variants
+   ═══════════════════════════════════════════════════════════════════
+
+   FUSE-STYLE Compliant: All static layout/structure styles in CSS.
+   TTT Gap Model: NO external margins - container controls spacing
+
+   Variants:
+   - Hero: Large hero headlines (48px)
+   - Title: Page and section titles
+   - Heading: Subsection headings
+   - Body: Regular body text
+   - Caption: Small caption text
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   BODY VARIANT - Body Text
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-typography-body {
+  line-height: 1.5;
+
+  /* NO external margins - TTT Gap Model compliant */
+}
+
+/* Size variants */
+.vr-typography-body--sm {
+  font-size: var(--font-size-sm);
+}
+
+.vr-typography-body--md {
+  font-size: var(--font-size-md);
+}
+
+.vr-typography-body--lg {
+  font-size: var(--font-size-lg);
+}
+
+/* Weight variants */
+.vr-typography-body--normal {
+  font-weight: var(--font-weight-normal);
+}
+
+.vr-typography-body--medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.vr-typography-body--semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Color variants */
+.vr-typography-body--primary {
+  color: var(--text-primary);
+}
+
+.vr-typography-body--secondary {
+  color: var(--text-secondary);
+}
+
+.vr-typography-body--tertiary {
+  color: var(--text-tertiary);
+}
+
+.vr-typography-body--error {
+  color: var(--error-600);
+}
+
+.vr-typography-body--success {
+  color: var(--success-600);
+}
+
+.vr-typography-body--warning {
+  color: var(--warning-600);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAPTION VARIANT - Small Caption Text
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-typography-caption {
+  line-height: 1.4;
+
+  /* NO external margins - TTT Gap Model compliant */
+}
+
+/* Size variants */
+.vr-typography-caption--xs {
+  font-size: var(--font-size-xs);
+}
+
+.vr-typography-caption--sm {
+  font-size: var(--font-size-sm);
+}
+
+/* Weight variants */
+.vr-typography-caption--normal {
+  font-weight: var(--font-weight-normal);
+}
+
+.vr-typography-caption--medium {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Color variants */
+.vr-typography-caption--primary {
+  color: var(--text-primary);
+}
+
+.vr-typography-caption--secondary {
+  color: var(--text-secondary);
+}
+
+.vr-typography-caption--tertiary {
+  color: var(--text-tertiary);
+}
+
+.vr-typography-caption--muted {
+  color: var(--text-quaternary);
+}
+
+/* Style variants */
+.vr-typography-caption--italic {
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HEADING VARIANT - Subsection Headings
+
+   Pure System: Level determines EVERYTHING
+   - Level 2: 2xl size, bold weight (most prominent subsection)
+   - Level 3: xl size, semibold weight (standard section, most common)
+   - Level 4: lg size, medium weight (smaller section)
+   - Level 5: md size, normal weight (minor heading)
+   - Level 6: md size, normal weight (minor heading)
+
+   Weight prop can override level defaults when needed
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-typography-heading {
+  color: var(--text-primary);
+  line-height: 1.3;
+
+  /* NO external margins - TTT Gap Model compliant */
+}
+
+/* Level-based size variants (Pure System) */
+.vr-typography-heading--2 {
+  font-size: var(--font-size-2xl);
+}
+
+.vr-typography-heading--3 {
+  font-size: var(--font-size-xl);
+}
+
+.vr-typography-heading--4 {
+  font-size: var(--font-size-lg);
+}
+
+.vr-typography-heading--5 {
+  font-size: var(--font-size-md);
+}
+
+.vr-typography-heading--6 {
+  font-size: var(--font-size-md);
+}
+
+/* Weight variants */
+.vr-typography-heading--normal {
+  font-weight: var(--font-weight-normal);
+}
+
+.vr-typography-heading--medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.vr-typography-heading--semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+.vr-typography-heading--bold {
+  font-weight: var(--font-weight-bold);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TITLE VARIANT - Page and Section Titles
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-typography-title {
+  color: var(--text-primary);
+  line-height: 1.2;
+
+  /* NO external margins - TTT Gap Model compliant */
+}
+
+/* Size variants */
+.vr-typography-title--sm {
+  font-size: var(--font-size-lg);
+}
+
+.vr-typography-title--md {
+  font-size: var(--font-size-xl);
+}
+
+.vr-typography-title--lg {
+  font-size: var(--font-size-2xl);
+}
+
+.vr-typography-title--xl {
+  font-size: var(--font-size-3xl);
+}
+
+/* Weight variants */
+.vr-typography-title--normal {
+  font-weight: var(--font-weight-normal);
+}
+
+.vr-typography-title--medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.vr-typography-title--semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+.vr-typography-title--bold {
+  font-weight: var(--font-weight-bold);
+}
+
+/* Alignment */
+.vr-typography-title--left {
+  text-align: left;
+}
+
+.vr-typography-title--center {
+  text-align: center;
+}
+
+.vr-typography-title--right {
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HERO VARIANT - Hero Headlines
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-typography-hero {
+  font-size: 3rem;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+
+  /* NO external margins - TTT Gap Model compliant */
+}
+
+/* Weight variants */
+.vr-typography-hero--normal {
+  font-weight: var(--font-weight-normal);
+}
+
+.vr-typography-hero--medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.vr-typography-hero--semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+.vr-typography-hero--bold {
+  font-weight: var(--font-weight-bold);
+}

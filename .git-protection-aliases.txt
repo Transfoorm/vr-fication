@@ -1,0 +1,56 @@
+# ═══════════════════════════════════════════════════════════════════
+# 🛡️ VRP DESTRUCTIVE OPERATION PROTECTION - ADD TO ~/.gitconfig
+# ═══════════════════════════════════════════════════════════════════
+# Copy this into your ~/.gitconfig [alias] section
+# This protects MANUAL terminal commands (Knox Shield only protects Claude)
+
+[alias]
+	# Safe checkout - blocks file checkout, allows branch checkout
+	co = "!f() { \
+		for arg in \"$@\"; do \
+			if [ -f \"$arg\" ] || [[ \"$arg\" =~ ^src/|^convex/|^styles/ ]]; then \
+				echo '⛔ BLOCKED: git checkout <file> destroys uncommitted work'; \
+				echo 'Use: git stash push <file>'; \
+				exit 1; \
+			fi; \
+		done; \
+		git checkout \"$@\"; \
+	}; f"
+
+	# Block restore completely
+	restore = "!echo '⛔ BLOCKED: git restore destroys uncommitted work. Use git stash.' && exit 1"
+
+	# Block reset --hard
+	reset = "!f() { \
+		if echo \"$*\" | grep -q -- '--hard'; then \
+			echo '⛔ BLOCKED: git reset --hard destroys uncommitted work. Use git stash.'; \
+			exit 1; \
+		fi; \
+		git reset \"$@\"; \
+	}; f"
+
+	# Block clean -f/-d
+	clean = "!f() { \
+		if echo \"$*\" | grep -qE '(-f|-d)'; then \
+			echo '⛔ BLOCKED: git clean deletes untracked files permanently.'; \
+			exit 1; \
+		fi; \
+		git clean \"$@\"; \
+	}; f"
+
+# ═══════════════════════════════════════════════════════════════════
+# INSTALLATION INSTRUCTIONS
+# ═══════════════════════════════════════════════════════════════════
+#
+# 1. Run this command to add protection globally:
+#    cat .git-protection-aliases.txt >> ~/.gitconfig
+#
+# 2. Or manually copy the [alias] section above into ~/.gitconfig
+#
+# 3. Then developers MUST use the aliases:
+#    - git co (instead of git checkout)
+#    - Blocked: git restore
+#    - Blocked: git reset --hard
+#    - Blocked: git clean -fd
+#
+# ═══════════════════════════════════════════════════════════════════

@@ -1,0 +1,16 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FOOTER STYLES - WCCC ly-* Compliant
+   Bottom frame with sidebar-aware gradient
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ly-footer-container {
+  width: 100%;
+  height: var(--footer-height);
+  background: linear-gradient(
+    to right,
+    var(--sidebar-bg) 0%,
+    var(--sidebar-bg) calc(var(--sidebar-width) + var(--curved-radius)),
+    var(--ai-sidebar-bg) calc(100% - var(--ai-sidebar-expanded) - var(--curved-radius)),
+    var(--ai-sidebar-bg) 100%
+  );
+}

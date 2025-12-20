@@ -1,0 +1,179 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# VRP SERVER-SIDE ENFORCEMENT - TTT SOVEREIGNTY MODE
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# This workflow runs on GitHub's servers - NO LOCAL BYPASS POSSIBLE.
+#
+# Devs CANNOT:
+# - Skip these checks
+# - Disable this workflow
+# - Bypass ESLint
+# - Merge without passing
+#
+# Every PR must pass ALL checks before merge is allowed.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: VRP Enforcement
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+    CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+    NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # LINT CHECK - ESLint Iron Wall
+  # ─────────────────────────────────────────────────────────────────────────────
+  lint:
+    name: ESLint Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # TYPE CHECK - TypeScript Verification
+  # ─────────────────────────────────────────────────────────────────────────────
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Convex codegen
+        run: npx convex codegen
+
+      - name: Run TypeScript check
+        run: npx tsc --noEmit
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # BUILD CHECK - Full Production Build
+  # ─────────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Convex codegen
+        run: npx convex codegen
+
+      - name: Build project
+        run: npm run build
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # VRP CHECKS - ISV & Naming Conventions
+  # ─────────────────────────────────────────────────────────────────────────────
+  vrp:
+    name: VRP Virgin Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ISV Check
+        run: npm run vrp:isv
+
+      - name: Run Naming Check
+        run: npm run vrp:naming
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # PROTECTED FILES CHECK - Detect unauthorized changes
+  # ─────────────────────────────────────────────────────────────────────────────
+  protected-files:
+    name: Protected Files Alert
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for protected file changes
+        run: |
+          echo "🛡️ Checking for changes to protected files..."
+
+          PROTECTED_FILES=(
+            "eslint.config.mjs"
+            "package.json"
+            "tsconfig.json"
+            ".husky/"
+            "scripts/"
+            "eslint/"
+            ".github/"
+            "src/middleware.ts"
+          )
+
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          ALERT=false
+
+          echo "Changed files in this PR:"
+          echo "$CHANGED_FILES"
+          echo ""
+
+          for pattern in "${PROTECTED_FILES[@]}"; do
+            if echo "$CHANGED_FILES" | grep -q "^$pattern"; then
+              echo "⚠️  PROTECTED FILE CHANGED: $pattern"
+              ALERT=true
+            fi
+          done
+
+          if [ "$ALERT" = true ]; then
+            echo ""
+            echo "═══════════════════════════════════════════════════════════════"
+            echo "🚨 ATTENTION: This PR modifies PROTECTED FILES"
+            echo "═══════════════════════════════════════════════════════════════"
+            echo ""
+            echo "These changes require @Metafoorm approval via CODEOWNERS."
+            echo "Ensure branch protection is enabled for this to be enforced."
+            echo ""
+          else
+            echo "✅ No protected files changed in this PR."
+          fi

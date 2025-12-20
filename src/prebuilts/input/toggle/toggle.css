@@ -1,0 +1,171 @@
+/* ═══════════════════════════════════════════════════════════════════
+   INPUT TOGGLE VARIANT
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Toggle Shadows */
+  --toggle-thumb-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+  --toggle-thumb-shadow-hover: 0 2px 6px rgb(0 0 0 / 30%);
+}
+
+.vr-input-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+
+  /* NO external margins - TTT Gap Model compliant */
+}
+
+.vr-input-toggle-wrapper--left {
+  flex-direction: row;
+}
+
+.vr-input-toggle-wrapper--right {
+  flex-direction: row;
+}
+
+/* Toggle button */
+.vr-input-toggle {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Toggle track */
+.vr-input-toggle-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: var(--gray-300);
+  border-radius: var(--radius-full);
+  transition: background-color 0.3s ease;
+}
+
+/* Size variants */
+.vr-input-toggle--sm .vr-input-toggle-track {
+  width: 36px;
+  height: 20px;
+  padding: 2px;
+}
+
+.vr-input-toggle--md .vr-input-toggle-track {
+  width: 48px;
+  height: 24px;
+  padding: 2px;
+}
+
+.vr-input-toggle--lg .vr-input-toggle-track {
+  width: 60px;
+  height: 28px;
+  padding: 2px;
+}
+
+/* Toggle thumb */
+.vr-input-toggle-thumb {
+  position: absolute;
+  background-color: var(--white);
+  border-radius: var(--radius-full);
+  box-shadow: var(--toggle-thumb-shadow);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vr-input-toggle--sm .vr-input-toggle-thumb {
+  width: 16px;
+  height: 16px;
+  left: 2px;
+}
+
+.vr-input-toggle--md .vr-input-toggle-thumb {
+  width: 20px;
+  height: 20px;
+  left: 2px;
+}
+
+.vr-input-toggle--lg .vr-input-toggle-thumb {
+  width: 24px;
+  height: 24px;
+  left: 2px;
+}
+
+/* On/Off text */
+.vr-input-toggle-text {
+  position: absolute;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--white);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.vr-input-toggle--sm .vr-input-toggle-text {
+  right: 5px;
+}
+
+.vr-input-toggle--md .vr-input-toggle-text {
+  right: 7px;
+}
+
+.vr-input-toggle--lg .vr-input-toggle-text {
+  right: 9px;
+}
+
+/* Enabled state */
+.vr-input-toggle--enabled .vr-input-toggle-track {
+  background-color: var(--brand-primary);
+}
+
+.vr-input-toggle--enabled.vr-input-toggle--sm .vr-input-toggle-thumb {
+  transform: translateX(16px);
+}
+
+.vr-input-toggle--enabled.vr-input-toggle--md .vr-input-toggle-thumb {
+  transform: translateX(24px);
+}
+
+.vr-input-toggle--enabled.vr-input-toggle--lg .vr-input-toggle-thumb {
+  transform: translateX(32px);
+}
+
+.vr-input-toggle--enabled .vr-input-toggle-text {
+  opacity: 1;
+  left: 6px;
+  right: auto;
+}
+
+/* Label */
+.vr-input-toggle-label {
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  user-select: none;
+}
+
+/* Hover state */
+.vr-input-toggle:hover .vr-input-toggle-track {
+  opacity: 0.9;
+}
+
+.vr-input-toggle:hover .vr-input-toggle-thumb {
+  box-shadow: var(--toggle-thumb-shadow-hover);
+}
+
+/* Focus state */
+.vr-input-toggle:focus-visible .vr-input-toggle-track {
+  box-shadow: 0 0 0 3px var(--brand-light);
+}
+
+/* Disabled state */
+.vr-input-toggle:disabled .vr-input-toggle-track {
+  opacity: 0.5;
+  background-color: var(--gray-200);
+}
+
+.vr-input-toggle-wrapper--disabled {
+  opacity: 0.5;
+}
+
+.vr-input-toggle-wrapper--disabled .vr-input-toggle-label {
+  color: var(--text-tertiary);
+}

@@ -1,0 +1,22 @@
+# Claude Code ignore file
+# Prevents indexing of large directories that slow down conversation compacting
+
+# Operations directory - contains isolated git tracking systems
+.ops/
+
+# Build outputs
+.next/
+out/
+build/
+
+# Dependencies
+node_modules/
+
+# Environment files
+.env*
+
+# System files
+.DS_Store
+
+# TypeScript build info
+*.tsbuildinfo

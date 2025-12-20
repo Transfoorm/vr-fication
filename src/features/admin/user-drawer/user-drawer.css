@@ -1,0 +1,372 @@
+/** ──────────────────────────────────────────────────────────────────────┐
+│  👤 USER DRAWER - Layout Styles                                       │
+│  /src/features/admin/user-drawer/user-drawer.css                      │
+│                                                                       │
+│  Feature-level CSS (ft-*)                                             │
+└────────────────────────────────────────────────────────────────────────┘ */
+
+.ft-user-details-coming-soon {
+  color: var(--text-tertiary);
+  margin-top: var(--space-lg);
+}
+
+/* Country selector button - clone from account profile-tab */
+button.ft-profiletab-country-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 8px);
+  text-align: left;
+  cursor: pointer;
+  height: var(--form-input-height);
+}
+
+.ft-profiletab-country-button__flag {
+  /* Font size handled by emoji rendering */
+}
+
+.ft-profiletab-country-button__text {
+  flex: 1;
+}
+
+/* Avatar display - view-only (circle shape) */
+.ft-profiletab-avatar-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%; /* Perfect circle */
+  border: 1px solid var(--border-primary, #e5e7eb);
+  overflow: hidden;
+  background-color: var(--white); /* Clear background like logo */
+}
+
+/* Center labels above avatar and logo */
+.ft-profiletab-media-group .vr-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ft-profiletab-media-group .vr-field__label {
+  text-align: center;
+  width: 100%;
+}
+
+.ft-profiletab-avatar-display__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ft-profiletab-avatar-display__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+
+  /* Typography handled by T.caption */
+  color: var(--text-tertiary, #9ca3af); /* Same color as logo placeholder */
+  background: transparent; /* Clear background like logo */
+  text-align: center;
+  padding: var(--space-md, 16px);
+}
+
+/* Brand logo display - view-only (matches sidebar company-button-logo exactly) */
+.ft-profiletab-logo-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 30px; /* Same 25% ratio as sidebar (8px/32px = 30px/120px) */
+  border: 1px solid var(--border-primary, #e5e7eb);
+  overflow: hidden;
+  background-color: var(--white);
+}
+
+.ft-profiletab-logo-display__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Same as sidebar - fills space, crops if needed */
+}
+
+.ft-profiletab-logo-display__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+
+  /* Typography handled by T.caption */
+  color: var(--text-tertiary, #9ca3af);
+  text-align: center;
+  padding: var(--space-md, 16px);
+}
+
+/* Profile tab layout */
+.ft-profiletab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Media section - Avatar/Logo + Edit Button */
+.ft-profiletab-media-section {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-lg, 24px);
+  margin-top: var(--space-sm, 8px);
+}
+
+/* Media group - Avatar + Logo side by side */
+.ft-profiletab-media-group {
+  display: flex;
+  gap: var(--space-xl, 32px);
+}
+
+/* Button group - Edit + Delete buttons */
+.ft-profiletab-button-group {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-sm, 8px);
+  align-items: flex-start;
+}
+
+/* Edit User button - fixed width to prevent layout shift when toggling text */
+.ft-profiletab-edit-button-fixed {
+  min-width: 130px !important;
+  width: 130px !important;
+}
+
+/* Email tab layout */
+.ft-emailtab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Recovery section - border only, no background */
+.ft-emailtab__recovery-section {
+  margin-top: var(--space-md, 16px);
+  padding: var(--space-lg, 24px);
+  border: 1px solid var(--border-primary, #e5e7eb);
+  border-radius: var(--radius-md, 8px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg, 24px);
+}
+
+.ft-emailtab__recovery-header {
+  /* Typography handled by T.h4 */
+  color: var(--text-primary, #111827);
+}
+
+/* Success state - green helper text */
+.ft-emailtab__recovery--success .vr-field__helper {
+  color: var(--success-600, #16a34a);
+
+  /* Typography handled by Field component */
+}
+
+/* Magic link display */
+.ft-emailtab__magic-link {
+  margin-top: var(--space-lg, 24px);
+  padding: var(--space-md, 16px);
+  background: var(--bg-secondary, #f9fafb);
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--border-primary, #e5e7eb);
+}
+
+.ft-emailtab__magic-link-label {
+  /* Typography handled by T.caption */
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: var(--space-sm, 8px);
+}
+
+.ft-emailtab__magic-link-row {
+  display: flex;
+  gap: var(--space-sm, 8px);
+}
+
+.ft-emailtab__magic-link-input {
+  flex: 1;
+  padding: var(--space-sm, 8px) var(--space-md, 12px);
+
+  /* Typography handled inline by input element */
+  font-family: monospace; /* Preserve monospace for URLs */
+  background: var(--bg-muted, #fcfcfc);
+  border: 1px solid var(--border-primary, #e5e7eb);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--text-primary, #111827);
+}
+
+.ft-emailtab__copy-btn {
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
+
+  /* Typography handled by button text */
+  background: var(--brand-primary, #f97316);
+  color: var(--text-on-brand, #fff);
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.ft-emailtab__copy-btn:hover {
+  background: var(--brand-dark, #ea580c);
+}
+
+.ft-emailtab__copy-btn:disabled {
+  background: var(--bg-tertiary, #e5e7eb);
+  color: var(--text-tertiary, #9ca3af);
+  cursor: not-allowed;
+}
+
+/* Copied state - green */
+.ft-emailtab__copy-btn--copied {
+  background: var(--success-600, #16a34a);
+}
+
+.ft-emailtab__copy-btn--copied:hover {
+  background: var(--success-700, #15803d);
+}
+
+/* Clear state - neutral gray */
+.ft-emailtab__copy-btn--clear {
+  background: var(--bg-tertiary, #6b7280);
+}
+
+.ft-emailtab__copy-btn--clear:hover {
+  background: var(--text-secondary, #4b5563);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ACTIVITY TAB
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-activity {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg, 24px);
+}
+
+.ft-activity__grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 8px);
+}
+
+.ft-activity__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xs, 4px) 0;
+}
+
+.ft-activity__label {
+  /* Typography handled by T.caption */
+  color: var(--text-secondary, #6b7280);
+}
+
+.ft-activity__value {
+  /* Typography handled by T.body */
+  color: var(--text-primary, #111827);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs, 4px);
+}
+
+.ft-activity__value--mono {
+  /* Typography handled by T.caption */
+  font-family: monospace; /* Preserve monospace for IDs */
+  background: var(--bg-secondary, #f9fafb);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.ft-activity__subtext {
+  /* Typography handled by T.caption */
+  color: var(--text-tertiary, #9ca3af);
+  margin-left: var(--space-xs, 4px);
+}
+
+/* Status pill - uses data-status attribute for colors */
+.ft-activity__status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+
+  /* Typography handled by StatusPill component text */
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Setup status colors */
+.ft-activity__status-pill[data-status="complete"] {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.ft-activity__status-pill[data-status="pending"] {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.ft-activity__status-pill[data-status="invited"] {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.ft-activity__status-pill[data-status="abandon"] {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.ft-activity__status-pill[data-status="revoked"] {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Subscription status colors */
+.ft-activity__status-pill[data-status="active"] {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.ft-activity__status-pill[data-status="trial"] {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.ft-activity__status-pill[data-status="lifetime"] {
+  background-color: #fae8ff;
+  color: #a855f7;
+}
+
+.ft-activity__status-pill[data-status="expired"] {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.ft-activity__status-pill[data-status="cancelled"] {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Active indicator dot */
+.ft-activity__active-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-tertiary, #9ca3af);
+  margin-right: var(--space-xs, 4px);
+}
+
+.ft-activity__active-dot--active {
+  background: var(--success-500, #22c55e);
+  box-shadow: 0 0 0 2px rgb(34 197 94 / 20%);
+}

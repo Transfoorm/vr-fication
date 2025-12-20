@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# ═══════════════════════════════════════════════════════════════════
+#  🛡️  VRP PURITY CHECK - Unstaged Files Detector
+# ═══════════════════════════════════════════════════════════════════
+#
+#  Virgin Repo Protocol: No files in limbo.
+#  Every change must be staged or explicitly discarded.
+#
+# ═══════════════════════════════════════════════════════════════════
+
+# Check for unstaged changes (modified tracked files)
+UNSTAGED=$(git diff --name-only)
+
+# Check for untracked files (new files not added to git)
+UNTRACKED=$(git ls-files --others --exclude-standard)
+
+if [ -n "$UNSTAGED" ] || [ -n "$UNTRACKED" ]; then
+  echo ""
+  echo "╔═══════════════════════════════════════════════════════════════╗"
+  echo "║  🛡️  VRP PURITY CHECK - UNSTAGED FILES DETECTED              ║"
+  echo "╚═══════════════════════════════════════════════════════════════╝"
+  echo ""
+  echo "❌ BLOCKED: Virgin Repo Protocol requires a clean working tree."
+  echo ""
+
+  if [ -n "$UNSTAGED" ]; then
+    echo "Modified files not staged for commit:"
+    echo "$UNSTAGED" | sed 's/^/  - /'
+    echo ""
+  fi
+
+  if [ -n "$UNTRACKED" ]; then
+    echo "Untracked files:"
+    echo "$UNTRACKED" | sed 's/^/  - /'
+    echo ""
+  fi
+
+  echo "VRP requires a clean decision:"
+  echo "  1. Stage these files:    git add <file>"
+  echo "  2. Discard changes:      git restore <file>"
+  echo "  3. Stash for later:      git stash"
+  echo ""
+  echo "Virgin Repo Protocol: No files in limbo. Every change committed or discarded."
+  echo ""
+  exit 1
+fi

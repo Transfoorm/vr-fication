@@ -1,0 +1,76 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# CODEOWNERS - TTT SOVEREIGNTY MODE
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# This file defines WHO must approve changes to sacred files.
+# GitHub enforces this server-side - NO LOCAL BYPASS POSSIBLE.
+#
+# Requirements:
+# 1. Branch protection must be enabled on main
+# 2. "Require review from Code Owners" must be checked
+# 3. Direct pushes to main must be blocked
+#
+# With this config, NO developer can:
+# - Create ESLint exceptions
+# - Modify build configs
+# - Disable VRP checks
+# - Change security scripts
+# - Bypass Husky hooks
+# - Modify custom rules
+#
+# WITHOUT Ken's explicit approval.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ESLINT - The Iron Wall
+# ─────────────────────────────────────────────────────────────────────────────
+eslint.config.mjs                    @Metafoorm
+.eslintrc*                           @Metafoorm
+eslint/                              @Metafoorm
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PACKAGE & BUILD CONFIG
+# ─────────────────────────────────────────────────────────────────────────────
+package.json                         @Metafoorm
+package-lock.json                    @Metafoorm
+tsconfig*.json                       @Metafoorm
+
+# ─────────────────────────────────────────────────────────────────────────────
+# VRP SCRIPTS & ENFORCEMENT
+# ─────────────────────────────────────────────────────────────────────────────
+scripts/                             @Metafoorm
+.vrp-approval*                       @Metafoorm
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HUSKY GIT HOOKS
+# ─────────────────────────────────────────────────────────────────────────────
+.husky/                              @Metafoorm
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STYLING ENFORCEMENT
+# ─────────────────────────────────────────────────────────────────────────────
+.stylelintrc.json                    @Metafoorm
+stylelint.config.js                  @Metafoorm
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CLAUDE AI CONTROLS
+# ─────────────────────────────────────────────────────────────────────────────
+.claude/                             @Metafoorm
+CLAUDE.md                            @Metafoorm
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GITHUB WORKFLOWS & SECURITY
+# ─────────────────────────────────────────────────────────────────────────────
+.github/                             @Metafoorm
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FUSE ARCHITECTURE CORE
+# ─────────────────────────────────────────────────────────────────────────────
+ttts/                                @Metafoorm
+vrs/                                 @Metafoorm
+srs/                                 @Metafoorm
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MIDDLEWARE & AUTH
+# ─────────────────────────────────────────────────────────────────────────────
+src/middleware.ts                    @Metafoorm

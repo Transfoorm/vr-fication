@@ -1,0 +1,29 @@
+/*   PREBUILTS VARIABLES AND CLASSES PANEL */
+
+/* 🟦🟦🟦🟦🟦🟦 COMPONENT STYLES - All Prebuilt Components 🟦🟦🟦🟦🟦🟦
+   Import order: alphabetical for easy maintenance
+   NOTE: @import must come BEFORE all other CSS rules
+   * BASE CLASSES - Shared by all variants */ 
+@import url('../src/prebuilts/actions/actions.css');               /* 1 ⬇️ */ 
+@import url('../src/prebuilts/badge/badge.css');
+@import url('../src/prebuilts/button/button.css');
+@import url('../src/prebuilts/card/card.css');
+@import url('../src/prebuilts/divider/divider.css');
+@import url('../src/prebuilts/dropdown/dropdown.css');
+@import url('../src/prebuilts/field/field.css');
+@import url('../src/prebuilts/grid/grid.css');
+@import url('../src/prebuilts/input/input.css');
+@import url('../src/prebuilts/label/label.css');
+@import url('../src/prebuilts/modal/modal.css');
+@import url('../src/prebuilts/page/page.css');
+@import url('../src/prebuilts/rank/rank.css');
+@import url('../src/prebuilts/search/search.css');
+@import url('../src/prebuilts/stack/stack.css');
+@import url('../src/prebuilts/table/table.css');
+@import url('../src/prebuilts/tabs/tabs.css');
+@import url('../src/prebuilts/tooltip/tooltip.css');
+@import url('../src/prebuilts/typography/typography.css');           /* 19 */ 
+
+/* Variables moved to styles/tokens.css - PREBUILT COMPONENT VARIABLES section */
+
+

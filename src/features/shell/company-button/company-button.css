@@ -1,0 +1,437 @@
+/** ──────────────────────────────────────────────────────────────────────┐
+│  🏢 COMPANY BUTTON STYLES                                              │
+│  /src/features/CompanyButton/company-button.css                       │
+│                                                                        │
+│  Organized into clear sections for easy navigation.                   │
+└────────────────────────────────────────────────────────────────────────┘ */
+
+:root {
+  /* Loading State */
+  --company-button-loading-height: 54px;
+
+  /* Button Transition */
+  --company-button-transition-duration: 0.05s;
+
+  /* Logo Dimensions */
+  --company-button-logo-size: 32px;
+
+  /* Chevron Dimensions */
+  --company-button-chevron-size: 14px;
+
+  /* Menu Positioning */
+  --company-button-menu-top: 65px;
+  --company-button-menu-radius: 10px;
+
+  /* Menu Animation */
+  --company-button-fade-in-duration: 0.15s;
+
+  /* Header Icon */
+  --company-button-header-icon-size: 18px;
+
+  /* Menu Content */
+  --company-button-menu-content-padding: 4px;
+
+  /* Menu Item */
+  --company-button-menu-item-gap: 8px;
+  --company-button-menu-item-icon-size: 16px;
+
+  /* Error Message */
+  --company-button-error-margin-top: 6px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   1. CONTAINER
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-company-button-container {
+  position: relative;
+}
+
+.ft-company-button-loading {
+  width: 100%;
+  height: var(--company-button-loading-height);
+  background-color: var(--appshell-bg);
+  border-radius: var(--radius-md);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   2. BUTTON - Main trigger button
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-company-button {
+  position: relative;
+  width: 100%;
+  padding: var(--space-sm) var(--space-xs);
+  background-color: var(--sidebar-main-button-rest);  /* 🟨 BUTTON REST COLOR */
+  color: var(--sidebar-button-text);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--company-button-transition-duration);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  margin-bottom: var(--space-lg);
+}
+
+.ft-company-button:hover {
+  background-color: var(--sidebar-main-button-hover);
+}
+
+.ft-company-button--active,
+.ft-company-button--active:hover {
+  background-color: var(--sidebar-main-button-active);  /* 🟨 BUTTON ACTIVE COLOR */
+}
+
+/* Company logo - larger with rounded corners */
+.ft-company-button-logo {
+  width: var(--company-button-logo-size);
+  height: var(--company-button-logo-size);
+  border-radius: var(--radius-md);
+  background-color: var(--white);
+  object-fit: cover;
+}
+
+/* Hidden file input */
+.ft-company-button-file-input {
+  display: none;
+}
+
+.ft-company-button-chevron {
+  position: absolute;
+  bottom: 8px;
+  right: 17px;
+  width: var(--company-button-chevron-size);
+  height: var(--company-button-chevron-size);
+  color: var(--text-tertiary);
+}
+
+.ft-company-button-text {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ft-company-button-title {
+  /* Typography handled by T.body */
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.ft-company-button-title--placeholder {
+  font-style: italic;
+  color: var(--text-tertiary);
+}
+
+.ft-company-button-subtitle {
+  /* Typography handled by T.caption */
+  color: var(--text-tertiary);
+  line-height: 1.2;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   3. MENU - Dropdown panel
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-company-button-menu {
+  position: fixed;
+  top: var(--company-button-menu-top);  /* 🟨 MENU TOP DISTANCE */
+  left: calc(var(--sidebar-width) - 15px);  /* 🟨 MENU RIGHT POSITION */
+  background-color: var(--page-arch-color);
+  box-shadow: var(--userbutton-menu-shadow);
+  border: 1px solid var(--border-light);
+  border-radius: var(--company-button-menu-radius);
+  min-width: var(--userbutton-menu-width);
+  z-index: 200;
+  animation: ft-company-button-scale-in var(--company-button-fade-in-duration) ease-out;
+  transform-origin: top left;
+}
+
+@keyframes ft-company-button-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ft-company-button-menu--closing {
+  animation: ft-company-button-scale-out var(--company-button-fade-in-duration) ease-out;
+}
+
+@keyframes ft-company-button-scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.ft-company-button-menu-close {
+  display: none;
+}
+
+.ft-company-button-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: transparent;
+  z-index: 49;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   4. MENU HEADER
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-company-button-menu-header {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-light);
+  background-color: var(--bg-secondary);     /* Title Background */
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--text-secondary);
+}
+
+.ft-company-button-menu-header-icon {
+  width: var(--company-button-header-icon-size);
+  height: var(--company-button-header-icon-size);
+  flex-shrink: 0;
+}
+
+.ft-company-button-menu-header-text {
+  display: flex;
+  flex-direction: column;
+
+  /* Typography handled by T.body */
+  color: var(--text-secondary);
+}
+
+.ft-company-button-menu-header-status {
+  /* Typography handled by T.caption */
+  color: var(--text-tertiary);
+  line-height: 1;
+  margin-top: 1px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   5. MENU CONTENT - Item list
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-company-button-menu-content {
+  padding: var(--company-button-menu-content-padding) 0;
+}
+
+.ft-company-button-menu-item-wrapper {
+  padding: 0 var(--company-button-menu-content-padding);
+  user-select: none;
+}
+
+.ft-company-button-menu-item-wrapper * {
+  user-select: none !important;
+}
+
+.ft-company-button-menu-item-wrapper *::selection {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.ft-company-button-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--company-button-menu-item-gap);
+  text-align: left;
+  padding: 6px 12px;
+
+  /* Typography handled by button text */
+  color: var(--text-primary);
+  background-color: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--company-button-transition-duration) ease;
+  user-select: none;
+}
+
+.ft-company-button-menu-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+.ft-company-button-menu-icon {
+  width: var(--company-button-menu-item-icon-size);
+  height: var(--company-button-menu-item-icon-size);
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.ft-company-button-menu-value {
+  /* Typography handled by T.body */
+  color: var(--text-primary);
+}
+
+.ft-company-button-menu-value--placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   6. MENU FOOTER
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-company-button-menu-footer {
+  border-top: 1px solid var(--border-light);
+  padding: var(--company-button-menu-content-padding) 0;
+}
+
+.ft-company-button-menu-link-wrapper {
+  padding: 0 var(--company-button-menu-content-padding);
+}
+
+.ft-company-button-menu-link {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--company-button-menu-item-gap);
+  text-align: left;
+  padding: 8px 12px;
+
+  /* Typography handled by button text */
+  color: var(--text-primary);
+  background-color: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--company-button-transition-duration) ease;
+}
+
+.ft-company-button-menu-link:hover {
+  background-color: var(--bg-secondary);
+}
+
+.ft-company-button-menu-link-icon {
+  width: var(--company-button-menu-item-icon-size);
+  height: var(--company-button-menu-item-icon-size);
+  flex-shrink: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   7. COUNTRY SELECTOR OVERRIDES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-company-button-menu-flag {
+  /* Emoji size handled by rendering */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   7. LOGO CROPPER MODAL
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-company-button-cropper-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 901;
+  background-color: var(--bg-primary);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  width: 320px;
+}
+
+.ft-company-button-cropper-header {
+  /* Typography handled by T.h3 */
+  margin-bottom: var(--space-lg);
+  display: flex;
+  align-items: flex-start;
+}
+
+.ft-company-button-cropper-header-icon {
+  margin-left: var(--space-sm);
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+.ft-company-button-cropper-container {
+  position: relative;
+  width: 100%;
+  height: 192px;
+  margin-bottom: var(--space-lg);
+
+  /* Checkerboard pattern to show transparency */
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
+    linear-gradient(-45deg, #e5e7eb 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e5e7eb 75%),
+    linear-gradient(-45deg, transparent 75%, #e5e7eb 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.ft-company-button-cropper-actions {
+  margin-top: var(--space-lg);
+}
+
+.ft-company-button-cropper-save {
+  width: 100%;
+  color: var(--text-inverse);
+
+  /* Typography handled by button text */
+  padding: var(--space-sm) 0;
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background-color: var(--brand-primary);
+  opacity: 1;
+  border: none;
+}
+
+.ft-company-button-cropper-save * {
+  color: #fff !important;
+}
+
+.ft-company-button-cropper-save:hover {
+  background-color: var(--brand-hover);
+}
+
+.ft-company-button-cropper-save--uploading {
+  cursor: default;
+  background-color: var(--bg-tertiary);
+  opacity: 0.7;
+}
+
+.ft-company-button-cropper-save--uploading:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* Crop area mask - rounded corners matching logo display (25% ratio) */
+.ft-company-button-crop-area {
+  border-radius: 25% !important;
+}

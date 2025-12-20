@@ -1,0 +1,410 @@
+/** ──────────────────────────────────────────────────────────────────────┐
+│  🔐 AUTH FEATURE STYLES - Authentication Experience                    │
+│  /src/features/auth/auth.css                                           │
+│                                                                        │
+│  Semantic styling for all authentication pages.                        │
+│  Composes global tokens from Controlmaster + transtheme.              │
+│                                                                        │
+│  Architecture Layer: Feature (ft-*)                                    │
+│  - Uses tokens from: transtheme.css, tokens.css                        │
+│  - Used by: sign-in, sign-up, reset, sign-out pages                   │
+│  - Zero coupling to VRS (components handle their own styling)          │
+└────────────────────────────────────────────────────────────────────────┘ */
+
+:root {
+  /* Auth Page Background */
+  --ft-auth-page-bg: linear-gradient(to bottom right, #fff7ed, #fff, #fef2f2);
+
+  /* Auth Text - ISOLATED from theme (always light mode appearance) */
+  --ft-auth-text-primary: #3f4958;
+  --ft-auth-text-secondary: #6b7280;
+
+  /* Auth Card */
+  --ft-auth-card-glow-bg: #db3e05;
+  --ft-auth-card-bg: rgb(255 255 255 / 95%);
+  --ft-auth-card-shadow: 0 25px 50px -12px rgb(0 0 0 / 10%);
+  --ft-auth-card-border: rgb(255 255 255 / 50%);
+
+  /* Auth Title */
+  --ft-auth-title-color: #db3e05;
+
+  /* Auth Form */
+  --ft-auth-label-color: #374151;
+  --ft-auth-input-bg: rgb(249 250 251 / 50%);
+  --ft-auth-input-border: #e5e7eb;
+  --ft-auth-input-hover-bg: #fff;
+  --ft-auth-input-focus-border: #db3e05;
+  --ft-auth-input-focus-bg: #fff;
+  --ft-auth-input-focus-shadow: 0 0 0 2px rgb(219 62 5 / 20%);
+  --ft-auth-input-placeholder: #9ca3af;
+  --ft-auth-input-icon-color: #6b7280;
+  --ft-auth-input-icon-hover: #374151;
+  --ft-auth-help-text-color: #6b7280;
+
+  /* Auth States */
+  --ft-auth-error-bg: #fef2f2;
+  --ft-auth-error-border: #fecaca;
+  --ft-auth-error-text: #dc2626;
+  --ft-auth-warning-bg: #fefce8;
+  --ft-auth-warning-border: #fde68a;
+  --ft-auth-warning-text: #d97706;
+  --ft-auth-success-icon-bg: linear-gradient(to bottom right, #4ade80, #059669);
+  --ft-auth-success-icon-shadow: 0 10px 25px -5px rgb(0 0 0 / 10%);
+  --ft-auth-progress-track-bg: #e5e7eb;
+
+  /* Auth Links */
+  --ft-auth-link-color: #db3e05;
+  --ft-auth-link-hover: #cc3600;
+
+  /* Auth Note/Terms */
+  --ft-auth-note-color: #6b7280;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH PAGE CONTAINER
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-auth-page {
+  display: flex;
+  min-height: 100vh;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1rem;
+  padding-top: 2rem;
+  background: var(--ft-auth-page-bg);
+}
+
+.ft-auth-container {
+  width: 100%;
+  max-width: 30rem; /* 448px */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH LOGO
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-auth-logo-wrapper {
+  text-align: center;
+  margin-top: 2.5rem;
+  margin-bottom: 3.75rem; /* mb-15 */
+}
+
+.ft-auth-logo {
+  width: 340px;
+  height: 64px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH CARD (Glass Morphism with Glow)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-auth-card-wrapper {
+  position: relative;
+}
+
+.ft-auth-card-glow {
+  position: absolute;
+  inset: 0;
+  background: var(--ft-auth-card-glow-bg);
+  border-radius: var(--radius-2xl);
+  filter: blur(40px);
+  opacity: 0.2;
+}
+
+.ft-auth-card {
+  position: relative;
+  background-color: var(--ft-auth-card-bg);
+  backdrop-filter: blur(24px);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--ft-auth-card-shadow);
+  border: 1px solid var(--ft-auth-card-border);
+  padding: 2rem;
+}
+
+/* TTT: Stable card prevents layout collapse during hydration */
+.ft-auth-card-stable {
+  min-height: 420px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH HEADER
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.ft-auth-title {
+  font-size: var(--font-size-4xl); /* 36px */
+  font-weight: var(--font-weight-bold);
+  color: var(--ft-auth-title-color);
+  line-height: 2.5rem;
+}
+
+.ft-auth-subtitle {
+  margin-top: 0.5rem;
+  color: var(--ft-auth-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH FORM
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ft-auth-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.ft-auth-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--ft-auth-label-color);
+  margin-bottom: 0.5rem;
+}
+
+.ft-auth-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--ft-auth-input-bg);
+  border: 1px solid var(--ft-auth-input-border);
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-base);
+  color: var(--ft-auth-text-primary);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.ft-auth-input:hover {
+  background-color: var(--ft-auth-input-hover-bg);
+}
+
+.ft-auth-input:focus {
+  border-color: var(--ft-auth-input-focus-border);
+  background-color: var(--ft-auth-input-focus-bg);
+  box-shadow: var(--ft-auth-input-focus-shadow);
+}
+
+.ft-auth-input:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ft-auth-input::placeholder {
+  color: var(--ft-auth-input-placeholder);
+}
+
+/* Input with icon (password field) */
+.ft-auth-input-wrapper {
+  position: relative;
+}
+
+.ft-auth-input-with-icon {
+  padding-right: 3rem;
+}
+
+.ft-auth-input-icon-button {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ft-auth-input-icon-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.ft-auth-input-icon-button:hover {
+  color: var(--ft-auth-input-icon-hover);
+}
+
+.ft-auth-input-icon-button:focus {
+  outline: none;
+}
+
+.ft-auth-help-text {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--ft-auth-help-text-color);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH STATES (Error, Success, Loading)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-auth-error {
+  padding: 0.75rem;
+  background-color: var(--ft-auth-error-bg);
+  border: 1px solid var(--ft-auth-error-border);
+  border-radius: var(--radius-xl);
+}
+
+.ft-auth-error-text {
+  font-size: 0.875rem;
+  color: var(--ft-auth-error-text);
+}
+
+.ft-auth-warning {
+  padding: 0.75rem;
+  background-color: var(--ft-auth-warning-bg);
+  border: 1px solid var(--ft-auth-warning-border);
+  border-radius: var(--radius-xl);
+  margin-top: 0.5rem;
+}
+
+.ft-auth-warning-text {
+  font-size: 0.875rem;
+  color: var(--ft-auth-warning-text);
+  line-height: 1.4;
+}
+
+.ft-auth-success {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ft-auth-success-icon {
+  width: 5rem;
+  height: 5rem;
+  background: var(--ft-auth-success-icon-bg);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: var(--ft-auth-success-icon-shadow);
+}
+
+.ft-auth-success-message {
+  font-size: 0.875rem;
+  color: var(--ft-auth-text-secondary);
+}
+
+.ft-auth-progress-bar {
+  padding-top: 0.5rem;
+}
+
+.ft-auth-progress-track {
+  height: 0.25rem;
+  background-color: var(--ft-auth-progress-track-bg);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.ft-auth-progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    var(--brand-gradient-start),
+    var(--brand-gradient-end)
+  );
+  border-radius: 9999px;
+  animation: ft-auth-loading 3s ease-in-out forwards;
+}
+
+@keyframes ft-auth-loading {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH LINKS & NAVIGATION
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-auth-link-wrapper {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+/* TTT: Inline link wrapper for forms inside card */
+.ft-auth-link-wrapper-inline {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* TTT: Footer inside card (after form) */
+.ft-auth-footer-inline {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0;
+  margin-bottom: -0.5rem;
+  border-top: 1px solid var(--ft-auth-card-border);
+  text-align: center;
+}
+
+.ft-auth-link {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--ft-auth-link-color);
+  transition: color 0.2s ease;
+  text-decoration: none;
+}
+
+.ft-auth-link:hover {
+  color: var(--ft-auth-link-hover);
+}
+
+.ft-auth-footer-text {
+  font-size: 0.875rem;
+  color: var(--ft-auth-text-secondary);
+}
+
+.ft-auth-footer-link {
+  font-weight: var(--font-weight-semibold);
+  color: var(--ft-auth-link-color);
+  transition: color 0.2s ease;
+  text-decoration: none;
+}
+
+.ft-auth-footer-link:hover {
+  color: var(--ft-auth-link-hover);
+}
+
+/* Highlight text (bold + link color) */
+.ft-auth-highlight {
+  color: var(--ft-auth-link-color);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH FOOTER NOTE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-auth-note {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.ft-auth-note-text {
+  font-size: 0.75rem;
+  color: var(--ft-auth-note-color);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SIGN-UP SPECIFIC: TERMS TEXT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ft-auth-terms {
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--ft-auth-note-color);
+}

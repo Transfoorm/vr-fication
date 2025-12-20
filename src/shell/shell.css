@@ -1,0 +1,12 @@
+/* ═══════════════════════════════════════════════════════════════════
+   SHELL - Layout Components (WCCC ly-* Compliant)
+   Consolidated import hub for all shell component styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+@import url('./app.css');
+@import url('./topbar/topbar.css');
+@import url('./footer/footer.css');
+@import url('./page-arch/page-arch.css');
+@import url('./page-header/page-header.css');
+@import url('./ai-sidebar/ai-sidebar.css');
+@import url('./sidebar/sidebar.css');

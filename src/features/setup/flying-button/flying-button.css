@@ -1,0 +1,48 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FLYING BUTTON (PHOENIX) - Animation Engine Styles
+   /src/features/setup/FlyingButton/flying-button.css
+
+   Styles for the animated button that flies between modal and topbar.
+   Uses position: fixed to escape all parent contexts.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-phoenix {
+  position: fixed;
+  left: var(--phoenix-x);
+  top: var(--phoenix-y);
+  z-index: 9999;
+  pointer-events: none;
+  transform: scale(1);
+  transform-origin: top left;
+  transition: transform var(--phoenix-flight-duration) ease-in-out;
+}
+
+/* Phoenix button width matches source */
+.ft-phoenix button {
+  width: var(--phoenix-width);
+}
+
+.ft-phoenix--visible {
+  opacity: 1;
+}
+
+.ft-phoenix--hidden {
+  opacity: 0;
+}
+
+.ft-phoenix--flying {
+  transition: left var(--phoenix-flight-duration) ease-in-out,
+              top var(--phoenix-flight-duration) ease-in-out,
+              transform var(--phoenix-flight-duration) ease-in-out;
+  transform: scale(0.8);
+  transform-origin: top left;
+}
+
+/* Reverse flight - Phoenix grows back to 100% */
+.ft-phoenix--reverse {
+  transform: scale(0.8);
+}
+
+.ft-phoenix--reverse.ft-phoenix--flying {
+  transform: scale(1);
+}

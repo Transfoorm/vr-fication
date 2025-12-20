@@ -1,0 +1,539 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 FIELD VR - Complete Field Styles
+   /src/prebuilts/field/field.css
+
+   ALL field-related styles in ONE file:
+   - Shared base classes (.vr-field__*)
+   - Field.live (auto-save with states)
+   - Field.verify (identity-grade with reveal)
+   - Field.readonly (label + content wrapper)
+   - Layout utilities (vr-field-spacing, vr-field-row)
+
+   TTT Gap Model: NO external margins - container controls spacing
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   SHARED FIELD BASE - Used by all field types
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Label - shared across all field types */
+.vr-field__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+/* Required asterisk */
+.vr-field__required {
+  color: var(--error-600);
+  margin-left: 2px;
+}
+
+/* Helper text - absolute positioned, zero layout impact */
+.vr-field__helper {
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* Error message */
+.vr-field__error {
+  font-size: var(--font-size-xs);
+  color: var(--error-600);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FIELD.LIVE - Complete auto-save field
+   States: idle | focused | dirty | saving | saved | error
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-field-live {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  position: relative;
+}
+
+.vr-field-live__input {
+  width: 100%;
+  padding: var(--space-md);
+  font-size: var(--font-size-md);
+  font-family: inherit;
+  color: var(--text-primary, #1f2937);
+  background-color: var(--bg-input, #fff);
+  border: 1px solid var(--border-light, #eee8e7);
+  border-radius: var(--radius-md, 8px);
+  line-height: normal;
+  height: var(--form-input-height);
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.vr-field-live__input:focus {
+  outline: none;
+  border-color: var(--brand-primary, #f97316);
+}
+
+.vr-field-live__input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Focused - brand orange ring + faint yellow 🟡 (same as Field.verify) */
+.vr-field-live--focused .vr-field-live__input {
+  border-color: var(--brand-primary, #f97316);
+  box-shadow: 0 0 0 3px var(--brand-light, #fed7aa);
+  background-color: #fffef5;
+}
+
+/* ⌨🟡 Dirty - brighter yellow while typing */
+.vr-field-live--dirty .vr-field-live__input {
+  background-color: #ffffd8;
+  border-color: var(--brand-primary, #f97316);
+  box-shadow: 0 0 0 3px var(--brand-light, #fed7aa);
+}
+
+/* Saving - orange glow + yellow bg */
+.vr-field-live--saving .vr-field-live__input {
+  background-color: var(--warning-50, #fffbeb);
+  border-color: var(--brand-primary, #f97316);
+  box-shadow: 0 0 0 3px var(--brand-light, #fed7aa);
+}
+
+/* Saved - keep dirty yellow while badge shows */
+.vr-field-live--saved .vr-field-live__input {
+  background-color: #fefed0;
+  border-color: var(--brand-primary, #f97316);
+  box-shadow: 0 0 0 3px var(--brand-light, #fed7aa);
+}
+
+/* Error - red ring */
+.vr-field-live--error .vr-field-live__input {
+  border-color: var(--error-600, #dc2626);
+  box-shadow: 0 0 0 3px var(--error-100, #fee2e2);
+}
+
+/* Dark mode - color scheme for browser native UI */
+[data-theme-mode="dark"] .vr-field-live__input {
+  color-scheme: dark;
+}
+
+/* Disabled - read-only mode */
+.vr-field-live--disabled .vr-field-live__input {
+  background-color: var(--bg-tertiary, #f5f5f5);
+  color: var(--text-secondary, #6b7280);
+  cursor: not-allowed;
+  opacity: 0.7;
+  border-color: var(--border-primary, #e5e7eb);
+  box-shadow: none;
+}
+
+.vr-field-live--disabled .vr-field-live__input:hover,
+.vr-field-live--disabled .vr-field-live__input:focus {
+  border-color: var(--border-primary, #e5e7eb);
+  box-shadow: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Dark Mode Overrides - Field.live
+   ───────────────────────────────────────────────────────────────────── */
+
+[data-theme-mode="dark"] .vr-field-live--focused .vr-field-live__input {
+  background-color: #2d2a1f;
+  box-shadow: 0 0 0 3px rgb(249 115 22 / 30%);
+}
+
+[data-theme-mode="dark"] .vr-field-live--dirty .vr-field-live__input {
+  background-color: #3a3620;
+  box-shadow: 0 0 0 3px rgb(249 115 22 / 30%);
+}
+
+[data-theme-mode="dark"] .vr-field-live--saving .vr-field-live__input {
+  background-color: #2d2a1f;
+  box-shadow: 0 0 0 3px rgb(249 115 22 / 30%);
+}
+
+[data-theme-mode="dark"] .vr-field-live--saved .vr-field-live__input {
+  background-color: #3a3620;
+  box-shadow: 0 0 0 3px rgb(249 115 22 / 30%);
+}
+
+/* Hover - subtle border highlight (not when disabled) */
+.vr-field-live:not(.vr-field-live--disabled) .vr-field-live__input:hover {
+  border-color: var(--brand-primary, #f97316);
+}
+
+/* Input wrapper for chip positioning */
+.vr-field-live__input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Status chip - inside input on the right */
+.vr-field-live__chip {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  font-size: var(--font-size-xs, 12px);
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm, 4px);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.vr-field-live__chip--visible {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.vr-field-live__chip--saving {
+  background-color: var(--warning-100, #fef3c7);
+  color: var(--warning-700, #a16207);
+}
+
+.vr-field-live__chip--saved {
+  background-color: var(--success-100, #dcfce7);
+  color: var(--success-700, #15803d);
+}
+
+.vr-field-live__chip--error {
+  background-color: var(--error-100, #fee2e2);
+  color: var(--error-700, #b91c1c);
+}
+
+/* NOTE: Helper, error, has-helper now use shared .vr-field__* classes */
+
+/* Textarea variant - multiline, resizable */
+.vr-field-live__textarea {
+  height: auto;
+  min-height: calc(var(--form-input-height) * 2);
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Character counter - absolute positioned, zero layout impact */
+.vr-field-live__counter {
+  position: absolute;
+  bottom: -18px;
+  right: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FIELD.VERIFY - Identity-grade field with Reveal choreography
+   States: idle | focused | dirty | committing | success | error
+
+   The Reveal Pattern:
+   - idle: Display mode (quiet, minimal chrome)
+   - focused: Awakens (border materializes, yellow breathes in)
+   - dirty: Pill slides in showing → newValue
+   - committing: Pill becomes spinner, amber pulse
+   - success: Green ring, checkmark
+   - error: Red ring, stays focused for retry
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-field-verify {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  position: relative;
+}
+
+/* NOTE: Label, required now use shared .vr-field__* classes */
+
+/* Input wrapper for pill positioning */
+.vr-field-verify__input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   INPUT - The awakening field
+   ───────────────────────────────────────────────────────────────────── */
+
+.vr-field-verify__input {
+  width: 100%;
+  padding: var(--space-md);
+  padding-right: 140px; /* Space for pill */
+  font-size: var(--font-size-md);
+  font-family: inherit;
+  color: var(--text-primary);
+  background-color: var(--bg-input);
+  border: 1px solid transparent; /* Idle: no border */
+  border-radius: var(--radius-md);
+  line-height: normal;
+  height: var(--form-input-height);
+  box-sizing: border-box;
+  transition:
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out,
+    background-color 150ms ease-out;
+  position: relative;
+  z-index: 0;
+}
+
+.vr-field-verify__input:focus {
+  outline: none;
+}
+
+.vr-field-verify__input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Idle - quiet, display-like */
+.vr-field-verify--idle .vr-field-verify__input {
+  border-color: var(--border-light);
+  background-color: var(--bg-input);
+}
+
+/* Focused - awakening (border + faint yellow arrive together) */
+.vr-field-verify--focused .vr-field-verify__input {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-light);
+  background-color: #fffef5;
+}
+
+/* 🟡 - same faint yellow, pill visible */
+.vr-field-verify--dirty .vr-field-verify__input {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-light);
+  background-color: #fffef5;
+}
+
+/* Committing - amber pulse */
+.vr-field-verify--committing .vr-field-verify__input {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-light);
+  background-color: var(--warning-100);
+  animation: vr-field-verify-pulse 1s ease-in-out infinite;
+}
+
+@keyframes vr-field-verify-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--brand-light); }
+  50% { box-shadow: 0 0 0 5px var(--brand-light); }
+}
+
+/* Success - green ring */
+.vr-field-verify--success .vr-field-verify__input {
+  border-color: var(--success-500);
+  box-shadow: 0 0 0 3px var(--success-100);
+  background-color: var(--bg-input);
+}
+
+/* Error - red ring */
+.vr-field-verify--error .vr-field-verify__input {
+  border-color: var(--error-500);
+  box-shadow: 0 0 0 3px var(--error-100);
+  background-color: var(--warning-50);
+}
+
+/* Dark mode - color scheme for browser native UI */
+[data-theme-mode="dark"] .vr-field-verify__input {
+  color-scheme: dark;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   PILL - The commit button that slides in
+   ───────────────────────────────────────────────────────────────────── */
+
+.vr-field-verify__pill {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
+  z-index: 1;
+  min-width: 100px;
+
+  /* Default - green verified (overridden by --active, --error, etc) */
+  background-color: var(--success-500);
+  color: #fff;
+}
+
+/* Pill active (dirty state) - orange, clickable */
+.vr-field-verify__pill--active {
+  background-color: var(--verify-bg);
+  color: var(--verify-text);
+}
+
+/* Pill editing (focused, not dirty) - yellow, just a label */
+.vr-field-verify__pill--editing {
+  background-color: var(--editing-bg);
+  color: var(--editing-text);
+  pointer-events: none;
+  cursor: default;
+}
+
+.vr-field-verify__pill--editing .vr-field-verify__typing,
+.vr-field-verify__pill--active .vr-field-verify__typing {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: normal;
+  animation: vr-field-verify-typing-cycle 6s ease-in-out infinite;
+}
+
+@keyframes vr-field-verify-typing-cycle {
+  /* Start empty */
+  0% { width: 0; }
+
+  /* Type in slowly */
+  40% { width: 100%; }
+
+  /* Hold fully visible */
+  80% { width: 100%; }
+
+  /* Collapse back */
+  100% { width: 0; }
+}
+
+/* Pill empty (no value set yet) - neutral gray, just a label */
+.vr-field-verify__pill--empty {
+  background-color: var(--bg-tertiary);
+  color: var(--text-tertiary);
+  pointer-events: none;
+  cursor: default;
+}
+
+/* Pill verified (no changes) - green, just a label */
+.vr-field-verify__pill--verified {
+  background-color: var(--verified-bg);
+  color: var(--verified-text);
+  pointer-events: none;
+  cursor: default;
+}
+
+.vr-field-verify__pill--active:hover {
+  background-color: var(--brand-hover);
+  box-shadow: 0 2px 8px var(--brand-light);
+}
+
+.vr-field-verify__pill--active:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* Pill committing - spinner */
+.vr-field-verify__pill--committing {
+  background-color: var(--brand-primary);
+  color: #fff;
+  cursor: wait;
+}
+
+/* Pill success - green checkmark */
+.vr-field-verify__pill--success {
+  background-color: var(--success-500);
+  color: #fff;
+}
+
+/* Pill error - red X */
+.vr-field-verify__pill--error {
+  background-color: var(--error-500);
+  color: #fff;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Dark Mode Overrides - Field.verify
+   ───────────────────────────────────────────────────────────────────── */
+
+[data-theme-mode="dark"] .vr-field-verify--focused .vr-field-verify__input {
+  background-color: #2d2a1f;
+  box-shadow: 0 0 0 3px rgb(249 115 22 / 30%);
+}
+
+[data-theme-mode="dark"] .vr-field-verify--dirty .vr-field-verify__input {
+  background-color: #2d2a1f;
+  box-shadow: 0 0 0 3px rgb(249 115 22 / 30%);
+}
+
+/* Idle hover - subtle highlight on hover */
+.vr-field-verify--idle .vr-field-verify__input:hover {
+  border-color: var(--brand-primary);
+  cursor: text;
+}
+
+/* NOTE: Helper, error, has-helper now use shared .vr-field__* classes */
+
+/* ═══════════════════════════════════════════════════════════════════
+   FIELD.READONLY - Label + field + messages (not editable)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-field-readonly {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  position: relative;
+
+  /* Ensure children (like Field.display) fill container width */
+  width: 100%;
+}
+
+/* Force direct children (the field content) to fill width */
+.vr-field-readonly > :not(.vr-field-readonly__label, .vr-field-readonly__helper, .vr-field-readonly__error) {
+  width: 100%;
+}
+
+.vr-field-readonly__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.vr-field-readonly__required {
+  color: var(--error-600);
+  margin-left: 2px;
+}
+
+.vr-field-readonly__helper {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.vr-field-readonly__error {
+  font-size: var(--font-size-xs);
+  color: var(--error-600);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FIELD LAYOUT - Spacing utilities for field groups
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Vertical stack - gaps between rows */
+.vr-field-spacing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Horizontal row - fields side by side */
+.vr-field-row {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: flex-start;
+}
+
+.vr-field-row > * {
+  flex: 1;
+  min-width: 0;
+}
+

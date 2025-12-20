@@ -1,0 +1,505 @@
+/* ═══════════════════════════════════════════════════════════════════
+   👤 USER BUTTON - Avatar + Dropdown Menu
+   Complete user profile management interface
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Avatar */
+  --user-button-avatar-size: 40px;
+  --user-button-avatar-border: 2px;
+  --user-button-avatar-shadow-sm: 0 1px 2px rgb(0 0 0 / 5%);
+  --user-button-avatar-shadow-md: 0 4px 6px rgb(0 0 0 / 10%);
+
+  /* Menu Positioning & Dimensions */
+  --user-button-menu-bottom: 64px;
+  --user-button-menu-left: 3px;
+  --user-button-menu-radius: 10px;
+  --user-button-menu-width: 240px;
+  --user-button-menu-width-modal: 320px;
+  --user-button-menu-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -2px rgb(0 0 0 / 5%);
+
+  /* Close Button */
+  --user-button-close-offset: -8px;
+  --user-button-close-size: 20px;
+
+  /* Icon Sizes */
+  --user-button-icon-sm: 16px;
+  --user-button-icon-md: 18px;
+  --user-button-icon-lg: 20px;
+
+  /* Spacing - Padding */
+  --user-button-padding-xs: 4px;
+  --user-button-padding-sm: 8px;
+  --user-button-padding-md: 12px;
+  --user-button-padding-lg: 16px;
+  --user-button-padding-header-y: 8px;
+  --user-button-padding-header-x: 16px;
+  --user-button-padding-item-y: 6px;
+  --user-button-padding-item-x: 12px;
+  --user-button-padding-error-button-y: 4px;
+  --user-button-padding-error-button-x: 10px;
+  --user-button-padding-theme-reduced: 4px;
+
+  /* Spacing - Gaps & Margins */
+  --user-button-gap-sm: 6px;
+  --user-button-gap-md: 8px;
+  --user-button-margin-xs: 1px;
+  --user-button-margin-sm: 2px;
+  --user-button-margin-md: 8px;
+  --user-button-margin-lg: 16px;
+  --user-button-margin-negative-sm: -4px;
+  --user-button-margin-negative-xs: -1px;
+
+  /* Borders */
+  --user-button-border-sm: 2px;
+  --user-button-border-md: 3px;
+  --user-button-border-radius-sm: 2px;
+  --user-button-border-radius-md: 4px;
+
+  /* Animations & Transitions */
+  --user-button-transition-fast: 0.15s;
+  --user-button-transition-medium: 0.2s;
+  --user-button-transition-slow: 0.8s;
+
+  /* Modal & Cropper */
+  --user-button-cropper-height: 192px;
+
+  /* Backdrops */
+  --user-button-backdrop-opacity-light: 0.1;
+  --user-button-backdrop-opacity-medium: 0.4;
+  --user-button-backdrop-light: rgb(0 0 0 / 10%);
+  --user-button-backdrop-medium: rgb(0 0 0 / 40%);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   LOADING STATE
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-loading {
+  width: var(--user-button-avatar-size);
+  height: var(--user-button-avatar-size);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   CONTAINER
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-right: var(--topbar-userbutton-padding);
+}
+
+.ft-userbutton-avatar-wrapper {
+  cursor: pointer;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   AVATAR
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-avatar {
+  width: var(--user-button-avatar-size);
+  height: var(--user-button-avatar-size);
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: var(--user-button-avatar-border) solid var(--border-light);
+  box-shadow: var(--user-button-avatar-shadow-sm);
+  transition: all var(--duration-fast) var(--easing);
+  transform: scale(1);
+}
+
+.ft-userbutton-avatar--active {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 2px var(--brand-light), var(--user-button-avatar-shadow-md);
+  transform: scale(1.05);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   HIDDEN FILE INPUT
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-file-input {
+  display: none;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   DROPDOWN MENU - Bottom-left of modal touches top-right of footer button
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-menu {
+  position: fixed;
+  bottom: var(--user-button-menu-bottom);
+  left: calc(var(--sidebar-width) - 5px);  /* 🟨 Match CompanyButton positioning */
+  background-color: var(--bg-primary);
+  box-shadow: var(--user-button-menu-shadow);
+  border: 1px solid var(--border-light);
+  border-radius: var(--user-button-menu-radius);
+  min-width: var(--user-button-menu-width);
+  z-index: 50;
+  animation: fade-in var(--user-button-transition-fast) ease-out;
+}
+
+.ft-userbutton-menu--closing {
+  animation: scale-out var(--user-button-transition-fast) ease-out;
+  transform-origin: bottom left;
+}
+
+.ft-userbutton-modal--closing {
+  animation: fade-out var(--user-button-transition-fast) ease-out;
+}
+
+/* Close Button (Menu + Modal) */
+.ft-userbutton-close-button {
+  position: absolute;
+  top: var(--user-button-close-offset);
+  right: var(--user-button-close-offset);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  width: var(--user-button-close-size);
+  height: var(--user-button-close-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+
+  /* Typography handled by button content */
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: background-color var(--user-button-transition-fast) ease;
+}
+
+.ft-userbutton-close-button:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   MENU HEADER (Email verification section)
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-menu-header {
+  padding: var(--user-button-padding-header-y) var(--user-button-padding-header-x);
+  border-bottom: 1px solid var(--border-light);
+  background-color: var(--bg-secondary);  /* Title Header background */
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+.ft-userbutton-menu-header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--user-button-gap-sm);
+}
+
+.ft-userbutton-menu-header-icon {
+  width: var(--user-button-icon-lg);
+  height: var(--user-button-icon-lg);
+  flex-shrink: 0;
+  border-radius: var(--user-button-border-radius-sm);
+}
+
+.ft-userbutton-menu-header-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+}
+
+.ft-userbutton-menu-email {
+  /* Typography handled by T.body */
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+  margin: 0;
+  user-select: text;
+  cursor: text;
+}
+
+.ft-userbutton-menu-email--unverified {
+  color: var(--text-secondary);
+}
+
+.ft-userbutton-menu-email-status {
+  /* Typography handled by T.caption */
+  color: var(--text-tertiary);
+  line-height: 1;
+  margin: 0;
+  margin-top: var(--user-button-margin-xs);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   ERROR MESSAGE
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-error-container {
+  padding: var(--user-button-padding-header-y) var(--user-button-padding-header-x);
+  background-color: var(--color-error-light);
+  border-left: var(--user-button-border-md) solid var(--color-error);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.ft-userbutton-error-text {
+  /* Typography handled by T.body */
+  color: var(--color-error-dark);
+  line-height: 1.4;
+  margin-bottom: var(--user-button-margin-md);
+}
+
+.ft-userbutton-error-buttons {
+  display: flex;
+  gap: var(--user-button-gap-md);
+  justify-content: center;
+}
+
+.ft-userbutton-error-button {
+  /* Typography handled by button text */
+  color: var(--color-error-dark);
+  background-color: var(--color-error-button-bg);
+  border: none;
+  border-radius: var(--user-button-border-radius-md);
+  padding: var(--user-button-padding-error-button-y) var(--user-button-padding-error-button-x);
+  cursor: pointer;
+  transition: background-color var(--user-button-transition-fast) ease;
+}
+
+.ft-userbutton-error-button:hover {
+  background-color: var(--color-error-button-hover);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   MENU ITEMS
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-menu-items {
+  padding: var(--user-button-padding-xs) 0;
+}
+
+.ft-userbutton-menu-item-wrapper {
+  padding: 0 var(--user-button-padding-xs);
+}
+
+.ft-userbutton-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--user-button-gap-md);
+  text-align: left;
+  padding: var(--user-button-padding-item-y) var(--user-button-padding-item-x);
+
+  /* Typography handled by button text */
+  color: var(--text-primary);
+  background-color: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--user-button-transition-fast) ease;
+}
+
+.ft-userbutton-menu-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Theme Toggle Button - reduce padding to match other buttons */
+.ft-userbutton-menu-item:has(.ft-theme-label) {
+  padding: var(--user-button-padding-theme-reduced) var(--user-button-padding-item-x);
+}
+
+/* Nudge the text label up slightly */
+.ft-userbutton-theme-text {
+  transform: translateY(var(--user-button-margin-negative-xs));
+  display: inline-block;
+}
+
+/* Theme Toggle inside menu - remove hover background and extra height */
+.ft-userbutton-menu-item .ft-theme-label {
+  width: var(--user-button-icon-lg);
+  height: var(--user-button-icon-lg);
+  margin-left: var(--user-button-margin-negative-sm);
+  margin-top: var(--user-button-margin-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ft-userbutton-menu-item .ft-theme-label:hover {
+  background-color: transparent;
+}
+
+.ft-userbutton-menu-item .ft-theme-svg {
+  width: var(--user-button-icon-md);
+  height: var(--user-button-icon-md);
+}
+
+.ft-userbutton-menu-item .ft-theme-input {
+  pointer-events: none;
+}
+
+/* Divider */
+.ft-userbutton-menu-divider {
+  border-top: 1px solid var(--border-light);
+  padding: var(--user-button-padding-xs) 0;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   PROFILE MODAL
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 901;
+  background-color: var(--bg-primary);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--user-button-padding-lg);
+  width: var(--user-button-menu-width-modal);
+}
+
+/* Modal uses translate centering, needs custom animation */
+@keyframes ft-userbutton-modal-scale-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes ft-userbutton-modal-scale-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+}
+
+.ft-userbutton-modal--closing {
+  animation: ft-userbutton-modal-scale-out var(--user-button-transition-fast) ease-out;
+}
+
+.ft-userbutton-modal-header {
+  /* Typography handled by T.h3 */
+  margin-bottom: var(--user-button-margin-lg);
+  display: flex;
+  align-items: flex-start;
+}
+
+.ft-userbutton-modal-header-icon {
+  margin-left: var(--user-button-margin-md);
+  width: var(--user-button-icon-sm);
+  height: var(--user-button-icon-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   IMAGE CROPPER
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-cropper-container {
+  position: relative;
+  width: 100%;
+  height: var(--user-button-cropper-height);
+  margin-bottom: var(--user-button-margin-lg);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.ft-userbutton-upload-actions {
+  margin-top: var(--user-button-margin-lg);
+}
+
+.ft-userbutton-upload-button {
+  width: 100%;
+  color: var(--text-inverse);
+
+  /* Typography handled by button text */
+  padding: var(--user-button-padding-sm) 0;
+  border-radius: var(--radius-lg);
+  transition: all var(--user-button-transition-medium) ease;
+  cursor: pointer;
+  background-color: var(--brand-primary);
+  opacity: 1;
+  border: none;
+}
+
+.ft-userbutton-upload-button * {
+  color: #fff !important;
+}
+
+.ft-userbutton-upload-button:hover {
+  background-color: var(--brand-hover);
+}
+
+.ft-userbutton-upload-button--uploading {
+  cursor: default;
+  background-color: var(--bg-tertiary);
+  opacity: 0.7;
+}
+
+.ft-userbutton-upload-button--uploading:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   BACKDROPS
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   SIGN-OUT OVERLAY
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-userbutton-signout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background-color: var(--user-button-backdrop-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade-in var(--user-button-transition-medium) ease-out;
+}
+
+/* Sign-out button */
+.ft-userbutton-signout-button.vr-button-primary {
+  padding: 0.9rem 2rem;
+  background: linear-gradient(140.14deg, #ec540e 15.05%, #d6361f 114.99%) padding-box,
+              linear-gradient(142.51deg, #ff9465 8.65%, #f63 88.82%) border-box;
+  border: 2px solid transparent;
+  border-radius: var(--radius-xl);
+  box-shadow: 8px 8px 20px 0 rgb(69 9 0 / 35%);
+  text-shadow: 1px 1px 1px rgb(0 0 0 / 25%);
+  color: #fff !important;
+}
+
+.ft-userbutton-signout-button * {
+  color: #fff !important;
+}
+

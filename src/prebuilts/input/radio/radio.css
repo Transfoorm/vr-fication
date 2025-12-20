@@ -1,0 +1,130 @@
+/* ═══════════════════════════════════════════════════════════════════
+   INPUT RADIO VARIANT
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-input-radio-group {
+  display: flex;
+
+  /* NO external margins - TTT Gap Model compliant */
+}
+
+/* Layout directions */
+.vr-input-radio-group--vertical {
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.vr-input-radio-group--horizontal {
+  flex-flow: row wrap;
+  gap: var(--space-lg);
+}
+
+/* Individual radio item */
+.vr-input-radio {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Hidden native radio */
+.vr-input-radio-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Custom radio button - Fancy inset style */
+.vr-input-radio-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 4px;
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-full);
+  box-shadow:
+    inset -1px -1px 4px var(--bg-primary),
+    inset 1px 1px 3px var(--border-normal);
+  transition:
+    background-color 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
+}
+
+/* Size variants */
+.vr-input-radio--sm .vr-input-radio-button {
+  width: 16px;
+  height: 16px;
+}
+
+.vr-input-radio--md .vr-input-radio-button {
+  width: 20px;
+  height: 20px;
+}
+
+.vr-input-radio--lg .vr-input-radio-button {
+  width: 24px;
+  height: 24px;
+}
+
+/* Radio dot (inner circle) - always visible, animates on check */
+.vr-input-radio-dot {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border-radius: var(--radius-full);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Label */
+.vr-input-radio-label {
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.vr-input-radio--sm .vr-input-radio-label {
+  font-size: var(--font-size-sm);
+}
+
+.vr-input-radio--md .vr-input-radio-label {
+  font-size: var(--font-size-md);
+}
+
+.vr-input-radio--lg .vr-input-radio-label {
+  font-size: var(--font-size-lg);
+}
+
+/* States */
+.vr-input-radio:hover .vr-input-radio-button {
+  opacity: 0.8;
+}
+
+.vr-input-radio-input:checked + .vr-input-radio-button .vr-input-radio-dot {
+  background: var(--brand-primary);
+  transform: scale(1.1);
+  outline: 2px solid var(--bg-primary);
+}
+
+.vr-input-radio-input:focus-visible + .vr-input-radio-button {
+  box-shadow:
+    inset -1px -1px 4px var(--bg-primary),
+    inset 1px 1px 3px var(--border-normal),
+    0 0 0 3px var(--brand-light);
+}
+
+/* Disabled state */
+.vr-input-radio--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vr-input-radio--disabled .vr-input-radio-label {
+  color: var(--text-tertiary);
+}
+
+.vr-input-radio--disabled:hover .vr-input-radio-button {
+  opacity: 1;
+}

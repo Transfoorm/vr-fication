@@ -1,0 +1,253 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 SIMPLE TABS VARIANT - Inconspicuous Card Header Tabs
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Simple Tabs */
+  --tabs-simple-action-offset: -2px;
+  --tabs-simple-count-padding-y: 2px;
+  --tabs-simple-count-padding-x: 6px;
+
+  /* Panels Tabs */
+  --tabs-panels-height: 40px;
+  --tabs-panels-container-radius: 8px;
+  --tabs-panels-container-padding: 4px;
+  --tabs-panels-list-gap: 6px;
+  --tabs-panels-trigger-gap: 2px;
+  --tabs-panels-trigger-radius: 6px;
+  --tabs-panels-trigger-padding-y: 6px;
+  --tabs-panels-trigger-padding-x: 12px;
+  --tabs-panels-trigger-font-size: var(--font-size-sm);
+  --tabs-panels-transition-duration: 200ms;
+  --tabs-panels-focus-outline: 2px;
+  --tabs-panels-focus-offset: 2px;
+  --tabs-panels-count-min-width: 18px;
+  --tabs-panels-count-height: 18px;
+  --tabs-panels-count-padding-x: 5px;
+  --tabs-panels-count-radius: 9px;
+  --tabs-panels-count-font-size: 11px;
+}
+
+.vr-tabs-simple {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-light);
+  margin: 0;
+  padding: 0;
+}
+
+.vr-tabs-simple .vr-tabs-simple-tabs-nav {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.vr-tabs-simple .vr-tabs-simple-tabs-actions {
+  display: flex;
+  align-items: center;
+  padding-right: var(--space-sm);
+  gap: var(--space-sm);
+}
+
+.vr-tabs-simple .vr-tabs-simple-tabs-actions > * {
+  transform: translateY(var(--tabs-simple-action-offset));
+}
+
+.vr-tabs-simple .vr-tabs-simple-tab-item {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing);
+  position: relative;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.vr-tabs-simple .vr-tabs-simple-tab-item:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+.vr-tabs-simple .vr-tabs-simple-tab-item.active {
+  color: var(--brand-primary);
+  background-color: var(--brand-lightest);
+  border: 1px solid var(--border-light);
+  border-bottom: 2px solid var(--brand-primary);
+}
+
+.vr-tabs-simple .vr-tabs-simple-tab-count {
+  padding: var(--tabs-simple-count-padding-y) var(--tabs-simple-count-padding-x);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.vr-tabs-simple .vr-tabs-simple-tab-item.active .vr-tabs-simple-tab-count {
+  background-color: var(--brand-primary);
+  color: var(--text-inverse);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 PANELS TABS VARIANT - Modern Elevated Pill Style
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-tabs-panels {
+  display: inline-flex;
+  height: var(--tabs-panels-height);
+  align-items: center;
+  border-radius: var(--tabs-panels-container-radius);
+  background: linear-gradient(to bottom, var(--bg-secondary), var(--bg-tertiary));
+  border: var(--card-border-width) solid var(--border-normal);
+  padding: var(--tabs-panels-container-padding);
+  color: var(--text-secondary);
+  width: fit-content;
+}
+
+.vr-tabs-panels .vr-tabs-panels-list {
+  display: flex;
+  align-items: center;
+  gap: var(--tabs-panels-list-gap);
+  position: relative;
+}
+
+.vr-tabs-panels .vr-tabs-panels-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tabs-panels-trigger-gap);
+  white-space: nowrap;
+  border-radius: var(--tabs-panels-trigger-radius);
+  padding: var(--tabs-panels-trigger-padding-y) var(--tabs-panels-trigger-padding-x);
+  font-size: var(--tabs-panels-trigger-font-size);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--tabs-panels-transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  position: relative;
+}
+
+/* Bordered variant - 50% opacity faint border on active only */
+.vr-tabs-panels--bordered .vr-tabs-panels-trigger.active {
+  border-color: rgb(from var(--border-light) r g b / 50%);
+}
+
+.vr-tabs-panels .vr-tabs-panels-trigger:focus-visible {
+  outline: var(--tabs-panels-focus-outline) solid var(--brand-primary);
+  outline-offset: var(--tabs-panels-focus-offset);
+}
+
+.vr-tabs-panels .vr-tabs-panels-trigger:hover:not(.disabled, .active) {
+  color: var(--text-primary);
+  background-color: var(--bg-tab-hover);
+}
+
+.vr-tabs-panels .vr-tabs-panels-trigger.active {
+  background-color: var(--bg-tab-rest);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.vr-tabs-panels .vr-tabs-panels-trigger.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.vr-tabs-panels .vr-tabs-panels-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vr-tabs-panels .vr-tabs-panels-icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.vr-tabs-panels .vr-tabs-panels-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 2px;
+  border-radius: 50%;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  position: relative;
+  top: -4px;
+  margin-left: 0;
+}
+
+.vr-tabs-panels .vr-tabs-panels-trigger.active .vr-tabs-panels-tab-count {
+  background-color: var(--brand-primary);
+  color: var(--text-inverse);
+}
+
+/* Tab label with smaller inline text (e.g., "Genome 29%") */
+.vr-tabs-panels-label-sm {
+  font-size: var(--font-size-xs);
+  opacity: 0.8;
+  position: relative;
+  top: 1px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TAB PANELS CONTAINER - Composite VR Internal Layout
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-tabs-panels-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+/* .vr-tabs-panels-content - no styling needed, gap handled by container */
+
+.vr-hidden {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HIGHLIGHT BREATHING ANIMATION - Gentle color pulse
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes vr-tabs-highlight-breathe {
+  0% { color: inherit; }
+
+  /* Quick anticipation - slight shift toward orange */
+  15% { color: inherit; }
+
+  /* Smooth glide to dark orange */
+  40% { color: var(--brand-primary-dark); }
+
+  /* Hold dark orange briefly */
+  55% { color: var(--brand-primary-dark); }
+
+  /* Gentle ease back */
+  75% { color: inherit; }
+
+  /* Rest period */
+  100% { color: inherit; }
+}
+
+.vr-tabs-panels .vr-tabs-panels-trigger--highlight:not(.active) {
+  animation: vr-tabs-highlight-breathe 3s ease-in-out infinite;
+}

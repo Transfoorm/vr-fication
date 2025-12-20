@@ -1,0 +1,383 @@
+/** ─────────────────────────────────────────────────────────────────────┐
+│  🔥 VANISH DRAWER STYLES - User Deletion Portal (WCCC ft-* Compliant) │
+│  /src/features/Vanish/vanish.css                                       │
+│                                                                         │
+│  Complete styles for VANISH drawer portal.                            │
+│  Dark theme, intentional friction, ceremonial UX.                     │
+│                                                                         │
+│  WCCC ft-* PREFIX:                                                     │
+│  All classes use ft-vanish-* prefix for feature discoverability.      │
+│  State-based transforms (--hidden/--visible) handle animation.        │
+└─────────────────────────────────────────────────────────────────────────┘ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   BACKDROP - Dims FUSE organism
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-vanish-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background-color: rgb(0 0 0 / 40%);
+  transition: opacity 300ms ease-out;
+}
+
+.ft-vanish-backdrop--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ft-vanish-backdrop--visible {
+  opacity: 1;
+}
+
+.ft-vanish-backdrop--interactive {
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DRAWER CONTAINER - The VANISH realm
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-vanish-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 80%;
+  max-width: 900px;
+  z-index: 9999;
+  background-color: #18181b; /* Dark VANISH theme */
+  border-left: 2px solid #ef4444; /* Red threshold border */
+  box-shadow: -8px 0 24px rgb(239 68 68 / 30%); /* Fire glow */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 300ms ease-out;
+}
+
+.ft-vanish-drawer--hidden {
+  transform: translateX(100%);
+}
+
+.ft-vanish-drawer--visible {
+  transform: translateX(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HEADER - The threshold marker
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-vanish-header {
+  height: calc(var(--topbar-height) + 2px);
+  padding: 0 24px;
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.ft-vanish-header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.ft-vanish-header-icon {
+  display: inline-block;
+  transform: scale(1.5); /* Make emoji 1.5x larger */
+}
+
+.ft-vanish-header-title {
+  /* Typography handled by T.h3 */
+  color: #991b1b !important;
+}
+
+.ft-vanish-header-subtitle {
+  /* Typography handled by T.body */
+  color: #7f1d1d !important;
+  margin-top: -3px;
+}
+
+.ft-vanish-header-close {
+  padding: 8px 10px;
+  background-color: transparent;
+  color: #991b1b;
+  border: 1px solid #ef4444;
+  border-radius: var(--radius-sm);
+
+  /* Typography handled by button text */
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.ft-vanish-header-close:disabled {
+  opacity: 0.5;
+}
+
+.ft-vanish-header-close:hover:not(:disabled) {
+  background-color: #fef2f2;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FORM CONTAINER - The ritual space
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-vanish-form {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-xl);
+  color: #fafafa;
+}
+
+.ft-vanish-form-title {
+  margin: 0 0 var(--space-lg) 0;
+  color: #ef4444 !important;
+
+  /* Typography handled by T.h2 */
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TARGET CARD - Who will be deleted
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-vanish-target-card {
+  background-color: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.ft-vanish-target-label {
+  /* Typography handled by T.body */
+  color: #a1a1aa !important;
+  margin-bottom: var(--space-sm);
+}
+
+/* Batch list */
+.ft-vanish-target-list {
+  max-height: 200px;
+  overflow: auto;
+  margin-top: var(--space-md);
+}
+
+.ft-vanish-target-item {
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid #3f3f46;
+}
+
+.ft-vanish-target-item:last-child {
+  border-bottom: none;
+}
+
+.ft-vanish-target-name {
+  /* Typography handled by T.body */
+  color: #fafafa !important;
+  margin-bottom: 4px;
+}
+
+.ft-vanish-target-details {
+  /* Typography handled by T.caption */
+  color: #a1a1aa !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Single target */
+.ft-vanish-target-single-name {
+  /* Typography handled by T.body */
+  color: #fafafa !important;
+  margin-bottom: 8px;
+}
+
+.ft-vanish-target-single-email {
+  /* Typography handled by T.body */
+  color: #a1a1aa !important;
+  margin-bottom: 8px;
+}
+
+.ft-vanish-target-single-badges {
+  /* Typography handled by T.caption */
+  color: #a1a1aa !important;
+  display: flex;
+  gap: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FORM FIELDS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-vanish-field {
+  margin-bottom: var(--space-lg);
+}
+
+.ft-vanish-label {
+  /* Typography handled by T.body */
+  display: block;
+  margin-bottom: var(--space-sm);
+  color: #fafafa !important;
+}
+
+.ft-vanish-label * {
+  color: #fafafa !important;
+}
+
+.ft-vanish-label-required {
+  color: #ef4444 !important;
+}
+
+.ft-vanish-textarea {
+  width: 100%;
+  padding: var(--space-md);
+  background-color: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: var(--radius-sm);
+  color: #fafafa;
+  min-height: 100px;
+  font-family: inherit; /* Preserve font-family for form inputs */
+  resize: vertical;
+}
+
+.ft-vanish-textarea::placeholder {
+  color: #71717a;
+}
+
+.ft-vanish-input {
+  width: 100%;
+  padding: var(--space-md);
+  background-color: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: var(--radius-sm);
+  color: #fafafa;
+  font-family: monospace; /* Preserve monospace for confirmation input */
+}
+
+.ft-vanish-input::placeholder {
+  color: #71717a;
+}
+
+.ft-vanish-confirmation-code {
+  font-family: monospace;
+  color: #ef4444 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ACTION BUTTONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-vanish-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+  padding-top: var(--space-lg);
+  border-top: 1px solid #3f3f46;
+  margin-top: var(--space-xl);
+}
+
+.ft-vanish-button-cancel {
+  padding: 12px 24px;
+  background-color: #27272a;
+  color: #fafafa;
+  border: 1px solid #3f3f46;
+  border-radius: var(--radius-sm);
+
+  /* Typography handled by button text */
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.ft-vanish-button-cancel:disabled {
+  opacity: 0.5;
+}
+
+.ft-vanish-button-cancel:hover:not(:disabled) {
+  background-color: #3f3f46;
+}
+
+.ft-vanish-button-delete {
+  padding: 12px 24px;
+  background-color: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+
+  /* Typography handled by button text */
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.ft-vanish-button-delete:disabled {
+  opacity: 0.5;
+}
+
+.ft-vanish-button-delete:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   AUDIT TRAIL NOTICE
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-vanish-audit-notice {
+  margin-top: var(--space-xl);
+  padding: var(--space-md);
+  background-color: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: var(--radius-sm);
+
+  /* Typography handled by T.caption */
+  color: #a1a1aa !important;
+  line-height: 1.6;
+}
+
+.ft-vanish-audit-notice * {
+  color: #a1a1aa !important;
+}
+
+.ft-vanish-audit-title {
+  /* Typography handled by T.h4 */
+  color: #fafafa !important;
+  margin-bottom: 4px;
+}
+
+.ft-vanish-audit-list {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.ft-vanish-audit-list li {
+  margin: 4px 0;
+  display: list-item;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .ft-vanish-form {
+    padding: var(--space-md);
+  }
+
+  /* Typography responsive sizing handled by T-VR props */
+
+  .ft-vanish-actions {
+    flex-direction: column;
+  }
+
+  .ft-vanish-button-cancel,
+  .ft-vanish-button-delete {
+    width: 100%;
+  }
+}

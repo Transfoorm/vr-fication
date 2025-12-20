@@ -1,0 +1,308 @@
+'use client';
+
+import '@/features/admin/showcase-bundle/showcase-bundle.css';
+import { Card, Button, Input, Icon, Tooltip } from '@/prebuilts';
+import TypographyHeading from '@/prebuilts/typography/TypographyHeading';
+import TypographyBody from '@/prebuilts/typography/TypographyBody';
+
+export default function Tooltips() {
+  return (
+    <Card.standard
+      title="Tooltips Showcase"
+      subtitle="Testing tooltip examples with various elements"
+    >
+      <div className="ft-showcasetabs-tooltips-container">
+        {/* Title Section */}
+        <div>
+          <Tooltip.caret content="These are interactive elements for the page. This is an example of a tooltip that you can hover over a title to display helpful information and context about the section below. Tooltips are great for providing additional details without cluttering the interface." size="lg">
+            <TypographyHeading level={3} size="md" weight="semibold" className="ft-showcasetabs-tooltips-title-hover">Interactive Elements</TypographyHeading>
+          </Tooltip.caret>
+        </div>
+
+        {/* Button Example */}
+        <div>
+          <Tooltip.caret content="Click on this link and it will take you to a page">
+            <Button.primary>Hover Me</Button.primary>
+          </Tooltip.caret>
+        </div>
+
+        {/* Radio Example */}
+        <div>
+          <Input.radio
+            value="option1"
+            onChange={() => {}}
+            options={[
+              {
+                value: 'option1',
+                label: 'Option 1',
+                tooltip: 'This is for option one',
+                tooltipSize: 'sm',
+                tooltipSide: 'left'
+              },
+              {
+                value: 'option2',
+                label: 'Option 2',
+                tooltip: 'We use MD for option two because it has a few more words than what option one had',
+                tooltipSize: 'md',
+                tooltipSide: 'top'
+              },
+              {
+                value: 'option3',
+                label: 'Option 3',
+                tooltip: 'Option three uses the large tooltip size to demonstrate how tooltips can contain longer blocks of text. This is useful when you need to provide detailed explanations, instructions, or contextual information that wouldn\'t fit in a smaller tooltip. The large size gives you plenty of room to communicate complex ideas while still maintaining good readability and a clean interface.',
+                tooltipSize: 'lg',
+                tooltipSide: 'bottom'
+              },
+              {
+                value: 'option4',
+                label: 'Option 4',
+                tooltip: 'We use RHS for option four because it will be out of the way',
+                tooltipSize: 'md',
+                tooltipSide: 'right'
+              }
+            ]}
+            direction="horizontal"
+          />
+        </div>
+
+        {/* Lorem Ipsum Paragraph */}
+        <div>
+          <p>
+            Lorem ipsum dolor sit amet,{' '}
+            <Tooltip.caret content="This word uses Button.link VR with a small tooltip on top" size="sm" side="top">
+              <Button.link onClick={() => {}} className="ft-showcasetabs-tooltips-link-inline">consectetur</Button.link>
+            </Tooltip.caret>
+            {' '}adipiscing elit. Sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+            quis nostrud{' '}
+            <Tooltip.caret content="This demonstrates a medium-sized tooltip appearing on the bottom of an underlined word" size="md" side="bottom">
+              <u className="ft-showcasetabs-tooltips-underline">exercitation</u>
+            </Tooltip.caret>
+            {' '}ullamco laboris nisi ut aliquip ex ea commodo
+            consequat. Duis aute irure dolor in{' '}
+            <Tooltip.caret content="Here's a larger tooltip with more detailed information about this underlined Latin word, showing how tooltips can contain longer explanatory text" size="lg" side="left">
+              <u className="ft-showcasetabs-tooltips-underline">reprehenderit</u>
+            </Tooltip.caret>
+            {' '}in voluptate velit esse
+            cillum dolore eu fugiat nulla pariatur.{' '}
+            <Tooltip.caret content="Info icon at the end of paragraph" size="sm" side="top" trigger="click" closeOnMouseLeave={true}>
+              <span className="ft-showcasetabs-tooltips-icon-wrapper">
+                <Icon variant="info" size="xs" className="ft-showcasetabs-tooltips-icon-color" />
+              </span>
+            </Tooltip.caret>
+          </p>
+          <p>
+            Space import info icon and a tooltip{' '}
+            <Tooltip.caret content="Hover me version hover" size="sm" side="top" trigger="hover">
+              <span className="ft-showcasetabs-tooltips-icon-wrapper">
+                <Icon variant="info" size="xs" className="ft-showcasetabs-tooltips-icon-color" />
+              </span>
+            </Tooltip.caret>
+            {' '}hover me version hover.
+          </p>
+        </div>
+
+        {/* Icon Examples */}
+        <div className="ft-showcasetabs-tooltips-icons-row">
+          <div className="ft-showcasetabs-tooltips-icons-item">
+            <span>Click on stays on until you unclick me:</span>
+            <Tooltip.caret content="Click to toggle this tooltip on and off" size="sm" side="top" trigger="click">
+              <Icon
+                variant="info"
+                size="md"
+                className="ft-showcasetabs-tooltips-icon-accent"
+              />
+            </Tooltip.caret>
+          </div>
+
+          <div className="ft-showcasetabs-tooltips-icons-item">
+            <span>Hover me and click off:</span>
+            <Tooltip.caret content="This is a standard hover tooltip but when you click it disapears." size="sm" side="top" dismissOnClick={true}>
+              <Icon
+                variant="alert-circle"
+                size="md"
+                className="ft-showcasetabs-tooltips-icon-warning"
+              />
+            </Tooltip.caret>
+          </div>
+        </div>
+
+        <hr className="ft-showcasetabs-tooltips-divider" />
+
+        {/* Documentation Section */}
+        <div className="ft-showcasetabs-tooltips-docs">
+          <TypographyHeading level={3} size="md" weight="semibold" className="ft-showcasetabs-tooltips-docs-title">Tooltip Implementation Guide</TypographyHeading>
+          <TypographyBody size="md" className="ft-showcasetabs-tooltips-docs-intro">
+            All tooltips use the <strong>Tooltip.caret</strong> VR component. This keeps tooltip logic contained within the VR architecture, preventing page infection. Each variation below demonstrates different configurations.
+          </TypographyBody>
+
+          <div className="ft-showcasetabs-tooltips-docs-list">
+            {/* Style 1 */}
+            <div>
+              <TypographyHeading level={3} size="md" weight="semibold">1. Large Hover Tooltip on Title</TypographyHeading>
+              <TypographyBody size="sm"><strong>VR:</strong> Tooltip.caret</TypographyBody>
+              <TypographyBody size="sm"><strong>Usage:</strong> Large informational tooltip on headings</TypographyBody>
+              <pre className="ft-showcasetabs-tooltips-code-block">
+{`<Tooltip.caret content="..." size="lg">
+  <h3>Interactive Elements</h3>
+</Tooltip.caret>`}
+              </pre>
+              <TypographyBody size="sm"><strong>Props:</strong> size=&quot;lg&quot;, trigger defaults to &quot;hover&quot;</TypographyBody>
+            </div>
+
+            {/* Style 2 */}
+            <div>
+              <TypographyHeading level={3} size="md" weight="semibold">2. Button Hover Tooltip</TypographyHeading>
+              <TypographyBody size="sm"><strong>VR:</strong> Tooltip.caret</TypographyBody>
+              <TypographyBody size="sm"><strong>Usage:</strong> Standard tooltip on buttons</TypographyBody>
+              <pre className="ft-showcasetabs-tooltips-code-block">
+{`<Tooltip.caret content="Click on this link and it will take you to a page">
+  <Button.primary>Hover Me</Button.primary>
+</Tooltip.caret>`}
+              </pre>
+              <TypographyBody size="sm"><strong>Props:</strong> size defaults to &quot;sm&quot;, trigger defaults to &quot;hover&quot;</TypographyBody>
+            </div>
+
+            {/* Style 3 */}
+            <div>
+              <TypographyHeading level={3} size="md" weight="semibold">3. Radio Button Tooltips (Directional)</TypographyHeading>
+              <TypographyBody size="sm"><strong>VR:</strong> Input.radio with built-in tooltip support</TypographyBody>
+              <TypographyBody size="sm"><strong>Usage:</strong> Per-option tooltips with custom positioning</TypographyBody>
+              <pre className="ft-showcasetabs-tooltips-code-block">
+{`<Input.radio
+  options={[{
+    value: 'option1',
+    label: 'Option 1',
+    tooltip: 'This is for option one',
+    tooltipSize: 'sm',
+    tooltipSide: 'left'
+  }]}
+/>`}
+              </pre>
+              <TypographyBody size="sm"><strong>Props:</strong> tooltipSize (sm/md/lg), tooltipSide (top/bottom/left/right)</TypographyBody>
+            </div>
+
+            {/* Style 4 */}
+            <div>
+              <TypographyHeading level={3} size="md" weight="semibold">4. Inline Link with Tooltip</TypographyHeading>
+              <TypographyBody size="sm"><strong>VR:</strong> Tooltip.caret + Button.link</TypographyBody>
+              <TypographyBody size="sm"><strong>Usage:</strong> Clickable inline text with tooltip</TypographyBody>
+              <pre className="ft-showcasetabs-tooltips-code-block">
+{`<Tooltip.caret content="..." size="sm" side="top"
+  <Button.link onClick={() => {}}
+    style={{ minHeight: 'auto', padding: 0, textDecorationColor: 'currentColor' }}>
+    consectetur
+  </Button.link>
+</Tooltip.caret>`}
+              </pre>
+              <TypographyBody size="sm"><strong>Props:</strong> Inline styles needed to prevent layout shift</TypographyBody>
+            </div>
+
+            {/* Style 5 */}
+            <div>
+              <TypographyHeading level={3} size="md" weight="semibold">5. Underlined Text with Tooltip (Medium)</TypographyHeading>
+              <TypographyBody size="sm"><strong>VR:</strong> Tooltip.caret</TypographyBody>
+              <TypographyBody size="sm"><strong>Usage:</strong> Underlined text with medium tooltip below</TypographyBody>
+              <pre className="ft-showcasetabs-tooltips-code-block">
+{`<Tooltip.caret content="..." size="md" side="bottom"
+  <u style={{ cursor: 'pointer', textDecorationColor: 'currentColor' }}>
+    exercitation
+  </u>
+</Tooltip.caret>`}
+              </pre>
+              <TypographyBody size="sm"><strong>Props:</strong> size=&quot;md&quot;, side=&quot;bottom&quot;</TypographyBody>
+            </div>
+
+            {/* Style 6 */}
+            <div>
+              <TypographyHeading level={3} size="md" weight="semibold">6. Underlined Text with Tooltip (Large, Left)</TypographyHeading>
+              <TypographyBody size="sm"><strong>VR:</strong> Tooltip.caret</TypographyBody>
+              <TypographyBody size="sm"><strong>Usage:</strong> Large tooltip positioned to the left</TypographyBody>
+              <pre className="ft-showcasetabs-tooltips-code-block">
+{`<Tooltip.caret content="..." size="lg" side="left"
+  <u style={{ cursor: 'pointer', textDecorationColor: 'currentColor' }}>
+    reprehenderit
+  </u>
+</Tooltip.caret>`}
+              </pre>
+              <TypographyBody size="sm"><strong>Props:</strong> size=&quot;lg&quot;, side=&quot;left&quot;</TypographyBody>
+            </div>
+
+            {/* Style 7 */}
+            <div>
+              <TypographyHeading level={3} size="md" weight="semibold">7. Click-to-Open, Hover-to-Close Icon Tooltip</TypographyHeading>
+              <TypographyBody size="sm"><strong>VR:</strong> Tooltip.caret</TypographyBody>
+              <TypographyBody size="sm"><strong>Usage:</strong> Click opens tooltip, moving mouse away closes it</TypographyBody>
+              <pre className="ft-showcasetabs-tooltips-code-block">
+{`<Tooltip.caret content="..." size="sm" side="top"
+  trigger="click" closeOnMouseLeave={true}>
+  <span className="ft-showcasetabs-tooltips-icon-wrapper">
+    <Icon variant="info" size="xs" className="ft-showcasetabs-tooltips-icon-color" />
+  </span>
+</Tooltip.caret>`}
+              </pre>
+              <TypographyBody size="sm"><strong>Props:</strong> trigger=&quot;click&quot;, closeOnMouseLeave={true}</TypographyBody>
+            </div>
+
+            {/* Style 8 */}
+            <div>
+              <TypographyHeading level={3} size="md" weight="semibold">8. Standard Hover Icon Tooltip</TypographyHeading>
+              <TypographyBody size="sm"><strong>VR:</strong> Tooltip.caret</TypographyBody>
+              <TypographyBody size="sm"><strong>Usage:</strong> Standard hover tooltip on info icon</TypographyBody>
+              <pre className="ft-showcasetabs-tooltips-code-block">
+{`<Tooltip.caret content="Hover me version hover" size="sm" side="top"
+  <span className="ft-showcasetabs-tooltips-icon-wrapper">
+    <Icon variant="info" size="xs" className="ft-showcasetabs-tooltips-icon-color" />
+  </span>
+</Tooltip.caret>`}
+              </pre>
+              <TypographyBody size="sm"><strong>Props:</strong> Default hover trigger</TypographyBody>
+            </div>
+
+            {/* Style 9 */}
+            <div>
+              <TypographyHeading level={3} size="md" weight="semibold">9. Click-to-Toggle Icon Tooltip</TypographyHeading>
+              <TypographyBody size="sm"><strong>VR:</strong> Tooltip.caret</TypographyBody>
+              <TypographyBody size="sm"><strong>Usage:</strong> Click to toggle tooltip on/off, stays open until clicked again</TypographyBody>
+              <pre className="ft-showcasetabs-tooltips-code-block">
+{`<Tooltip.caret content="Click to toggle this tooltip on and off"
+  size="sm" side="top" trigger="click">
+  <Icon variant="info" size="md"
+    className="ft-showcasetabs-tooltips-icon-accent" />
+</Tooltip.caret>`}
+              </pre>
+              <TypographyBody size="sm"><strong>Props:</strong> trigger=&quot;click&quot; (without closeOnMouseLeave)</TypographyBody>
+            </div>
+
+            {/* Style 10 */}
+            <div>
+              <TypographyHeading level={3} size="md" weight="semibold">10. Hover-to-Show, Click-to-Dismiss Icon Tooltip</TypographyHeading>
+              <TypographyBody size="sm"><strong>VR:</strong> Tooltip.caret</TypographyBody>
+              <TypographyBody size="sm"><strong>Usage:</strong> Tooltip appears on hover but dismisses when icon is clicked</TypographyBody>
+              <pre className="ft-showcasetabs-tooltips-code-block">
+{`<Tooltip.caret content="..." size="sm" side="top" dismissOnClick={true}>
+  <Icon variant="alert-circle" size="md"
+    className="ft-showcasetabs-tooltips-icon-warning" />
+</Tooltip.caret>`}
+              </pre>
+              <TypographyBody size="sm"><strong>Props:</strong> dismissOnClick={'{true}'} - Hover shows, click dismisses</TypographyBody>
+            </div>
+          </div>
+
+          <div className="ft-showcasetabs-tooltips-props-summary">
+            <TypographyHeading level={3} size="md" weight="semibold" className="ft-showcasetabs-tooltips-props-title">Key Props Summary</TypographyHeading>
+            <ul className="ft-showcasetabs-tooltips-props-list">
+              <li><strong>size:</strong> &quot;sm&quot; | &quot;md&quot; | &quot;lg&quot; (default: &quot;sm&quot;)</li>
+              <li><strong>side:</strong> &quot;top&quot; | &quot;bottom&quot; | &quot;left&quot; | &quot;right&quot; (default: &quot;top&quot;)</li>
+              <li><strong>trigger:</strong> &quot;hover&quot; | &quot;click&quot; (default: &quot;hover&quot;)</li>
+              <li><strong>closeOnMouseLeave:</strong> boolean - Use with trigger=&quot;click&quot; to close on mouse leave (default: false)</li>
+              <li><strong>dismissOnClick:</strong> boolean - Tooltip shows on hover but dismisses when clicked (default: false)</li>
+              <li><strong>followCursor:</strong> boolean - Tooltip follows mouse cursor (default: false)</li>
+              <li><strong>fullWidth:</strong> boolean - Makes tooltip wrapper full width (default: false)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </Card.standard>
+  );
+}

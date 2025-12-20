@@ -1,0 +1,27 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 STACK COMPONENT - Vertical Layout Utilities
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.vr-stack-tight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.vr-stack-loose {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+.vr-stack-horizontal {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-md);
+}

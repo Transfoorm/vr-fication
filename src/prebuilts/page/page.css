@@ -1,0 +1,293 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 PAGE COMPONENT - All variants consolidated
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   BASE PAGE - Shared by all page variants
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-page {
+  min-height: 100%;
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STANDARD PAGE VARIANT - Enterprise Default Layout
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-page-standard {
+  /* No padding/margin - spacing controlled by DividerVC */
+  padding: 0;
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+/* Optional content width constraint for readability */
+.vr-page-standard.vr-page-standard-constrained {
+  max-width: var(--page-constrained-max-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DASHBOARD PAGE VARIANT - Auto-Grid Widget Layout
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-page-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--page-dashboard-min-width), 1fr));
+  gap: var(--page-dashboard-gap);
+
+  /* No padding - spacing controlled by DividerVC */
+  padding: 0;
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+/* Widget span controls */
+.vr-page-dashboard-widget.vr-page-dashboard-widget-span-2 {
+  grid-column: span 2;
+}
+
+.vr-page-dashboard-widget.vr-page-dashboard-widget-span-3 {
+  grid-column: span 3;
+}
+
+.vr-page-dashboard-widget.vr-page-dashboard-widget-full {
+  grid-column: 1 / -1;
+}
+
+/* Responsive behavior */
+@media (width <= 1200px) {
+  .vr-page-dashboard-widget.vr-page-dashboard-widget-span-3 {
+    grid-column: span 2;
+  }
+}
+
+@media (width <= 768px) {
+  .vr-page-dashboard-widget.vr-page-dashboard-widget-span-2,
+  .vr-page-dashboard-widget.vr-page-dashboard-widget-span-3 {
+    grid-column: span 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FULL PAGE VARIANT - Edge-to-Edge Immersive Layout
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-page-full {
+  padding: 0;
+  min-height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+/* Direct children can use full viewport */
+.vr-page-full > * {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SIDEBAR PAGE VARIANT - Fixed Sidebar + Main Content
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-page-sidebar {
+  display: grid;
+  grid-template-columns: var(--page-sidebar-width) 1fr;
+  gap: var(--page-sidebar-gap);
+
+  /* No padding/margin - spacing controlled by DividerVC */
+  padding: 0;
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+/* Sidebar and main sections */
+.vr-page-sidebar .vr-page-sidebar-sidebar-section {
+  position: sticky;
+  top: var(--page-sidebar-sticky-top);
+  max-height: calc(100vh - calc(var(--page-sidebar-sticky-offset) * 2));
+  overflow-y: auto;
+}
+
+.vr-page-sidebar .vr-page-sidebar-sidebar-main {
+  min-height: 100%;
+}
+
+/* Sidebar on right */
+.vr-page-sidebar.vr-page-sidebar-sidebar-right {
+  grid-template-columns: 1fr var(--page-sidebar-width);
+}
+
+.vr-page-sidebar.vr-page-sidebar-sidebar-right .vr-page-sidebar-sidebar-section {
+  order: 2;
+}
+
+.vr-page-sidebar.vr-page-sidebar-sidebar-right .vr-page-sidebar-sidebar-main {
+  order: 1;
+}
+
+/* Mobile behavior */
+@media (width <= 768px) {
+  .vr-page-sidebar.vr-page-sidebar-sidebar-collapsible {
+    grid-template-columns: 1fr;
+  }
+
+  .vr-page-sidebar.vr-page-sidebar-sidebar-collapsible .vr-page-sidebar-sidebar-section {
+    position: static;
+    max-height: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BRIDGE PAGE VARIANT - Universal Feed Grid Layout
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-page-bridge {
+  /* No padding/margin - spacing controlled by DividerVC */
+  padding: 0;
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+/* Bridge header container */
+.vr-page-bridge-header {
+  margin-bottom: var(--page-bridge-title-margin-bottom);
+  padding-bottom: var(--page-bridge-title-padding-bottom);
+}
+
+/* Bridge title styling */
+.vr-page-bridge-title {
+  color: var(--page-title-color);
+  margin: 0;
+
+  /* Typography handled by T.title size="xl" weight="bold" */
+}
+
+/* Bridge subtitle styling */
+.vr-page-bridge-subtitle {
+  color: var(--page-subtitle-color);
+  margin: 0;
+  margin-top: var(--page-bridge-subtitle-gap);
+
+  /* Typography handled by T.body size="md" */
+}
+
+/* Auto-responsive grid for feed sections */
+.vr-page-bridge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--page-bridge-grid-min-width), 1fr));
+  gap: var(--page-bridge-grid-gap);
+}
+
+/* Feed items container */
+.vr-page-bridge-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Individual feed item */
+.vr-page-bridge-item {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+  transition: background 0.2s ease;
+}
+
+.vr-page-bridge-item:hover {
+  background: var(--surface-hover);
+}
+
+.vr-page-bridge-item > :first-child {
+  margin: 0;
+  margin-bottom: var(--space-xs);
+
+  /* Typography handled by T.body size="md" weight="semibold" */
+}
+
+.vr-page-bridge-item > :nth-child(2) {
+  margin: 0;
+  margin-bottom: var(--space-sm);
+
+  /* Typography handled by T.body size="sm" */
+}
+
+.vr-page-bridge-timestamp {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  /* Typography handled by T.caption size="xs" */
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SPLIT PAGE VARIANT - Two-Column 50/50 Layout
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-page-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--page-split-gap);
+
+  /* No padding/margin - spacing controlled by DividerVC */
+  padding: 0;
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+/* Column containers */
+.vr-page-split .vr-page-split-split-left,
+.vr-page-split .vr-page-split-split-right {
+  min-height: 100%;
+}
+
+/* Mobile stacking */
+@media (width <= 768px) {
+  .vr-page-split {
+    grid-template-columns: 1fr;
+  }
+
+  /* Reverse option for mobile */
+  .vr-page-split.vr-page-split-reverse-mobile {
+    direction: rtl;
+  }
+
+  .vr-page-split.vr-page-split-reverse-mobile > * {
+    direction: ltr;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TRIPLE PAGE VARIANT - Three-Column Equal Layout
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-page-triple {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--page-split-gap);
+
+  /* No padding/margin - spacing controlled by DividerVC */
+  padding: 0;
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+/* Column containers */
+.vr-page-triple .vr-page-triple-triple-left,
+.vr-page-triple .vr-page-triple-triple-center,
+.vr-page-triple .vr-page-triple-triple-right {
+  min-height: 100%;
+}
+
+/* Mobile stacking */
+@media (width <= 768px) {
+  .vr-page-triple {
+    grid-template-columns: 1fr;
+  }
+}

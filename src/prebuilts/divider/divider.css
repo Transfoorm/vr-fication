@@ -1,0 +1,73 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 DIVIDER COMPONENT - Spacing Utilities
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-divider-default {
+  height: 1rem;
+}
+
+.vr-divider-default-sm {
+  height: 0.5rem;
+}
+
+.vr-divider-default-lg {
+  height: 2rem;
+}
+
+.vr-divider-default-xl {
+  height: 3rem;
+}
+
+.vr-divider-line {
+  margin: 1rem 0;
+  border: none;
+  border-top: 1px solid var(--border-light);
+}
+
+.vr-divider-line-sm {
+  margin: 0.5rem 0;
+}
+
+.vr-divider-line-lg {
+  margin: 2rem 0;
+}
+
+.vr-divider-line-xl {
+  margin: 3rem 0;
+}
+
+.vr-divider-gradient {
+  margin: 1rem 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border-light), transparent);
+}
+
+.vr-divider-gradient-sm {
+  margin: 0.5rem 0;
+}
+
+.vr-divider-gradient-lg {
+  margin: 2rem 0;
+}
+
+.vr-divider-gradient-xl {
+  margin: 3rem 0;
+}
+
+.vr-divider-dashed {
+  margin: 1rem 0;
+  border: none;
+  border-top: 1px dashed var(--border-light);
+}
+
+.vr-divider-dashed-sm {
+  margin: 0.5rem 0;
+}
+
+.vr-divider-dashed-lg {
+  margin: 2rem 0;
+}
+
+.vr-divider-dashed-xl {
+  margin: 3rem 0;
+}

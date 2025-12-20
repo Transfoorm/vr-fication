@@ -1,0 +1,115 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CHECKBOX VARIANT - SETTINGS CONTEXT
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Checkbox Settings Shadows */
+  --checkbox-settings-hover-shadow: 0 0 0 4px rgb(255 85 39 / 10%);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   BASE CONTAINER
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-checkbox-settings {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  border: 2px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--bg-primary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vr-checkbox-settings.vr-checkbox--disabled {
+  opacity: 0.5;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   SIZE VARIANTS
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-checkbox-settings.vr-checkbox--sm {
+  width: 20px;
+  height: 20px;
+}
+
+.vr-checkbox-settings.vr-checkbox--md {
+  width: 24px;
+  height: 24px;
+}
+
+.vr-checkbox-settings.vr-checkbox--lg {
+  width: 28px;
+  height: 28px;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   CHECKED STATE
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-checkbox-settings.vr-checkbox--checked {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.vr-checkbox-settings.vr-checkbox--checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-inverse);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  animation: checkmark-pop 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   COLOR VARIANTS
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-checkbox-settings.vr-checkbox--success.vr-checkbox--checked {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.vr-checkbox-settings.vr-checkbox--warning.vr-checkbox--checked {
+  background-color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.vr-checkbox-settings.vr-checkbox--error.vr-checkbox--checked {
+  background-color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   FOCUS STATE
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-checkbox-settings:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   HOVER STATE
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-checkbox-settings:not(.vr-checkbox--disabled):hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--checkbox-settings-hover-shadow);
+  transform: scale(1.05);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   ACTIVE STATE
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-checkbox-settings:not(.vr-checkbox--disabled):active {
+  transform: scale(0.95);
+}

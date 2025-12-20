@@ -1,0 +1,39 @@
+/* ═══════════════════════════════════════════════════════════════════
+   INPUT TEXT VARIANT
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-input-text {
+  width: 100%;
+  padding: var(--space-md);
+  font-size: var(--font-size-md);
+  font-family: inherit;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  line-height: normal;
+  min-height: 48px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  /* NO external margins - TTT Gap Model compliant */
+}
+
+.vr-input-text:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--shadow-focus);
+}
+
+/* LiveField override - parent state controls focus styling */
+.vr-fieldbox-live .vr-input-text:focus {
+  border-color: var(--border-light);
+  box-shadow: none;
+}
+
+.vr-input-text::placeholder {
+  color: var(--text-tertiary);
+}
+
+.vr-input-text--disabled {
+  opacity: 0.5;
+  background-color: var(--bg-disabled);
+}

@@ -1,0 +1,66 @@
+/* ═══════════════════════════════════════════════════════════════════
+   INPUT TEXTAREA VARIANT
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-input-textarea {
+  width: 100%;
+  padding: var(--space-md);
+  font-size: var(--font-size-md);
+  font-family: inherit;
+  color: var(--text-primary);
+  background-color: var(--bg-fieldbox-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+
+  /* NO external margins - TTT Gap Model compliant */
+}
+
+.vr-input-textarea:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-light);
+  background-color: var(--bg-fieldbox-primary);
+}
+
+.vr-input-textarea::placeholder {
+  color: var(--text-tertiary);
+  opacity: 1;
+}
+
+/* Auto-resize variant */
+.vr-input-textarea--auto-resize {
+  resize: none;
+  overflow: hidden;
+}
+
+/* Disabled state */
+.vr-input-textarea:disabled {
+  opacity: 0.5;
+  background-color: var(--bg-fieldbox-secondary);
+}
+
+/* Character counter container */
+.vr-input-textarea-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.vr-input-textarea-counter {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  text-align: right;
+}
+
+.vr-input-textarea-counter--warning {
+  color: var(--warning-600);
+}
+
+.vr-input-textarea-counter--error {
+  color: var(--error-600);
+}

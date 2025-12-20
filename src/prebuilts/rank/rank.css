@@ -1,0 +1,241 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 RANK COMPONENT - All variants consolidated
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Shimmer Animation */
+  --rank-shimmer-overlay: rgb(255 255 255 / 20%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RANK CARD VARIANT - Intelligent Rank Display
+   TTT Gap Model compliant - Container controls spacing
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-rank-card {
+  background: var(--rank-bg, var(--bg-card));
+  border: 2px solid var(--rank-color, var(--border-normal));
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  transition: all 0.2s ease;
+
+  /* NO external margins - TTT Gap Model */
+}
+
+.vr-rank-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+}
+
+/* Loading state */
+.vr-rank-card--loading {
+  min-height: 160px;
+  position: relative;
+  overflow: hidden;
+}
+
+.vr-rank-card-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--rank-shimmer-overlay),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* Header */
+.vr-rank-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.vr-rank-card-icon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.vr-rank-card-label {
+  color: var(--rank-color, var(--text-primary));
+
+  /* Typography handled by T.title size="sm" weight="semibold" */
+}
+
+/* Count */
+.vr-rank-card-count {
+  color: var(--rank-color, var(--text-primary));
+  line-height: 1;
+
+  /* Typography handled by T.title size="3xl" weight="bold" */
+}
+
+/* Footer */
+.vr-rank-card-footer {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+}
+
+.vr-rank-card-percentage {
+  color: var(--rank-color, var(--text-primary));
+
+  /* Typography handled by T.title size="md" weight="semibold" */
+}
+
+.vr-rank-card-description {
+  /* Typography handled by T.body size="sm" */
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RANK TABLE VARIANT - User Rank Table Styles
+   TTT Gap Model compliant - Container controls spacing
+   Table.sortable VR handles all table styling
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-rank-table {
+  width: 100%;
+
+  /* NO external margins - TTT Gap Model */
+}
+
+.vr-rank-table tbody tr td {
+  overflow: visible;
+}
+
+/* Fix: Override Table.sortable's first-child rule (meant for checkboxes) */
+.vr-rank-table tbody tr td:first-child {
+  font-size: var(--table-cell-font-size) !important;
+  line-height: normal !important;
+  padding: var(--table-cell-padding) !important;
+  text-align: left !important;
+}
+
+/* Z-index layering: Header > Open Dropdown > Rows */
+.vr-rank-table thead {
+  z-index: 100 !important; /* Always on top */
+}
+
+.vr-rank-table tbody tr {
+  position: relative;
+  z-index: 1;
+}
+
+/* Elevate row with open dropdown */
+.vr-rank-table tbody tr:has(.vr-dropdown-with-icons:focus-within) {
+  z-index: 50; /* Above other rows, below sticky header */
+}
+
+/* Ensure dropdown menu respects header */
+.vr-rank-table .vr-dropdown-with-icons .vr-dropdown-with-icons-menu {
+  z-index: 50 !important; /* Match parent row, will be clipped by header */
+}
+
+/* Fix for last 3 rows: Open dropdown upward to avoid clipping */
+.vr-rank-table tbody tr:nth-last-child(-n+3) .vr-dropdown-with-icons-menu {
+  top: auto !important;
+  bottom: calc(100% + 4px) !important;
+}
+
+/* Current user indicator */
+.vr-current-user-badge {
+  margin-left: var(--space-xs);
+  color: var(--brand-primary);
+  font-size: var(--font-size-xs);
+}
+
+/* Rank selector actions column layout */
+.vr-rank-actions-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.vr-rank-selector-wrapper {
+  position: relative;
+}
+
+/* Loading state */
+.vr-rank-table--loading {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vr-rank-table-shimmer {
+  font-size: var(--font-size-lg);
+  color: var(--text-tertiary);
+  animation: pulse 2s infinite;
+}
+
+/* Updating indicator */
+.vr-updating-indicator {
+  margin-left: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  animation: pulse 1s infinite;
+}
+
+/* Empty state */
+.vr-empty-state {
+  padding: var(--space-3xl);
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+/* Disabled tooltip for own Admiral rank */
+.vr-rank-selector-disabled-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+}
+
+.vr-rank-selector-disabled-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--bg-inverse);
+}
+
+.vr-rank-selector-disabled-tooltip:hover,
+.vr-dropdown-with-icons--disabled:hover + .vr-rank-selector-disabled-tooltip {
+  opacity: 1;
+}
+
+/* Email column styling */
+.vr-rank-table-email {
+  color: var(--text-secondary);
+}
+
+/* Trial days urgency indicator (ISV compliant - data-attribute) */
+.vr-trial-days {
+  font-weight: var(--font-weight-semibold);
+}
+
+.vr-trial-days[data-urgency="high"] {
+  color: var(--danger);
+}

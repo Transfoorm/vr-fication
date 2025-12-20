@@ -1,0 +1,71 @@
+{
+  "name": "fuse",
+  "version": "6.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "dev:convex": "convex dev",
+    "build": "npx convex codegen && next build --turbopack",
+    "start": "next start",
+    "lint": "eslint",
+    "lint:admin": "eslint 'src/app/domains/admin/**/*.{ts,tsx}'",
+    "lint:fix:admin": "eslint 'src/app/domains/admin/**/*.{ts,tsx}' --fix",
+    "virgin-check": "tsc --project tsconfig.VRP.json && eslint . --max-warnings=0 && npm run vrp:all && npm run build",
+    "virgin-check:quick": "tsc --project tsconfig.VRP.json && eslint . --max-warnings=0",
+    "vrp:isv": "tsx scripts/checkISV.ts",
+    "vrp:naming": "tsx scripts/checkNaming.ts",
+    "vrp:manifest": "tsx scripts/validateManifest.ts",
+    "vrp:cascade": "tsx scripts/verifyCascadeCoverage.ts",
+    "vrp:warp": "tsx scripts/verifyWarpNavSync.ts",
+    "vrp:prism": "tsx scripts/verifyPrismCoverage.ts",
+    "vrp:css": "tsx scripts/checkCSS.ts",
+    "vrp:clerk": "tsx scripts/checkClerkVirus.ts",
+    "vrp:class-scan": "tsx scripts/checkVRClasses.ts",
+    "vrp:typography": "tsx scripts/checkTypography.ts",
+    "vrp:all": "npm run vrp:isv && npm run vrp:naming && npm run vrp:clerk && npm run vrp:manifest && npm run vrp:cascade && npm run vrp:warp && npm run vrp:prism && npm run vrp:css && npm run vrp:class-scan && npm run vrp:typography",
+    "prebuild": "npm run vrp:cascade",
+    "clean:buildinfo": "tsx scripts/cleanBuildinfo.ts",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "tsx scripts/checkISV.ts",
+      "tsx scripts/checkNaming.ts",
+      "tsx scripts/checkClerkVirus.ts",
+      "eslint --max-warnings=0",
+      "tsc-files --noEmit"
+    ],
+    "**/*.css": [
+      "stylelint --fix"
+    ]
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^6.33.2",
+    "convex": "^1.27.3",
+    "framer-motion": "^11.15.0",
+    "jose": "^6.1.0",
+    "jotai": "^2.15.0",
+    "lucide-react": "^0.544.0",
+    "next": "^15.5.7",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-easy-crop": "^5.5.3",
+    "svix": "^1.77.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
+    "stylelint": "^16.26.0",
+    "stylelint-config-standard": "^36.0.1",
+    "tsc-files": "^1.1.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  }
+}

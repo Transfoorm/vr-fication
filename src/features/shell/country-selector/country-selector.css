@@ -1,0 +1,128 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🌍 COUNTRY SELECTOR - Business Location Dropdown
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Dropdown Dimensions */
+  --country-selector-dropdown-width: 192px;
+  --country-selector-dropdown-padding-bottom: 4px;
+  --country-selector-dropdown-z-index: 9999;
+
+  /* Header */
+  --country-selector-header-padding-y: 12px;
+  --country-selector-header-padding-x: 16px;
+  --country-selector-header-gap: 8px;
+
+  /* Option */
+  --country-selector-option-gap: 12px;
+  --country-selector-option-padding-y: 8px;
+  --country-selector-option-padding-x: 12px;
+  --country-selector-option-margin-y: 4px;
+  --country-selector-option-margin-x: 4px;
+  --country-selector-option-width-offset: 8px;
+
+  /* Option Content */
+  --country-selector-option-content-gap: 2px;
+
+  /* Shadow */
+  --country-selector-dropdown-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -2px rgb(0 0 0 / 5%);
+}
+
+/* Dropdown - Portal Container */
+.ft-country-dropdown {
+  position: fixed;
+  width: var(--country-selector-dropdown-width);
+  background-color: var(--page-arch-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--country-selector-dropdown-shadow);
+  border: 1px solid var(--border-light);
+  padding-top: 0;
+  padding-bottom: var(--country-selector-dropdown-padding-bottom);
+  z-index: var(--country-selector-dropdown-z-index);
+  top: var(--dropdown-top, 50%);
+}
+
+/* Dropdown - Left Alignment */
+.ft-country-dropdown--left {
+  left: var(--dropdown-left, 280px);
+}
+
+/* Dropdown - Right Alignment */
+.ft-country-dropdown--right {
+  right: var(--dropdown-right, 20px);
+}
+
+/* Dropdown - Header */
+.ft-country-header {
+  /* Typography handled by T.caption */
+  padding: var(--country-selector-header-padding-y) var(--country-selector-header-padding-x);
+  color: var(--text-secondary);
+  letter-spacing: 0.025em;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-light);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--country-selector-header-gap);
+  white-space: nowrap;
+}
+
+/* Option - Button Base */
+.ft-country-option {
+  width: calc(100% - var(--country-selector-option-width-offset));
+  display: flex;
+  align-items: center;
+  gap: var(--country-selector-option-gap);
+  padding: var(--country-selector-option-padding-y) var(--country-selector-option-padding-x);
+  margin: 0 var(--country-selector-option-margin-x) var(--country-selector-option-margin-y) var(--country-selector-option-margin-x);
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+/* First option - Add top margin */
+.ft-country-option:first-of-type {
+  margin-top: var(--country-selector-option-margin-y);
+}
+
+/* Option - Hover */
+.ft-country-option:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Option - Selected State */
+.ft-country-option--selected {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+/* Option - Flag Emoji */
+.ft-country-option-flag {
+  /* Emoji sizing - not Typography text */
+  line-height: 1;
+}
+
+/* Option - Content Container */
+.ft-country-option-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--country-selector-option-content-gap);
+}
+
+/* Option - Country Name */
+.ft-country-option-name {
+  /* Typography handled by T.body */
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+/* Option - Checkmark */
+.ft-country-option-checkmark {
+  /* Checkmark character sizing - not Typography text */
+  color: var(--brand-primary);
+}

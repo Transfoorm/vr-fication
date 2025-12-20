@@ -1,0 +1,16 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 BASE ACTIONS STYLES - Shared by all action variants
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Actions wrapper - applies gap between action icons */
+.vr-table-actions-wrapper {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+/* Disabled action icons - grey out and prevent interaction */
+span[data-disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+}

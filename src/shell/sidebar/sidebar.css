@@ -1,0 +1,357 @@
+/** ──────────────────────────────────────────────────────────────────────┐
+│  📍 SIDEBAR STYLES (WCCC ly-* Compliant)                              │
+│  /src/shell/css/sidebar.css                                           │
+│                                                                        │
+│  Minimal starter - just container frame and background.               │
+└────────────────────────────────────────────────────────────────────────┘ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SIDEBAR VARIABLES - Component-Scoped Dimensions
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Container & Scroll */
+  --sidebar-fade-clearance: 40px;
+  --sidebar-fade-gradient-start: 60px;
+
+  /* Buttons & Icons */
+  --sidebar-active-indicator-width: 4px;
+  --sidebar-icon-size: 18px;
+  --sidebar-chevron-size: 16px;
+
+  /* Collapse Button */
+  --sidebar-collapse-button-size: 24px;
+  --sidebar-collapse-button-top: 5px;
+  --sidebar-collapse-button-right: 12px;
+  --sidebar-collapse-icon-size: 16px;
+
+  /* Sublinks */
+  --sidebar-sublinks-indent: 24px;
+  --sidebar-sublinks-padding-top: 8px;
+  --sidebar-sublinks-gap: 8px;
+  --sidebar-sublink-padding-left: 10px;
+  --sidebar-sublink-offset-correction: -9px;
+  --sidebar-sublink-width: 82%;
+
+  /* Footer */
+  --sidebar-footer-padding-top: 5px;
+  --sidebar-footer-separator-offset: -6px;
+  --sidebar-footer-separator-inset: 6px;
+  --sidebar-footer-separator-thickness: 1px;
+  --sidebar-footer-avatar-size: 32px;
+  --sidebar-footer-menu-bottom: 60px;   /* 🟨 Modal Vertical position */
+  --sidebar-footer-text-gap: -10px;
+  --sidebar-footer-name-max-width: 15ch;
+  --sidebar-footer-email-max-width: 16ch;
+  --sidebar-footer-chevron-size: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   1. CONTAINER
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ly-sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--appshell-bg);
+  border-right: 1px none var(--border-normal);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-sm) var(--space-sm) var(--space-md) var(--space-sm);
+  z-index: 100;
+}
+
+.ly-sidebar-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  padding-bottom: var(--sidebar-fade-clearance);  /* 🟨 UNDER THE FADE */
+
+  /* Hide scrollbar */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+
+  /* Fade effect at bottom */
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(100% - var(--sidebar-fade-gradient-start)),
+    transparent 100%
+  );
+}
+
+/* Hide scrollbar for Chrome/Safari */
+.ly-sidebar-content::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   2. NAVIGATION BUTTONS 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ly-sidebar-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.ly-sidebar-button {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--sidebar-main-button-rest);  /* 🟨 BUTTON REST COLOR */
+  color: var(--sidebar-button-text);  /* 🟨 BUTTON TEXT COLOR */
+  border: none;
+  border-radius: var(--radius-md);
+
+  /* Typography handled by button text */
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.05s;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.ly-sidebar-button:hover {
+  background-color: var(--sidebar-main-button-hover);  /* 🟨 BUTTON HOVER COLOR */
+}
+
+.ly-sidebar-icon {
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+  flex-shrink: 0;
+}
+
+.ly-sidebar-button--active {
+  /* Subtle active state - you're HERE */
+  background-color: var(--sidebar-main-button-active);  /* 🟨 BUTTON ACTIVE COLOR */
+  text-shadow: 0.3px 0 0 currentcolor;  /* Fake bold - no text shift */
+  box-shadow: inset var(--sidebar-active-indicator-width) 0 0 var(--sidebar-bracket-color);  /* Left BRACKET --> ⟬ */
+}
+
+.ly-sidebar-button--active .ly-sidebar-icon {
+  text-shadow: none;  /* Don't apply fake bold to icons */
+}
+
+/* Collapse All Button - Floating in top-right corner */
+.ly-sidebar-collapse-all {
+  position: absolute;
+  top: var(--sidebar-collapse-button-top);
+  right: var(--sidebar-collapse-button-right);
+  width: var(--sidebar-collapse-button-size);
+  height: var(--sidebar-collapse-button-size);
+  padding: 0;
+  background-color: var(--appshell-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-tertiary);
+  z-index: 10;
+}
+
+.ly-sidebar-collapse-all:hover {
+  background-color: var(--sidebar-main-button-hover);
+  color: var(--text-secondary);
+  border-color: var(--border-normal);
+}
+
+.ly-sidebar-collapse-all-icon {
+  width: var(--sidebar-collapse-icon-size);
+  height: var(--sidebar-collapse-icon-size);
+}
+
+.ly-sidebar-chevron {
+  width: var(--sidebar-chevron-size);
+  height: var(--sidebar-chevron-size);
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: transform 0.05s;
+}
+
+.ly-sidebar-chevron--open {
+  transform: rotate(90deg);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   3. SUBLINKS 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ly-sidebar-sublinks {
+  display: flex;
+  flex-direction: column;
+  margin-left: var(--sidebar-sublinks-indent);
+  padding-left: var(--space-md);
+  border-left: 1px solid var(--bg-sideline);  /* 🟨 SUBLINK VERTICAL LINE */
+  margin-top: 0;  /* 🟨 SUBLINK LINE GAP */
+  padding-top: var(--sidebar-sublinks-padding-top);
+  gap: var(--sidebar-sublinks-gap);  /* 🟨 SUBLINK SPACING */
+}
+
+.ly-sidebar-sublink {
+  padding: var(--space-xs) var(--space-sm) var(--space-xs) var(--sidebar-sublink-padding-left);
+  margin-left: var(--sidebar-sublink-offset-correction);  /* Offset to keep text aligned with section */
+  color: var(--sidebar-button-text);
+
+  /* Typography handled by button text */
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.05s;
+  text-decoration: none;
+  width: var(--sidebar-sublink-width);
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+}
+
+.ly-sidebar-sublink:hover {
+  background-color: var(--sidebar-sublink-button-hover);  /* 🟨 SUBLINK HOVER COLOR */
+}
+
+.ly-sidebar-sublink--active {
+  background-color: var(--sidebar-sublink-button-active);  /* 🟨 SUBLINK ACTIVE COLOR */
+  text-shadow: 0.3px 0 0 currentcolor;  /* Fake bold - no text shift */
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   4. FOOTER 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Footer - UserButton container styled as button */
+.ly-sidebar-footer {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md) var(--space-sm) var(--space-xs);
+  background-color: var(--appshell-bg);
+  border: none;
+  padding-top: var(--sidebar-footer-padding-top);                        /* <-- gap above avatar inside footer */
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.05s;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);                    /* <-- gap between avatar and text */
+  margin-top: var(--space-md);             /* <-- gap between footer and nav content */
+  position: relative;
+}
+
+/* ***Separator line above footer*** */
+.ly-sidebar-footer::before {
+  content: '';
+  position: absolute;
+  top: var(--sidebar-footer-separator-offset);  /* 🟨 FOOTER SEPARATOR TOP */
+  left: var(--sidebar-footer-separator-inset);  /* 🟨 FOOTER SEPARATOR LEFT */
+  right: var(--sidebar-footer-separator-inset);  /* 🟨 FOOTER SEPARATOR RIGHT */
+  height: var(--sidebar-footer-separator-thickness);                             /* <-- thickness of the line */
+  background-color: var(--sidebar-main-button-hover);   /* <-- color of the line */
+}
+
+.ly-sidebar-footer:hover {
+  background-color: var(--sidebar-main-button-hover);
+}
+
+.ly-sidebar-footer--active {
+  background-color: var(--sidebar-main-button-active);
+}
+
+.ly-sidebar-footer-userbutton {
+  flex-shrink: 0;
+}
+
+/* Override UserButton avatar size in sidebar footer */
+.ly-sidebar-footer-userbutton .ft-userbutton-container {
+  margin-right: 0;
+  height: auto;
+  justify-content: flex-start;
+}
+
+.ly-sidebar-footer-userbutton .ft-userbutton-avatar {
+  width: var(--sidebar-footer-avatar-size);
+  height: var(--sidebar-footer-avatar-size);
+}
+
+.ly-sidebar-footer-userbutton .ft-userbutton-avatar-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* Remove active/focus ring from avatar in sidebar */
+.ly-sidebar-footer-userbutton .ft-userbutton-avatar--active {
+  border-color: var(--border-light);
+  box-shadow: var(--userbutton-avatar-shadow-sm);
+  transform: scale(1);
+}
+
+/* Position UserButton menu above sidebar footer button */
+.ly-sidebar-footer-userbutton .ft-userbutton-menu {
+  position: fixed;
+  inset: auto auto var(--sidebar-footer-menu-bottom) calc(var(--sidebar-width) - 15px);  /* 🟨 MENU BOTTOM GAP */ /* 🟨 MENU RIGHT POSITION */
+  background-color: var(--page-arch-color);
+  transform-origin: bottom left;
+  z-index: 200;
+}
+
+/* Modal background color */
+.ly-sidebar-footer-userbutton .ft-userbutton-modal {
+  background-color: var(--page-arch-color);
+  transform-origin: bottom left;
+  z-index: 10000;
+}
+
+/* Hide close buttons in sidebar */
+.ly-sidebar-footer-userbutton .ft-userbutton-close-button {
+  display: none;
+}
+
+.ly-sidebar-footer-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sidebar-footer-text-gap);                                /* <-- gap between name and email */
+}
+
+.ly-sidebar-footer-name {
+  /* Typography handled by T.body */
+  color: var(--sidebar-button-text);
+  line-height: 1;
+  max-width: var(--sidebar-footer-name-max-width);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ly-sidebar-footer-email {
+  /* Typography handled by T.caption */
+  color: var(--text-tertiary);
+  line-height: 0.8;
+  max-width: var(--sidebar-footer-email-max-width);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0;
+}
+
+.ly-sidebar-footer-chevron {
+  width: var(--sidebar-footer-chevron-size);
+  height: var(--sidebar-footer-chevron-size);
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--sidebar-button-text);
+  transition: opacity 50ms ease;
+}
+
+.ly-sidebar-footer-chevron--hidden {
+  opacity: 0;
+}

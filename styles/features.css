@@ -1,0 +1,47 @@
+/* Feature Components - Application-Level Reusable Features */
+
+/* Auth Feature (sign-in, sign-up, forgot password) */
+@import url('../src/app/(auth)/auth.css');
+
+/* Company Button (includes Logo Cropper) */
+@import url('../src/features/shell/company-button/company-button.css');
+
+/* Country Selector */
+@import url('../src/features/shell/country-selector/country-selector.css');
+
+/* Theme Toggle */
+@import url('../src/features/shell/theme-toggle/theme-toggle.css');
+
+/* User Button */
+@import url('../src/features/shell/user-button/user-button.css');
+
+/* Setup Modal */
+@import url('../src/features/setup/setup-modal/setup-modal.css');
+
+/* Email Tab */
+@import url('../src/features/account/email-tab/email-tab.css');
+
+/* Genome Tab */
+@import url('../src/features/account/genome-tab/genome-tab.css');
+
+/* Password Tab */
+@import url('../src/features/account/password-tab/password-tab.css');
+
+/* Profile Tab */
+@import url('../src/features/account/profile-tab/profile-tab.css');
+
+/* Miror AI Fields */
+@import url('../src/features/preferences/miror-ai-tab/miror-ai-tab.css');
+
+/* Flying Button (Phoenix) */
+@import url('../src/features/setup/flying-button/flying-button.css');
+
+/* Shadow King (Sovereign Setup Enforcement) */
+@import url('../src/features/setup/shadow-king/shadow-king.css');
+
+/* Vanish Protocol - User Deletion Feature (WCCC ft-* Compliant)
+   Clean feature - no Clerk imports. Clerk calls happen via Convex actions. */
+@import url('../src/features/vanish/vanish.css');
+
+/* System Database - DB Check */
+@import url('../src/features/system/database/db-check/db-check.css');

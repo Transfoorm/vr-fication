@@ -1,0 +1,771 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🎨 TRANS THEME - Light & Dark Modes
+   ═══════════════════════════════════════════════════════════════════
+   Single theme file with both light and dark modes
+   Toggled via data-theme-mode attribute: "light" | "dark"
+
+   Architecture: [data-theme="transtheme"][data-theme-mode="light|dark"]
+   Database: themeName: "transtheme" + themeDark: true/false
+
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️ 
+  ☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️ LIGHT MODE ☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️
+  ☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️ */
+
+[data-theme="transtheme"][data-theme-mode="light"] {
+  /* ═══════════════════════════════════════════════════════════════════
+     LAYOUT BACKGROUNDS                Page:fcfbfc / Shell:f3efee
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --body-bg: #fff;
+
+  /* APPSHELL MASTER - Single source of truth for shell backgrounds */
+  --appshell-bg: #f1eded;                                /* 🎯 f6f0ee Master appshell background color f2eded */
+  --topbar-bg: var(--appshell-bg);
+  --topbar-border-color: none;                             /* Options: 'none', 'solid', 'dashed', 'dotted', or 'double' */
+  --topbar-border: 10px none var(--topbar-border-color);
+  --sidebar-bg: var(--appshell-bg);
+  --sidebar-border-color: none;
+  --sidebar-border: 0 none var(--sidebar-border-color);
+  --sidebar-bracket-color: #f97550;                     /* The coloured thick bracket on the left of active sections */
+
+
+  /* Sidebar Button States - Clean 3-State System */
+  --sidebar-main-button-rest: transparent;                        /* Resting: invisible/inherits bg */
+  --sidebar-main-button-active: #ede9e9;
+  --sidebar-main-button-hover: var(--sidebar-main-button-active);
+  --sidebar-sublink-button-rest:   var(--sidebar-main-button-rest);     /* Inherits cascading up to main - change once! */
+  --sidebar-sublink-button-active: var(--sidebar-main-button-active);   /* Inherits cascading up to main - change once! */
+  --sidebar-sublink-button-hover:  var(--sidebar-main-button-active);   /* Inherits cascading up to main - change once! */
+  --sidebar-button-text: #474c56;                                 /* Text & icon color for both Main and Sublink Buttons */
+
+    /* AI Sidebar States or System */
+  --ai-sidebar-bg: var(--appshell-bg);
+  --ai-sidebar-border-color: none;                                 /* <- For when NO PAGE ARCH */
+  --ai-sidebar-border: 50px none var(--ai-sidebar-border-color);
+  --ai-sidebar-top-border-color: var(--page-arch-border-color);
+  --ai-sidebar-top-border: 1px none var(--ai-sidebar-top-border-color);
+  --ai-sidebar-icons-color: #635f5e;
+  --ai-sidebar-avatar-bg: rgb(0 0 0 / 0%);
+  --ai-chat-box-bg: #fcfbfc;
+  --ai-chat-box-border: 1px solid #dcdfec;
+  --ai-chat-box-padding-left: 16px;
+  --ai-chat-box-padding-top: 16px;
+  --ai-chat-box-padding-right: 16px;
+  --ai-chat-box-padding-bottom: 16px;
+
+  /* Page Arch Foundation - Auto-matches sidebar backgrounds */
+  --page-arch-foundation: linear-gradient(
+    to right,
+    var(--sidebar-bg) 50%,
+    var(--ai-sidebar-bg) 50%
+  );                                                             /* Responsive split - adjusts with AI sidebar */
+
+  --page-arch-color: #fcfbfc;                                  /* Main content area */
+  --page-arch-border-color: #e9e2e2;
+  --page-arch-border: 1px solid var(--page-arch-border-color);
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PAGE FONTS.  090446-Navy Blue.  3f4958-gray dk
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Page Header Colors - Independent control */
+  --page-title-color: #5c5452;                                   /* Page title color - can differ from text-primary 3f4958 */
+  --page-subtitle-color: var(--text-secondary);                      /* Page subtitle color - can differ from text-secondary 6b7280 */
+
+
+   /* Default Text Colors - Independent control */
+  --text-primary: #3f4958;                                       /* Tailwind gray-700 (#374151) */
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --text-disabled: #afb0b3;                                      /* Disabled state text */
+  --text-inverse: #fff;
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BRAND COLORS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --brand-primary: #ff5020;
+  --brand-primary-dark: #e53606;                                 /* Darker orange for hover states */
+  --brand-hover: #e53606;
+  --brand-active: #d92a00;
+  --brand-light: #ffe5de;
+  --brand-faint: #fff6f4;
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BORDER COLORS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --border-light: #eee8e7;                                       /* Card borders */
+  --border-normal: #e7e0df;
+  --border-medium: #d3cfce;                                      /* Medium border weight */
+  --border-dark: #c3bdbc;
+
+  /* ═══════════════════════════════════════════════════════════════════
+     DIVIDER COLORS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --divider-color1: #ff5627;                                     /* Divider lines and gradients */
+  --divider-color2: #f7baa9;                                     /* Divider lines and gradients */
+  --divider-color3: #f1f1f1;                                     /* Divider lines and gradients */
+  --divider-color4: #090446;                                     /* Divider lines and gradients */
+  --divider-color5: #d2d0d0;                                     /* Divider lines and gradients */
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BACKGROUND COLORS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --bg-primary: #f6f0ee;
+  --bg-secondary: #f9f6f6;
+  --bg-tertiary: #f3f4f6;
+  --bg-hover: #f3efee;                                           /* Hover state for buttons/interactive elements */
+  --bg-active: #ebe7e6;                                          /* Active/pressed state for buttons/interactive */
+  --bg-sideline: #dad0cd;                                       
+  --bg-tab-hover: #f1efef;  
+  --bg-tab-rest: #fafafa;  
+
+  /* Field box backgrounds */
+  --bg-fieldbox-primary: #fafbda;                                /* f2f39e */
+  --bg-fieldbox-secondary: #fdf8f7;
+  --bg-input: #fff;                                              /* Input field background */
+
+  /* Card-specific backgrounds */
+  --card-header-bg: var(--bg-secondary);
+  --card-content-bg: #fff;
+  --card-highlight-bg: #fdf2f4;                                  /* Pinkish tinge for special sections */
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     SEMANTIC COLORS - Mapped to Transfoorm Brand
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Primary - Transfoorm Orange ff5627 */
+  --color-primary: #ff5627;                                      /* CARD VALUES - Transfoorm orange (from brand-primary) */
+  --color-primary-hover: #e53606;                                /* Darker orange hover state */
+  --color-primary-active: #d92a00;                               /* Darkest orange active state */
+  --color-primary-light: #f78869;                                /* Light orange tint */
+  --color-primary-faint: #fdc8b9;                                /* Faintest orange tint ffe5de */
+
+  /* Success */
+  --color-success: #10b981;
+  --color-success-hover: #009f67;
+  --color-success-light: #dbf5ec;
+  --success-50: #ecfdf5;
+  --success-100: #d1fae5;
+  --success-500: #10b981;
+  --success-600: #059669;
+  --success-700: #047857;
+
+  /* Field.verify States */
+  --verified-bg: #d1fae5;
+  --verified-text: #359879;
+  --verify-bg: #ff6a40;
+  --verify-text: #fcede9;
+  --editing-bg: #fde68a;
+  --editing-text: #b45309;
+
+  /* Warning */
+  --color-warning: #f59e0b;
+  --color-warning-hover: #db8400;
+  --color-warning-light: #fef0da;
+  --warning-50: #fffbeb;
+  --warning-100: #fef3c7;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+  --warning-700: #b45309;
+
+  /* Error - Complete palette for FUSE error system */
+  --color-error: #DC2626;                                        /* Primary error red (borders, accents) */
+  --color-error-hover: #d52a2a;                                  /* Hover state */
+  --color-error-light: #FEE2E2;                                  /* Light backgrounds */
+  --color-error-dark: #991B1B;                                   /* Dark text on light backgrounds */
+  --color-error-button-bg: rgb(0 0 0 / 5%);                  /* Button backgrounds on error */
+  --color-error-button-hover: rgb(0 0 0 / 10%);                /* Button hover on error */
+  --error-50: #fef2f2;
+  --error-100: #fee2e2;
+  --error-500: #ef4444;
+  --error-600: #dc2626;
+  --error-700: #b91c1c;
+
+  /* Info */
+  --color-info: #3b82f6;
+  --info-50: #eff6ff;
+  --info-100: #dbeafe;
+  --info-500: #3b82f6;
+  --info-600: #2563eb;
+  --info-700: #1d4ed8;
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BUTTON COLORS - Token-based button variant backgrounds
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Primary - Brand Orange Gradient */
+  --button-primary-gradient: radial-gradient(ellipse at center, #fb8840 0%, #ff5020 100%);
+  --button-primary-bg: var(--button-primary-gradient);
+  --button-primary-text: #fff;
+  --button-primary-shadow: 0 2px 4px rgb(255 80 32 / 20%);
+  --button-primary-hover-shadow: 0 3px 6px rgb(255 80 32 / 25%);
+
+  /* Secondary - Outlined */
+  --button-secondary-bg: #ebe7e6;
+  --button-secondary-text: var(--text-primary);
+  --button-secondary-border: #c7c2c0;
+  --button-secondary-hover-bg: #e4dfdd;
+  --button-secondary-hover-border: var(--brand-primary);
+  --button-secondary-active-bg: var(--bg-tertiary);
+
+  /* Danger - Red destructive actions */
+  --button-danger-bg: var(--color-error);
+  --button-danger-text: #fff;
+  --button-danger-hover-bg: var(--color-error-hover);
+  --button-danger-shadow: var(--shadow-sm);
+
+  /* Ghost - Transparent with hover */
+  --button-ghost-bg: transparent;
+  --button-ghost-text: var(--text-primary);
+  --button-ghost-border: var(--border-normal);
+  --button-ghost-hover-bg: var(--bg-hover);
+  --button-ghost-hover-text: var(--text-primary);
+  --button-ghost-active-bg: var(--bg-tertiary);
+
+  /* Link - Text-only */
+  --button-link-text: var(--brand-primary);
+  --button-link-hover-text: var(--brand-primary-dark);
+
+  /* Outline - Border only */
+  --button-outline-glow: 0 0 8px 0 rgb(0 0 0 / 5%);
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BRAND LOGO - Transfoorm Identity
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --logo-text-color: #1e1b4b;                                    /* Dark navy - Transfoorm wordmark */
+  --logo-accent-start: #ff5020;                                  /* Transfoorm orange - dot gradient start */
+  --logo-accent-end: #fbbf24;                                    /* Golden yellow - dot gradient end */
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     SCROLLBAR - Browser scrollbar styling
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --scrollbar-track: #f2eded;                                    /* Scrollbar track background */
+  --scrollbar-thumb: #ddd8d8;                                    /* Scrollbar thumb (draggable part) */
+  --scrollbar-thumb-hover: #8f9093;                              /* Scrollbar thumb on hover */
+  --scrollbar-thumb-border: #d3cfce;                             /* Scrollbar thumb border */
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BADGE COLORS - RANK
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Admiral - Deep red/crimson */
+  --badge-rank-admiral-bg: #FEE2E2;
+  --badge-rank-admiral-text: #991B1B;
+
+  /* Commodore - Amber/gold */
+  --badge-rank-commodore-bg: #FEF3C7;
+  --badge-rank-commodore-text: #92400E;
+
+  /* Captain - Teal/cyan */
+  --badge-rank-captain-bg: #CCFBF1;
+  --badge-rank-captain-text: #115E59;
+
+  /* Crew - Purple/violet */
+  --badge-rank-crew-bg: #EDE9FE;
+  --badge-rank-crew-text: #5B21B6;
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BADGE COLORS - SETUP
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Complete - Green/success */
+  --badge-setup-complete-bg: #D1FAE5;
+  --badge-setup-complete-text: #065F46;
+
+  /* Pending - Amber/warning */
+  --badge-setup-pending-bg: #FEF3C7;
+  --badge-setup-pending-text: #92400E;
+
+  /* Invited - Blue/info */
+  --badge-setup-invited-bg: #DBEAFE;
+  --badge-setup-invited-text: #1E40AF;
+
+  /* Abandon - Orange/warning-dark */
+  --badge-setup-abandon-bg: #FFEDD5;
+  --badge-setup-abandon-text: #C2410C;
+
+  /* Revoked - Gray/neutral */
+  --badge-setup-revoked-bg: #ecd6d6;
+  --badge-setup-revoked-text: #634b4b;
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     VERIFY MODAL - 6-Digit Code Verification
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Container gradient background */
+  --verify-gradient-start: #fff5f0;                              /* Warm white */
+  --verify-gradient-mid: #fff;                                   /* Pure white */
+  --verify-gradient-end: #fff0f0;                                /* Pinkish white */
+
+  /* Text colors */
+  --verify-heading: #d30;                                        /* Brand orange dark */
+  --verify-description: var(--text-secondary);                   /* #6b7280 */
+  --verify-email: #374151;                                       /* Dark gray */
+  --verify-hint: var(--text-tertiary);                           /* #9ca3af */
+
+  /* Code input */
+  --verify-input-bg: rgb(249 250 251 / 50%);                     /* Semi-transparent */
+  --verify-input-bg-focus: #fff;                                 /* Pure white on focus */
+  --verify-input-border: #e5e7eb;                                /* Light gray */
+  --verify-input-border-focus: #f40;                             /* Brand orange */
+  --verify-input-shadow-focus: rgb(255 68 0 / 10%);              /* Orange glow */
+
+  /* Error state */
+  --verify-error-bg: var(--error-50);                            /* #fef2f2 */
+  --verify-error-border: #fecaca;                                /* Light red */
+  --verify-error-text: var(--color-error);                       /* #dc2626 */
+
+  /* Success state */
+  --verify-success-gradient-start: var(--color-success);         /* #10b981 */
+  --verify-success-gradient-end: var(--success-600);             /* #059669 */
+  --verify-success-text: var(--color-success);                   /* #10b981 */
+  --verify-success-shadow: rgb(16 185 129 / 30%);                /* Green glow */
+
+  /* Progress bar */
+  --verify-progress-track: #e5e7eb;                              /* Light gray */
+  --verify-progress-fill-start: #f40;                            /* Brand orange */
+  --verify-progress-fill-end: #f63;                              /* Lighter orange */
+
+  /* Resend link */
+  --verify-resend-text: var(--text-secondary);                   /* #6b7280 */
+  --verify-resend-link: #e4461b;                                 /* Orange-red */
+  --verify-resend-link-hover: #d30;                              /* Darker orange */
+
+  /* Cancel button */
+  --verify-cancel-text: var(--text-secondary);                   /* #6b7280 */
+  --verify-cancel-hover: #374151;                                /* Dark gray */
+
+  /* Spinner */
+  --verify-spinner: #f40;                                        /* Brand orange */
+
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   👨🏻‍✈️ ADMIRAL RANK OVERRIDE - LIGHT MODE
+   ═══════════════════════════════════════════════════════════════════════
+   Admirals get a distinct shell appearance to visually indicate their rank.
+   Single source: change --admiral-shell-bg, all shell parts follow.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-theme="transtheme"][data-theme-mode="light"][data-user-rank="admiral"] {
+  --admiral-shell-bg: #f1eded;
+  --page-arch-border: 2px solid #ff5020;                         /* Orange border for Admiral */
+
+  /* All shell parts inherit from --admiral-shell-bg */
+  --appshell-bg: var(--admiral-shell-bg);
+  --page-arch-foundation: var(--admiral-shell-bg);
+  --topbar-bg: var(--admiral-shell-bg);
+  --sidebar-bg: var(--admiral-shell-bg);
+  --ai-sidebar-bg: var(--admiral-shell-bg);
+}
+
+
+/* 🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙
+   🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙 DARK MODE 🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙
+   🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙🌙 */
+    
+[data-theme="transtheme"][data-theme-mode="dark"] {
+  /* ═══════════════════════════════════════════════════════════════════
+     LAYOUT BACKGROUNDS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --body-bg: #0a0a0a;
+
+  /* APPSHELL MASTER - Single source of truth for shell backgrounds */
+  --appshell-bg: #1f2937;   /* 🎯 Master appshell background color */
+  --topbar-bg: var(--appshell-bg);
+  --topbar-border-color: none;
+  --topbar-border: 10px none var(--topbar-border-color);
+  --sidebar-bg: var(--appshell-bg);
+  --sidebar-border-color: none;
+  --sidebar-border: 0 none var(--sidebar-border-color);
+  --sidebar-bracket-color: #fa4716;                     /* The coloured thick bracket on the left of active sections */
+
+
+  /* Sidebar Button States - Clean 3-State System */
+  --sidebar-main-button-rest: transparent;                        /* Resting: invisible/inherits bg */
+  --sidebar-main-button-active: #374151;
+  --sidebar-main-button-hover: var(--sidebar-main-button-active);
+  --sidebar-sublink-button-rest: transparent;                     /* Resting: invisible/inherits bg */
+  --sidebar-sublink-button-active: #374151;
+  --sidebar-sublink-button-hover: var(--sidebar-sublink-button-active);
+  --sidebar-button-text: #d1d5db;                                 /* Text & icon color for both Main and Sublink Buttons */
+
+  /* Shadow hierarchy - depth-based elevation (dark mode - stronger) */
+  --sidebar-button-shadow-rest: 0 2px 4px rgb(0 0 0 / 20%);      /* Depth 0 - parent sections */
+  --sidebar-button-shadow-rest-secondary: 0 1px 2px rgb(0 0 0 / 15%); /* Depth 1 - first-level children */
+  --sidebar-button-shadow-rest-tertiary: 0 1px 2px rgb(0 0 0 / 10%); /* Depth 2 - second-level children */
+  --sidebar-button-shadow-active: 0 2px 4px rgb(248 177 74 / 30%); /* Active state glow (amber, stronger in dark) */
+  --sidebar-button-shadow-active-hover: 0 3px 6px rgb(248 177 74 / 40%); /* Active hover enhanced glow (amber, stronger in dark) */
+  --sidebar-button-shadow-hover: 0 4px 8px rgb(0 0 0 / 30%), 0 2px 4px rgb(0 0 0 / 20%);
+  --sidebar-button-border: 1px solid #4a5568;
+  --sidebar-button-hover-border: 1px solid #5a6478;
+  --ai-sidebar-bg: var(--appshell-bg);
+  --ai-sidebar-border-color: none;
+  --ai-sidebar-border: 50px none var(--ai-sidebar-border-color);
+  --ai-sidebar-top-border-color: var(--page-arch-border-color);
+  --ai-sidebar-top-border: 1px none var(--ai-sidebar-top-border-color);
+  --ai-sidebar-icons-color: #9ca3af;
+  --ai-sidebar-avatar-bg: #1f2937;
+  --ai-chat-box-bg: #1f2937;
+  --ai-chat-box-border: 1px solid #374151;
+  --ai-chat-box-padding-left: 16px;
+  --ai-chat-box-padding-top: 16px;
+  --ai-chat-box-padding-right: 16px;
+  --ai-chat-box-padding-bottom: 16px;
+
+  /* Page Arch Foundation - Auto-matches sidebar backgrounds */
+  --page-arch-foundation: linear-gradient(
+    to right,
+    var(--sidebar-bg) 50%,                                       /* In case the AI Sidebar is different colour */
+    var(--ai-sidebar-bg) 50%
+  );                                                             /* Responsive split - adjusts with AI sidebar */
+
+  --page-arch-color: #212c3b;                                    /* Page Arch background (main content area) - dark gray */
+  --page-arch-border-color: #3b434f;
+  --page-arch-border: 1px solid var(--page-arch-border-color);
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TEXT COLORS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+
+  /* Page Header Colors - Independent control */
+  --page-title-color: #f9fafb;                                   /* Page title color - can differ from text-primary */
+  --page-subtitle-color: #d1d5db;                                /* Page subtitle color - can differ from text-secondary */
+  --text-tertiary: #9ca3af;
+  --text-disabled: #6b7280;                                      /* Disabled state text - dark mode */
+  --text-inverse: #111827;
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BRAND COLORS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --brand-primary: #ff5020;
+  --brand-primary-dark: #e53606;                                 /* Darker orange for hover states */
+  --brand-hover: #e53606;
+  --brand-active: #d92a00;
+  --brand-light: #ffe5de;
+  --brand-faint: #fff6f4;
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BORDER COLORS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --border-light: #374151;
+  --border-normal: #4b5563;
+  --border-medium: #5a6478;                                    /* Medium border weight */
+  --border-dark: #6b7280;
+
+  /* Semantic border aliases for components */
+  --border-subtle: var(--border-light);                          /* Subtle/disabled borders */
+
+  /* ═══════════════════════════════════════════════════════════════════
+     DIVIDER COLORS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --divider-color1: #ff6a3d;                                     /* Divider lines and gradients - lighter orange for dark mode */
+  --divider-color2: #9ca3af;                                     /* Divider lines and gradients - lighter gray */
+  --divider-color3: #d1d5db;                                     /* Divider lines and gradients - even lighter gray */
+  --divider-color4: #6366f1;                                     /* Divider lines and gradients - indigo for visibility */
+  --divider-color5: #fbbf24;                                     /* Divider lines and gradients - golden yellow */
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     SEMANTIC BORDERS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --border-topbar-bottom: 1px solid #4b5563;
+  --border-sidebar-right: 1px solid #4b5563;
+  --border-sidebar-header-bottom: 1px solid #4b5563;
+  --border-ai-sidebar-top: 1px solid #4b5563;
+  --border-preferences-top: 1px solid #4b5563;
+  --border-ai-sidebar-left: 1px solid #4b5563;
+  --border-ai-sidebar-bottom: 1px solid #4b5563;
+  --border-ai-chat-box: 1px solid #374151;
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BACKGROUND COLORS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-tertiary: #374151;
+  --bg-hover: #4b5563;                                           /* Hover state for buttons/interactive elements */
+  --bg-active: #374151;                                          /* Active/pressed state for buttons/interactive elements */
+  --bg-sideline: #4b5563;                                        /* Vertical line indicator for active state */
+
+  /* Field box backgrounds */
+  --bg-fieldbox-primary: #1a2332;
+  --bg-fieldbox-secondary: #212c3b;
+  --bg-input: #1f2937;                                           /* Input field background - dark */
+
+  /* Card-specific backgrounds */
+  --card-header-bg: var(--bg-secondary);
+  --card-content-bg: var(--bg-primary);
+  --card-highlight-bg: #2d1f2a;                                  /* Pinkish tinge for special sections (dark) */
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     SEMANTIC COLORS
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Primary - Transfoorm Orange (matches light mode) */
+  --color-primary: #ff5627;                                      /* CARD VALUES - Transfoorm orange */
+  --color-primary-hover: #e53606;                                /* Darker orange hover state */
+  --color-primary-active: #d92a00;                               /* Darkest orange active state */
+  --color-primary-light: #ff7a52;                                /* Bright orange for sidebar bracket */
+  --color-primary-faint: #2d1a0f;                                /* Dark mode faint tint */
+
+  /* Success */
+  --color-success: #34d399;
+  --color-success-hover: #4eedb3;
+  --color-success-light: #103f2e;
+  --success-50: #103f2e;
+  --success-100: #065f46;
+  --success-500: #34d399;
+  --success-600: #10b981;
+  --success-700: #059669;
+
+  /* Field.verify States */
+  --verified-bg: #065f46;
+  --verified-text: #a7f3d0;
+  --verify-bg: #7c2d12;
+  --verify-text: #fed7aa;
+  --editing-bg: #422006;
+  --editing-text: #fde68a;
+
+  /* Warning */
+  --color-warning: #fbbf24;
+  --color-warning-hover: #ffd93e;
+  --color-warning-light: #4b390b;
+  --warning-50: #422006;
+  --warning-100: #4b390b;
+  --warning-500: #fbbf24;
+  --warning-600: #f59e0b;
+  --warning-700: #d97706;
+
+  /* Error - Matches light mode */
+  --color-error: #DC2626;
+  --color-error-hover: #d52a2a;
+  --color-error-light: #FEE2E2;
+  --color-error-dark: #991B1B;
+  --color-error-button-bg: rgb(0 0 0 / 5%);
+  --color-error-button-hover: rgb(0 0 0 / 10%);
+  --error-50: #450a0a;
+  --error-100: #7f1d1d;
+  --error-500: #f87171;
+  --error-600: #ef4444;
+  --error-700: #dc2626;
+
+  /* Info - Transfoorm Orange (matches primary) */
+  --color-info: #ff5627;
+  --info-50: #1e1b4b;
+  --info-100: #312e81;
+  --info-500: #818cf8;
+  --info-600: #6366f1;
+  --info-700: #4f46e5;
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BUTTON COLORS - Token-based button variant backgrounds (matches light mode)
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Primary - Brand Orange Gradient */
+  --button-primary-gradient: radial-gradient(ellipse at center, #fb8840 0%, #ff5020 100%);
+  --button-primary-bg: var(--button-primary-gradient);
+  --button-primary-text: #fff;
+  --button-primary-shadow: 0 2px 4px rgb(255 80 32 / 20%);
+  --button-primary-hover-shadow: 0 3px 6px rgb(255 80 32 / 25%);
+
+  /* Secondary - Outlined */
+  --button-secondary-bg: #374151;
+  --button-secondary-text: var(--text-primary);
+  --button-secondary-border: #4b5563;
+  --button-secondary-hover-bg: #4b5563;
+  --button-secondary-hover-border: var(--brand-primary);
+  --button-secondary-active-bg: var(--bg-tertiary);
+
+  /* Danger - Red destructive actions */
+  --button-danger-bg: var(--color-error);
+  --button-danger-text: #fff;
+  --button-danger-hover-bg: var(--color-error-hover);
+  --button-danger-shadow: var(--shadow-sm);
+
+  /* Ghost - Transparent with hover */
+  --button-ghost-bg: transparent;
+  --button-ghost-text: var(--text-primary);
+  --button-ghost-border: var(--border-normal);
+  --button-ghost-hover-bg: var(--bg-hover);
+  --button-ghost-hover-text: var(--text-primary);
+  --button-ghost-active-bg: var(--bg-tertiary);
+
+  /* Link - Text-only */
+  --button-link-text: var(--brand-primary);
+  --button-link-hover-text: var(--brand-primary-dark);
+
+  /* Outline - Border only */
+  --button-outline-glow: 0 0 8px 0 rgb(255 255 255 / 5%);
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BRAND LOGO
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --logo-text-color: #e0e7ff;
+  --logo-accent-start: #fb923c;
+  --logo-accent-end: #fde047;
+  --logo-gradient: linear-gradient(135deg, #fb923c 0%, #fde047 100%);
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     SCROLLBAR - Browser scrollbar styling
+     ═══════════════════════════════════════════════════════════════════ */
+
+  --scrollbar-track: #1f2937;                                    /* Scrollbar track background - matches sidebar */
+  --scrollbar-thumb: #4b5563;                                    /* Scrollbar thumb (draggable part) */
+  --scrollbar-thumb-hover: #6b7280;                              /* Scrollbar thumb on hover - lighter */
+  --scrollbar-thumb-border: #374151;                             /* Scrollbar thumb border */
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BADGE COLORS - RANK (Dark Mode)
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Admiral - Deep red/crimson (dark mode - richer bg, lighter text) */
+  --badge-rank-admiral-bg: #7F1D1D;
+  --badge-rank-admiral-text: #FECACA;
+
+  /* Commodore - Amber/gold (dark mode) */
+  --badge-rank-commodore-bg: #78350F;
+  --badge-rank-commodore-text: #FDE68A;
+
+  /* Captain - Teal/cyan (dark mode) */
+  --badge-rank-captain-bg: #134E4A;
+  --badge-rank-captain-text: #99F6E4;
+
+  /* Crew - Purple/violet (dark mode) */
+  --badge-rank-crew-bg: #4C1D95;
+  --badge-rank-crew-text: #DDD6FE;
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BADGE COLORS - SETUP (Dark Mode)
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Complete - Green/success (dark mode) */
+  --badge-setup-complete-bg: #064E3B;
+  --badge-setup-complete-text: #A7F3D0;
+
+  /* Pending - Amber/warning (dark mode) */
+  --badge-setup-pending-bg: #78350F;
+  --badge-setup-pending-text: #FDE68A;
+
+  /* Invited - Blue/info (dark mode) */
+  --badge-setup-invited-bg: #1E3A8A;
+  --badge-setup-invited-text: #BFDBFE;
+
+  /* Abandon - Orange/warning-dark (dark mode) */
+  --badge-setup-abandon-bg: #7C2D12;
+  --badge-setup-abandon-text: #FED7AA;
+
+  /* Revoked - Gray/neutral (dark mode) */
+  --badge-setup-revoked-bg: #374151;
+  --badge-setup-revoked-text: #D1D5DB;
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     VERIFY MODAL - 6-Digit Code Verification (Dark Mode)
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Container gradient background - darker warm tones */
+  --verify-gradient-start: #2d1f1a;                              /* Dark warm brown */
+  --verify-gradient-mid: #1f2937;                                /* Dark slate */
+  --verify-gradient-end: #2d1a1a;                                /* Dark reddish */
+
+  /* Text colors */
+  --verify-heading: #ff7a52;                                     /* Bright orange for dark bg */
+  --verify-description: var(--text-secondary);                   /* #d1d5db */
+  --verify-email: #f3f4f6;                                       /* Near white */
+  --verify-hint: var(--text-tertiary);                           /* #9ca3af */
+
+  /* Code input */
+  --verify-input-bg: rgb(55 65 81 / 50%);                        /* Semi-transparent dark */
+  --verify-input-bg-focus: #374151;                              /* Dark gray on focus */
+  --verify-input-border: #4b5563;                                /* Medium gray */
+  --verify-input-border-focus: #ff7a52;                          /* Bright orange */
+  --verify-input-shadow-focus: rgb(255 122 82 / 20%);            /* Orange glow (stronger) */
+
+  /* Error state */
+  --verify-error-bg: var(--error-50);                            /* #450a0a */
+  --verify-error-border: #7f1d1d;                                /* Dark red */
+  --verify-error-text: #f87171;                                  /* Light red for dark bg */
+
+  /* Success state */
+  --verify-success-gradient-start: #10b981;                      /* Emerald */
+  --verify-success-gradient-end: #059669;                        /* Darker emerald */
+  --verify-success-text: #34d399;                                /* Bright green for dark bg */
+  --verify-success-shadow: rgb(52 211 153 / 30%);                /* Green glow */
+
+  /* Progress bar */
+  --verify-progress-track: #374151;                              /* Dark gray */
+  --verify-progress-fill-start: #ff7a52;                         /* Bright orange */
+  --verify-progress-fill-end: #fb923c;                           /* Amber */
+
+  /* Resend link */
+  --verify-resend-text: var(--text-secondary);                   /* #d1d5db */
+  --verify-resend-link: #fb923c;                                 /* Amber */
+  --verify-resend-link-hover: #ff7a52;                           /* Brighter orange */
+
+  /* Cancel button */
+  --verify-cancel-text: var(--text-secondary);                   /* #d1d5db */
+  --verify-cancel-hover: #f3f4f6;                                /* Near white */
+
+  /* Spinner */
+  --verify-spinner: #ff7a52;                                     /* Bright orange */
+
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   👨🏻‍✈️ ADMIRAL RANK OVERRIDE - DARK MODE
+   ═══════════════════════════════════════════════════════════════════════
+   Admirals get a distinct shell appearance to visually indicate their rank.
+   Single source: change --admiral-shell-bg, all shell parts follow.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-theme="transtheme"][data-theme-mode="dark"][data-user-rank="admiral"] {
+  --admiral-shell-bg: #1a1f2e;                                   /* Slightly warmer dark for Admiral */
+  --page-arch-border: 2px solid #ff5020;                         /* Orange border for Admiral */
+
+  /* All shell parts inherit from --admiral-shell-bg */
+  --appshell-bg: var(--admiral-shell-bg);
+  --page-arch-foundation: var(--admiral-shell-bg);
+  --topbar-bg: var(--admiral-shell-bg);
+  --sidebar-bg: var(--admiral-shell-bg);
+  --ai-sidebar-bg: var(--admiral-shell-bg);
+}

@@ -1,0 +1,213 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 BADGE VARIANTS - Consolidated CSS for all badge types
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   CASCADE BADGE VARIANT - Border-only cascade status indicators
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-badge-cascade {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  text-transform: capitalize;
+  text-align: center;
+  background-color: transparent;
+  border: 1px solid;
+}
+
+/* Success - Green border */
+.vr-badge-cascade.vr-badge-cascade-success {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+/* Failed - Red border */
+.vr-badge-cascade.vr-badge-cascade-failed {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+/* Running - Orange border */
+.vr-badge-cascade.vr-badge-cascade-running {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RANK BADGE VARIANT - Colored rank indicators
+   Colors defined in transtheme.css for light/dark mode support
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-badge-rank {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  text-transform: capitalize;
+  text-align: center;
+}
+
+/* Admiral - Deep red/crimson */
+.vr-badge-rank.vr-badge-rank-admiral {
+  background-color: var(--badge-rank-admiral-bg);
+  color: var(--badge-rank-admiral-text);
+}
+
+/* Commodore - Amber/gold */
+.vr-badge-rank.vr-badge-rank-commodore {
+  background-color: var(--badge-rank-commodore-bg);
+  color: var(--badge-rank-commodore-text);
+}
+
+/* Captain - Teal/cyan */
+.vr-badge-rank.vr-badge-rank-captain {
+  background-color: var(--badge-rank-captain-bg);
+  color: var(--badge-rank-captain-text);
+}
+
+/* Crew - Purple/violet */
+.vr-badge-rank.vr-badge-rank-crew {
+  background-color: var(--badge-rank-crew-bg);
+  color: var(--badge-rank-crew-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SETUP BADGE VARIANT - Colored setup status indicators
+   Colors defined in transtheme.css for light/dark mode support
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-badge-setup {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  text-transform: capitalize;
+  text-align: center;
+}
+
+/* Complete - Green/success */
+.vr-badge-setup.vr-badge-setup-complete {
+  background-color: var(--badge-setup-complete-bg);
+  color: var(--badge-setup-complete-text);
+}
+
+/* Pending - Amber/warning */
+.vr-badge-setup.vr-badge-setup-pending {
+  background-color: var(--badge-setup-pending-bg);
+  color: var(--badge-setup-pending-text);
+}
+
+/* Invited - Blue/info */
+.vr-badge-setup.vr-badge-setup-invited {
+  background-color: var(--badge-setup-invited-bg);
+  color: var(--badge-setup-invited-text);
+}
+
+/* Abandon - Orange/warning-dark */
+.vr-badge-setup.vr-badge-setup-abandon {
+  background-color: var(--badge-setup-abandon-bg);
+  color: var(--badge-setup-abandon-text);
+}
+
+/* Revoked - Gray/neutral */
+.vr-badge-setup.vr-badge-setup-revoked {
+  background-color: var(--badge-setup-revoked-bg);
+  color: var(--badge-setup-revoked-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BADGE STATUS VARIANT - Semantic Status Indicators
+   ═══════════════════════════════════════════════════════════════════
+
+   FUSE-STYLE Compliant: All static layout/structure styles in CSS.
+   TTT Gap Model: NO external margins - container controls spacing
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+
+  /* NO external margins - TTT Gap Model compliant */
+}
+
+/* Size variants */
+.vr-badge-status--sm {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+}
+
+.vr-badge-status--md {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+.vr-badge-status--lg {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-size-md);
+}
+
+/* Status dot indicator */
+.vr-badge-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background-color: currentcolor;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Status variants with semantic colors */
+.vr-badge-status--active {
+  background-color: var(--success-100);
+  color: var(--success-700);
+}
+
+.vr-badge-status--inactive {
+  background-color: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.vr-badge-status--pending {
+  background-color: var(--warning-100);
+  color: var(--warning-700);
+}
+
+.vr-badge-status--success {
+  background-color: var(--success-100);
+  color: var(--success-700);
+}
+
+.vr-badge-status--warning {
+  background-color: var(--warning-100);
+  color: var(--warning-700);
+}
+
+.vr-badge-status--error {
+  background-color: var(--error-100);
+  color: var(--error-700);
+}
+
+.vr-badge-status--info {
+  background-color: var(--brand-100);
+  color: var(--brand-700);
+}
+
+.vr-badge-status--disabled {
+  background-color: var(--gray-50);
+  color: var(--gray-400);
+  opacity: 0.7;
+}
+
+/* Hover states for interactive badges */
+.vr-badge-status:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}

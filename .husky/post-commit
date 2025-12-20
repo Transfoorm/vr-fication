@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# Clean up stale TypeScript buildinfo files after each commit
+npm run clean:buildinfo

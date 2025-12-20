@@ -1,0 +1,64 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "color-named": "never",
+    "custom-property-pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+    "selector-class-pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*(__[a-z0-9]+(-[a-z0-9]+)*)?(--[a-z0-9]+(-[a-z0-9]+)*)?$",
+    "length-zero-no-unit": true,
+    "shorthand-property-no-redundant-values": true,
+    "declaration-block-no-redundant-longhand-properties": true,
+    "selector-max-specificity": ["0,4,0", {
+      "ignoreSelectors": ["#__next"]
+    }],
+    "selector-id-pattern": null,
+    "no-duplicate-selectors": null,
+    "declaration-block-single-line-max-declarations": null,
+    "max-nesting-depth": 4,
+    "no-unknown-animations": null,
+    "comment-empty-line-before": [
+      "always",
+      {
+        "except": ["first-nested"],
+        "ignore": ["stylelint-commands"]
+      }
+    ],
+    "declaration-no-important": null,
+    "declaration-block-no-duplicate-properties": [
+      true,
+      {
+        "ignore": ["consecutive-duplicates-with-different-values"]
+      }
+    ],
+    "media-feature-range-notation": null,
+    "selector-no-qualifying-type": [
+      true,
+      {
+        "ignore": ["attribute", "class"]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/features/**/*.css",
+        "src/shell/**/*.css",
+        "src/app/domains/**/*.css"
+      ],
+      "rules": {
+        "declaration-property-value-disallowed-list": {
+          "font-size": ["/.*/"],
+          "font-weight": ["/.*/"],
+          "font-family": ["/^(?!inherit$|monospace$|var\\(--).*/"]
+        }
+      }
+    }
+  ],
+  "ignoreFiles": [
+    "node_modules/**",
+    ".next/**",
+    "out/**",
+    "build/**",
+    "dist/**",
+    "public/images/_dev/**"
+  ]
+}

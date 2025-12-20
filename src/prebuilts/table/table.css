@@ -1,0 +1,463 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 TABLE COMPONENT - All variants consolidated
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Wrapper Border */
+  --table-wrapper-radius: 6px;
+
+  /* Transitions */
+  --table-transition-duration-fast: 0.15s;
+  --table-transition-duration-normal: 0.2s;
+
+  /* Actions */
+  --table-actions-gap: 8px;
+
+  /* Batch Actions */
+  --table-batch-pill-padding-y: 10px;
+  --table-batch-pill-padding-x: 14px;
+  --table-batch-pill-height: 40px;
+
+  /* Responsive */
+  --table-breakpoint-mobile: 768px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BASE TABLE - Shared styles for all table variants
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+}
+
+.vr-table thead {
+  background-color: var(--sidebar-bg);
+}
+
+.vr-table th {
+  padding: var(--table-header-padding);
+  text-align: left;
+  font-size: var(--table-header-font-size);
+  font-weight: var(--table-header-font-weight);
+  color: var(--text-primary);
+  border-bottom: var(--table-border-width) solid var(--border-light);
+}
+
+.vr-table td {
+  padding: var(--table-cell-padding);
+  font-size: var(--table-cell-font-size);
+  color: var(--text-primary);
+  border-bottom: var(--table-border-width) solid var(--border-light);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGINATED TABLE VARIANT - Table with pagination
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-table-paginated-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.vr-table-paginated {
+  border-radius: var(--table-border-radius);
+}
+
+.vr-table-paginated th {
+  padding: var(--table-header-padding);
+  font-size: var(--table-header-font-size);
+  font-weight: var(--table-header-font-weight);
+  text-align: left;
+}
+
+.vr-table-paginated td {
+  padding: var(--table-cell-padding);
+  font-size: var(--table-cell-font-size);
+  text-align: left;
+}
+
+/* Pagination Controls */
+.vr-pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+}
+
+.vr-pagination-info {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.vr-pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.vr-pagination-button {
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--card-border-width) solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing);
+}
+
+.vr-pagination-button:disabled {
+  opacity: 0.4;
+}
+
+.vr-pagination-button:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  border-color: var(--brand-primary);
+}
+
+.vr-pagination-current {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  padding: 0 var(--space-sm);
+}
+
+/* Responsive */
+@media (max-width: calc(var(--table-breakpoint-mobile) * 1px)) {
+  .vr-pagination-controls {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SORTABLE TABLE VARIANT - Table with sorting (SaaS Pro Responsive)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Outer container - Position context for batch actions */
+.vr-table-sortable-container {
+  width: 100%;
+  overflow: visible;  /* Allow batch actions to float above */
+  position: relative;  /* Position context for absolute batch actions */
+  overflow-x: auto;  /* Merge from duplicate at line 67 */
+}
+
+/* Inner wrapper - Clips table to border-radius */
+.vr-table-wrapper {
+  width: 100%;
+  overflow: hidden;  /* Clip table corners to match border-radius */
+  background: var(--page-arch-color);
+  border: 1px solid var(--border-normal);
+  border-radius: var(--table-wrapper-radius);
+}
+
+.vr-table-sortable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* Sticky header styling */
+.vr-table-sortable thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-normal);
+}
+
+.vr-table-sortable th {
+  padding: var(--space-sm) var(--space-md);
+  text-align: center;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm); /* HEADER SIZE */
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.vr-table-sortable th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--table-transition-duration-normal) ease;
+}
+
+.vr-table-sortable td {
+  padding: var(--space-sm) var(--space-md);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);  /* DATA SIZE */
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Cell alignment variants */
+.vr-table-sortable td.cell-align-center {
+  text-align: center;
+}
+
+.vr-table-sortable td.cell-align-right {
+  text-align: right;
+}
+
+.vr-table-sortable th.active {
+  color: var(--color-primary);
+  background: var(--bg-hover);
+}
+
+.vr-table-sortable th.sortable:hover {
+  background: var(--bg-hover);
+}
+
+.vr-table-sortable .vr-table-sortable-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+.vr-table-sortable .vr-table-sortable-sort-indicator {
+  font-size: 10px ;    /* SORT ARROW SIZE */
+  opacity: 0.4;
+  transition: opacity var(--table-transition-duration-normal) ease;
+}
+
+.vr-table-sortable th.active .vr-table-sortable-sort-indicator {
+  opacity: 1;
+}
+
+/* stylelint-disable-next-line selector-max-specificity -- Table hover requires element+class combo */
+.vr-table-sortable th.sortable:hover .vr-table-sortable-sort-indicator {
+  opacity: 1;
+}
+
+.vr-table-sortable tbody tr {
+  border-bottom: 1px solid var(--border-light);
+  transition: background-color var(--table-transition-duration-fast) ease;
+}
+
+.vr-table-sortable tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+.vr-table-sortable tbody tr:last-child {
+  border-bottom: none;
+}
+
+  .vr-table-sortable .vr-table-sortable-cell-first-name,
+  .vr-table-sortable .vr-table-sortable-cell-last-name {
+    font-weight: var(--font-weight-semibold);
+  }
+
+
+
+
+/* ───────────────────────────────────────────────────────────────────
+   CHECKBOX COLUMN (Auto-styled select column)
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-table-sortable .vr-table-sortable-cell-select {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   TABLE ACTIONS (Auto-styled actions column)
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-table-sortable .vr-table-sortable-cell-actions {
+  white-space: nowrap;
+  padding: var(--space-sm) var(--space-md);
+}
+
+.vr-table-sortable .vr-table-sortable-cell-actions > div {
+  display: flex;
+  gap: var(--table-actions-gap);
+  align-items: center;
+  justify-content: center;
+}
+
+.vr-table-sortable-cell-actions svg {
+  color: var(--text-secondary);
+  transition: opacity var(--table-transition-duration-normal) ease;
+}
+
+.vr-table-sortable-cell-actions .vr-tooltip-trigger:hover svg {
+  opacity: 0.7;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   TEXT TRUNCATION (Now default on all td cells - see line 49-51)
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════
+   TABLE TOOLBAR (VR - Layout Only)
+   Search left, actions right. Zero layout shift.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.vr-table-toolbar-left {
+  flex: 1;
+  min-width: 0;  /* Allow shrinking */
+}
+
+.vr-table-toolbar-center {
+  flex: 0 0 auto;
+}
+
+.vr-table-toolbar-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* Hard-wired visibility: dims when no actions */
+.vr-table-toolbar-right[data-active="false"] {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   BATCH ACTIONS (VR - Hard-Wired Visibility)
+   Always rendered, opacity controlled. Zero layout shift.
+   ─────────────────────────────────────────────────────────────────── */
+
+.vr-batch-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+
+  /* Inactive state: dimmed, non-interactive */
+  opacity: 0.7;
+  pointer-events: none;
+  transition: opacity var(--table-transition-duration-normal) ease;
+}
+
+/* Active state: full visibility when selections exist */
+.vr-batch-actions.vr-batch-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Selection count pill - matches danger button height via same padding */
+.vr-selection-pill {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-error-light);
+  padding: var(--button-padding-y) var(--button-padding-x);
+  border: 1px solid transparent;
+  border-radius: var(--button-radius);
+  font-size: var(--button-font-size);
+  font-weight: normal;
+  color: var(--color-error-dark);
+  box-sizing: border-box;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STANDARD TABLE VARIANT - Basic table
+   (Placed last due to high-specificity pseudo-class selectors)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-table-standard {
+  width: 100%;
+  border-radius: var(--table-border-radius);
+}
+
+.vr-table-standard th {
+  padding: var(--table-header-padding);
+  font-size: var(--table-header-font-size);
+  font-weight: var(--table-header-font-weight);
+  text-align: left;
+}
+
+.vr-table-standard td {
+  padding: var(--table-cell-padding);
+  font-size: var(--table-cell-font-size);
+  text-align: left;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HIGH SPECIFICITY OVERRIDES - Must come last to satisfy stylelint
+   Ordered from lowest to highest specificity per stylelint rules
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* BASE .vr-table global overrides - :hover */
+.vr-table tbody tr:hover {
+  background-color: var(--table-row-hover-bg);
+}
+
+/* PAGINATED variant - Striped rows */
+.vr-table-paginated.vr-table-paginated-striped tbody tr:nth-child(even) {
+  background-color: var(--table-stripe-bg);
+}
+
+/* PAGINATED variant - Bordered */
+.vr-table-paginated.vr-table-paginated-bordered {
+  border: var(--table-border-width) solid var(--border-light);
+}
+
+.vr-table-paginated.vr-table-paginated-bordered th,
+.vr-table-paginated.vr-table-paginated-bordered td {
+  border-right: var(--table-border-width) solid var(--border-light);
+}
+
+/* STANDARD variant - Striped rows */
+.vr-table-standard.vr-table-standard-striped tbody tr:nth-child(even) {
+  background-color: var(--table-stripe-bg);
+}
+
+/* STANDARD variant - Bordered */
+.vr-table-standard.vr-table-standard-bordered {
+  border: var(--table-border-width) solid var(--border-light);
+}
+
+.vr-table-standard.vr-table-standard-bordered th,
+.vr-table-standard.vr-table-standard-bordered td {
+  border-right: var(--table-border-width) solid var(--border-light);
+}
+
+/* BASE .vr-table global overrides - :last-child */
+.vr-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* PAGINATED variant - :last-child (higher specificity) */
+.vr-table-paginated.vr-table-paginated-bordered th:last-child,
+.vr-table-paginated.vr-table-paginated-bordered td:last-child {
+  border-right: none;
+}
+
+/* SORTABLE variant - Striped rows */
+.vr-table-sortable.vr-table-sortable-striped tbody tr:nth-child(even) {
+  background: var(--bg-secondary);
+}
+
+/* SORTABLE variant - Bordered (uses border-right, not box-shadow which gets clipped by overflow:hidden) */
+.vr-table-sortable.vr-table-sortable-bordered th:not(:last-child),
+.vr-table-sortable.vr-table-sortable-bordered td:not(:last-child) {
+  border-right: 1px solid var(--border-light);
+}
+
+/* SORTABLE variant - :hover on :nth-child (highest specificity) */
+/* stylelint-disable-next-line selector-max-specificity -- Striped table hover needs pseudo-selectors */
+.vr-table-sortable.vr-table-sortable-striped tbody tr:nth-child(even):hover {
+  background: var(--bg-hover);
+}
+
+/* STANDARD variant - :last-child */
+.vr-table-standard.vr-table-standard-bordered th:last-child,
+.vr-table-standard.vr-table-standard-bordered td:last-child {
+  border-right: none;
+}

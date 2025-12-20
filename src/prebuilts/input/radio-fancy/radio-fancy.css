@@ -1,0 +1,88 @@
+/* ─────────────────────────────────────────────────────────────────────
+   VR: Radio Fancy - Uiverse-inspired stylized radio buttons
+   ───────────────────────────────────────────────────────────────────── */
+
+.vr-radio-fancy-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.vr-radio-fancy-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.vr-radio-fancy-input {
+  display: none;
+}
+
+.vr-radio-fancy-button {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  padding: 4px;
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
+  box-shadow:
+    inset -1px -1px 4px var(--bg-primary),
+    inset 1px 1px 3px var(--border-normal);
+}
+
+.vr-radio-fancy-button--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vr-radio-fancy-circle {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border-radius: 50%;
+  transition: all 0.3s ease-in-out;
+}
+
+.vr-radio-fancy-input:checked + .vr-radio-fancy-button .vr-radio-fancy-circle {
+  background: var(--brand-primary);
+  transform: scale(1.1);
+  outline: 2px solid var(--bg-primary);
+}
+
+.vr-radio-fancy-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+.vr-radio-fancy-label strong {
+  font-weight: var(--font-weight-bold);
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.vr-radio-fancy-label--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vr-radio-fancy-input:checked ~ .vr-radio-fancy-label {
+  color: var(--text-primary);
+}
+
+.vr-radio-fancy-desc {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+}

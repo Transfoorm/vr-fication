@@ -1,0 +1,56 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE HEADER STYLES - WCCC ly-* Compliant
+   Layout-owned component for page titles and subtitles
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Main Container */
+.ly-page-header-container {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-lg);                              /* 🟨 */
+  margin-top: var(--page-header-margin-top);         /* 🟨 */
+  margin-bottom: var(--page-header-margin-bottom);   /* 🟨 */
+}
+
+.ly-page-header-container--with-variant {
+  margin-top: calc(var(--page-header-margin-top) - var(--space-md));
+  margin-bottom: calc(var(--page-header-margin-bottom) - var(--space-md));
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+}
+
+.ly-page-header-container--top {
+  align-items: flex-start;
+}
+
+.ly-page-header-container--middle {
+  align-items: center;
+}
+
+.ly-page-header-container--bottom {
+  align-items: flex-end;
+}
+
+/* Left: Title and Subtitle */
+.ly-page-header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.ly-page-header-title {
+  /* Typography handled by T.title */
+  color: var(--page-title-color);
+  margin: 0;
+}
+
+.ly-page-header-subtitle {
+  /* Typography handled by T.caption */
+  margin: 0;
+  margin-top: var(--page-subtitle-gap);
+  color: var(--page-subtitle-color);
+}
+
+/* Right: Action */
+.ly-page-header-action {
+  flex-shrink: 0;
+}

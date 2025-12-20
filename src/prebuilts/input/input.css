@@ -1,0 +1,22 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 INPUT COMPONENTS - ORCHESTRATOR CSS
+   /src/prebuilts/input/input.css
+
+   Single entry point for all input variant styles.
+   Each variant lives in its own focused CSS file.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Checkbox variants (3 context-specific variants) */
+@import url('./checkbox/form/form.css');
+@import url('./checkbox/settings/settings.css');
+@import url('./checkbox/table/table.css');
+
+/* Standard input variants */
+@import url('./password/password.css');
+@import url('./radio/radio.css');
+@import url('./radio-fancy/radio-fancy.css');
+@import url('./range/range.css');
+@import url('./select/select.css');
+@import url('./text/text.css');
+@import url('./textarea/textarea.css');
+@import url('./toggle/toggle.css');

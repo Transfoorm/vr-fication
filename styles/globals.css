@@ -1,0 +1,162 @@
+/* FUSE Style System - Global Reset & Base Styles */
+
+@import url('./animations.css');
+@import url('./features.css');
+@import url('./layout.css');
+@import url('./prebuilts.css');
+@import url('./tokens.css');
+@import url('./themes/transtheme.css');
+
+/* Box model reset + kill not-allowed cursor virus */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+*:disabled,
+*[disabled] {
+  cursor: default !important;
+}
+
+/* HTML & Body */
+html {
+  overflow-y: scroll;
+  height: 100%;
+}
+
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  min-height: 100vh;
+  overscroll-behavior-y: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--body-bg, #fff);
+  color: var(--text-primary, #000);
+}
+
+#__next {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Typography - Headings (zero margin, layout components control spacing) */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: inherit;
+  line-height: var(--line-height-tight);
+}
+
+h1 { font-size: var(--font-size-4xl); font-weight: var(--font-weight-bold); }
+h2 { font-size: var(--font-size-3xl); font-weight: var(--font-weight-semibold); }
+h3 { font-size: var(--font-size-2xl); font-weight: var(--font-weight-semibold); }
+h4 { font-size: var(--font-size-xl); font-weight: var(--font-weight-medium); }
+h5 { font-size: var(--font-size-lg); font-weight: var(--font-weight-medium); }
+h6 { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); }
+
+/* Typography - Paragraphs */
+p {
+  margin: 0;
+  line-height: var(--line-height-normal);
+}
+
+p + p {
+  margin-top: var(--space-md);
+}
+
+/* Typography - Inline elements */
+small { font-size: var(--font-size-sm); }
+strong { font-weight: var(--font-weight-bold); }
+em { font-style: italic; }
+
+code {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: var(--font-size-sm);
+}
+
+/* Horizontal rule */
+hr {
+  border: none;
+  border-top: 1px solid var(--border-normal);
+  margin: var(--space-lg) 0;
+}
+
+/* Lists */
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Forms */
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+button {
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+label {
+  display: inline-block;
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-xs);
+  cursor: pointer;
+}
+
+/* Media */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Accessibility - Focus states */
+:focus-visible {
+  outline: var(--focus-outline-width) solid var(--brand-primary);
+  outline-offset: var(--focus-outline-offset);
+}
+
+/* Scrollbar - Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-height);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-track);
+  border-radius: var(--scrollbar-border-radius);
+  border: var(--scrollbar-thumb-border-width) solid var(--scrollbar-thumb-border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Scrollbar - Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}

@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════════════════════════
+   💬 TOOLTIP - Dark Tooltip with Portal Rendering
+   ═══════════════════════════════════════════════════════════════════
+
+   Uses React portal + position: fixed to avoid DOM clipping
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Tooltip Shadow */
+  --tooltip-shadow: 0 2px 6px rgb(0 0 0 / 25%);
+
+  /* Z-Index */
+  --tooltip-z-index: 9999;
+}
+
+.vr-tooltip-caret {
+  display: inline-block;
+  overflow: visible !important;
+}
+
+.vr-tooltip-caret--full-width {
+  display: block;
+  width: 100%;
+  overflow: visible !important;
+}
+
+.vr-tooltip-caret-content {
+  position: fixed;
+  top: var(--tooltip-top, 0);
+  left: var(--tooltip-left, 0);
+  background-color: #5c5c5c;
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 8px 12px;
+  z-index: 9999;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 500;
+  white-space: normal;
+  word-wrap: break-word;
+  pointer-events: none;
+  box-shadow: var(--tooltip-shadow);
+}
+
+/* Directional positioning */
+.vr-tooltip-caret-content--top {
+  transform: translate(-50%, -100%);
+}
+
+.vr-tooltip-caret-content--bottom {
+  transform: translate(-50%, 0);
+}
+
+.vr-tooltip-caret-content--left {
+  transform: translate(-100%, -50%);
+}
+
+.vr-tooltip-caret-content--right {
+  transform: translate(0, -50%);
+}
+
+/* Size variants */
+.vr-tooltip-caret-content--sm {
+  max-width: 160px;
+}
+
+.vr-tooltip-caret-content--md {
+  max-width: 240px;
+}
+
+.vr-tooltip-caret-content--lg {
+  max-width: 320px;
+}
+
+/* Caret positioning */
+.vr-tooltip-caret-content::after {
+  content: "";
+  position: absolute;
+  border-width: 7px;
+  border-style: solid;
+}
+
+/* Top - caret points down */
+.vr-tooltip-caret-content--top::after {
+  top: 100%;
+  left: 50%;
+  margin-left: -7px;
+  margin-top: -1px;
+  border-color: #5c5c5c transparent transparent;
+}
+
+/* Bottom - caret points up */
+.vr-tooltip-caret-content--bottom::after {
+  bottom: 100%;
+  left: 50%;
+  margin-left: -7px;
+  margin-bottom: -1px;
+  border-color: transparent transparent #5c5c5c;
+}
+
+/* Left - caret points right */
+.vr-tooltip-caret-content--left::after {
+  left: 100%;
+  top: 50%;
+  margin-top: -7px;
+  margin-left: -1px;
+  border-color: transparent transparent transparent #5c5c5c;
+}
+
+/* Right - caret points left */
+.vr-tooltip-caret-content--right::after {
+  right: 100%;
+  top: 50%;
+  margin-top: -7px;
+  margin-right: -1px;
+  border-color: transparent #5c5c5c transparent transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   💬 TOOLTIP LABEL ICON - Info icon trigger for tooltips
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-tooltip-label-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.vr-tooltip-label-icon__icon {
+  color: #999;
+}

@@ -1,0 +1,25 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🤖 VR-BACKDROP - Unified Dim Layer
+   /src/prebuilts/backdrop/backdrop.css
+
+   Site-wide consistent backdrop for attention-capture overlays.
+   40% opacity. No blur. ONE dim. Used everywhere.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vr-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-backdrop, 900);
+  background-color: rgb(0 0 0 / 40%);
+  animation: vr-backdrop-fade-in 200ms ease-out;
+}
+
+@keyframes vr-backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

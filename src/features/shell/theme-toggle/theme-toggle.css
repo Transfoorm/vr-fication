@@ -1,0 +1,105 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🌓 THEME TOGGLE - Animated Sun/Moon Switcher
+   Pure CSS implementation (Josh Comeau pattern)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Label Container */
+.ft-theme-label {
+  color: var(--text-secondary);
+  width: 40px;
+  height: 40px;
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ft-theme-label:hover {
+  background-color: var(--bg-active);
+}
+
+/* Hidden Checkbox (accessibility + state management) */
+.ft-theme-input {
+  opacity: 0;
+  width: 100%;
+  aspect-ratio: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+
+/* SVG Container - Base state (Light mode) */
+.ft-theme-svg {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.4s ease;
+  transform: rotate(40deg);
+  pointer-events: none;
+}
+
+/* Moon Mask Circle - Base state */
+.ft-theme-moon-mask {
+  transition: transform 0.64s cubic-bezier(0.41, 0.64, 0.32, 1.575);
+  transform: translate(0, 0);
+}
+
+/* Main Circle (Sun/Moon body) - Base state */
+.ft-theme-main-circle {
+  transform-origin: center center;
+  transition: transform 0.4s ease;
+  transform: scale(1);
+}
+
+/* Star Circles - Base state (hidden) */
+.ft-theme-star {
+  transform-origin: center center;
+  transform: scale(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE STATE - Triggered by :checked pseudo-selector
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* SVG Rotation - Dark mode */
+.ft-theme-input:checked + .ft-theme-svg {
+  transform: rotate(90deg);
+}
+
+/* Moon Mask Translation - Dark mode (creates crescent) */
+.ft-theme-input:checked + .ft-theme-svg .ft-theme-moon-mask {
+  transform: translate(16px, -3px);
+}
+
+/* Main Circle Scale - Dark mode (shrinks to moon size) */
+.ft-theme-input:checked + .ft-theme-svg .ft-theme-main-circle {
+  transform: scale(0.55);
+}
+
+/* Staggered animation delays for each star */
+.ft-theme-star:nth-child(1) { animation-delay: 0s; }
+.ft-theme-star:nth-child(2) { animation-delay: 0.05s; }
+.ft-theme-star:nth-child(3) { animation-delay: 0.1s; }
+.ft-theme-star:nth-child(4) { animation-delay: 0.17s; }
+.ft-theme-star:nth-child(5) { animation-delay: 0.25s; }
+.ft-theme-star:nth-child(6) { animation-delay: 0.29s; }
+
+/* Stars Visibility - Dark mode (animate in with stagger) */
+.ft-theme-input:checked + .ft-theme-svg .ft-theme-star {
+  animation: ft-theme-toggle-star-appear 0.4s ease forwards;
+}
+
+/* Star appear animation */
+@keyframes ft-theme-toggle-star-appear {
+  0% {
+    transform: scale(0);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}

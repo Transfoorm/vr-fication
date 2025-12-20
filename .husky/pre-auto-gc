@@ -1,0 +1,5 @@
+#!/bin/sh
+# Block automatic garbage collection that could lose work
+echo "⛔ BLOCKED: Automatic garbage collection disabled"
+echo "Run 'git gc' manually only when you're certain all work is committed"
+exit 1

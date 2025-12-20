@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# VRP Layer 5: Pre-Push Hook - Full Build Verification
+# Ensures no broken code can be pushed to remote
+
+echo "🛡️ VRP: Running full TypeScript check..."
+tsc --noEmit
+
+if [ $? -ne 0 ]; then
+  echo "❌ VRP BLOCKED: TypeScript compilation errors detected!"
+  echo "Fix all type errors before pushing."
+  exit 1
+fi
+
+echo "🛡️ VRP: Running full build verification..."
+npm run build
+
+if [ $? -ne 0 ]; then
+  echo "❌ VRP BLOCKED: Build failed!"
+  echo "Fix build errors before pushing."
+  exit 1
+fi
+
+echo "✅ VRP: All checks passed - push allowed"
