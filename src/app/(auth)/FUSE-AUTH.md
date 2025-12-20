@@ -509,7 +509,7 @@ Auth CSS lives WITH the auth pages since it's specific to the `(auth)` route gro
 
 | Prefix | Layer | Location |
 |--------|-------|----------|
-| `.vr-*` | VR/Prebuilts | `/src/vr/` |
+| `.vr-*` | VR/VRs | `/src/vr/` |
 | `.ft-*` | Features | `/src/features/` |
 | `.ly-*` | Shell/Layout | `/src/shell/` |
 

@@ -10,7 +10,7 @@ VR → Feature → Tab
 
 | Layer | What belongs here | What NEVER belongs here |
 |-------|-------------------|------------------------|
-| **VR** (Prebuilts) | Dumb UI shell, visual states, callbacks | FUSE, business logic, data fetching |
+| **VR** (VRs) | Dumb UI shell, visual states, callbacks | FUSE, business logic, data fetching |
 | **Feature** | FUSE wiring, transforms, modals, edge cases | Direct rendering in tabs |
 | **Tab** (Domain) | One line Feature import | State, FUSE, callbacks, logic |
 
@@ -25,7 +25,7 @@ VR → Feature → Tab
 
 ### CSS Prefix Check
 
-- `.vr-*` → Prebuilts only
+- `.vr-*` → VRs only
 - `.ft-*` → Features only
 - Tabs have NO CSS prefix because they have NO CSS
 

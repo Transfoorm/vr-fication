@@ -1,5 +1,5 @@
 /**──────────────────────────────────────────────────────────────────────┐
-│  🤖 PREBUILTS - Central Export                                         │
+│  🤖 VR - Central Export                                         │
 │  /src/vr/index.tsx                                   │
 │                                                                        │
 │  Single import for all VR components across the entire app.      │
@@ -13,7 +13,7 @@
 │  - Label: Text decorations (Label.basic, Label.error, etc.)           │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-// Prebuilt Component Variants
+// VR Component Variants
 export { Page } from '@/vr/page';
 export { Card } from '@/vr/card';
 export { Modal, useSideDrawer } from '@/vr/modal';

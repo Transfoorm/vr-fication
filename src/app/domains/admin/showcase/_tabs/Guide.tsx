@@ -63,7 +63,7 @@ export default function Guide() {
 
         <ul className="ft-showcasetabs-guide-prefix-list">
           <li>
-            <T.body size="sm"><code className="ft-showcasetabs-guide-code">.vr-*</code> — Prebuilts only (reusable DNA)</T.body>
+            <T.body size="sm"><code className="ft-showcasetabs-guide-code">.vr-*</code> — VRs only (reusable DNA)</T.body>
           </li>
           <li>
             <T.body size="sm"><code className="ft-showcasetabs-guide-code">.ft-*</code> — Features only (specific assembly)</T.body>

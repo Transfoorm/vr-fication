@@ -94,7 +94,7 @@ VRS components:
 
 ## Part 3: The Rules
 
-### VRs (Prebuilts)
+### VRs (VRs)
 - Dumb visual shells
 - Receive value, fire callback
 - No FUSE imports

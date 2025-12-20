@@ -494,7 +494,7 @@ export default function UsersTab() {
 VR → Feature → Tab
 ```
 
-**VR (Prebuilts)** = Pure UI behavior (dumb shell)
+**VR (VRs)** = Pure UI behavior (dumb shell)
 **Feature** = VR + FUSE + business logic (smart wrapper)
 **Tab/Page (Domain)** = One line import (pure declaration)
 

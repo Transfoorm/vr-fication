@@ -140,7 +140,7 @@ Every CSS class starts with a prefix that tells you its **category** and **which
 
 ## Architecture Prefixes
 
-### vr-* (Variant Robot - Prebuilts)
+### vr-* (Variant Robot - VRs)
 
 **vr = Variant Robot**
 
@@ -331,7 +331,7 @@ An import hub is a CSS file that imports other CSS files for organizational purp
 
 **Example: `/styles/vr.css`**
 ```css
-/* Prebuilts - Variant Robot Components */
+/* VRs - Variant Robot Components */
 @import '../src/vr/actions/actions.css';
 @import '../src/vr/badge/badge.css';
 @import '../src/vr/button/button.css';
