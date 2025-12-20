@@ -70,6 +70,7 @@ export async function POST(req: Request) {
       await convex.mutation(api.domains.admin.users.api.syncUserFromClerk, {
         clerkId: id,
         email: primaryEmail?.email_address,
+        emailVerified: isEmailVerified,
         secondaryEmail: secondaryEmail?.email_address || undefined,
         firstName: first_name || undefined,
         lastName: last_name || undefined,

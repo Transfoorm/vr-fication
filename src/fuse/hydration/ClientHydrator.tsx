@@ -16,7 +16,7 @@
 
 'use client';
 
-import { useLayoutEffect, useRef, useCallback } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { useFuse } from '@/store/fuse';
 import { getCookie, decodeFuseCookie } from './session/cookieClient';
 // WARP is now called from FuseApp.tsx - no longer needed here
@@ -111,48 +111,6 @@ export function ClientHydrator() {
     setAISidebarState('closed');
     console.log('⚡ FUSE: Store hydrated synchronously from cookie');
   }, [setUser, hydrateThemeMode, hydrateThemeName, hydrateDashboard, hydrateGenome, setAISidebarState]);
-
-  // Helper function to hydrate store from decoded cookie data
-  // Currently unused - reserved for future cookie polling implementation
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const hydrateFromCookie = useCallback((decoded: ReturnType<typeof decodeFuseCookie>) => {
-    if (!decoded) return;
-
-    // 🛡️ SOVEREIGNTY RESTORED: Use Convex _id as canonical identity
-    const userData = {
-      id: decoded._id,           // ✅ Convex _id (sovereign identity)
-      convexId: decoded._id,     // Explicit alias for clarity
-      clerkId: decoded.clerkId,  // Auth reference only (never use for queries)
-      email: decoded.email || '',
-      secondaryEmail: decoded.secondaryEmail,
-      emailVerified: decoded.emailVerified,
-      firstName: decoded.firstName || '',
-      lastName: decoded.lastName || '',
-      avatarUrl: decoded.avatarUrl,
-      brandLogoUrl: decoded.brandLogoUrl,
-      rank: decoded.rank as 'crew' | 'captain' | 'commodore' | 'admiral' | null | undefined,
-      setupStatus: decoded.setupStatus as 'pending' | 'complete' | null | undefined,
-      businessCountry: decoded.businessCountry,
-      entityName: decoded.entityName,
-      socialName: decoded.socialName,
-      phoneNumber: decoded.phoneNumber,
-      mirorAvatarProfile: decoded.mirorAvatarProfile,
-      mirorEnchantmentEnabled: decoded.mirorEnchantmentEnabled,
-      mirorEnchantmentTiming: decoded.mirorEnchantmentTiming
-    };
-
-    setUser(userData);
-
-    console.log('🛡️ FUSE Sovereignty: user.id=Convex(_id), clerkId retained for auth');
-
-    // Hydrate theme
-    if (decoded.themeMode) {
-      hydrateThemeMode(decoded.themeMode as 'light' | 'dark');
-    }
-    if (decoded.themeName) {
-      hydrateThemeName(decoded.themeName);
-    }
-  }, [setUser, hydrateThemeMode, hydrateThemeName]);
 
   // REMOVED: Old useEffect hydration - now done synchronously above
   // The synchronous hydration ensures store is populated BEFORE components render

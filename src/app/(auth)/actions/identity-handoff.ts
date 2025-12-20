@@ -97,6 +97,7 @@ export async function performIdentityHandoff(): Promise<IdentityHandoffResult> {
     const convexUser = await convex.mutation(api.domains.admin.users.api.ensureUser, {
       clerkId,
       email,
+      emailVerified: false, // Default to false - set to true during setup completion
       firstName,
       lastName,
       avatarUrl: avatarToSave,
@@ -143,6 +144,7 @@ export async function performIdentityHandoff(): Promise<IdentityHandoffResult> {
       _id: String(convexUser._id),      // ✅ SOVEREIGN IDENTITY — Convex _id
       clerkId: clerkId,                  // Reference only — for Clerk API calls
       email: convexUser.email || email,
+      emailVerified: convexUser.emailVerified,
       secondaryEmail: convexUser.secondaryEmail ?? undefined,
       firstName: convexUser.firstName ?? firstName,
       lastName: convexUser.lastName ?? lastName,

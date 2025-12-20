@@ -386,14 +386,10 @@ export default function UserButton() {
                 />
               )}
               <div className="ft-userbutton-menu-header-text">
-                <T.caption size="sm" className={`ft-userbutton-menu-email ${!user.emailVerified ? 'ft-userbutton-menu-email--unverified' : ''}`}>
+                <T.body size="sm" className={`ft-userbutton-menu-email ${!user.emailVerified ? 'ft-userbutton-menu-email--unverified' : ''}`}>
                   {user.email}
-                </T.caption>
-                {user.emailVerified ? (
-                  <T.caption size="xs" className="ft-userbutton-menu-email-status">
-                    Verified ✓
-                  </T.caption>
-                ) : (
+                </T.body>
+                {!user.emailVerified && (
                   <T.caption size="xs" className="ft-userbutton-menu-email-status">
                     Unverified - Setup incomplete
                   </T.caption>

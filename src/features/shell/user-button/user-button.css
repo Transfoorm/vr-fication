@@ -11,7 +11,7 @@
   --user-button-avatar-shadow-md: 0 4px 6px rgb(0 0 0 / 10%);
 
   /* Menu Positioning & Dimensions */
-  --user-button-menu-bottom: 64px;
+  --user-button-menu-bottom: 30px; /* 🟥  CompanyButton positioning */
   --user-button-menu-left: 3px;
   --user-button-menu-radius: 10px;
   --user-button-menu-width: 240px;
@@ -136,12 +136,12 @@
 .ft-userbutton-menu {
   position: fixed;
   bottom: var(--user-button-menu-bottom);
-  left: calc(var(--sidebar-width) - 5px);  /* 🟨 Match CompanyButton positioning */
-  background-color: var(--bg-primary);
+  left: calc(var(--sidebar-width) + 8px);  /* 🟥  CompanyButton positioning */
+  background-color: #fff;
   box-shadow: var(--user-button-menu-shadow);
   border: 1px solid var(--border-light);
   border-radius: var(--user-button-menu-radius);
-  min-width: var(--user-button-menu-width);
+  min-width: var(--user-button-menu-width); /* 240px min, expands for long emails */
   z-index: 50;
   animation: fade-in var(--user-button-transition-fast) ease-out;
 }
@@ -187,9 +187,9 @@
 .ft-userbutton-menu-header {
   padding: var(--user-button-padding-header-y) var(--user-button-padding-header-x);
   border-bottom: 1px solid var(--border-light);
-  background-color: var(--bg-secondary);  /* Title Header background */
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
+  background-color: rgb(0 0 0 / 5%);  /* Light header background - matches CompanyButton */
+  border-top-left-radius: var(--user-button-menu-radius);
+  border-top-right-radius: var(--user-button-menu-radius);
 }
 
 .ft-userbutton-menu-header-content {
@@ -229,7 +229,7 @@
 }
 
 .ft-userbutton-menu-email-status {
-  /* Typography handled by T.caption */
+  /* Typography handled by T.caption - size controlled by T.caption size="xs" */
   color: var(--text-tertiary);
   line-height: 1;
   margin: 0;

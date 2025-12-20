@@ -44,6 +44,7 @@ export default defineSchema({
     // Clerk identity now lives ONLY in admin_users_ClerkRegistry table.
     // See: _clerk-virus/S.I.D.—SOVEREIGN-IDENTITY-DOCTRINE.md (SID-15.1)
     email: v.string(),
+    emailVerified: v.boolean(), // Email verification status from Clerk (defaults to false)
     firstName: v.string(),
     lastName: v.string(),
 

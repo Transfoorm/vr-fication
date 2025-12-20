@@ -70,6 +70,7 @@ export async function updateBusinessCountryAction(businessCountry: string) {
       _id: String(freshUser._id),
       clerkId: session.clerkId, // Preserve from existing session
       email: freshUser.email || session.email || '',
+      emailVerified: freshUser.emailVerified,
       secondaryEmail: freshUser.secondaryEmail || undefined,
       firstName: freshUser.firstName || session.firstName,
       lastName: freshUser.lastName || session.lastName,
@@ -133,6 +134,7 @@ export async function completeSetupAction(data: {
       _id: String(freshUser._id),
       clerkId: session.clerkId, // Preserve from existing session
       email: freshUser.email || session.email || '',
+      emailVerified: freshUser.emailVerified,
       secondaryEmail: freshUser.secondaryEmail || undefined,
       firstName: freshUser.firstName || session.firstName,
       lastName: freshUser.lastName || session.lastName,
@@ -224,6 +226,7 @@ export async function updateProfileAction(data: {
       _id: String(freshUser._id),
       clerkId: session.clerkId, // Preserve from existing session
       email: freshUser.email || session.email || '',
+      emailVerified: freshUser.emailVerified,
       secondaryEmail: freshUser.secondaryEmail || undefined,
       firstName: freshUser.firstName || session.firstName,
       lastName: freshUser.lastName || session.lastName,
@@ -371,6 +374,7 @@ export async function refreshSessionAfterUpload() {
       _id: String(freshUser._id),
       clerkId: session.clerkId, // Preserve from existing session
       email: freshUser.email || session.email || '',
+      emailVerified: freshUser.emailVerified,
       secondaryEmail: freshUser.secondaryEmail || undefined,
       firstName: freshUser.firstName || session.firstName,
       lastName: freshUser.lastName || session.lastName,

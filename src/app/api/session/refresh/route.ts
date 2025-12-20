@@ -43,6 +43,7 @@ export async function POST() {
       _id: String(freshUser._id),
       clerkId: session.clerkId, // Preserve from existing session
       email: freshUser.email || session.email,
+      emailVerified: freshUser.emailVerified,
       secondaryEmail: freshUser.secondaryEmail || undefined,
       firstName: freshUser.firstName || session.firstName,
       lastName: freshUser.lastName || session.lastName,

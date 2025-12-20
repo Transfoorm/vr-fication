@@ -355,6 +355,7 @@ export default function SetupModal() {
       if (result.user) {
         updateUser({
           setupStatus: result.user.setupStatus as 'pending' | 'complete',
+          emailVerified: result.user.emailVerified,
           firstName: result.user.firstName || undefined,
           lastName: result.user.lastName || undefined,
           entityName: result.user.entityName || undefined,

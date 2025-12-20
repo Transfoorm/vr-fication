@@ -22,6 +22,7 @@ export class UsersModel {
     args: {
       clerkId: string;
       email: string;
+      emailVerified: boolean;
       firstName?: string;
       lastName?: string;
       avatarUrl?: string;
@@ -56,6 +57,7 @@ export class UsersModel {
     const userId = await db.insert("admin_users", {
       // clerkId removed per SID-15.1 - stored only in admin_users_ClerkRegistry
       email: args.email,
+      emailVerified: args.emailVerified,
       firstName: args.firstName || '', // Empty string shows "Setup Incomplete" in UI
       lastName: args.lastName || '', // Empty string shows "Setup Incomplete" in UI
       avatarUrl: args.avatarUrl,

@@ -419,6 +419,7 @@ export const ensureUser = mutation({
   args: {
     clerkId: v.string(),
     email: v.string(),
+    emailVerified: v.boolean(),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
@@ -433,17 +434,26 @@ export const ensureUser = mutation({
     if (existingUserId) {
       const existing = await ctx.db.get(existingUserId);
       if (existing) {
-        // Update last login
-        await ctx.db.patch(existing._id, {
+        const updates: Record<string, unknown> = {
           lastLoginAt: Date.now(),
           loginCount: (existing.loginCount || 0) + 1,
           updatedAt: Date.now(),
-        });
+        };
+
+        // 🛡️ MIGRATION FIX: If setup is complete but emailVerified is false, auto-correct it
+        // This fixes users who completed setup before emailVerified was added back to schema
+        if (existing.setupStatus === 'complete' && existing.emailVerified === false) {
+          updates.emailVerified = true;
+          console.log(`🛡️ SID ensureUser: MIGRATION - Auto-correcting emailVerified for user ${existing._id}`);
+        }
+
+        await ctx.db.patch(existing._id, updates);
 
         console.log(`🛡️ SID ensureUser: EXISTING user ${existing._id} in ${Date.now() - start}ms`);
 
-        // Return the SOVEREIGN _id and user data
-        return existing;
+        // Fetch updated user to return correct data
+        const updatedUser = await ctx.db.get(existing._id);
+        return updatedUser;
       }
     }
 
@@ -453,6 +463,7 @@ export const ensureUser = mutation({
     const userIdString = await UsersModel.createUser(ctx.db, {
       clerkId: args.clerkId,
       email: args.email,
+      emailVerified: args.emailVerified,
       firstName: args.firstName,
       lastName: args.lastName,
       avatarUrl: args.avatarUrl,
@@ -552,6 +563,7 @@ export const createUser = mutation({
   args: {
     clerkId: v.string(),
     email: v.string(),
+    emailVerified: v.boolean(),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
@@ -709,6 +721,7 @@ export const completeSetup = mutation({
       socialName: args.socialName,
       orgSlug: args.orgSlug,
       businessCountry: args.businessCountry,
+      emailVerified: true, // Set to true when setup is complete
       setupStatus: "complete",
       updatedAt: Date.now(),
     });
@@ -799,6 +812,7 @@ export const syncUserFromClerk = mutation({
   args: {
     clerkId: v.string(),
     email: v.optional(v.string()),
+    emailVerified: v.optional(v.boolean()),
     secondaryEmail: v.optional(v.string()),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
@@ -813,6 +827,7 @@ export const syncUserFromClerk = mutation({
       return await UsersModel.createUser(ctx.db, {
         clerkId: args.clerkId,
         email: args.email || '',
+        emailVerified: args.emailVerified ?? false,
         firstName: args.firstName,
         lastName: args.lastName,
         avatarUrl: args.avatarUrl,
@@ -824,6 +839,11 @@ export const syncUserFromClerk = mutation({
     };
 
     if (args.email !== undefined) updates.email = args.email;
+    // 🛡️ FUSE SOVEREIGNTY: Only upgrade emailVerified (false→true), NEVER downgrade (true→false)
+    // Once verified in FUSE (either via setup completion or Clerk webhook), Clerk cannot revoke it
+    if (args.emailVerified === true && user.emailVerified === false) {
+      updates.emailVerified = true;
+    }
     if (args.secondaryEmail !== undefined) updates.secondaryEmail = args.secondaryEmail;
     if (args.firstName !== undefined) updates.firstName = args.firstName;
     if (args.lastName !== undefined) updates.lastName = args.lastName;

@@ -294,21 +294,7 @@
   transform: scale(1);
 }
 
-/* Position UserButton menu above sidebar footer button */
-.ly-sidebar-footer-userbutton .ft-userbutton-menu {
-  position: fixed;
-  inset: auto auto var(--sidebar-footer-menu-bottom) calc(var(--sidebar-width) - 15px);  /* 🟨 MENU BOTTOM GAP */ /* 🟨 MENU RIGHT POSITION */
-  background-color: var(--page-arch-color);
-  transform-origin: bottom left;
-  z-index: 200;
-}
-
-/* Modal background color */
-.ly-sidebar-footer-userbutton .ft-userbutton-modal {
-  background-color: var(--page-arch-color);
-  transform-origin: bottom left;
-  z-index: 10000;
-}
+/* UserButton positioning now controlled in user-button.css */
 
 /* Hide close buttons in sidebar */
 .ly-sidebar-footer-userbutton .ft-userbutton-close-button {

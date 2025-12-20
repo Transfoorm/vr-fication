@@ -19,8 +19,8 @@
   --company-button-chevron-size: 14px;
 
   /* Menu Positioning */
-  --company-button-menu-top: 65px;
-  --company-button-menu-radius: 10px;
+  --company-button-menu-top: 20px;   /* 🟥 Modal vertical height */
+  --company-button-menu-radius: 13px;
 
   /* Menu Animation */
   --company-button-fade-in-duration: 0.15s;
@@ -142,12 +142,13 @@
 .ft-company-button-menu {
   position: fixed;
   top: var(--company-button-menu-top);  /* 🟨 MENU TOP DISTANCE */
-  left: calc(var(--sidebar-width) - 15px);  /* 🟨 MENU RIGHT POSITION */
-  background-color: var(--page-arch-color);
-  box-shadow: var(--userbutton-menu-shadow);
+  left: calc(var(--sidebar-width) + 8px);  /*  🟥 Outside sidebar edge */
+  background-color: #fff;
+  box-shadow: var(--user-button-menu-shadow);
   border: 1px solid var(--border-light);
   border-radius: var(--company-button-menu-radius);
-  min-width: var(--userbutton-menu-width);
+  overflow: hidden; /* Ensure children respect border-radius */
+  min-width: var(--user-button-menu-width); /* 240px min, expands like UserButton */
   z-index: 200;
   animation: ft-company-button-scale-in var(--company-button-fade-in-duration) ease-out;
   transform-origin: top left;
@@ -200,9 +201,9 @@
 .ft-company-button-menu-header {
   padding: 8px 16px;
   border-bottom: 1px solid var(--border-light);
-  background-color: var(--bg-secondary);     /* Title Background */
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
+  background-color: rgb(0 0 0 / 5%);     /* Light header background */
+  border-top-left-radius: var(--company-button-menu-radius);
+  border-top-right-radius: var(--company-button-menu-radius);
   display: flex;
   align-items: center;
   gap: var(--space-sm);
