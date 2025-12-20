@@ -41,6 +41,7 @@
   word-wrap: break-word;
   pointer-events: none;
   box-shadow: var(--tooltip-shadow);
+  animation: vr-tooltip-fade-in 300ms ease;
 }
 
 /* Directional positioning */
@@ -131,4 +132,15 @@
 
 .vr-tooltip-label-icon__icon {
   color: #999;
+}
+
+/* Fade in/out animation */
+@keyframes vr-tooltip-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

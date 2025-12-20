@@ -45,24 +45,24 @@
   opacity: 1;
 }
 
-/* Override VR: Remove bold from labels unless selected */
+/* Override VR: Adjust spacing, width, and typography for enchantment options */
+.ft-enchant-radio-container {
+  --radio-fancy-text-size: 15px;
+  --radio-fancy-text-weight: normal;
+}
+
 .ft-enchant-radio-container .vr-radio-fancy-label {
   display: block;
-  width: 220px;
-  padding: var(--space-sm) var(--space-md);
+  width: 260px;
+  padding: var(--space-md) var(--space-md);
   border-radius: var(--radius-sm);
   transition: all var(--duration-fast) var(--easing);
 }
 
-/* stylelint-disable-next-line selector-max-specificity -- VR override for radio label emphasis */
-.ft-enchant-radio-container .vr-radio-fancy-input:checked ~ .vr-radio-fancy-label strong {
-  /* Typography handled by VR component */
-}
-
-/* Depressed/inset effect when selected (matches avatar pressed appearance) */
+/* Subtle inset effect when selected */
 .ft-enchant-radio-container .vr-radio-fancy-input:checked ~ .vr-radio-fancy-label {
-  box-shadow: inset 0 1px 4px rgb(0 0 0 / 25%);
-  background: rgb(0 0 0 / 2%);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 12%);
+  background: rgb(0 0 0 / 1%);
 }
 
 .ft-miror-ai-tab-enchantment-label {
@@ -107,7 +107,17 @@
 .ft-enchant-radio-container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 50;
+}
+
+/* Override VR radio group spacing */
+.ft-enchant-radio-container .vr-radio-fancy-group {
+  gap: 0;
+}
+
+/* Tighter spacing between radio rows */
+.ft-enchant-radio-container .vr-radio-fancy-row {
+  margin-bottom: -4px;
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -194,18 +204,18 @@
   transition: all var(--duration-fast) var(--easing);
 }
 
-/* Active: pressed/inset effect */
+/* Selected avatar is more opaque than hover */
 .ft-miror-ai-tab-avatar-option--active .ft-miror-ai-tab-avatar-image {
-  box-shadow: inset 0 1px 4px rgb(0 0 0 / 25%);
+  opacity: 0.7;
 }
 
 .ft-miror-ai-tab-avatar-option:hover .ft-miror-ai-tab-avatar-image {
   opacity: 0.85;
 }
 
-/* Don't fade active avatar on hover */
+/* Disable hover effect on selected avatar */
 .ft-miror-ai-tab-avatar-option--active:hover .ft-miror-ai-tab-avatar-image {
-  opacity: 1;
+  opacity: 0.7;
 }
 
 
@@ -244,7 +254,7 @@
 }
 
 .ft-star-toggle .ft-star-svg-bg {
-  fill: #fff;
+  fill: transparent;
   position: absolute;
   width: 100%;
   height: 100%;

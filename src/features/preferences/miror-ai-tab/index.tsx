@@ -122,7 +122,7 @@ export function MirorAiTabFeature() {
           {/* Live Preview */}
           <div className="ft-miror-ai-tab-preview-wrapper">
             <div className="ft-miror-ai-tab-preview-label"></div>
-            <Tooltip.caret content="Live Preview of your AI Avatar. You can select an enchantment level or turn it off completely ↘︎" side="top" size="md">
+            <Tooltip.caret content="Select enchantment level or turn it off completely ↘︎" side="top" size="sm">
               <div className="ft-miror-ai-tab-preview">
                 <div className="ft-miror-ai-tab-preview-avatar-container">
                   <img
@@ -145,7 +145,7 @@ export function MirorAiTabFeature() {
 
           {/* Star Toggle - standalone item for space-evenly */}
           <div className="ft-miror-ai-tab-star-wrapper">
-            <Tooltip.caret content="Click to toggle enchantment on/off" side="top" dismissOnClick={true}>
+            <Tooltip.caret content="Toggle enchantment on/off" side="top" dismissOnClick={true}>
               <label className="ft-star-toggle ft-star-toggle--enchantment">
                 <input
                   className="ft-star-checkbox"
@@ -206,9 +206,9 @@ export function MirorAiTabFeature() {
               value={enchantmentTiming}
               onChange={(val) => updateMirorLocal({ mirorEnchantmentTiming: val as 'subtle' | 'magical' | 'playful' })}
               options={[
-                { value: 'playful', label: 'Playful: frequent and lively', description: '' },
-                { value: 'magical', label: 'Magical: special and delightful', description: '' },
-                { value: 'subtle', label: 'Subtle: rare and understated', description: '' },
+                { value: 'playful', label: 'Playful • frequent and lively', description: '' },
+                { value: 'magical', label: 'Magical • special and delightful', description: '' },
+                { value: 'subtle', label: 'Subtle • rare and understated', description: '' },
               ]}
               name="enchantment"
             />

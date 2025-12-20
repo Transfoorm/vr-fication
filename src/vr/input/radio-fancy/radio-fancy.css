@@ -57,14 +57,14 @@
 }
 
 .vr-radio-fancy-label {
-  font-size: var(--font-size-xs);
+  font-size: var(--radio-fancy-text-size, var(--font-size-xs));
   font-weight: var(--font-weight-normal);
   color: var(--text-tertiary);
   cursor: pointer;
 }
 
 .vr-radio-fancy-label strong {
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--radio-fancy-text-weight, var(--font-weight-bold));
   color: var(--text-secondary);
   margin-right: 4px;
 }
