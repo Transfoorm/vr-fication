@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { api } from '@/convex/_generated/api';
 import { fetchMutation } from 'convex/nextjs';
+import type { Id } from '@/convex/_generated/dataModel';
 
 /**
  * GET /api/auth/outlook/callback?code=xxx&state=xxx
@@ -26,7 +27,22 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');
   const error = searchParams.get('error');
-  const returnUrl = searchParams.get('state') || '/productivity/email';
+  const stateParam = searchParams.get('state') || '';
+
+  // Decode state parameter (contains userId + returnUrl)
+  let userId: Id<'admin_users'>;
+  let returnUrl = '/productivity/email';
+
+  try {
+    const decoded = JSON.parse(Buffer.from(stateParam, 'base64').toString());
+    userId = decoded.userId as Id<'admin_users'>;
+    returnUrl = decoded.returnUrl || returnUrl;
+  } catch (e) {
+    console.error('Failed to decode state parameter:', e);
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_APP_URL}/productivity/email?outlook_error=invalid_state`
+    );
+  }
 
   // Handle OAuth error
   if (error) {
@@ -88,6 +104,7 @@ export async function GET(request: NextRequest) {
 
     // Store tokens in Convex (will be encrypted by mutation)
     await fetchMutation(api.productivity.email.outlook.storeOutlookTokens, {
+      userId, // Pass userId from state parameter
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
       expiresAt,
@@ -95,7 +112,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Trigger initial email sync (background job)
-    await fetchMutation(api.productivity.email.outlook.triggerOutlookSync, {});
+    await fetchMutation(api.productivity.email.outlook.triggerOutlookSync, {
+      userId, // Pass userId to sync function
+    });
 
     // Redirect back to email console with success indicator
     return NextResponse.redirect(

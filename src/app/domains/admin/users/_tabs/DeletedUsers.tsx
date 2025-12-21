@@ -10,7 +10,7 @@
 │  - Pure declaration                                                   │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-import { DeletedUsersFeature } from '@/features/admin/users-tabs/deleted-users-tab';
+import { DeletedUsersFeature } from '@/features/admin/users-page/deleted-users-tab';
 
 export default function DeletedUsers() {
   return <DeletedUsersFeature />;

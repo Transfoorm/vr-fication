@@ -10,7 +10,7 @@
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { usePageTiming } from '@/fuse/hooks/usePageTiming';
-import { Tabs, Stack, Icon } from '@/vr';
+import { Tabs, Stack, Icon, Page } from '@/vr';
 import MirorAI from './_tabs/MirorAI';
 import Theme from './_tabs/Theme';
 import Controls from './_tabs/Controls';
@@ -20,14 +20,16 @@ export default function Preferences() {
   usePageTiming('/settings/preferences');
 
   return (
-    <Stack>
-      <Tabs.panels
-        tabs={[
-          { id: 'miror-ai', label: 'Miror AI', icon: <Icon variant="sparkles" />, content: <MirorAI /> },
-          { id: 'theme', label: 'Theme', icon: <Icon variant="palette" />, content: <Theme /> },
-          { id: 'controls', label: 'Controls', icon: <Icon variant="sliders" />, content: <Controls /> },
-        ]}
-      />
-    </Stack>
+    <Page.constrained>
+      <Stack>
+        <Tabs.panels
+          tabs={[
+            { id: 'miror-ai', label: 'Miror AI', icon: <Icon variant="sparkles" />, content: <MirorAI /> },
+            { id: 'theme', label: 'Theme', icon: <Icon variant="palette" />, content: <Theme /> },
+            { id: 'controls', label: 'Controls', icon: <Icon variant="sliders" />, content: <Controls /> },
+          ]}
+        />
+      </Stack>
+    </Page.constrained>
   );
 }

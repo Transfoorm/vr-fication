@@ -529,9 +529,15 @@ export default defineSchema({
     isRead: v.boolean(),
     readAt: v.optional(v.number()),
 
-    // Body fetch status (optional - bodies fetched on-demand)
-    bodyFetched: v.boolean(), // Whether full body has been loaded
-    bodyStorageId: v.optional(v.id("_storage")), // Convex storage ID if body stored
+    // Asset processing status (optional)
+    /** Reference to email body asset (HTML/text) */
+    bodyAssetId: v.optional(v.id("productivity_email_Assets")),
+    /** Whether all assets (body + images + attachments) have been processed */
+    assetsProcessed: v.boolean(),
+    /** When assets were last processed */
+    assetsProcessedAt: v.optional(v.number()),
+    /** How many assets this message references (for quick stats) */
+    assetCount: v.number(),
 
     // SRS rank-scoping (required)
     /** @todo SID-ORG: Convert to v.id("admin_orgs") when orgs domain is implemented. */
@@ -689,6 +695,101 @@ export default defineSchema({
     .index("by_sender_email", ["senderEmail"])
     .index("by_last_message", ["lastMessageAt"])
     .index("by_confirmedBy", ["confirmedBy"]),
+
+  /**
+   * 🖼️ EMAIL ASSETS
+   *
+   * Content-addressed storage for email bodies, images, and attachments.
+   * Uses SHA-256 hashing for deduplication and immutability.
+   *
+   * DOCTRINE:
+   * - Assets have identity before they have a home (hash-first)
+   * - Storage location is an implementation detail (provider-agnostic)
+   * - Deduplication via content-addressing (same hash = same asset)
+   * - Referenced by multiple messages (many-to-many via AssetReferences)
+   *
+   * STORAGE STRATEGY:
+   * - v1: Convex Storage (for ~100 emails, validation phase)
+   * - v2: S3-class object storage (for scale, cost, desktop mirroring)
+   * - Migration is mechanical (swap storage adapter, keys unchanged)
+   */
+  productivity_email_Assets: defineTable({
+    // Content-addressed identity (required)
+    /** SHA-256 hash of asset content (primary identifier) */
+    hash: v.string(),
+    /** Storage key (provider-agnostic): email-assets/sha256/{first2}/{fullhash} */
+    key: v.string(),
+
+    // Asset metadata (required)
+    /** MIME type (e.g., text/html, image/png, application/pdf) */
+    contentType: v.string(),
+    /** Size in bytes */
+    size: v.number(),
+    /** Asset source */
+    source: v.union(
+      v.literal("body"),       // Email HTML/text body
+      v.literal("attachment"), // Inline image (CID) or file attachment
+      v.literal("external")    // Downloaded external image
+    ),
+
+    // Storage location (implementation detail)
+    /** Convex storage ID (v1 - temporary warehouse) */
+    storageId: v.optional(v.id("_storage")),
+    /** S3/R2 key (v2 - future, mechanical migration) */
+    s3Key: v.optional(v.string()),
+
+    // Usage tracking (for garbage collection)
+    /** Last time this asset was accessed (via signed URL generation) */
+    lastAccessedAt: v.number(),
+    /** Reference count (how many messages use this asset) */
+    referenceCount: v.number(),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_hash", ["hash"])
+    .index("by_key", ["key"])
+    .index("by_source", ["source"])
+    .index("by_last_accessed", ["lastAccessedAt"]),
+
+  /**
+   * 🔗 EMAIL ASSET REFERENCES
+   *
+   * Many-to-many relationship: messages ↔ assets
+   * Tracks which messages use which assets (for deduplication and GC).
+   *
+   * DOCTRINE:
+   * - Assets are shared across messages (deduplication)
+   * - Reference counting for garbage collection
+   * - Asset deleted only when referenceCount = 0
+   * - Tracks original context (CID, external URL)
+   */
+  productivity_email_AssetReferences: defineTable({
+    // Relationship (required)
+    /** Message that references this asset */
+    messageId: v.id("productivity_email_Index"),
+    /** Asset being referenced */
+    assetId: v.id("productivity_email_Assets"),
+
+    // Reference context (required)
+    /** How this asset is used in the message */
+    referenceType: v.union(
+      v.literal("body"),         // Email HTML/text body
+      v.literal("inline_image"), // Inline image (embedded in body)
+      v.literal("attachment")    // File attachment
+    ),
+
+    // Original reference metadata (optional - for debugging/auditing)
+    /** Original URL for external images (before download) */
+    originalUrl: v.optional(v.string()),
+    /** Original CID reference for inline images (e.g., "image001@outlook") */
+    cidReference: v.optional(v.string()),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+  }).index("by_message", ["messageId"])
+    .index("by_asset", ["assetId"])
+    .index("by_reference_type", ["referenceType"]),
 
   productivity_calendar_Events: defineTable({
     title: v.string(),

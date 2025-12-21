@@ -11,7 +11,7 @@
 
 'use client';
 
-import { Field, Dropdown, Card, T } from '@/vr';
+import { Field, Dropdown, Card, T, Stack } from '@/vr';
 import { useFuse } from '@/store/fuse';
 import './genome-tab.css';
 
@@ -85,7 +85,7 @@ export function GenomeFields() {
   const completionPercent = genome?.completionPercent ?? 0;
 
   return (
-    <div className="ft-genometab">
+    <Stack>
       <Card.standard
         title={<>Professional Genome <T.body size="sm" className="ft-genometab-percent">{completionPercent}% Complete</T.body></>}
         subtitle="Complete your profile to unlock personalised Al coaching and transformation insights"
@@ -233,6 +233,6 @@ export function GenomeFields() {
           </div>
         </div>
       </Card.standard>
-    </div>
+    </Stack>
   );
 }

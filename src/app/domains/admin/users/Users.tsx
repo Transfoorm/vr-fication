@@ -12,11 +12,16 @@
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { usePageTiming } from '@/fuse/hooks/usePageTiming';
-import { UsersTabsFeature } from '@/features/admin/users-tabs';
+import { UsersTabsFeature } from '@/features/admin/users-page';
+import { Page } from '@/vr';
 
 export default function Users() {
   useSetPageHeader("User Management", 'View, ammend, delete or invite users');
   usePageTiming('/admin/users');
 
-  return <UsersTabsFeature />;
+  return (
+    <Page.constrained>
+      <UsersTabsFeature />
+    </Page.constrained>
+  );
 }

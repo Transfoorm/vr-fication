@@ -14,6 +14,7 @@
 
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useFuse } from '@/store/fuse';
 import { T } from '@/vr';
 import { StandardEmailView } from './StandardEmailView';
@@ -51,6 +52,10 @@ export function EmailConsole({ initialThreadId }: EmailConsoleProps) {
   const viewMode = useFuse((state) => state.productivity?.emailViewMode || 'standard');
   const setEmailViewMode = useFuse((state) => state.setEmailViewMode);
 
+  // Check for OAuth errors in URL
+  const searchParams = useSearchParams();
+  const outlookError = searchParams.get('outlook_error');
+
   // Early return if no email data loaded
   if (!email) {
     return (
@@ -60,6 +65,18 @@ export function EmailConsole({ initialThreadId }: EmailConsoleProps) {
           <T.body color="secondary" size="md">
             Connect your Outlook account to start managing your inbox with Await View.
           </T.body>
+
+          {/* Error message if OAuth failed */}
+          {outlookError && (
+            <div className="ft-email-console-error">
+              <T.body color="error" weight="medium">
+                ⚠️ Connection failed: {outlookError.replace(/_/g, ' ')}
+              </T.body>
+              <T.caption color="tertiary" size="sm">
+                Please try again or check your Microsoft account settings
+              </T.caption>
+            </div>
+          )}
 
           <a
             href="/api/auth/outlook/authorize"

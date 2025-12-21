@@ -10,7 +10,7 @@
 
 'use client';
 
-import './showcase-bundle.css';
+import './showcase-page.css';
 import { useState } from 'react';
 import { Card } from '@/vr/card';
 import { Input } from '@/vr/input';

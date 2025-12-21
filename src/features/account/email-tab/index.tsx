@@ -24,7 +24,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useFuse } from '@/store/fuse';
-import { Field, Card, T } from '@/vr';
+import { Field, Card, T, Stack } from '@/vr';
 import { VerifyEmail } from '@/app/(clerk)/features/VerifyEmail';
 import { VerifySecondary } from '@/app/(clerk)/features/VerifySecondary';
 import { swapEmailsToPrimary, deleteSecondaryEmail } from '@/app/(clerk)/actions/email';
@@ -245,66 +245,78 @@ export function EmailFields() {
 
   return (
     <>
-      <Card.standard
-        title="Email Settings"
-        subtitle="Manage your email addresses and preferences"
-      >
-        <div className="vr-field-spacing">
-          <div className="vr-field-row">
-            {/* Primary Email */}
-            <Field.verify
-              label="Primary Email"
-              value={primaryEmail}
-              onCommit={(v) => handleEmailCommit('email', v)}
-              type="email"
-              helper="* Changing your email will require verification"
-            />
-
-            {/* Secondary Email + Actions */}
-            <div className="ft-emailtab-field-with-action">
+      <Stack>
+        <Card.standard
+          title="Email Settings"
+          subtitle="Manage your email addresses and preferences"
+        >
+          <div className="vr-field-spacing">
+            <div className="vr-field-row">
+              {/* Primary Email */}
               <Field.verify
-                label="Secondary Email (Optional)"
-                value={secondaryEmail}
-                onCommit={(v) => handleEmailCommit('secondaryEmail', v)}
+                label="Primary Email"
+                value={primaryEmail}
+                onCommit={(v) => handleEmailCommit('email', v)}
                 type="email"
-                placeholder="Not set"
+                helper="* Changing your email will require verification"
               />
 
-              {/* Actions - only show when secondary email exists */}
-              {secondaryEmail && (
-                <div className="ft-emailtab-action-pills">
-                  <button
-                    type="button"
-                    onClick={handleSwapClick}
-                    onBlur={handleSwapBlur}
-                    disabled={swapState === 'executing' || removeState !== 'idle'}
-                    className={swapClasses}
-                  >
-                    <T.caption size="xs" weight="medium">
-                      {swapState === 'executing' ? (
-                        <span className="ft-emailtab-action-pill__typing">Swapping...</span>
-                      ) : swapState === 'confirming' ? 'Confirm →' : 'Make Primary'}
-                    </T.caption>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleRemoveClick}
-                    onBlur={handleRemoveBlur}
-                    disabled={removeState === 'executing' || swapState !== 'idle'}
-                    className={removeClasses}
-                  >
-                    <T.caption size="xs" weight="medium">
-                      {removeState === 'executing' ? (
-                        <span className="ft-emailtab-action-pill__typing">Removing...</span>
-                      ) : removeState === 'confirming' ? 'Confirm →' : 'Remove'}
-                    </T.caption>
-                  </button>
-                </div>
-              )}
+              {/* Secondary Email + Actions */}
+              <div className="ft-emailtab-field-with-action">
+                <Field.verify
+                  label="Secondary Email (Optional)"
+                  value={secondaryEmail}
+                  onCommit={(v) => handleEmailCommit('secondaryEmail', v)}
+                  type="email"
+                  placeholder="Not set"
+                />
+
+                {/* Actions - only show when secondary email exists */}
+                {secondaryEmail && (
+                  <div className="ft-emailtab-action-pills">
+                    <button
+                      type="button"
+                      onClick={handleSwapClick}
+                      onBlur={handleSwapBlur}
+                      disabled={swapState === 'executing' || removeState !== 'idle'}
+                      className={swapClasses}
+                    >
+                      <T.caption size="xs" weight="medium">
+                        {swapState === 'executing' ? (
+                          <span className="ft-emailtab-action-pill__typing">Swapping...</span>
+                        ) : swapState === 'confirming' ? 'Confirm →' : 'Make Primary'}
+                      </T.caption>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRemoveClick}
+                      onBlur={handleRemoveBlur}
+                      disabled={removeState === 'executing' || swapState !== 'idle'}
+                      className={removeClasses}
+                    >
+                      <T.caption size="xs" weight="medium">
+                        {removeState === 'executing' ? (
+                          <span className="ft-emailtab-action-pill__typing">Removing...</span>
+                        ) : removeState === 'confirming' ? 'Confirm →' : 'Remove'}
+                      </T.caption>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </Card.standard>
+        </Card.standard>
+
+        {/* TODO: Connected Email Accounts Card - Temporarily disabled pending useProductivitySync implementation
+        <Card.standard
+          title="Connected Accounts"
+          subtitle="Manage your connected email providers for unified inbox"
+        >
+          Connected accounts feature will be re-enabled after implementing useProductivitySync hook
+          that follows TTTS Golden Bridge pattern (sync hook → FUSE → component reads via useFuse)
+        </Card.standard>
+        */}
+      </Stack>
 
       {/* Verification Modal - VerifyEmail for primary, VerifySecondary for secondary */}
       {pendingField === 'email' ? (

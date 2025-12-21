@@ -11,7 +11,7 @@ export interface TypographyBodyProps {
   /** Size variant */
   size?: 'sm' | 'md' | 'lg';
   /** Weight variant */
-  weight?: 'normal' | 'medium' | 'semibold';
+  weight?: 'micro' | 'ultra' | 'thin' | 'normal' | 'medium' | 'semibold' | 'bold' | 'black' | 'boss';
   /** Text color variant */
   color?: 'primary' | 'secondary' | 'tertiary' | 'error' | 'success' | 'warning';
   /** Optional className for domain-specific styling */

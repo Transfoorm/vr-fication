@@ -16,6 +16,7 @@ import { api } from '@/convex/_generated/api';
  */
 export const storeOutlookTokens = mutation({
   args: {
+    userId: v.id('admin_users'), // User ID from OAuth state
     accessToken: v.string(),
     refreshToken: v.string(),
     expiresAt: v.number(),
@@ -23,18 +24,8 @@ export const storeOutlookTokens = mutation({
     emailAddress: v.optional(v.string()), // User's email from Graph API
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
-
-    // Find user via Clerk Registry (S.I.D. compliant)
-    const clerkRecord = await ctx.db
-      .query('admin_users_ClerkRegistry')
-      .withIndex('by_external_id', (q) => q.eq('externalId', identity.subject))
-      .first();
-
-    if (!clerkRecord) throw new Error('Clerk registry entry not found');
-
-    const user = await ctx.db.get(clerkRecord.userId);
+    // Get user from provided userId
+    const user = await ctx.db.get(args.userId);
     if (!user) throw new Error('User not found');
 
     // Check if Outlook account already exists for this user
@@ -61,7 +52,7 @@ export const storeOutlookTokens = mutation({
       // Create new account
       await ctx.db.insert('productivity_email_Accounts', {
         label: 'Outlook',
-        emailAddress: args.emailAddress || identity.email || 'unknown@outlook.com',
+        emailAddress: args.emailAddress || user.email || 'unknown@outlook.com',
         provider: 'outlook',
         accessToken: args.accessToken,
         refreshToken: args.refreshToken,
@@ -84,19 +75,11 @@ export const storeOutlookTokens = mutation({
  * Get Outlook tokens for current user
  */
 export const getOutlookTokens = query({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
-
-    const clerkRecord = await ctx.db
-      .query('admin_users_ClerkRegistry')
-      .withIndex('by_external_id', (q) => q.eq('externalId', identity.subject))
-      .first();
-
-    if (!clerkRecord) return null;
-
-    const user = await ctx.db.get(clerkRecord.userId);
+  args: {
+    userId: v.id('admin_users'), // User ID to get tokens for
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
     if (!user) return null;
 
     // Get Outlook account from productivity_email_Accounts
@@ -151,15 +134,16 @@ export const isOutlookConnected = query({
  * Trigger Outlook email sync (calls action)
  */
 export const triggerOutlookSync = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
-
+  args: {
+    userId: v.id('admin_users'), // User ID from OAuth state
+  },
+  handler: async (ctx, args) => {
     // Schedule sync action to run in background
-    await ctx.scheduler.runAfter(0, api.productivity.email.outlook.syncOutlookMessages, {});
+    await ctx.scheduler.runAfter(0, api.productivity.email.outlook.syncOutlookMessages, {
+      userId: args.userId,
+    });
 
-    console.log(`📧 Outlook sync triggered for user ${identity.subject}`);
+    console.log(`📧 Outlook sync triggered for user ${args.userId}`);
   },
 });
 
@@ -169,13 +153,14 @@ export const triggerOutlookSync = mutation({
  * This is an action (not mutation) so it can make external HTTP requests
  */
 export const syncOutlookMessages = action({
-  args: {},
-  handler: async (ctx): Promise<{ success: boolean; messageCount?: number; error?: string }> => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
-
+  args: {
+    userId: v.id('admin_users'), // User ID to sync for
+  },
+  handler: async (ctx, args): Promise<{ success: boolean; messageCount?: number; error?: string }> => {
     // Get tokens from database
-    const tokens = await ctx.runQuery(api.productivity.email.outlook.getOutlookTokens, {});
+    const tokens = await ctx.runQuery(api.productivity.email.outlook.getOutlookTokens, {
+      userId: args.userId,
+    });
     if (!tokens) {
       console.error('No Outlook tokens found');
       return { success: false, error: 'Not connected to Outlook' };
@@ -201,6 +186,7 @@ export const syncOutlookMessages = action({
               'isDraft',
               'webLink',
               'bodyPreview',
+              'body', // Full HTML/text body
               'inferenceClassification',
               'flag',
             ].join(','),
@@ -228,6 +214,7 @@ export const syncOutlookMessages = action({
 
       // Store messages in Convex (call mutation)
       await ctx.runMutation(api.productivity.email.outlook.storeOutlookMessages, {
+        userId: args.userId,
         messages,
       });
 
@@ -246,20 +233,11 @@ export const syncOutlookMessages = action({
  */
 export const storeOutlookMessages = mutation({
   args: {
+    userId: v.id('admin_users'), // User ID to store messages for
     messages: v.array(v.any()), // OutlookMessage[] (typed on client)
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
-
-    const clerkRecord = await ctx.db
-      .query('admin_users_ClerkRegistry')
-      .withIndex('by_external_id', (q) => q.eq('externalId', identity.subject))
-      .first();
-
-    if (!clerkRecord) throw new Error('Clerk registry entry not found');
-
-    const user = await ctx.db.get(clerkRecord.userId);
+    const user = await ctx.db.get(args.userId);
     if (!user) throw new Error('User not found');
 
     // Get Outlook account
@@ -307,7 +285,7 @@ export const storeOutlookMessages = mutation({
       });
 
       // Determine initial resolution state
-      const isFromMe = message.from?.emailAddress?.address === identity.email;
+      const isFromMe = message.from?.emailAddress?.address === user.email;
       const isUnread = !message.isRead;
       let resolutionState: 'awaiting_me' | 'awaiting_them' | 'resolved' | 'none' = 'none';
 
@@ -317,7 +295,8 @@ export const storeOutlookMessages = mutation({
         resolutionState = 'awaiting_them';
       }
 
-      // Insert message
+      // Insert message (assets will be processed separately in background)
+      // messageId will be used when assets.ts is implemented for background processing
       await ctx.db.insert('productivity_email_Index', {
         // External IDs
         externalMessageId: message.id,
@@ -342,8 +321,11 @@ export const storeOutlookMessages = mutation({
         // Resolution state
         resolutionState,
 
-        // Body fetch status
-        bodyFetched: false,
+        // Asset processing (will be done in background)
+        bodyAssetId: undefined,
+        assetsProcessed: false,
+        assetsProcessedAt: undefined,
+        assetCount: 0,
 
         // SRS rank-scoping
         orgId: user.orgSlug || user._id, // TODO: Use proper orgId when orgs domain is implemented
@@ -353,11 +335,53 @@ export const storeOutlookMessages = mutation({
         updatedAt: now,
       });
 
+      // TODO: Schedule asset processing for this message (background, non-blocking)
+      // Disabled until assets.ts is implemented
+      // ctx.scheduler.runAfter(0, api.productivity.email.assets.processMessageAssets, {
+      //   userId: args.userId,
+      //   messageId,
+      //   externalMessageId: message.id,
+      // });
+
       messagesStored++;
     }
 
-    console.log(`✅ Stored ${messagesStored} messages`);
+    console.log(`✅ Stored ${messagesStored} messages, scheduled asset processing`);
 
     return { messagesStored };
+  },
+});
+
+/**
+ * Disconnect Outlook account
+ * Clears OAuth tokens and marks account as disconnected
+ */
+export const disconnectOutlookAccount = mutation({
+  args: {
+    userId: v.id('admin_users'),
+    accountId: v.id('productivity_email_Accounts'),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error('User not found');
+
+    const account = await ctx.db.get(args.accountId);
+    if (!account) throw new Error('Account not found');
+
+    // Verify ownership
+    if (account.userId !== user._id) {
+      throw new Error('Account does not belong to user');
+    }
+
+    // Mark account as disconnected and clear tokens
+    await ctx.db.patch(args.accountId, {
+      status: 'disconnected',
+      accessToken: undefined,
+      refreshToken: undefined,
+      disconnectedAt: Date.now(),
+    });
+
+    console.log(`✅ Disconnected Outlook account ${account.emailAddress}`);
+    return { success: true };
   },
 });

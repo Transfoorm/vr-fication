@@ -1,24 +1,23 @@
 'use client';
 
-import '@/features/admin/showcase-bundle/showcase-bundle.css';
+import '@/features/admin/showcase-page/showcase-page.css';
 import { Card, Divider, T } from '@/vr';
 
 export default function Guide() {
   return (
     <Card.standard
       title="The VR Doctrine"
-      subtitle="Everything you need to know about Variant Robots"
+      subtitle="Variant Robots (VRs) are the DNA of this application. They're dumb, beautiful, reusable UI shells that know nothing about your data — and that's exactly what makes them powerful."
     >
       <div className="ft-showcasetabs-guide">
-        <div className="ft-showcasetabs-guide-columns">
-          {/* Introduction */}
-          <T.body size="sm" className="ft-showcasetabs-guide-intro">
-          <strong>Variant Robots (VRs)</strong> are the DNA of this application.
-          They&apos;re dumb, beautiful, reusable UI shells that know nothing about
-          your data — and that&apos;s exactly what makes them powerful.
-        </T.body>
+        {/* Main Section Title - Full Width, Centered */}
+        <T.title size="xl" weight="bold" align="center">WHAT IS A VR?</T.title>
 
         <Divider.line />
+
+        <div className="ft-showcasetabs-guide-columns">
+          {/* Introduction */}
+
 
         {/* The Stack */}
         <T.h3 weight="bold">The Stack</T.h3>
@@ -73,7 +72,6 @@ export default function Guide() {
           </li>
         </ul>
 
-        <Divider.line />
 
         {/* The Ontology */}
         <T.h3 weight="bold">The Ontology</T.h3>
@@ -131,10 +129,11 @@ export default function Guide() {
         </ul>
         </div>
 
-        <Divider.line />
+    
 
         {/* Main Section Title - Full Width, Centered */}
         <T.title size="xl" weight="bold" align="center">SET UP PAGES WITH VR&apos;s and FEATURES</T.title>
+            <Divider.line />
 
         {/* Second 2-column section - Page & Tab Setup */}
         <div className="ft-showcasetabs-guide-columns">
@@ -237,6 +236,95 @@ export default function Guide() {
         <T.body size="sm">
           <strong>Rule:</strong> If you&apos;re asking &quot;Do I need a Feature?&quot;, the answer is YES.
         </T.body>
+
+        </div>
+
+        {/* Main Section Title - Full Width, Centered */}
+        <T.title size="xl" weight="bold" align="center">PAGE LAYOUT PATTERNS</T.title>
+        <Divider.line />
+
+        {/* Third 2-column section - Page Layout */}
+        <div className="ft-showcasetabs-guide-columns">
+          <T.h3 weight="bold">The Two Layout Modes</T.h3>
+
+          <T.body size="sm">
+            Every page must explicitly declare its width behavior using Page variants.
+          </T.body>
+
+          <T.body size="sm">
+            <strong>Page.full</strong> — Full available width
+          </T.body>
+          <T.body size="sm">
+            Use for: Productivity surfaces (Email, Calendar, Tasks, Bookings, Meetings)
+          </T.body>
+          <T.body size="sm">
+            Timeline and canvas-based interfaces where horizontal space improves usability.
+          </T.body>
+
+          <T.body size="sm">
+            <strong>Page.constrained</strong> — Max 1320px centered
+          </T.body>
+          <T.body size="sm">
+            Use for: Data surfaces (Admin, Settings, Finance, Clients, Projects, System)
+          </T.body>
+          <T.body size="sm">
+            Tables, lists, forms, and config UIs where constrained width aids readability.
+          </T.body>
+
+          <T.h4 weight="semibold">Code Examples</T.h4>
+
+          <T.body size="sm">
+            <strong>Productivity Page (Full Width):</strong>
+          </T.body>
+          <T.caption>src/app/domains/productivity/Email.tsx</T.caption>
+          <pre className="ft-showcasetabs-guide-code-block">
+{`import { Page } from '@/vr';
+
+export default function Email() {
+  return (
+    <Page.full>
+      <EmailConsole />
+    </Page.full>
+  );
+}`}
+          </pre>
+
+          <T.body size="sm">
+            <strong>Data Page (Constrained Width):</strong>
+          </T.body>
+          <T.caption>src/app/domains/admin/users/Users.tsx</T.caption>
+          <pre className="ft-showcasetabs-guide-code-block">
+{`import { Page } from '@/vr';
+
+export default function Users() {
+  return (
+    <Page.constrained>
+      <UsersTabsFeature />
+    </Page.constrained>
+  );
+}`}
+          </pre>
+
+          <T.h4 weight="semibold">Decision Rule</T.h4>
+
+          <T.body size="sm">
+            <strong>Ask: Is this a workspace or data?</strong>
+          </T.body>
+          <ul className="ft-showcasetabs-guide-prefix-list">
+            <li><T.body size="sm">Workspace (timeline, canvas, messaging) → Page.full</T.body></li>
+            <li><T.body size="sm">Data (tables, lists, forms, config) → Page.constrained</T.body></li>
+          </ul>
+
+          <T.body size="sm">
+            <strong>Communication Protocol:</strong>
+          </T.body>
+          <T.body size="sm">
+            When requesting a new page, specify surface type in business terms:
+          </T.body>
+          <ul className="ft-showcasetabs-guide-prefix-list">
+            <li><T.body size="sm">&quot;Create a full-width email console&quot; → Developer uses Page.full</T.body></li>
+            <li><T.body size="sm">&quot;Create a user management table&quot; → Developer uses Page.constrained</T.body></li>
+          </ul>
         </div>
       </div>
     </Card.standard>

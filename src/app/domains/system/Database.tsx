@@ -14,10 +14,15 @@
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { usePageTiming } from '@/fuse/hooks/usePageTiming';
 import { DBCheckFeature } from '@/features/system/database/db-check';
+import { Page } from '@/vr';
 
 export default function Database() {
   useSetPageHeader("Database", 'Database integrity monitoring and health checks');
   usePageTiming('/system/database');
 
-  return <DBCheckFeature />;
+  return (
+    <Page.constrained>
+      <DBCheckFeature />
+    </Page.constrained>
+  );
 }

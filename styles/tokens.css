@@ -24,10 +24,15 @@
   --font-size-xs: 12px;    /* Captions, labels */
 
   /* Weights */
+  --font-weight-micro: 100;
+  --font-weight-ultra: 200;
+  --font-weight-thin: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
+  --font-weight-black: 800;
+  --font-weight-boss: 900;
 
   /* Line Heights */
   --line-height-tight: 1.25;
@@ -132,13 +137,17 @@
    LAYOUT CONTROL VARIABLES - App Shell & Page Architecture
    =========================================================== */
 :root {
+  /* Layout Width System - Opt-in constraints for different surface types */
+  --layout-constrained-width: 1320px;    /* Constrained layout - E.g. Tables, admin, config, finance */
+  --layout-max-width: none;              /* Full-width layout - E.g. Email, calendar, messaging, booking */
+
   /* Content Alignment */
   --page-margin-left: auto;              /* LEFT aligned: 0 | CENTER aligned: auto */
   --page-margin-right: auto;             /* Always auto */
 
   /* Page Arch System */
   --curved-radius: 20px;                 /* Disable in layout.tsx with USE_CURVES = false */
-  --content-width: 1200px;               /* Max width for titles and content */
+  --content-width: 1320px;               /* DEPRECATED: Use --layout-constrained-width instead */
 
   /* App Shell - Topbar */
   --topbar-height: 50px;                 /* Top navigation bar height */
@@ -186,7 +195,7 @@
   --page-sidebar-sticky-offset: var(--space-2xl); /* Sticky sidebar bottom offset */
   --page-dashboard-gap: var(--space-2xl);  /* Gap between dashboard widgets */
   --page-dashboard-min-width: 300px;      /* Minimum widget width */
-  --page-constrained-max-width: 1200px;   /* Max width for constrained pages */
+  --page-constrained-max-width: 1200px;   /* DEPRECATED: Use --layout-constrained-width (1320px) instead */
 
   /* Bridge Page Variant */
   --page-bridge-title-size: var(--page-title-size);        /* Bridge title font size */

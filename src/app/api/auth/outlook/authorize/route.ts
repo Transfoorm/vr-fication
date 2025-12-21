@@ -7,6 +7,7 @@
 └────────────────────────────────────────────────────────────────────────┘ */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { readSessionCookie } from '@/fuse/hydration/session/cookie';
 
 /**
  * GET /api/auth/outlook/authorize
@@ -22,6 +23,13 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const returnUrl = searchParams.get('returnUrl') || '/productivity/email';
+
+  // Get user from session cookie
+  const session = await readSessionCookie();
+
+  if (!session || !session._id) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
 
   // Microsoft OAuth configuration
   const clientId = process.env.MICROSOFT_CLIENT_ID;
@@ -40,6 +48,12 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Encode state with userId + returnUrl
+  const state = JSON.stringify({
+    userId: session._id,
+    returnUrl,
+  });
+
   // Build Microsoft authorization URL
   const authUrl = new URL('https://login.microsoftonline.com/common/oauth2/v2.0/authorize');
   authUrl.searchParams.set('client_id', clientId);
@@ -47,7 +61,7 @@ export async function GET(request: NextRequest) {
   authUrl.searchParams.set('redirect_uri', redirectUri);
   authUrl.searchParams.set('scope', scope);
   authUrl.searchParams.set('response_mode', 'query');
-  authUrl.searchParams.set('state', returnUrl); // Pass return URL via state
+  authUrl.searchParams.set('state', Buffer.from(state).toString('base64')); // Pass userId + returnUrl via state
 
   // Redirect to Microsoft login
   return NextResponse.redirect(authUrl.toString());

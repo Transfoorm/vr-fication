@@ -15,10 +15,15 @@
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { usePageTiming } from '@/fuse/hooks/usePageTiming';
 import { AccountPageFeature } from '@/features/account/account-page';
+import { Page } from '@/vr';
 
 export default function Account() {
   useSetPageHeader('Manage Your Account', 'These are your account details and settings');
   usePageTiming('/settings/account');
 
-  return <AccountPageFeature />;
+  return (
+    <Page.constrained>
+      <AccountPageFeature />
+    </Page.constrained>
+  );
 }

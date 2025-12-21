@@ -51,34 +51,36 @@ export default function StandardCard({
   const hasContent = children !== null && children !== undefined && children !== '';
 
   return (
-    <div className={`vr-card vr-card-standard ${className}`}>
-      {(title || subtitle) && (
-        <div className="vr-card-standard-header">
-          {title && (
-            <T.title size="md" weight="semibold" className="vr-card-standard-title">
-              {icon && <Icon variant={icon} size="md" />}
-              {title}
-            </T.title>
-          )}
-          {subtitle && (
-            <T.body size="sm" color="secondary" className="vr-card-standard-subtitle">
-              {subtitle}
-            </T.body>
-          )}
-        </div>
-      )}
+    <div className={`vr-card-standard-frame ${className}`}>
+      <div className="vr-card-standard-surface">
+        {(title || subtitle) && (
+          <div className="vr-card-standard-header">
+            {title && (
+              <T.title size="md" weight="semibold" className="vr-card-standard-title">
+                {icon && <Icon variant={icon} size="md" />}
+                {title}
+              </T.title>
+            )}
+            {subtitle && (
+              <T.body size="sm" color="secondary" className="vr-card-standard-subtitle">
+                {subtitle}
+              </T.body>
+            )}
+          </div>
+        )}
 
-      {hasContent && (
-        <div className="vr-card-standard-content">
-          {children}
-        </div>
-      )}
+        {hasContent && (
+          <div className="vr-card-standard-content">
+            {children}
+          </div>
+        )}
 
-      {footer && (
-        <div className="vr-card-standard-footer">
-          {footer}
-        </div>
-      )}
+        {footer && (
+          <div className="vr-card-standard-footer">
+            {footer}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

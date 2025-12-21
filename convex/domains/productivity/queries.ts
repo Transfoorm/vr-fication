@@ -252,6 +252,37 @@ export const listThreads = query({
 });
 
 /**
+ * 📨 LIST EMAIL MESSAGES (All Messages)
+ *
+ * Returns all email messages from productivity_email_Index with rank-based scoping.
+ * Used by WARP to preload email data into FUSE store.
+ *
+ * @returns Array of email messages
+ */
+export const listMessages = query({
+  args: { callerUserId: v.id("admin_users") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+
+    // Fetch all email messages with rank-based scoping
+    if (rank === "admiral") {
+      return await ctx.db
+        .query("productivity_email_Index")
+        .order("desc") // Most recent first
+        .collect();
+    } else {
+      const orgId = user.orgSlug || "";
+      return await ctx.db
+        .query("productivity_email_Index")
+        .withIndex("by_org", (q) => q.eq("orgId", orgId))
+        .order("desc")
+        .collect();
+    }
+  },
+});
+
+/**
  * 📨 GET EMAIL MESSAGE (Single Message Details)
  *
  * Returns full details for a specific email message.
@@ -284,6 +315,10 @@ export const getEmailMessage = query({
     return message;
   },
 });
+
+// TODO: Implement getEmailBody as action with internal query helper
+// Requires splitting DB access (query) from storage access (action)
+// Deferred until assets.ts pipeline is implemented
 
 /**
  * 📧 LIST EMAIL ACCOUNTS (Connected Accounts)

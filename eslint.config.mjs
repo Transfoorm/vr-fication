@@ -9,6 +9,7 @@ import tttsRules from "./eslint/ttts/index.js";
 import vrpRules from "./eslint/vrp/index.js";
 import srbRules from "./eslint/srb/index.js";
 import typographySovereignty from "./eslint/typography-sovereignty.js";
+import vrRules from "./eslint/vr/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -43,6 +44,7 @@ const eslintConfig = [
       "vrp": vrpRules,
       "srb": srbRules,
       "typography": typographySovereignty,
+      "vr": vrRules,
     },
   },
   // Global lint configuration + Superior VRP Layer 2 Rules
@@ -128,6 +130,13 @@ const eslintConfig = [
 
       // TYPO-6: Prevent prop sprawl - max 3 semantic props per Typography VR
       "typography/no-prop-sprawl": "warn",
+
+      // ═══════════════════════════════════════════════════════════════════
+      // VR DOCTRINE - "THERE'S A VR FOR THAT"
+      // ═══════════════════════════════════════════════════════════════════
+
+      // VR-1: Enforce Stack VR for multiple cards
+      "vr/no-manual-card-stacking": "error",
 
       // NOTE: class-prefix and no-component-css DISABLED for now
       // Legacy uses VR architecture, not 5-file system yet

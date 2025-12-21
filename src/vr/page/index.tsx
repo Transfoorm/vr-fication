@@ -20,6 +20,7 @@
 
 import StandardPage from './Standard';
 import FullPage from './Full';
+import ConstrainedPage from './Constrained';
 import SplitPage from './Split';
 import TriplePage from './Triple';
 import SidebarPage from './Sidebar';
@@ -40,6 +41,7 @@ import BridgePage from './Bridge';
 export const Page = {
   standard: StandardPage,
   full: FullPage,
+  constrained: ConstrainedPage,
   split: SplitPage,
   triple: TriplePage,
   sidebar: SidebarPage,
@@ -51,6 +53,7 @@ export const Page = {
 export {
   StandardPage,
   FullPage,
+  ConstrainedPage,
   SplitPage,
   TriplePage,
   SidebarPage,
@@ -62,6 +65,7 @@ export {
 // Type exports for TypeScript users
 export type { StandardPageProps } from './Standard';
 export type { FullPageProps } from './Full';
+export type { ConstrainedPageProps } from './Constrained';
 export type { SplitPageProps } from './Split';
 export type { TriplePageProps } from './Triple';
 export type { SidebarPageProps } from './Sidebar';

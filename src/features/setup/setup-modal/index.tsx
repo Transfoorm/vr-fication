@@ -206,6 +206,7 @@ export default function SetupModal() {
 
       const timer = setTimeout(() => {
         setHiddenPlaceholders(new Set());
+        setErrors({}); // Clear errors - fades text back in, synced with placeholder
       }, 3500);
 
       return () => clearTimeout(timer);
@@ -610,7 +611,7 @@ export default function SetupModal() {
                   )}
                 </div>
                 {errors.firstName && (
-                  <T.body size="md" weight="medium" className="ft-setup-error-text">{errors.firstName}</T.body>
+                  <T.body size="md" weight="normal" className="ft-setup-error-text">{errors.firstName}</T.body>
                 )}
               </div>
 
@@ -630,7 +631,7 @@ export default function SetupModal() {
                   }`}
                 />
                 {errors.lastName && (
-                  <T.body size="md" weight="medium" className="ft-setup-error-text">{errors.lastName}</T.body>
+                  <T.body size="md" weight="normal" className="ft-setup-error-text">{errors.lastName}</T.body>
                 )}
               </div>
 
@@ -650,7 +651,7 @@ export default function SetupModal() {
                   }`}
                 />
                 {errors.entityName && (
-                  <T.body size="md" weight="medium" className="ft-setup-error-text">{errors.entityName}</T.body>
+                  <T.body size="md" weight="normal" className="ft-setup-error-text">{errors.entityName}</T.body>
                 )}
               </div>
 
@@ -674,7 +675,7 @@ export default function SetupModal() {
                   }`}
                 />
                 {errors.socialName && (
-                  <T.body size="md" weight="medium" className="ft-setup-error-text">{errors.socialName}</T.body>
+                  <T.body size="md" weight="normal" className="ft-setup-error-text">{errors.socialName}</T.body>
                 )}
                 <T.caption size="xs" className="ft-setup-help-text">
                   * Uppercase and lowercase letters, numbers and one period (dot). No symbols or special characters. You can change your username.

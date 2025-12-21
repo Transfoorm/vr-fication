@@ -291,11 +291,17 @@ export default function TypographyShowcase() {
 
       {/* TypographyBody - All Weights */}
       <Typography.heading level={3} weight="semibold">TypographyBody Weights</Typography.heading>
-      <Typography.caption color="secondary">All weight variants shown at medium size with primary color</Typography.caption>
+      <Typography.caption color="secondary">All 9 weight variants (100-900) shown at medium size with primary color</Typography.caption>
 
-      <Typography.body size="md" weight="semibold">Semibold weight (strong emphasis within body text)</Typography.body>
-      <Typography.body size="md" weight="medium">Medium weight (subtle emphasis within body text)</Typography.body>
-      <Typography.body size="md" weight="normal">Normal weight (default for body text)</Typography.body>
+      <Typography.body size="md" weight="micro">Micro weight (100 - ultra lightweight)</Typography.body>
+      <Typography.body size="md" weight="ultra">Ultra weight (200 - very lightweight)</Typography.body>
+      <Typography.body size="md" weight="thin">Thin weight (300 - lightweight, subtle text)</Typography.body>
+      <Typography.body size="md" weight="normal">Normal weight (400 - default for body text)</Typography.body>
+      <Typography.body size="md" weight="medium">Medium weight (500 - subtle emphasis)</Typography.body>
+      <Typography.body size="md" weight="semibold">Semibold weight (600 - strong emphasis)</Typography.body>
+      <Typography.body size="md" weight="bold">Bold weight (700 - bold emphasis)</Typography.body>
+      <Typography.body size="md" weight="black">Black weight (800 - very heavy)</Typography.body>
+      <Typography.body size="md" weight="boss">Boss weight (900 - maximum weight)</Typography.body>
 
       <Divider.line />
 
@@ -383,7 +389,7 @@ export default function TypographyShowcase() {
       <Typography.heading level={3} weight="semibold">TypographyBody</Typography.heading>
       <Typography.body size="md">
         <strong>Sizes:</strong> 3 (sm, md, lg)<br />
-        <strong>Weights:</strong> 3 (normal, medium, semibold)<br />
+        <strong>Weights:</strong> 9 (micro, ultra, thin, normal, medium, semibold, bold, black, boss) — Full 100-900 scale<br />
         <strong>Colors:</strong> 6 (primary, secondary, tertiary, error, success, warning)
       </Typography.body>
 

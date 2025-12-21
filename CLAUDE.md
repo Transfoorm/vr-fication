@@ -310,6 +310,102 @@ When building features, always remember:
 
 ---
 
+# 📐 PAGE LAYOUT SYSTEM: TWO-MODE ARCHITECTURE
+
+## THE LAYOUT PHILOSOPHY
+
+Every page in the app follows one of two layout patterns based on its purpose:
+- **Productivity Pages** → Full-width workspace (`Page.full`)
+- **Data Pages** → Constrained readable width (`Page.constrained`)
+
+This isn't arbitrary - it's based on how humans interact with different types of content.
+
+## PRODUCTIVITY PAGES (Full-Width)
+
+**Use `<Page.full>` when building:**
+- Email interfaces
+- Calendar views
+- Task management boards
+- Messaging/chat interfaces
+- Booking/scheduling systems
+- Timeline-based workflows
+
+**Why full-width?**
+- Users spend extended time in these interfaces
+- Horizontal space improves usability (more visible items, less scrolling)
+- Canvas-based interactions benefit from maximum viewport
+- Examples: Gmail, Outlook Web, Slack, Asana
+
+**Code Example:**
+```tsx
+import { Page } from '@/vr';
+
+export default function Email() {
+  return (
+    <Page.full>
+      <EmailConsole />
+    </Page.full>
+  );
+}
+```
+
+## DATA PAGES (Constrained 1320px)
+
+**Use `<Page.constrained>` when building:**
+- Admin panels (user management, system config)
+- Settings/preferences pages
+- Financial dashboards (invoices, transactions, reports)
+- Data tables and lists
+- Form-heavy configuration screens
+- Analytics and reporting interfaces
+
+**Why constrained?**
+- Prevents eye strain from scanning ultra-wide tables
+- Maintains readable column widths (60-80 characters optimal)
+- Improves form usability (shorter line length = better UX)
+- Standard SaaS pattern (Stripe, Linear, Notion all use ~1320px)
+
+**Code Example:**
+```tsx
+import { Page } from '@/vr';
+
+export default function Users() {
+  return (
+    <Page.constrained>
+      <UsersTable />
+    </Page.constrained>
+  );
+}
+```
+
+## THE DECISION RULE
+
+**When creating a new page, ask:**
+> **"Is this a workspace where users work, or a surface where users view/manage data?"**
+
+- **Workspace** → `Page.full` (Email, Calendar, Tasks)
+- **Data** → `Page.constrained` (Admin, Settings, Finance)
+
+## COMMUNICATION PROTOCOL
+
+**What you say to developers:**
+- ❌ "Make this full-width" or "Make this constrained"
+- ✅ "Create an email interface" → Dev knows → Productivity → `Page.full`
+- ✅ "Create a user management page" → Dev knows → Data → `Page.constrained`
+- ✅ "Create a settings page" → Dev knows → Config → `Page.constrained`
+
+Just describe WHAT the page is, and devs will know which layout pattern to use.
+
+## TECHNICAL IMPLEMENTATION
+
+Both variants are first-class VR components:
+- `Page.full` - Full available width (between sidebars)
+- `Page.constrained` - Max-width 1320px, horizontally centered
+
+No props, no configuration, just semantic clarity.
+
+---
+
 # 🛑 KNOX PROTOCOL - PROTECTED FILE BLOCKING
 
 **CRITICAL: When ANY git commit fails with a pre-commit hook error containing:**

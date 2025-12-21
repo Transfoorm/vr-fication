@@ -33,22 +33,27 @@ export async function GET() {
 
   try {
     // ⚡ Fetch productivity data using sovereign queries (rank-scoped in Convex)
-    const [emails, calendar, bookings, meetings] = await Promise.all([
-      convex.query(api.domains.productivity.queries.listEmails, { callerUserId }),
+    const [emailThreads, emailMessages, calendar, bookings, meetings] = await Promise.all([
+      convex.query(api.domains.productivity.queries.listThreads, { callerUserId }), // Fetch thread metadata
+      convex.query(api.domains.productivity.queries.listMessages, { callerUserId }), // Fetch all messages
       convex.query(api.domains.productivity.queries.listCalendarEvents, { callerUserId }),
       convex.query(api.domains.productivity.queries.listBookings, { callerUserId }),
       convex.query(api.domains.productivity.queries.listMeetings, { callerUserId }),
     ]);
 
     console.log('🚀 WARP API: Productivity data fetched', {
-      emails: emails?.length || 0,
+      threads: emailThreads?.length || 0,
+      messages: emailMessages?.length || 0,
       calendar: calendar?.length || 0,
       bookings: bookings?.length || 0,
       meetings: meetings?.length || 0,
     });
 
     return Response.json({
-      emails: emails || [],
+      email: {
+        threads: emailThreads || [],
+        messages: emailMessages || [],
+      },
       calendar: calendar || [],
       bookings: bookings || [],
       meetings: meetings || [],
@@ -56,10 +61,13 @@ export async function GET() {
   } catch (error) {
     console.error('❌ WARP API: Failed to fetch productivity data:', error);
     return Response.json({
-      emails: [],
+      email: {
+        threads: [],
+        messages: [],
+      },
       calendar: [],
       bookings: [],
-      meetings: []
+      meetings: [],
     });
   }
 }

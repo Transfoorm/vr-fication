@@ -80,3 +80,62 @@
   80% { width: 100%; }
   100% { width: 0; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CONNECTED EMAIL ACCOUNTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-emailtab-connected-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.ft-emailtab-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.ft-emailtab-account-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.ft-emailtab-empty-accounts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xl) 0;
+  text-align: center;
+}
+
+.ft-emailtab-connect-button-container {
+  margin-top: var(--space-lg);
+  display: flex;
+  justify-content: center;
+}
+
+.ft-emailtab-connect-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm) var(--space-lg);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  color: var(--text-inverse);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--easing);
+  box-shadow: 0 2px 8px rgb(59 130 246 / 20%);
+}
+
+.ft-emailtab-connect-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(59 130 246 / 30%);
+}

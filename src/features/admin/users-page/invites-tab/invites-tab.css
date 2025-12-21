@@ -3,14 +3,8 @@
 │  /src/features/admin/users-tabs/invites-tab/invites-tab.css           │
 │                                                                       │
 │  Feature-level CSS (ft-*)                                             │
+│  Card stacking handled by Stack VR                                    │
 └────────────────────────────────────────────────────────────────────────┘ */
-
-.ft-invitestab {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg, 24px);
-  height: 100%;
-}
 
 /* Invite section - border only, no background */
 .ft-invitestab__section {

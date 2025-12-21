@@ -12,7 +12,7 @@
 
 import './invites-tab.css';
 import { useState, useRef } from 'react';
-import { Field, Card, T } from '@/vr';
+import { Field, Card, T, Stack } from '@/vr';
 import { sendInviteLink } from '@/app/(clerk)/actions/invite';
 
 interface BatchResult {
@@ -235,7 +235,7 @@ export function InvitesFeature() {
   const failCount = batchResults.filter(r => !r.success).length;
 
   return (
-    <div className="ft-invitestab">
+    <Stack>
       {/* Single Invite Card */}
       <Card.standard
         title="Single Invite"
@@ -437,6 +437,6 @@ export function InvitesFeature() {
           )}
         </div>
       </Card.standard>
-    </div>
+    </Stack>
   );
 }

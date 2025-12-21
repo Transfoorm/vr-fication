@@ -1,6 +1,6 @@
 'use client';
 
-import '@/features/admin/showcase-bundle/showcase-bundle.css';
+import '@/features/admin/showcase-page/showcase-page.css';
 import { Card } from '@/vr/card';
 import { Button } from '@/vr/button';
 

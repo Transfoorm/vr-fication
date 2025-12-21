@@ -14,9 +14,8 @@
   z-index: 1;
 }
 
-/* Content Wrapper */
+/* Content Wrapper - Default: Full-width (pages opt into constraints via Page.constrained) */
 .ly-page-arch-content {
-  max-width: var(--content-width);
   width: 100%;
   margin-left: var(--page-margin-left);
   margin-right: var(--page-margin-right);
