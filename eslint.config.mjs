@@ -318,6 +318,20 @@ const eslintConfig = [
       "vrp/no-eslint-disable": "off"   // Allow documented architectural disable comments
     }
   },
+  // Exception: E2E and Unit Tests (Playwright + Vitest)
+  // Tests need to access browser globals and mock types that don't have TS definitions
+  {
+    files: [
+      "e2e/**/*.{ts,tsx,spec.ts}",           // E2E tests (Playwright)
+      "**/__tests__/**/*.{ts,tsx}",          // Unit tests (Vitest)
+      "**/*.{test,spec}.{ts,tsx}",           // Test files
+      "vitest.setup.ts",                      // Vitest setup file
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",  // Browser globals need any type
+      "vrp/no-eslint-disable": "off",                // Allow test-specific disable comments
+    }
+  },
   // ═══════════════════════════════════════════════════════════════════
   // 🛡️ WCCC PROTECTION - PREVENT PAGE-SPECIFIC CSS FILES
   // ═══════════════════════════════════════════════════════════════════

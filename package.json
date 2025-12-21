@@ -25,6 +25,14 @@
     "vrp:all": "npm run vrp:isv && npm run vrp:naming && npm run vrp:clerk && npm run vrp:manifest && npm run vrp:cascade && npm run vrp:warp && npm run vrp:prism && npm run vrp:css && npm run vrp:class-scan && npm run vrp:typography",
     "prebuild": "npm run vrp:cascade",
     "clean:buildinfo": "tsx scripts/cleanBuildinfo.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:all": "npm run test:run && npm run test:e2e",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -55,17 +63,25 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.57.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/ui": "^4.0.16",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
+    "happy-dom": "^20.0.11",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "stylelint": "^16.26.0",
     "stylelint-config-standard": "^36.0.1",
     "tsc-files": "^1.1.4",
     "tsx": "^4.19.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.16"
   }
 }
