@@ -14,7 +14,6 @@
 
 'use client';
 
-import { useState } from 'react';
 import { useFuse } from '@/store/fuse';
 import { T } from '@/vr';
 import { StandardEmailView } from './StandardEmailView';
@@ -27,8 +26,6 @@ export interface EmailConsoleProps {
   initialThreadId?: string;
 }
 
-type ViewMode = 'standard' | 'await';
-
 /**
  * 📧 EMAIL CONSOLE
  *
@@ -37,6 +34,7 @@ type ViewMode = 'standard' | 'await';
  * - AWAIT VIEW (power tool): Three-rail triage interface for inbox processing
  *
  * Toggle between modes with header button
+ * View preference persisted in FUSE store
  *
  * STANDARD VIEW:
  * - Left (35%): Thread list (traditional)
@@ -48,11 +46,10 @@ type ViewMode = 'standard' | 'await';
  * - Right (25%): AI insights + promotion actions
  */
 export function EmailConsole({ initialThreadId }: EmailConsoleProps) {
-  // View mode state (standard = default, await = triage mode)
-  const [viewMode, setViewMode] = useState<ViewMode>('standard');
-
-  // FUSE store access (email data preloaded by WARP)
+  // FUSE store access (email data + view mode preference)
   const email = useFuse((state) => state.productivity?.email);
+  const viewMode = useFuse((state) => state.productivity?.emailViewMode || 'standard');
+  const setEmailViewMode = useFuse((state) => state.setEmailViewMode);
 
   // Early return if no email data loaded
   if (!email) {
@@ -63,9 +60,10 @@ export function EmailConsole({ initialThreadId }: EmailConsoleProps) {
     );
   }
 
-  // Toggle between view modes
+  // Toggle between view modes (persists to FUSE)
   const toggleViewMode = () => {
-    setViewMode((current) => (current === 'standard' ? 'await' : 'standard'));
+    const newMode = viewMode === 'standard' ? 'await' : 'standard';
+    setEmailViewMode(newMode);
   };
 
   return (

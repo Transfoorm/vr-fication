@@ -20,6 +20,8 @@ import type { ProductivityEmail } from '@/features/productivity/email-console/ty
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
+export type EmailViewMode = 'standard' | 'await';
+
 export interface ProductivityData {
   email?: ProductivityEmail;
   calendar: Record<string, unknown>[];
@@ -35,6 +37,8 @@ export interface ProductivitySlice {
   meetings: Record<string, unknown>[];
   bookings: Record<string, unknown>[];
   tasks: Record<string, unknown>[];
+  // UI preferences (persisted)
+  emailViewMode: EmailViewMode;
   // ADP Coordination (REQUIRED)
   status: ADPStatus;
   lastFetchedAt?: number;
@@ -44,6 +48,7 @@ export interface ProductivitySlice {
 export interface ProductivityActions {
   hydrateProductivity: (data: Partial<ProductivityData>, source?: ADPSource) => void;
   clearProductivity: () => void;
+  setEmailViewMode: (mode: EmailViewMode) => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -56,6 +61,8 @@ const initialProductivityState: ProductivitySlice = {
   meetings: [],
   bookings: [],
   tasks: [],
+  // UI preferences
+  emailViewMode: 'standard', // Default to standard view
   // ADP Coordination
   status: 'idle',
   lastFetchedAt: undefined,
@@ -98,6 +105,16 @@ export const createProductivitySlice: StateCreator<
     const start = fuseTimer.start('clearProductivity');
     set(initialProductivityState);
     fuseTimer.end('clearProductivity', start);
+  },
+
+  setEmailViewMode: (mode) => {
+    set((state) => ({
+      ...state,
+      emailViewMode: mode,
+    }));
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`⚡ FUSE: Email view mode changed to ${mode}`);
+    }
   },
 });
 
