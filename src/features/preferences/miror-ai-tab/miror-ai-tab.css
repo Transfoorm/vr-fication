@@ -57,7 +57,7 @@
 /* Override VR: Adjust spacing and width for enchantment options */
 .ft-enchant-radio-container .vr-radio-fancy-label {
   display: block;
-  width: 240px;
+  width: 200px;
   padding: 12px var(--space-md);
   border-radius: var(--radius-sm);
   transition: all var(--duration-fast) var(--easing);
