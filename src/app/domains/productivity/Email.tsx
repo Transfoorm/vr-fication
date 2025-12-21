@@ -1,37 +1,10 @@
 'use client';
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
-import { Card } from '@/vr/card';
-import { Grid } from '@/vr/grid';
+import { EmailConsole } from '@/features/productivity/email-console';
 
 export default function Email() {
-  useSetPageHeader('Email', 'Manage your communications');
+  useSetPageHeader('Email', 'Inbox triage and workflow management');
 
-  return (
-    <Grid.verticalBig>
-      <Grid.cards>
-        <Card.metric
-          title="Unread Messages"
-          value={42}
-          trend={8}
-          trendDirection="up"
-          context="since yesterday"
-        />
-        <Card.metric
-          title="Sent Today"
-          value={17}
-          trend={3}
-          trendDirection="down"
-          context="vs daily avg"
-        />
-        <Card.metric
-          title="Response Rate"
-          value="78%"
-          trend={12}
-          trendDirection="up"
-          context="this week"
-        />
-      </Grid.cards>
-    </Grid.verticalBig>
-  );
+  return <EmailConsole />;
 }
