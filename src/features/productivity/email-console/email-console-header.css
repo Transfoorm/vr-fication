@@ -1,0 +1,80 @@
+/* ═══════════════════════════════════════════════════════════════════
+   📧 EMAIL CONSOLE HEADER - View Mode Toggle
+   /src/features/productivity/email-console/email-console-header.css
+
+   Header bar with view mode toggle button
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   Header Container
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-email-console-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 2px solid var(--border-light, #e5e7eb);
+  background: var(--surface-raised, #fafafa);
+  flex-shrink: 0;
+}
+
+.ft-email-console-header__title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   View Toggle Button
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-email-view-toggle {
+  padding: var(--space-sm) var(--space-lg);
+  border: 2px solid var(--accent-primary, #3b82f6);
+  border-radius: var(--radius-md, 8px);
+  background: linear-gradient(135deg, rgb(59 130 246 / 5%), transparent);
+  color: var(--accent-primary, #3b82f6);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgb(59 130 246 / 10%);
+}
+
+.ft-email-view-toggle:hover {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgb(59 130 246 / 25%);
+  border-color: #2563eb;
+}
+
+.ft-email-view-toggle--active {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: #10b981;
+  color: #fff;
+  box-shadow: 0 2px 8px rgb(16 185 129 / 20%);
+}
+
+.ft-email-view-toggle--active:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  border-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgb(16 185 129 / 30%);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Mobile Responsive
+   ─────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .ft-email-console-header {
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: stretch;
+  }
+
+  .ft-email-view-toggle {
+    width: 100%;
+    text-align: center;
+  }
+}

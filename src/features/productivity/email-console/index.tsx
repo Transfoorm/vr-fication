@@ -1,17 +1,15 @@
 /**──────────────────────────────────────────────────────────────────────┐
-│  📧 EMAIL CONSOLE FEATURE - Three-Rail Layout                          │
+│  📧 EMAIL CONSOLE FEATURE - Dual-Mode Email Interface                  │
 │  /src/features/productivity/email-console/index.tsx                    │
 │                                                                        │
 │  FEATURE LAYER (DIRTY): FUSE wiring + business logic                   │
 │  Domain layer will import this as clean component                      │
 │                                                                        │
-│  EMAIL UX DOCTRINE:                                                    │
-│  - NOT a Gmail/Outlook clone                                           │
-│  - Three zones: Queue (left) + Message (center) + Intelligence (right) │
-│  - Inbox is work queue, not storage                                    │
-│  - Actions inverted: Resolve/Promote primary, Reply secondary          │
+│  DUAL-MODE SYSTEM:                                                     │
+│  - Standard View: Traditional two-rail email (default)                 │
+│  - Await View: Three-rail triage interface (power tool)                │
 │                                                                        │
-│  See: /docs/EMAIL_UX_DOCTRINE.md                                       │
+│  Toggle between modes with "Await View" button in header              │
 └────────────────────────────────────────────────────────────────────────┘ */
 
 'use client';
@@ -19,38 +17,39 @@
 import { useState } from 'react';
 import { useFuse } from '@/store/fuse';
 import { T } from '@/vr';
-import { InboxQueue } from './InboxQueue';
-import { MessageBody } from './MessageBody';
-import { IntelligenceRail } from './IntelligenceRail';
+import { StandardEmailView } from './StandardEmailView';
+import { AwaitView } from './AwaitView';
 import './email-console.css';
+import './email-console-header.css';
 
 export interface EmailConsoleProps {
   /** Optional initial thread ID to open */
   initialThreadId?: string;
 }
 
+type ViewMode = 'standard' | 'await';
+
 /**
  * 📧 EMAIL CONSOLE
  *
- * Three-rail email intake interface.
- * NOT a Gmail clone - optimized for processing, not reading.
+ * Dual-mode email interface:
+ * - STANDARD VIEW (default): Traditional two-rail email for reading/replying
+ * - AWAIT VIEW (power tool): Three-rail triage interface for inbox processing
  *
- * LAYOUT:
- * - Left (30%): Inbox queue (thread list filtered by state)
- * - Center (45%): Message body (current thread messages)
- * - Right (25%): Intelligence rail (AI suggestions, actions)
+ * Toggle between modes with header button
  *
- * DOCTRINE:
- * - <50ms render target (WARP preloads thread list)
- * - 0ms perceived navigation (thread data in FUSE)
- * - Thread state derived on-the-fly (not stored)
- * - Humans commit state changes (AI suggests only)
+ * STANDARD VIEW:
+ * - Left (35%): Thread list (traditional)
+ * - Right (65%): Reading pane + reply buttons
+ *
+ * AWAIT VIEW:
+ * - Left (30%): State-filtered queue
+ * - Center (45%): Message thread
+ * - Right (25%): AI insights + promotion actions
  */
 export function EmailConsole({ initialThreadId }: EmailConsoleProps) {
-  // Selected thread state (client-side only)
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(
-    initialThreadId || null
-  );
+  // View mode state (standard = default, await = triage mode)
+  const [viewMode, setViewMode] = useState<ViewMode>('standard');
 
   // FUSE store access (email data preloaded by WARP)
   const email = useFuse((state) => state.productivity?.email);
@@ -64,29 +63,44 @@ export function EmailConsole({ initialThreadId }: EmailConsoleProps) {
     );
   }
 
+  // Toggle between view modes
+  const toggleViewMode = () => {
+    setViewMode((current) => (current === 'standard' ? 'await' : 'standard'));
+  };
+
   return (
-    <div className="ft-email-console">
-      {/* LEFT RAIL: Inbox Queue (30%) */}
-      <div className="ft-email-console__queue">
-        <InboxQueue
-          selectedThreadId={selectedThreadId}
-          onThreadSelect={setSelectedThreadId}
-        />
+    <>
+      {/* Header with View Toggle */}
+      <div className="ft-email-console-header">
+        <div className="ft-email-console-header__title">
+          <T.h3>
+            {viewMode === 'standard' ? 'Inbox' : 'Await View'}
+          </T.h3>
+          <T.caption color="tertiary">
+            {viewMode === 'standard'
+              ? 'Traditional email interface'
+              : 'Inbox triage & processing'}
+          </T.caption>
+        </div>
+
+        <button
+          className={`ft-email-view-toggle ${
+            viewMode === 'await' ? 'ft-email-view-toggle--active' : ''
+          }`}
+          onClick={toggleViewMode}
+        >
+          <T.body weight="medium">
+            {viewMode === 'standard' ? '⚡ Enter Await View' : '← Exit Await View'}
+          </T.body>
+        </button>
       </div>
 
-      {/* CENTER PANEL: Message Body (45%) */}
-      <div className="ft-email-console__body">
-        <MessageBody
-          threadId={selectedThreadId}
-        />
-      </div>
-
-      {/* RIGHT RAIL: Intelligence & Actions (25%) */}
-      <div className="ft-email-console__intelligence">
-        <IntelligenceRail
-          threadId={selectedThreadId}
-        />
-      </div>
-    </div>
+      {/* Conditional View Rendering */}
+      {viewMode === 'standard' ? (
+        <StandardEmailView initialThreadId={initialThreadId} />
+      ) : (
+        <AwaitView initialThreadId={initialThreadId} />
+      )}
+    </>
   );
 }
