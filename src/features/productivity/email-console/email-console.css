@@ -59,15 +59,49 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
-   Loading State
+   Empty State - Connect Outlook
    ─────────────────────────────────────────────────────────────────── */
 
-.ft-email-console-loading {
+.ft-email-console-empty {
   display: flex;
   align-items: center;
   justify-content: center;
   height: calc(100vh - var(--shell-header-height, 80px));
-  color: var(--text-tertiary);
+  background: var(--surface-base);
+}
+
+.ft-email-console-empty__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  max-width: 400px;
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.ft-email-console-connect-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md) var(--space-xl);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  color: var(--text-inverse);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--easing);
+  box-shadow: 0 2px 8px rgb(59 130 246 / 20%);
+  margin-top: var(--space-sm);
+}
+
+.ft-email-console-connect-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(59 130 246 / 30%);
+}
+
+.ft-email-console-connect-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgb(59 130 246 / 20%);
 }
 
 /* ─────────────────────────────────────────────────────────────────────

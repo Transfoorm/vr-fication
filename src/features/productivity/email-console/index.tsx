@@ -54,8 +54,24 @@ export function EmailConsole({ initialThreadId }: EmailConsoleProps) {
   // Early return if no email data loaded
   if (!email) {
     return (
-      <div className="ft-email-console-loading">
-        <T.body>Loading email data...</T.body>
+      <div className="ft-email-console-empty">
+        <div className="ft-email-console-empty__content">
+          <T.h3>Connect Your Email</T.h3>
+          <T.body color="secondary" size="md">
+            Connect your Outlook account to start managing your inbox with Await View.
+          </T.body>
+
+          <a
+            href="/api/auth/outlook/authorize"
+            className="ft-email-console-connect-button"
+          >
+            <T.body weight="semibold">Connect Outlook</T.body>
+          </a>
+
+          <T.caption color="tertiary" size="sm">
+            You&apos;ll be redirected to Microsoft to authorize access
+          </T.caption>
+        </div>
       </div>
     );
   }
