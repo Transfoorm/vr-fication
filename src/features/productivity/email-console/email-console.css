@@ -30,9 +30,10 @@
    ─────────────────────────────────────────────────────────────────── */
 
 .ft-email-console__queue {
-  border-right: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light, #e5e7eb);
   overflow: hidden auto;
-  background: var(--surface-raised);
+  background: var(--surface-raised, #fafafa);
+  box-shadow: inset -1px 0 0 rgb(0 0 0 / 3%);
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -50,10 +51,11 @@
    ─────────────────────────────────────────────────────────────────── */
 
 .ft-email-console__intelligence {
-  border-left: 1px solid var(--border-light);
+  border-left: 1px solid var(--border-light, #e5e7eb);
   overflow: hidden auto;
-  background: var(--surface-raised);
+  background: var(--surface-raised, #fafafa);
   padding: var(--space-md);
+  box-shadow: inset 1px 0 0 rgb(0 0 0 / 3%);
 }
 
 /* ─────────────────────────────────────────────────────────────────────

@@ -62,16 +62,24 @@
    ─────────────────────────────────────────────────────────────────── */
 
 .ft-message-item {
-  padding: var(--space-md);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
+  padding: var(--space-lg);
+  border: 1px solid var(--border-light, #e5e7eb);
+  border-radius: var(--radius-md, 8px);
+  background: var(--surface-raised, #fff);
   position: relative;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+  transition: all 0.2s ease;
+}
+
+.ft-message-item:hover {
+  box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
+  border-color: var(--border-medium, #d1d5db);
 }
 
 .ft-message-item--urgent {
-  border-left: 3px solid var(--status-warning);
-  padding-left: calc(var(--space-md) - 2px);
+  border-left: 4px solid var(--status-warning, #f59e0b);
+  padding-left: calc(var(--space-lg) - 3px);
+  background: linear-gradient(to right, rgb(245 158 11 / 3%), transparent);
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -159,30 +167,31 @@
 
 .ft-message-item__state {
   position: absolute;
-  top: var(--space-md);
-  right: var(--space-md);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-sm);
+  top: var(--space-lg);
+  right: var(--space-lg);
+  padding: 6px 12px;
+  border-radius: 16px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 }
 
 .ft-message-item__state--awaiting-me {
-  background: var(--status-warning-bg);
-  color: var(--status-warning);
-  border: 1px solid var(--status-warning);
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  border: 1.5px solid #fbbf24;
 }
 
 .ft-message-item__state--awaiting-them {
-  background: var(--status-info-bg);
-  color: var(--status-info);
-  border: 1px solid var(--status-info);
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  border: 1.5px solid #60a5fa;
 }
 
 .ft-message-item__state--resolved {
-  background: var(--status-success-bg);
-  color: var(--status-success);
-  border: 1px solid var(--status-success);
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  border: 1.5px solid #34d399;
 }
 
 .ft-message-item__state--none {
