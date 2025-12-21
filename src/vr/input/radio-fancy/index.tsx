@@ -68,7 +68,8 @@ export default function InputRadioFancy({
               <span className="vr-radio-fancy-circle" />
             </label>
             <label htmlFor={optionId} className={`vr-radio-fancy-label ${isDisabled ? 'vr-radio-fancy-label--disabled' : ''}`}>
-              <strong>{option.label}</strong>{option.description ? ` • ${option.description}` : ''}
+              <strong>{option.label}</strong>
+              {option.description && <span className="vr-radio-fancy-desc">{option.description}</span>}
             </label>
           </div>
         );

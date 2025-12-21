@@ -122,7 +122,7 @@ export function MirorAiTabFeature() {
           {/* Live Preview */}
           <div className="ft-miror-ai-tab-preview-wrapper">
             <div className="ft-miror-ai-tab-preview-label"></div>
-            <Tooltip.caret content="Select enchantment level or turn it off completely ↘︎" side="top" size="sm">
+            <Tooltip.caret content="Select enchantment or toggle on / off ↘︎" side="top" size="sm">
               <div className="ft-miror-ai-tab-preview">
                 <div className="ft-miror-ai-tab-preview-avatar-container">
                   <img
@@ -206,11 +206,12 @@ export function MirorAiTabFeature() {
               value={enchantmentTiming}
               onChange={(val) => updateMirorLocal({ mirorEnchantmentTiming: val as 'subtle' | 'magical' | 'playful' })}
               options={[
-                { value: 'playful', label: 'Playful • frequent and lively', description: '' },
-                { value: 'magical', label: 'Magical • special and delightful', description: '' },
-                { value: 'subtle', label: 'Subtle • rare and understated', description: '' },
+                { value: 'playful', label: 'Playful', description: 'Frequent and lively' },
+                { value: 'magical', label: 'Magical', description: 'Special and delightful' },
+                { value: 'subtle', label: 'Subtle', description: 'Rare and understated' },
               ]}
               name="enchantment"
+              disabled={!enchantmentEnabled}
             />
           </div>
         </div>

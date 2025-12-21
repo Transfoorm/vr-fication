@@ -48,6 +48,12 @@
   opacity: 1;
 }
 
+/* Remove not-allowed cursor when disabled */
+.ft-enchant-radio-container .vr-radio-fancy-label--disabled,
+.ft-enchant-radio-container .vr-radio-fancy-button--disabled {
+  cursor: default;
+}
+
 /* Override VR: Adjust spacing and width for enchantment options */
 .ft-enchant-radio-container .vr-radio-fancy-label {
   display: block;
@@ -55,6 +61,17 @@
   padding: 12px var(--space-md);
   border-radius: var(--radius-sm);
   transition: all var(--duration-fast) var(--easing);
+}
+
+/* Label styling: darker color */
+.ft-enchant-radio-container .vr-radio-fancy-label strong {
+  color: var(--text-primary);
+}
+
+/* Description styling: lighter color + italic */
+.ft-enchant-radio-container .vr-radio-fancy-desc {
+  color: var(--text-tertiary);
+  font-style: italic;
 }
 
 /* Subtle inset effect when selected */
