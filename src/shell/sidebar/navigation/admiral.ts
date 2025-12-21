@@ -5,41 +5,51 @@
 │  Navigation structure for Admiral rank (platform administrator)      │
 └────────────────────────────────────────────────────────────────────────┘ */
 
+import { ROUTES } from '@/rank/routes';
 import type { NavSection } from './types';
 
 export const admiralNav: NavSection[] = [
   {
     label: 'Dashboard',
     icon: 'layout-dashboard',
-    path: '/'
+    path: ROUTES.dashboard
+  },
+  {
+    label: 'Productivity',
+    icon: 'send',
+    children: [
+      { path: ROUTES.productivity.email, label: 'Email' },
+      { path: ROUTES.productivity.calendar, label: 'Calendar' },
+      { path: ROUTES.productivity.meetings, label: 'Meetings' },
+      { path: ROUTES.productivity.bookings, label: 'Bookings' }
+    ]
   },
   {
     label: 'Admin',
     icon: 'user-star',
     children: [
-      { path: '/admin/users', label: 'Users' },
-      { path: '/admin/plans', label: 'Plans' },
-      { path: '/admin/showcase', label: 'Showcase' }
+      { path: ROUTES.admin.users, label: 'Users' },
+      { path: ROUTES.admin.plans, label: 'Plans' },
+      { path: ROUTES.admin.showcase, label: 'Showcase' }
     ]
   },
   {
     label: 'System',
     icon: 'activity',
     children: [
-      { path: '/system/ai', label: 'AI' },
-      { path: '/system/ranks', label: 'Ranks' },
-      { path: '/system/database', label: 'Database' }
+      { path: ROUTES.system.ai, label: 'AI' },
+      { path: ROUTES.system.ranks, label: 'Ranks' }
     ]
   },
   {
     label: 'Settings',
     icon: 'settings',
     children: [
-      { path: '/settings/preferences', label: 'Preferences' },
-      { path: '/settings/account', label: 'Account' },
-      { path: '/settings/security', label: 'Security' },
-      { path: '/settings/billing', label: 'Billing' },
-      { path: '/settings/plan', label: 'Plan' }
+      { path: ROUTES.settings.preferences, label: 'Preferences' },
+      { path: ROUTES.settings.account, label: 'Account' },
+      { path: ROUTES.settings.security, label: 'Security' },
+      { path: ROUTES.settings.billing, label: 'Billing' },
+      { path: ROUTES.settings.plan, label: 'Plan' }
     ]
   }
 ];
