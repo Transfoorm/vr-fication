@@ -23,12 +23,14 @@ export const ADMIRAL_MANIFEST: RankManifest = {
   allowed: [
     ROUTES.dashboard,
     ROUTES.home,
+    ...flattenRoutes(ROUTES.productivity),
     ...flattenRoutes(ROUTES.admin),
     ...flattenRoutes(ROUTES.system),
     ...flattenRoutes(ROUTES.settings),
   ],
   nav: [
     { path: ROUTES.dashboard, label: 'Dashboard', icon: 'home' },
+    { path: ROUTES.productivity.email, label: 'Productivity', icon: 'briefcase' },
     { path: ROUTES.admin.users, label: 'Users', icon: 'users' },
     { path: ROUTES.admin.plans, label: 'Plans', icon: 'layers' },
     { path: ROUTES.admin.showcase, label: 'Showcase', icon: 'flag' },
