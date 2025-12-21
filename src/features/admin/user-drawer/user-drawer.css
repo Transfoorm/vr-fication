@@ -41,17 +41,7 @@ button.ft-profiletab-country-button {
   background-color: var(--white); /* Clear background like logo */
 }
 
-/* Center labels above avatar and logo */
-.ft-profiletab-media-group .vr-field {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.ft-profiletab-media-group .vr-field__label {
-  text-align: center;
-  width: 100%;
-}
+/* Removed VR targeting - Field VR should provide centered variant */
 
 .ft-profiletab-avatar-display__image {
   width: 100%;
@@ -164,12 +154,7 @@ button.ft-profiletab-country-button {
   color: var(--text-primary, #111827);
 }
 
-/* Success state - green helper text */
-.ft-emailtab__recovery--success .vr-field__helper {
-  color: var(--success-600, #16a34a);
-
-  /* Typography handled by Field component */
-}
+/* Removed VR targeting - Field VR should provide success/error color variants */
 
 /* Magic link display */
 .ft-emailtab__magic-link {

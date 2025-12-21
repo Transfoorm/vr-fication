@@ -15,20 +15,7 @@
   font-family: var(--font-mono, 'Monaco', 'Courier New', monospace);
 }
 
-/* Orange pill for counts - real rounded pill shape */
-.ft-dbcheck-status .vr-tabs-panels-tab-count {
-  /* Typography handled by T.caption */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 20px;
-  padding: 0 8px;
-  border-radius: 12px;
-  background-color: var(--brand-primary);
-  color: var(--text-inverse);
-  line-height: 1;
-}
+/* Removed VR targeting - Tabs VR should provide count badge color variants */
 
 /* DB Check status indicator */
 .ft-dbcheck-indicator {

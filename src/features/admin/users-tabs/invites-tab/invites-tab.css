@@ -28,12 +28,7 @@
   color: var(--text-primary, #111827);
 }
 
-/* Success state - green helper text */
-.ft-invitestab__success .vr-field__helper {
-  color: var(--success-600, #16a34a);
-
-  /* Typography handled by Field component */
-}
+/* Removed VR targeting - Field VR should provide success/error color variants */
 
 /* Link display box */
 .ft-invitestab__link-box {
