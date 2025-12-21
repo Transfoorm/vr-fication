@@ -37,7 +37,7 @@
 
 /* Radio container opacity when disabled */
 .ft-enchant-radio-container {
-  --radio-fancy-text-size: 15px;
+  --radio-fancy-text-size: 14px;
   --radio-fancy-text-weight: normal;
 
   opacity: 0.35;
