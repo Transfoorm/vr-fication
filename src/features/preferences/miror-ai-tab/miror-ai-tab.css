@@ -37,6 +37,9 @@
 
 /* Radio container opacity when disabled */
 .ft-enchant-radio-container {
+  --radio-fancy-text-size: 15px;
+  --radio-fancy-text-weight: normal;
+
   opacity: 0.35;
   transition: opacity 0.3s ease;
 }
@@ -48,7 +51,7 @@
 /* Override VR: Adjust spacing and width for enchantment options */
 .ft-enchant-radio-container .vr-radio-fancy-label {
   display: block;
-  width: 260px;
+  width: 240px;
   padding: 12px var(--space-md);
   border-radius: var(--radius-sm);
   transition: all var(--duration-fast) var(--easing);
