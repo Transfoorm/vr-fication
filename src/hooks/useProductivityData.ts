@@ -37,7 +37,7 @@ export function useProductivityData() {
   return {
     // DATA: Raw domain data from FUSE store
     data: {
-      emails: productivity.emails,
+      email: productivity.email,
       calendar: productivity.calendar,
       meetings: productivity.meetings,
       bookings: productivity.bookings,
@@ -46,12 +46,13 @@ export function useProductivityData() {
 
     // COMPUTED: Calculated/derived values
     computed: {
-      totalEmails: productivity.emails.length,
+      totalEmailThreads: productivity.email?.threads?.length || 0,
+      totalEmailMessages: productivity.email?.messages?.length || 0,
       totalCalendarEvents: productivity.calendar.length,
       totalMeetings: productivity.meetings.length,
       totalBookings: productivity.bookings.length,
       totalTasks: productivity.tasks.length,
-      hasData: productivity.emails.length > 0 || productivity.calendar.length > 0 || productivity.tasks.length > 0,
+      hasData: (productivity.email?.threads?.length || 0) > 0 || productivity.calendar.length > 0 || productivity.tasks.length > 0,
     },
 
     // ACTIONS: Mutations and operations

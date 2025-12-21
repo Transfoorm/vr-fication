@@ -262,7 +262,7 @@ export const useFuse = create<FuseStore>()((set, get) => {
     // ════════════════════════════════════════════════════════════════════════
 
     productivity: {
-      emails: [],
+      email: undefined,
       calendar: [],
       meetings: [],
       bookings: [],
@@ -373,7 +373,7 @@ export const useFuse = create<FuseStore>()((set, get) => {
       const start = fuseTimer.start('clearProductivity');
       set({
         productivity: {
-          emails: [],
+          email: undefined,
           calendar: [],
           meetings: [],
           bookings: [],

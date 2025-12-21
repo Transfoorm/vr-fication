@@ -69,7 +69,7 @@ export function useDashboardData() {
         hasDeletionLogs: admin.computed.hasDeletionLogs,
 
         // Work domain stats (all ranks)
-        unreadEmails: work.computed.totalEmails,
+        unreadEmails: work.computed.totalEmailThreads,
         upcomingEvents: work.computed.totalCalendarEvents,
         activeTasks: work.computed.totalTasks,
 

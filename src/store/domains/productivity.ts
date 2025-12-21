@@ -14,13 +14,14 @@
 import type { StateCreator } from 'zustand';
 import type { ADPSource, ADPStatus } from './_template';
 import { fuseTimer } from './_template';
+import type { ProductivityEmail } from '@/features/productivity/email-console/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface ProductivityData {
-  emails: Record<string, unknown>[];
+  email?: ProductivityEmail;
   calendar: Record<string, unknown>[];
   meetings: Record<string, unknown>[];
   bookings: Record<string, unknown>[];
@@ -29,7 +30,7 @@ export interface ProductivityData {
 
 export interface ProductivitySlice {
   // Domain data
-  emails: Record<string, unknown>[];
+  email?: ProductivityEmail;
   calendar: Record<string, unknown>[];
   meetings: Record<string, unknown>[];
   bookings: Record<string, unknown>[];
@@ -50,7 +51,7 @@ export interface ProductivityActions {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const initialProductivityState: ProductivitySlice = {
-  emails: [],
+  email: undefined,
   calendar: [],
   meetings: [],
   bookings: [],
@@ -84,7 +85,7 @@ export const createProductivitySlice: StateCreator<
     }));
     if (process.env.NODE_ENV === 'development') {
       console.log(`⚡ FUSE: Productivity domain hydrated via ${source}`, {
-        emails: data.emails?.length || 0,
+        email: data.email ? `${data.email.threads?.length || 0} threads, ${data.email.messages?.length || 0} messages` : 'none',
         calendar: data.calendar?.length || 0,
         meetings: data.meetings?.length || 0,
         bookings: data.bookings?.length || 0,

@@ -421,6 +421,275 @@ export default defineSchema({
   }).index("by_org", ["orgId"])
     .index("by_status", ["status"]),
 
+  /**
+   * 📧 EMAIL INTAKE INDEX
+   *
+   * Stores metadata for RECEIVED emails (not sent/draft).
+   * This is the single source of truth for message-level resolution state.
+   *
+   * DOCTRINE:
+   * - Thread state is DERIVED (never stored) via deriveThreadState() pure function
+   * - Message resolution state is STORED (single source of truth)
+   * - AI classification is cached here (suggestions), humans commit via mutations
+   * - Email bodies fetched on-demand (not stored initially)
+   *
+   * See: /docs/EMAIL_DOCTRINE.md, /docs/EMAIL_THREAD_STATE_DERIVATION.md
+   */
+  productivity_email_Index: defineTable({
+    // External provider IDs (required)
+    /** Gmail/Outlook message ID (external provider identifier) */
+    externalMessageId: v.string(),
+    /** Gmail/Outlook thread ID (groups conversation messages) */
+    externalThreadId: v.string(),
+
+    // Message metadata (required)
+    subject: v.string(),
+    snippet: v.string(), // First ~150 chars for preview
+    from: v.object({
+      name: v.string(),
+      email: v.string(),
+    }),
+    to: v.array(v.object({
+      name: v.string(),
+      email: v.string(),
+    })),
+    cc: v.optional(v.array(v.object({
+      name: v.string(),
+      email: v.string(),
+    }))),
+    receivedAt: v.number(), // Unix timestamp (when message arrived)
+    hasAttachments: v.boolean(),
+
+    // Connected email account (required)
+    /** Which email account this message belongs to */
+    accountId: v.id("productivity_email_Accounts"),
+
+    // Resolution state (required - single source of truth)
+    /**
+     * Message-level resolution state (user-committed).
+     * Thread state is DERIVED from these via deriveThreadState().
+     *
+     * - awaiting_me: Requires my action/response
+     * - awaiting_them: I responded, waiting for their reply
+     * - resolved: Conversation concluded or action taken
+     * - none: Default state (new/unprocessed)
+     */
+    resolutionState: v.union(
+      v.literal("awaiting_me"),
+      v.literal("awaiting_them"),
+      v.literal("resolved"),
+      v.literal("none")
+    ),
+    resolvedAt: v.optional(v.number()), // When user marked resolved
+    resolvedBy: v.optional(v.id("admin_users")), // Who resolved it
+
+    // AI classification (optional - advisory only, humans commit)
+    aiClassification: v.optional(v.object({
+      intent: v.optional(v.union(
+        v.literal("question"),
+        v.literal("request"),
+        v.literal("update"),
+        v.literal("booking"),
+        v.literal("social"),
+        v.literal("newsletter"),
+        v.literal("spam")
+      )),
+      priority: v.optional(v.union(
+        v.literal("urgent"),
+        v.literal("high"),
+        v.literal("normal"),
+        v.literal("low")
+      )),
+      senderType: v.optional(v.union(
+        v.literal("client"),
+        v.literal("prospect"),
+        v.literal("vendor"),
+        v.literal("team"),
+        v.literal("personal"),
+        v.literal("automated")
+      )),
+      confidence: v.optional(v.number()), // 0-1 confidence score
+      explanation: v.optional(v.string()), // Why AI suggested this classification
+    })),
+
+    // Promotion tracking (optional - links to promoted entities)
+    promotedTo: v.optional(v.object({
+      type: v.union(
+        v.literal("task"),
+        v.literal("project"),
+        v.literal("booking")
+      ),
+      entityId: v.string(), // ID of promoted task/project/booking
+      promotedAt: v.number(),
+      promotedBy: v.id("admin_users"),
+      undoWindowEndsAt: v.number(), // When undo expires (e.g., 10 minutes)
+    })),
+
+    // Read/unread tracking (optional)
+    isRead: v.boolean(),
+    readAt: v.optional(v.number()),
+
+    // Body fetch status (optional - bodies fetched on-demand)
+    bodyFetched: v.boolean(), // Whether full body has been loaded
+    bodyStorageId: v.optional(v.id("_storage")), // Convex storage ID if body stored
+
+    // SRS rank-scoping (required)
+    /** @todo SID-ORG: Convert to v.id("admin_orgs") when orgs domain is implemented. */
+    orgId: v.string(),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_org", ["orgId"])
+    .index("by_account", ["accountId"])
+    .index("by_external_message_id", ["externalMessageId"])
+    .index("by_external_thread_id", ["externalThreadId"])
+    .index("by_resolution_state", ["resolutionState"])
+    .index("by_received_at", ["receivedAt"])
+    .index("by_sender_email", ["from.email"])
+    .index("by_resolvedBy", ["resolvedBy"])
+    .index("by_promotedBy", ["promotedTo.promotedBy"]),
+
+  /**
+   * 📬 EMAIL ACCOUNTS
+   *
+   * Stores connected email accounts (Gmail, Outlook, etc.).
+   * Users can connect multiple accounts for unified inbox.
+   *
+   * DOCTRINE:
+   * - OAuth tokens stored here (encrypted at rest by Convex)
+   * - Sync status tracked for background workers
+   * - Account quarantine follows Clerk SID pattern (external provider IDs)
+   */
+  productivity_email_Accounts: defineTable({
+    // Account identity (required)
+    /** User-friendly label (e.g., "Work Gmail", "Personal Outlook") */
+    label: v.string(),
+    /** Email address of connected account */
+    emailAddress: v.string(),
+    /** Provider type */
+    provider: v.union(
+      v.literal("gmail"),
+      v.literal("outlook"),
+      v.literal("imap") // Future: generic IMAP support
+    ),
+
+    // OAuth credentials (required for gmail/outlook)
+    /** OAuth access token (encrypted at rest by Convex) */
+    accessToken: v.optional(v.string()),
+    /** OAuth refresh token (encrypted at rest by Convex) */
+    refreshToken: v.optional(v.string()),
+    /** When access token expires */
+    tokenExpiresAt: v.optional(v.number()),
+
+    // Sync status (required)
+    /** Last successful sync timestamp */
+    lastSyncAt: v.optional(v.number()),
+    /** Next scheduled sync */
+    nextSyncAt: v.optional(v.number()),
+    /** Sync frequency in milliseconds (default: 5 minutes) */
+    syncFrequency: v.number(),
+    /** Whether background sync is enabled */
+    syncEnabled: v.boolean(),
+    /** Last sync error (if any) */
+    lastSyncError: v.optional(v.string()),
+
+    // Provider-specific metadata (optional)
+    /** Gmail: historyId for incremental sync */
+    gmailHistoryId: v.optional(v.string()),
+    /** Outlook: deltaToken for incremental sync */
+    outlookDeltaToken: v.optional(v.string()),
+
+    // Account status (required)
+    status: v.union(
+      v.literal("active"),     // Connected and syncing
+      v.literal("paused"),     // User paused sync
+      v.literal("error"),      // Sync error (needs reauth)
+      v.literal("disconnected") // User disconnected account
+    ),
+
+    // SRS rank-scoping (required)
+    /** @todo SID-ORG: Convert to v.id("admin_orgs") when orgs domain is implemented. */
+    orgId: v.string(),
+    /** Which user owns this account */
+    userId: v.id("admin_users"),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    connectedAt: v.number(),
+    disconnectedAt: v.optional(v.number()),
+  }).index("by_org", ["orgId"])
+    .index("by_user", ["userId"])
+    .index("by_email", ["emailAddress"])
+    .index("by_status", ["status"])
+    .index("by_next_sync", ["nextSyncAt"]),
+
+  /**
+   * 🧠 EMAIL SENDER CACHE
+   *
+   * Caches AI classification for known senders (performance optimization).
+   * AI suggests, but classification only persists after human confirmation.
+   *
+   * DOCTRINE:
+   * - AI suggestions are cached here (not authoritative)
+   * - Humans can override AI classification
+   * - Used to pre-populate AI suggestions for repeat senders
+   * - NOT used for automatic state changes (humans commit)
+   */
+  productivity_email_SenderCache: defineTable({
+    // Sender identity (required)
+    /** Sender email address (normalized to lowercase) */
+    senderEmail: v.string(),
+    /** Sender display name (from most recent message) */
+    senderName: v.optional(v.string()),
+
+    // Classification (optional - set after human confirmation)
+    senderType: v.optional(v.union(
+      v.literal("client"),
+      v.literal("prospect"),
+      v.literal("vendor"),
+      v.literal("team"),
+      v.literal("personal"),
+      v.literal("automated")
+    )),
+    /** Whether this classification was confirmed by human (vs AI suggestion) */
+    confirmedByHuman: v.boolean(),
+    /** If confirmed, who confirmed it */
+    confirmedBy: v.optional(v.id("admin_users")),
+    confirmedAt: v.optional(v.number()),
+
+    // AI suggestion metadata (optional)
+    aiSuggestedType: v.optional(v.union(
+      v.literal("client"),
+      v.literal("prospect"),
+      v.literal("vendor"),
+      v.literal("team"),
+      v.literal("personal"),
+      v.literal("automated")
+    )),
+    aiConfidence: v.optional(v.number()), // 0-1 confidence score
+    aiExplanation: v.optional(v.string()), // Why AI suggested this
+
+    // Usage statistics (required)
+    messageCount: v.number(), // How many messages from this sender
+    lastMessageAt: v.number(), // Most recent message timestamp
+
+    // SRS rank-scoping (required)
+    /** @todo SID-ORG: Convert to v.id("admin_orgs") when orgs domain is implemented. */
+    orgId: v.string(),
+    /** Which user's inbox this sender appears in */
+    userId: v.id("admin_users"),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_org", ["orgId"])
+    .index("by_user", ["userId"])
+    .index("by_sender_email", ["senderEmail"])
+    .index("by_last_message", ["lastMessageAt"])
+    .index("by_confirmedBy", ["confirmedBy"]),
+
   productivity_calendar_Events: defineTable({
     title: v.string(),
     description: v.optional(v.string()),

@@ -1,0 +1,248 @@
+/* ═══════════════════════════════════════════════════════════════════
+   📧 MESSAGE BODY - Center Panel Styles
+   /src/features/productivity/email-console/message-body.css
+
+   Feature-level CSS (ft-*) - Transient display, NOT permanent storage
+   Emphasis on reading + Quick actions secondary
+
+   EMAIL UX DOCTRINE:
+   - Chronological message display (oldest → newest)
+   - Clean, readable typography
+   - Actions below (not primary focus)
+   - Minimal chrome (content-first)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   Container
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Thread Header
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-body__header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--border-light);
+  background: var(--surface-base);
+  flex-shrink: 0;
+}
+
+.ft-message-body__subject {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.ft-message-body__participants {
+  color: var(--text-secondary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Message List
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-body__messages {
+  flex: 1;
+  overflow: hidden auto;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Individual Message Item
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-item {
+  padding: var(--space-md);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  position: relative;
+}
+
+.ft-message-item--urgent {
+  border-left: 3px solid var(--status-warning);
+  padding-left: calc(var(--space-md) - 2px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Message Header (From + Date)
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-sm);
+  gap: var(--space-md);
+}
+
+.ft-message-item__from {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.ft-message-item__from-name {
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ft-message-item__from-email {
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ft-message-item__date {
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Message Recipients
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-item__recipients {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.ft-message-item__recipients-label {
+  margin-right: var(--space-xs);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Message Body
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-item__body {
+  color: var(--text-primary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-bottom: var(--space-sm);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Message Attachments
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-item__attachments {
+  color: var(--text-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--surface-base);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  display: inline-block;
+  margin-bottom: var(--space-sm);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Resolution State Badge
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-item__state {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ft-message-item__state--awaiting-me {
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+  border: 1px solid var(--status-warning);
+}
+
+.ft-message-item__state--awaiting-them {
+  background: var(--status-info-bg);
+  color: var(--status-info);
+  border: 1px solid var(--status-info);
+}
+
+.ft-message-item__state--resolved {
+  background: var(--status-success-bg);
+  color: var(--status-success);
+  border: 1px solid var(--status-success);
+}
+
+.ft-message-item__state--none {
+  display: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Quick Actions (Secondary)
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-body__actions {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border-light);
+  background: var(--surface-base);
+  flex-shrink: 0;
+}
+
+.ft-message-action {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ft-message-action:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-dark);
+  color: var(--text-primary);
+}
+
+.ft-message-action--secondary {
+  /* Secondary actions are smaller, less prominent */
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Empty State
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-message-body-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--space-xl);
+}
+
+.ft-message-body-empty__content {
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.ft-message-body-empty__content p {
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.ft-message-body-empty__hint {
+  opacity: 0.7;
+}

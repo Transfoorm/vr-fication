@@ -31,7 +31,7 @@ async function getCurrentUserWithRank(ctx: MutationCtx, callerUserId: Id<"admin_
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// EMAIL MUTATIONS
+// EMAIL OUTBOUND MUTATIONS (draft/sent/archived)
 // ═══════════════════════════════════════════════════════════════════════
 
 export const createEmail = mutation({
@@ -294,6 +294,260 @@ export const deleteBooking = mutation({
     }
 
     await ctx.db.delete(args.bookingId);
+    return { success: true };
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// EMAIL INTAKE MUTATIONS (Resolution State Management)
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * 📨 MARK AWAITING ME
+ *
+ * Marks message(s) as requiring user action/response.
+ * User commits state change (AI may suggest, but cannot execute).
+ *
+ * DOCTRINE:
+ * - Humans commit state changes (AI suggests only)
+ * - Updates message-level resolutionState
+ * - Thread state is auto-derived from message states
+ *
+ * @param messageIds - Array of message IDs to update
+ */
+export const markAwaitingMe = mutation({
+  args: {
+    callerUserId: v.id("admin_users"),
+    messageIds: v.array(v.id("productivity_email_Index")),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+    const now = Date.now();
+
+    for (const messageId of args.messageIds) {
+      const message = await ctx.db.get(messageId);
+      if (!message) {
+        throw new Error(`Message ${messageId} not found`);
+      }
+
+      // Check authorization (org-scoping)
+      if (rank !== "admiral") {
+        const orgId = user.orgSlug || "";
+        if (message.orgId !== orgId) {
+          throw new Error("Unauthorized: Message not in your organization");
+        }
+      }
+
+      // Update resolution state
+      await ctx.db.patch(messageId, {
+        resolutionState: "awaiting_me",
+        resolvedAt: undefined, // Clear resolved timestamp
+        resolvedBy: undefined,
+        updatedAt: now,
+      });
+    }
+
+    return { success: true, updated: args.messageIds.length };
+  },
+});
+
+/**
+ * 📤 MARK AWAITING THEM
+ *
+ * Marks message(s) as waiting for recipient response (user replied).
+ * User commits state change.
+ *
+ * @param messageIds - Array of message IDs to update
+ */
+export const markAwaitingThem = mutation({
+  args: {
+    callerUserId: v.id("admin_users"),
+    messageIds: v.array(v.id("productivity_email_Index")),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+    const now = Date.now();
+
+    for (const messageId of args.messageIds) {
+      const message = await ctx.db.get(messageId);
+      if (!message) {
+        throw new Error(`Message ${messageId} not found`);
+      }
+
+      // Check authorization (org-scoping)
+      if (rank !== "admiral") {
+        const orgId = user.orgSlug || "";
+        if (message.orgId !== orgId) {
+          throw new Error("Unauthorized: Message not in your organization");
+        }
+      }
+
+      // Update resolution state
+      await ctx.db.patch(messageId, {
+        resolutionState: "awaiting_them",
+        resolvedAt: undefined, // Clear resolved timestamp
+        resolvedBy: undefined,
+        updatedAt: now,
+      });
+    }
+
+    return { success: true, updated: args.messageIds.length };
+  },
+});
+
+/**
+ * ✅ RESOLVE THREAD (Bulk)
+ *
+ * Marks all messages in a thread as resolved.
+ * Primary action for clearing inbox queue.
+ *
+ * DOCTRINE:
+ * - Humans commit resolution (not AI)
+ * - Bulk operation (all messages in thread)
+ * - Reversible (reopenThread mutation exists)
+ *
+ * @param threadId - External thread ID (Gmail/Outlook)
+ */
+export const resolveThread = mutation({
+  args: {
+    callerUserId: v.id("admin_users"),
+    threadId: v.string(), // externalThreadId
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+    const now = Date.now();
+
+    // Fetch all messages in thread
+    let messages;
+    if (rank === "admiral") {
+      messages = await ctx.db
+        .query("productivity_email_Index")
+        .withIndex("by_external_thread_id", (q) => q.eq("externalThreadId", args.threadId))
+        .collect();
+    } else {
+      const orgId = user.orgSlug || "";
+      messages = await ctx.db
+        .query("productivity_email_Index")
+        .withIndex("by_external_thread_id", (q) => q.eq("externalThreadId", args.threadId))
+        .filter((q) => q.eq(q.field("orgId"), orgId))
+        .collect();
+    }
+
+    if (messages.length === 0) {
+      throw new Error("Thread not found");
+    }
+
+    // Bulk update all messages to "resolved"
+    for (const message of messages) {
+      await ctx.db.patch(message._id, {
+        resolutionState: "resolved",
+        resolvedAt: now,
+        resolvedBy: user._id,
+        updatedAt: now,
+      });
+    }
+
+    return { success: true, resolved: messages.length };
+  },
+});
+
+/**
+ * 🔄 REOPEN THREAD
+ *
+ * Reopens a resolved thread (undo resolution).
+ * Sets all messages back to "none" state.
+ *
+ * DOCTRINE:
+ * - Reversibility principle (fast actions must be undoable)
+ * - Resets to neutral "none" state (not awaiting_me)
+ *
+ * @param threadId - External thread ID
+ */
+export const reopenThread = mutation({
+  args: {
+    callerUserId: v.id("admin_users"),
+    threadId: v.string(), // externalThreadId
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+    const now = Date.now();
+
+    // Fetch all messages in thread
+    let messages;
+    if (rank === "admiral") {
+      messages = await ctx.db
+        .query("productivity_email_Index")
+        .withIndex("by_external_thread_id", (q) => q.eq("externalThreadId", args.threadId))
+        .collect();
+    } else {
+      const orgId = user.orgSlug || "";
+      messages = await ctx.db
+        .query("productivity_email_Index")
+        .withIndex("by_external_thread_id", (q) => q.eq("externalThreadId", args.threadId))
+        .filter((q) => q.eq(q.field("orgId"), orgId))
+        .collect();
+    }
+
+    if (messages.length === 0) {
+      throw new Error("Thread not found");
+    }
+
+    // Bulk reset all messages to "none" state
+    for (const message of messages) {
+      await ctx.db.patch(message._id, {
+        resolutionState: "none",
+        resolvedAt: undefined,
+        resolvedBy: undefined,
+        updatedAt: now,
+      });
+    }
+
+    return { success: true, reopened: messages.length };
+  },
+});
+
+/**
+ * 📖 MARK MESSAGE READ
+ *
+ * Marks a specific message as read (tracking only).
+ * Does NOT change resolution state.
+ *
+ * @param messageId - Message to mark as read
+ */
+export const markMessageRead = mutation({
+  args: {
+    callerUserId: v.id("admin_users"),
+    messageId: v.id("productivity_email_Index"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+    const now = Date.now();
+
+    const message = await ctx.db.get(args.messageId);
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    // Check authorization (org-scoping)
+    if (rank !== "admiral") {
+      const orgId = user.orgSlug || "";
+      if (message.orgId !== orgId) {
+        throw new Error("Unauthorized: Message not in your organization");
+      }
+    }
+
+    // Mark as read
+    await ctx.db.patch(args.messageId, {
+      isRead: true,
+      readAt: now,
+      updatedAt: now,
+    });
+
     return { success: true };
   },
 });
