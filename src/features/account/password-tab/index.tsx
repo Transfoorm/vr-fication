@@ -19,7 +19,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Icon, T } from '@/vr';
+import { Icon, T, Card } from '@/vr';
 import { changePassword } from '@/app/(clerk)/actions/password';
 import './password-tab.css';
 
@@ -248,7 +248,11 @@ export function PasswordFields() {
   // Render
   // ─────────────────────────────────────────────────────────────────────
   return (
-    <div ref={ceremonyRef} className="ft-passwordtab" onKeyDown={handleKeyDown}>
+    <Card.standard
+      title="Password Settings"
+      subtitle="Update your account password"
+    >
+      <div ref={ceremonyRef} className="ft-passwordtab" onKeyDown={handleKeyDown}>
       {/* BOX 1: Change Password */}
       <div
         ref={box1Ref}
@@ -381,6 +385,7 @@ export function PasswordFields() {
           <div className="ft-passwordtab__error"><T.caption>{confirmError}</T.caption></div>
         )}
       </div>
-    </div>
+      </div>
+    </Card.standard>
   );
 }

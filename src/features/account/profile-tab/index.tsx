@@ -124,7 +124,7 @@ export function ProfileFields() {
   return (
     <Card.standard
       title="Your Profile"
-      subtitle="Click inside any field to change it,"
+      subtitle="Click inside any field to update them"
     >
       <div className="vr-field-spacing">
         {/* Row 1: First Name + Last Name */}

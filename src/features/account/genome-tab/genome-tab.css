@@ -56,6 +56,15 @@
   color: var(--brand-primary-dark) !important;
 }
 
+/* Outer card - allow dropdown overflow */
+.ft-genometab > .vr-card-standard {
+  overflow: visible; /* Allow dropdowns to extend beyond card */
+}
+
+.ft-genometab > .vr-card-standard > .vr-card-standard-content {
+  overflow: visible; /* Allow dropdowns to extend beyond card content */
+}
+
 /* Outer card header - matches tabs/footer gradient */
 .ft-genometab > .vr-card-standard > .vr-card-standard-header {
   background: linear-gradient(to bottom, var(--bg-secondary), var(--bg-tertiary));
@@ -66,6 +75,7 @@
   border: 1px solid var(--border-light);
   box-shadow: none;
   background: linear-gradient(to bottom, var(--bg-secondary), var(--bg-tertiary));
+  overflow: visible; /* Allow dropdowns to extend beyond card */
 }
 
 .ft-genometab-inner-card.vr-card-standard .vr-card-standard-header {
@@ -75,6 +85,7 @@
 
 .ft-genometab-inner-card.vr-card-standard .vr-card-standard-content {
   background: transparent;
+  overflow: visible; /* Allow dropdowns to extend beyond card content */
 }
 
 /* ─────────────────────────────────────────────────────────────────────

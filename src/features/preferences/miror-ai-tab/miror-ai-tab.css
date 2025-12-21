@@ -14,7 +14,14 @@
   overflow: visible !important;
 }
 
-/* Removed VR targeting - overflow handled by feature container */
+/* Ensure Card doesn't clip animations */
+.ft-miror-ai-tab .vr-card {
+  overflow: visible !important;
+}
+
+.ft-miror-ai-tab .vr-card__content {
+  overflow: visible !important;
+}
 
 /* ─────────────────────────────────────────────────────────────────────
    Avatar Row: Grid + Preview side by side
@@ -38,7 +45,20 @@
   opacity: 1;
 }
 
-/* Removed VR targeting - radio customization should be VR variants */
+/* Override VR: Adjust spacing and width for enchantment options */
+.ft-enchant-radio-container .vr-radio-fancy-label {
+  display: block;
+  width: 260px;
+  padding: 12px var(--space-md);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--easing);
+}
+
+/* Subtle inset effect when selected */
+.ft-enchant-radio-container .vr-radio-fancy-input:checked ~ .vr-radio-fancy-label {
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 12%);
+  background: rgb(0 0 0 / 1%);
+}
 
 .ft-miror-ai-tab-enchantment-label {
   /* Empty placeholder - no text content */
@@ -82,10 +102,18 @@
 .ft-enchant-radio-container {
   display: flex;
   flex-direction: column;
-  gap: 50;
+  gap: 0;
 }
 
-/* Removed VR targeting - spacing should be VR variant prop */
+/* Override VR radio group spacing */
+.ft-enchant-radio-container .vr-radio-fancy-group {
+  gap: 0;
+}
+
+/* Tighter spacing between radio rows */
+.ft-enchant-radio-container .vr-radio-fancy-row {
+  margin-bottom: -4px;
+}
 
 /* ─────────────────────────────────────────────────────────────────────
    Live Preview (right column)

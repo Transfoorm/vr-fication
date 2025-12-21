@@ -9,7 +9,7 @@
 .vr-spinner {
   border-radius: 50%;
   border-style: solid;
-  animation: vr-spinner-spin 0.8s linear infinite;
+  animation: vr-icon-spin 0.8s linear infinite;
   display: inline-block;
   flex-shrink: 0;
 }
@@ -62,7 +62,7 @@
 }
 
 /* Spin animation */
-@keyframes vr-spinner-spin {
+@keyframes vr-icon-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
