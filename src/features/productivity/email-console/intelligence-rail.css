@@ -1,0 +1,320 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🧠 INTELLIGENCE RAIL - Right Panel Styles
+   /src/features/productivity/email-console/intelligence-rail.css
+
+   Feature-level CSS (ft-*) - AI insights + primary actions
+   Structured, system-like (not conversational)
+
+   EMAIL UX DOCTRINE:
+   - Promotion actions PRIMARY (large, top position)
+   - AI insights visible but advisory (not automatic)
+   - Thread state actions fast + accessible
+   - Minimal decorative chrome
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   Container
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-intelligence-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-md);
+  height: 100%;
+  overflow: hidden auto;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Section Container
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-intelligence-rail__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ft-intelligence-rail__section-title {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   PRIMARY ACTIONS (Resolve/Reopen/Mark)
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-intelligence-rail__actions-primary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ft-ir-action {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.ft-ir-action:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-dark);
+}
+
+.ft-ir-action--primary {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+  padding: var(--space-md);
+}
+
+.ft-ir-action--primary:hover {
+  background: var(--accent-primary-hover);
+  border-color: var(--accent-primary-hover);
+}
+
+.ft-ir-action--resolve {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: #10b981;
+  color: #fff;
+  box-shadow: 0 4px 12px rgb(16 185 129 / 25%);
+}
+
+.ft-ir-action--resolve:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  border-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgb(16 185 129 / 35%);
+}
+
+.ft-ir-action--secondary {
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  border-color: var(--border-light);
+}
+
+.ft-ir-action--secondary:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+
+.ft-ir-action--tertiary {
+  background: transparent;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-light);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.ft-ir-action--tertiary:hover {
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   PROMOTION ACTIONS (→ Task, → Project, → Booking)
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-intelligence-rail__promotions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.ft-ir-promotion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-md) var(--space-sm);
+  min-height: 80px;
+  border: 2px solid var(--accent-primary, #3b82f6);
+  border-radius: var(--radius-md, 8px);
+  background: linear-gradient(135deg, rgb(59 130 246 / 5%), transparent);
+  color: var(--accent-primary, #3b82f6);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ft-ir-promotion:hover {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 24px rgb(59 130 246 / 35%);
+  border-color: #2563eb;
+}
+
+.ft-ir-promotion__label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   AI INSIGHTS (Classification Results)
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-intelligence-rail__insights {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: linear-gradient(135deg, rgb(59 130 246 / 3%), rgb(147 51 234 / 3%));
+  border: 1.5px solid rgb(59 130 246 / 20%);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: 0 4px 12px rgb(59 130 246 / 6%);
+}
+
+.ft-ir-insight {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-sm);
+  align-items: baseline;
+}
+
+.ft-ir-insight--full {
+  grid-template-columns: 1fr;
+}
+
+.ft-ir-insight__label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+}
+
+.ft-ir-insight__value {
+  color: var(--text-primary);
+  text-transform: capitalize;
+}
+
+.ft-ir-insight__value--high {
+  color: var(--status-error, #ef4444);
+  background: linear-gradient(to right, rgb(239 68 68 / 10%), transparent);
+  padding: 2px 8px;
+  margin: -2px -8px;
+  border-radius: 4px;
+  border-left: 3px solid #ef4444;
+  padding-left: 6px;
+}
+
+.ft-ir-insight__value--medium {
+  color: var(--status-warning, #f59e0b);
+  background: linear-gradient(to right, rgb(245 158 11 / 10%), transparent);
+  padding: 2px 8px;
+  margin: -2px -8px;
+  border-radius: 4px;
+  border-left: 3px solid #f59e0b;
+  padding-left: 6px;
+}
+
+.ft-ir-insight__value--low {
+  color: var(--status-info, #3b82f6);
+  opacity: 0.8;
+}
+
+.ft-ir-insight__explanation {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: var(--space-xs);
+}
+
+.ft-ir-insight__confidence {
+  color: var(--text-tertiary);
+  font-style: italic;
+  text-align: right;
+  margin-top: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--border-light);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   THREAD METADATA (Context Info)
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-intelligence-rail__metadata {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ft-ir-meta-item {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-sm);
+  align-items: baseline;
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.ft-ir-meta-item:last-child {
+  border-bottom: none;
+}
+
+.ft-ir-meta-item__label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+}
+
+.ft-ir-meta-item__value {
+  color: var(--text-primary);
+  word-wrap: break-word;
+}
+
+.ft-ir-meta-item__value--awaiting-me {
+  color: var(--status-warning);
+}
+
+.ft-ir-meta-item__value--awaiting-them {
+  color: var(--status-info);
+}
+
+.ft-ir-meta-item__value--resolved {
+  color: var(--status-success);
+}
+
+.ft-ir-meta-item__value--none {
+  color: var(--text-tertiary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   SECONDARY ACTIONS (Archive/Spam)
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-intelligence-rail__actions-secondary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Empty State
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-intelligence-rail-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--space-xl);
+}
+
+.ft-intelligence-rail-empty__content {
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.ft-intelligence-rail-empty__content p {
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.ft-intelligence-rail-empty__hint {
+  opacity: 0.7;
+}

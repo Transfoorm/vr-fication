@@ -183,6 +183,7 @@ interface FuseStore {
   // ─────────────────────────────────────────────────────────────────────────────
   hydrateProductivity: (data: Partial<ProductivityData>, source?: ADPSource) => void;
   clearProductivity: () => void;
+  setEmailViewMode: (mode: 'standard' | 'await') => void;
 
   hydrateAdmin: (data: Partial<AdminData>, source?: ADPSource) => void;
   clearAdmin: () => void;
@@ -262,11 +263,12 @@ export const useFuse = create<FuseStore>()((set, get) => {
     // ════════════════════════════════════════════════════════════════════════
 
     productivity: {
-      emails: [],
+      email: undefined,
       calendar: [],
       meetings: [],
       bookings: [],
       tasks: [],
+      emailViewMode: 'standard',
       status: 'idle',
       lastFetchedAt: undefined,
       source: undefined,
@@ -373,17 +375,29 @@ export const useFuse = create<FuseStore>()((set, get) => {
       const start = fuseTimer.start('clearProductivity');
       set({
         productivity: {
-          emails: [],
+          email: undefined,
           calendar: [],
           meetings: [],
           bookings: [],
           tasks: [],
+          emailViewMode: 'standard',
           status: 'idle',
           lastFetchedAt: undefined,
           source: undefined,
         },
       });
       fuseTimer.end('clearProductivity', start);
+    },
+    setEmailViewMode: (mode) => {
+      set((state) => ({
+        productivity: {
+          ...state.productivity,
+          emailViewMode: mode,
+        },
+      }));
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`⚡ FUSE: Email view mode changed to ${mode}`);
+      }
     },
 
     // Admin

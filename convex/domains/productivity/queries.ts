@@ -18,6 +18,11 @@ import { query } from "@/convex/_generated/server";
 import { v } from "convex/values";
 import type { QueryCtx } from "@/convex/_generated/server";
 import type { Id } from "@/convex/_generated/dataModel";
+import {
+  groupMessagesByThread,
+  computeThreadMetadata,
+  type ThreadMetadata,
+} from "./helpers/threadState";
 
 /**
  * 🛡️ SID Phase 10: Sovereign user lookup by userId
@@ -108,6 +113,201 @@ export const listMeetings = query({
       return await ctx.db
         .query("productivity_pipeline_Prospects")
         .withIndex("by_org", (q) => q.eq("orgId", orgId))
+        .collect();
+    }
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// EMAIL INTAKE QUERIES
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * 📧 GET THREAD STATE (Single Thread)
+ *
+ * Returns thread state + metadata for a specific email thread.
+ *
+ * DOCTRINE:
+ * - Thread state is DERIVED (not stored)
+ * - Uses deriveThreadState() pure function
+ * - Computes metadata from constituent messages
+ *
+ * @param threadId - External thread ID (Gmail/Outlook thread ID)
+ * @returns Thread metadata with derived state
+ */
+export const getThreadState = query({
+  args: {
+    callerUserId: v.id("admin_users"),
+    threadId: v.string(), // externalThreadId from Gmail/Outlook
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+
+    // Fetch all messages in thread
+    let messages;
+    if (rank === "admiral") {
+      messages = await ctx.db
+        .query("productivity_email_Index")
+        .withIndex("by_external_thread_id", (q) => q.eq("externalThreadId", args.threadId))
+        .collect();
+    } else {
+      const orgId = user.orgSlug || "";
+      messages = await ctx.db
+        .query("productivity_email_Index")
+        .withIndex("by_external_thread_id", (q) => q.eq("externalThreadId", args.threadId))
+        .filter((q) => q.eq(q.field("orgId"), orgId))
+        .collect();
+    }
+
+    if (messages.length === 0) {
+      return null;
+    }
+
+    // Compute thread metadata (includes derived state)
+    const currentUserEmail = user.email;
+    const metadata = computeThreadMetadata(messages, currentUserEmail);
+
+    return {
+      ...metadata,
+      messages, // Include full message details
+    };
+  },
+});
+
+/**
+ * 📬 LIST THREADS (Inbox View)
+ *
+ * Returns all email threads with derived states, grouped and filtered.
+ *
+ * DOCTRINE:
+ * - Thread state is DERIVED on-the-fly (not stored)
+ * - Supports filtering by state (awaiting_me, awaiting_them, resolved, none)
+ * - Sorted by latest message descending (most recent first)
+ * - <50ms render target (WARP preloads this into FUSE)
+ *
+ * @param stateFilter - Optional filter by thread state
+ * @returns Array of thread metadata sorted by latest message
+ */
+export const listThreads = query({
+  args: {
+    callerUserId: v.id("admin_users"),
+    stateFilter: v.optional(
+      v.union(
+        v.literal("awaiting_me"),
+        v.literal("awaiting_them"),
+        v.literal("resolved"),
+        v.literal("none")
+      )
+    ),
+    limit: v.optional(v.number()), // Optional limit (default: all)
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+    const currentUserEmail = user.email;
+
+    // Fetch all email index messages with rank-based scoping
+    let allMessages;
+    if (rank === "admiral") {
+      allMessages = await ctx.db
+        .query("productivity_email_Index")
+        .order("desc") // Most recent first
+        .collect();
+    } else {
+      const orgId = user.orgSlug || "";
+      allMessages = await ctx.db
+        .query("productivity_email_Index")
+        .withIndex("by_org", (q) => q.eq("orgId", orgId))
+        .order("desc")
+        .collect();
+    }
+
+    // Group messages by thread
+    const threadMap = groupMessagesByThread(allMessages);
+
+    // Compute metadata for each thread
+    const threads: ThreadMetadata[] = [];
+    for (const [, messages] of threadMap) {
+      const metadata = computeThreadMetadata(messages, currentUserEmail);
+
+      // Apply state filter if provided
+      if (args.stateFilter && metadata.state !== args.stateFilter) {
+        continue;
+      }
+
+      threads.push(metadata);
+    }
+
+    // Sort by latest message descending (most recent first)
+    threads.sort((a, b) => b.latestMessageAt - a.latestMessageAt);
+
+    // Apply limit if provided
+    if (args.limit && args.limit > 0) {
+      return threads.slice(0, args.limit);
+    }
+
+    return threads;
+  },
+});
+
+/**
+ * 📨 GET EMAIL MESSAGE (Single Message Details)
+ *
+ * Returns full details for a specific email message.
+ *
+ * @param messageId - Convex document ID of email message
+ * @returns Email message with all fields
+ */
+export const getEmailMessage = query({
+  args: {
+    callerUserId: v.id("admin_users"),
+    messageId: v.id("productivity_email_Index"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+
+    const message = await ctx.db.get(args.messageId);
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    // Check authorization (org-scoping)
+    if (rank !== "admiral") {
+      const orgId = user.orgSlug || "";
+      if (message.orgId !== orgId) {
+        throw new Error("Unauthorized: Message not in your organization");
+      }
+    }
+
+    return message;
+  },
+});
+
+/**
+ * 📧 LIST EMAIL ACCOUNTS (Connected Accounts)
+ *
+ * Returns all connected email accounts for current user.
+ *
+ * @returns Array of connected email accounts
+ */
+export const listEmailAccounts = query({
+  args: { callerUserId: v.id("admin_users") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+
+    // Email accounts are always user-scoped (not org-scoped)
+    // Users can only see their own connected accounts
+    if (rank === "admiral") {
+      // Admiral can see all accounts (for admin purposes)
+      return await ctx.db.query("productivity_email_Accounts").collect();
+    } else {
+      // Regular users see only their own accounts
+      return await ctx.db
+        .query("productivity_email_Accounts")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
         .collect();
     }
   },

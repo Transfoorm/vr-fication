@@ -14,13 +14,16 @@
 import type { StateCreator } from 'zustand';
 import type { ADPSource, ADPStatus } from './_template';
 import { fuseTimer } from './_template';
+import type { ProductivityEmail } from '@/features/productivity/email-console/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
+export type EmailViewMode = 'standard' | 'await';
+
 export interface ProductivityData {
-  emails: Record<string, unknown>[];
+  email?: ProductivityEmail;
   calendar: Record<string, unknown>[];
   meetings: Record<string, unknown>[];
   bookings: Record<string, unknown>[];
@@ -29,11 +32,13 @@ export interface ProductivityData {
 
 export interface ProductivitySlice {
   // Domain data
-  emails: Record<string, unknown>[];
+  email?: ProductivityEmail;
   calendar: Record<string, unknown>[];
   meetings: Record<string, unknown>[];
   bookings: Record<string, unknown>[];
   tasks: Record<string, unknown>[];
+  // UI preferences (persisted)
+  emailViewMode: EmailViewMode;
   // ADP Coordination (REQUIRED)
   status: ADPStatus;
   lastFetchedAt?: number;
@@ -43,6 +48,7 @@ export interface ProductivitySlice {
 export interface ProductivityActions {
   hydrateProductivity: (data: Partial<ProductivityData>, source?: ADPSource) => void;
   clearProductivity: () => void;
+  setEmailViewMode: (mode: EmailViewMode) => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -50,11 +56,13 @@ export interface ProductivityActions {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const initialProductivityState: ProductivitySlice = {
-  emails: [],
+  email: undefined,
   calendar: [],
   meetings: [],
   bookings: [],
   tasks: [],
+  // UI preferences
+  emailViewMode: 'standard', // Default to standard view
   // ADP Coordination
   status: 'idle',
   lastFetchedAt: undefined,
@@ -84,7 +92,7 @@ export const createProductivitySlice: StateCreator<
     }));
     if (process.env.NODE_ENV === 'development') {
       console.log(`⚡ FUSE: Productivity domain hydrated via ${source}`, {
-        emails: data.emails?.length || 0,
+        email: data.email ? `${data.email.threads?.length || 0} threads, ${data.email.messages?.length || 0} messages` : 'none',
         calendar: data.calendar?.length || 0,
         meetings: data.meetings?.length || 0,
         bookings: data.bookings?.length || 0,
@@ -97,6 +105,16 @@ export const createProductivitySlice: StateCreator<
     const start = fuseTimer.start('clearProductivity');
     set(initialProductivityState);
     fuseTimer.end('clearProductivity', start);
+  },
+
+  setEmailViewMode: (mode) => {
+    set((state) => ({
+      ...state,
+      emailViewMode: mode,
+    }));
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`⚡ FUSE: Email view mode changed to ${mode}`);
+    }
   },
 });
 

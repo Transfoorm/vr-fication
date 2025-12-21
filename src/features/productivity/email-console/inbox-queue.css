@@ -1,0 +1,220 @@
+/* ═══════════════════════════════════════════════════════════════════
+   📬 INBOX QUEUE - Left Rail Styles
+   /src/features/productivity/email-console/inbox-queue.css
+
+   Feature-level CSS (ft-*) - Work queue, NOT folder tree
+   High density + Strong state indicators + Minimal chrome
+
+   EMAIL UX DOCTRINE:
+   - awaiting-me = bold + orange (urgent visual weight)
+   - High density (compact thread items)
+   - Flat list (no nested hierarchy)
+   - Minimal decorative borders
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   Container
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-inbox-queue {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   State Filter Tabs
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-inbox-queue__filters {
+  display: flex;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border-light);
+  background: var(--surface-raised);
+  flex-shrink: 0;
+}
+
+.ft-inbox-filter {
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background: var(--surface-base);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.ft-inbox-filter:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-medium);
+}
+
+.ft-inbox-filter--active {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+}
+
+.ft-inbox-filter--active:hover {
+  background: var(--accent-primary-hover);
+  border-color: var(--accent-primary-hover);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Thread List
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-inbox-queue__list {
+  flex: 1;
+  overflow: hidden auto;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Individual Thread Item
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-inbox-thread {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border-light, #e5e7eb);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ft-inbox-thread:hover {
+  background: var(--surface-hover, #f9fafb);
+  transform: translateX(4px);
+  border-left: 3px solid var(--border-medium, #d1d5db);
+  padding-left: calc(var(--space-md) - 3px);
+}
+
+.ft-inbox-thread--selected {
+  background: linear-gradient(to right, rgb(59 130 246 / 8%), transparent);
+  border-left: 4px solid var(--accent-primary, #3b82f6);
+  padding-left: calc(var(--space-md) - 4px);
+  box-shadow: inset 0 0 0 1px rgb(59 130 246 / 10%);
+}
+
+.ft-inbox-thread--selected:hover {
+  background: linear-gradient(to right, rgb(59 130 246 / 12%), transparent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   State Badge (Visual Indicator)
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-inbox-thread__state {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+}
+
+.ft-inbox-thread__state--awaiting-me {
+  background: var(--status-warning, #f59e0b);
+  box-shadow: 0 0 8px rgb(245 158 11 / 40%);
+}
+
+.ft-inbox-thread__state--awaiting-them {
+  background: var(--status-info, #3b82f6);
+  opacity: 0.5;
+}
+
+.ft-inbox-thread__state--resolved {
+  background: var(--status-success, #10b981);
+  opacity: 0.6;
+}
+
+.ft-inbox-thread__state--none {
+  background: var(--border-medium, #d1d5db);
+  opacity: 0.2;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Thread Content
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-inbox-thread__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.ft-inbox-thread__participants {
+  color: var(--text-primary, #111827);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ft-inbox-thread--urgent .ft-inbox-thread__participants {
+  color: var(--status-warning, #f59e0b);
+  background: linear-gradient(to right, rgb(245 158 11 / 8%), transparent);
+  padding: 2px 6px;
+  margin: -2px -6px;
+  border-radius: 4px;
+}
+
+.ft-inbox-thread__subject {
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ft-inbox-thread--urgent .ft-inbox-thread__subject {
+  color: var(--text-primary);
+}
+
+.ft-inbox-thread__meta {
+  color: var(--text-tertiary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Unread Indicator
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-inbox-thread__unread {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Empty State
+   ─────────────────────────────────────────────────────────────────── */
+
+.ft-inbox-queue__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.ft-inbox-queue__empty p {
+  margin: 0;
+}
+
+.ft-inbox-queue__empty-hint {
+  font-style: italic;
+  opacity: 0.7;
+}

@@ -296,6 +296,19 @@ const eslintConfig = [
       "vrp/no-eslint-disable": "off"   // Allow documented Vanish quarantine disable comments
     }
   },
+  // Exception: Convex Actions (Productivity Email)
+  // Convex actions are designed to make external HTTP requests to third-party APIs
+  // IMPORTANT: This exception applies ONLY to Convex actions.
+  // No client, query, or mutation code may live in this path.
+  // TODO: Tighten to convex/**/actions/**/*.ts when actions are moved to dedicated subdirectory
+  {
+    files: [
+      "convex/productivity/email/**/*.ts"  // Email sync actions (Outlook Graph API, Gmail API, etc.)
+    ],
+    rules: {
+      "no-restricted-globals": "off"  // Convex actions use fetch() for external API requests
+    }
+  },
   // Exception: WARP/PRISM infrastructure (fetch for preloading)
   {
     files: [

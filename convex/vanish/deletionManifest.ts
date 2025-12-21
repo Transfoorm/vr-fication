@@ -118,6 +118,21 @@ export const DELETION_MANIFEST: DeletionManifest = {
     },
 
     // Productivity Domain
+    productivity_email_Index: {
+      fields: {
+        resolvedBy: 'delete',
+        promotedBy: 'delete',
+      },
+    },
+    productivity_email_Accounts: {
+      fields: { userId: 'delete' },
+    },
+    productivity_email_SenderCache: {
+      fields: {
+        confirmedBy: 'delete',
+        userId: 'delete',
+      },
+    },
     productivity_email_Messages: {
       fields: { createdBy: 'delete' },
     },
