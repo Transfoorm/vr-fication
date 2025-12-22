@@ -87,7 +87,7 @@ export function GenomeFields() {
   return (
     <Stack>
       <Card.standard
-        title={<><T.body>Professional Genome</T.body> <T.caption className="ft-genometab-percent">{completionPercent}% Complete</T.caption></>}
+        title={<><span>Professional Genome</span> <T.caption weight="normal" className="ft-genometab-percent">{completionPercent}% Complete</T.caption></>}
         subtitle="Complete your profile to unlock personalised Al coaching and transformation insights"
         footer={
           <div className="ft-genometab-completion">

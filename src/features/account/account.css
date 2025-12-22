@@ -526,11 +526,12 @@ button.ft-profiletab-country-button {
 .ft-genometab-completion-fill[data-percent="90"] { width: 90%; }
 .ft-genometab-completion-fill[data-percent="100"] { width: 100%; }
 
-/* Percentage text in title - brand color, baseline-aligned */
-.ft-genometab-percent {
-  color: var(--brand-primary-dark);
+/* Percentage text in title - brand color, baseline-aligned
+   Higher specificity to override T.caption color */
+span.ft-genometab-percent {
+  color: var(--brand-primary);
   position: relative;
-  top: 2px;
+  top: 0;
 }
 
 /* ─────────────────────────────────────────────────────────────────────
