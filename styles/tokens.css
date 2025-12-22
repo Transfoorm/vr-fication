@@ -167,6 +167,7 @@
   --ai-sidebar-avatar-margin-left-closed: 4px; /* Avatar left margin when closed */
 
   /* Page Header - Auto-generated titles */
+  --page-header-display: none;          /* 🟡 Set to 'none' to hide page header or 'block' to show it */
   --page-header-margin-top: 40px;        /* Gap above title/subtitle block */
   --page-header-margin-left: var(--page-content-padding-left);
   --page-subtitle-gap: 0;                /* Gap between title and subtitle */
@@ -175,6 +176,7 @@
   --page-subtitle-size: 14px;            /* Page subtitle font size */
 
   /* Page Content Padding */
+  --page-content-padding-top: 25px;         /* 🟡 Set to 40px when --page-header-display: none */
   --page-content-padding-left: 25px;     /* Left content padding */
   --page-content-padding-right: 25px;    /* Right content padding */
   --page-content-padding-bottom: 60px;   /* Bottom content padding */

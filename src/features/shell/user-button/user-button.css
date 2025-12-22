@@ -11,7 +11,7 @@
   --user-button-avatar-shadow-md: 0 4px 6px rgb(0 0 0 / 10%);
 
   /* Menu Positioning & Dimensions */
-  --user-button-menu-bottom: 30px; /* 🟥  CompanyButton positioning */
+  --user-button-menu-bottom: 18px; /* 🟥  CompanyButton positioning */
   --user-button-menu-left: 3px;
   --user-button-menu-radius: 10px;
   --user-button-menu-width: 240px;
@@ -136,7 +136,7 @@
 .ft-userbutton-menu {
   position: fixed;
   bottom: var(--user-button-menu-bottom);
-  left: calc(var(--sidebar-width) + 8px);  /* 🟥  CompanyButton positioning */
+  left: calc(var(--sidebar-width) - 2px);  /* 🟥  CompanyButton positioning */
   background-color: var(--card-content-bg);
   box-shadow: var(--user-button-menu-shadow);
   border: 1px solid var(--border-normal);

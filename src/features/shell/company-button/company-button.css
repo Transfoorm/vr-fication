@@ -142,7 +142,7 @@
 .ft-company-button-menu {
   position: fixed;
   top: var(--company-button-menu-top);  /* 🟨 MENU TOP DISTANCE */
-  left: calc(var(--sidebar-width) + 8px);  /*  🟥 Outside sidebar edge */
+  left: calc(var(--sidebar-width) - 2px);  /*  🟥 Outside sidebar edge */
   background-color: var(--card-content-bg);
   box-shadow: var(--user-button-menu-shadow);
   border: 1px solid var(--border-normal);

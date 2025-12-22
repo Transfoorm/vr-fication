@@ -1,13 +1,13 @@
 'use client';
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
-import { Page } from '@/vr';
+import { Page, T } from '@/vr';
 
 export default function AI() {
   useSetPageHeader('AI', 'Coming soon');
   return (
     <Page.constrained>
-      {/* Coming soon */}
+      <T.body>AI coming soon</T.body>
     </Page.constrained>
   );
 }

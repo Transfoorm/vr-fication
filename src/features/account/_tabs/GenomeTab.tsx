@@ -87,7 +87,7 @@ export function GenomeFields() {
   return (
     <Stack>
       <Card.standard
-        title={<><T.body>Professional Genome</T.body> <T.body size="sm" className="ft-genometab-percent">{completionPercent}% Complete</T.body></>}
+        title={<><T.body>Professional Genome</T.body> <T.caption className="ft-genometab-percent">{completionPercent}% Complete</T.caption></>}
         subtitle="Complete your profile to unlock personalised Al coaching and transformation insights"
         footer={
           <div className="ft-genometab-completion">
@@ -151,12 +151,10 @@ export function GenomeFields() {
             />
           </div>
 
-          {/* Transformation Journey - Special Section */}
-          <Card.standard
-            title="🔥 Transformation Journey"
-            subtitle=" Your transformation context will define how the AI can assist you to create the greatest change!"
-            className="ft-genometab-inner-card"
-          >
+          {/* Transformation Journey - Shaded Section (no card, just background) */}
+          <div className="ft-genometab-journey">
+            <T.title size="sm" weight="semibold">🔥 Transformation Journey</T.title>
+            <T.body size="sm" color="secondary">Your transformation context will define how the AI can assist you to create the greatest change!</T.body>
             <div className="vr-field-spacing">
               <div className="ft-genometab-row">
                 <Field.live
@@ -199,7 +197,7 @@ export function GenomeFields() {
                 />
               </div>
             </div>
-          </Card.standard>
+          </div>
 
           {/* Growth Intel */}
           <div className="ft-genometab-row">

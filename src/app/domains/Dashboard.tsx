@@ -15,7 +15,7 @@ import FlyingButton from '@/features/setup/flying-button';
 import { Page } from '@/vr';
 
 export default function Dashboard() {
-  useSetPageHeader(undefined, 'Coming soon');
+  useSetPageHeader('Dashboard', 'Coming soon');
 
   return (
     <Page.constrained>

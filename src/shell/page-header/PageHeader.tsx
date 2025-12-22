@@ -43,8 +43,8 @@ export default function PageHeader() {
   const displayTitle = headerData.title || lastValidTitle.current;
   const displaySubtitle = headerData.subtitle || lastValidSubtitle.current;
 
-  // Don't render if we've never had a title (initial page load to non-header page)
-  if (!displayTitle) {
+  // Don't render if hidden, or if we've never had a title
+  if (headerData.hidden || !displayTitle) {
     return null;
   }
 

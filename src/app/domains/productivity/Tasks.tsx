@@ -7,7 +7,7 @@ export default function Tasks() {
   useSetPageHeader('Tasks', 'Coming soon');
   return (
     <Page.full>
-      <T.body>Coming soon</T.body>
+      <T.body>Tasks coming soon</T.body>
     </Page.full>
   );
 }

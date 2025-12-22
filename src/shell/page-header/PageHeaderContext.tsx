@@ -26,6 +26,7 @@ interface PageHeaderData {
   subtitle: string | null;
   action?: ReactNode;
   actionPosition?: ActionPosition;
+  hidden?: boolean;
 }
 
 interface PageHeaderContextValue {

@@ -7,7 +7,7 @@ export default function Calendar() {
   useSetPageHeader('Calendar', 'Coming soon');
   return (
     <Page.full>
-      <T.body>Coming soon</T.body>
+      <T.body>Calendar coming soon</T.body>
     </Page.full>
   );
 }

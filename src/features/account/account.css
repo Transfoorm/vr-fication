@@ -526,23 +526,25 @@ button.ft-profiletab-country-button {
 .ft-genometab-completion-fill[data-percent="90"] { width: 90%; }
 .ft-genometab-completion-fill[data-percent="100"] { width: 100%; }
 
-/* Percentage text in title - lighter, smaller */
+/* Percentage text in title - brand color, baseline-aligned */
 .ft-genometab-percent {
-  /* Typography handled by T.body */
-  color: var(--brand-primary-dark) !important;
+  color: var(--brand-primary-dark);
+  position: relative;
+  top: 2px;
 }
 
-/* Card header gradient styling removed - violates VR cross-contamination rules */
+/* ─────────────────────────────────────────────────────────────────────
+   Transformation Journey - Shaded section (no card, just background)
+   ───────────────────────────────────────────────────────────────────── */
 
-/* Features should not target VR classes directly */
-
-/* If needed, add feature className to Card component and style through that */
-
-/* Inner card gradient styling removed - violates VR cross-contamination rules */
-
-/* Features should not target VR internal classes */
-
-/* If needed, create a new Card variant or use feature wrapper div */
+.ft-genometab-journey {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+}
 
 /* ─────────────────────────────────────────────────────────────────────
    Field Rows - Genome-specific grid with smart child-count detection

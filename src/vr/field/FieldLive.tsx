@@ -326,7 +326,7 @@ export default function FieldLive({
             className="vr-field-live__input"
           />
         )}
-        {!multiline && <div className={chipClasses}>{chipText}</div>}
+        <div className={chipClasses}>{chipText}</div>
       </div>
       {multiline && (
         <div className="vr-field-live__counter">

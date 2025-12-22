@@ -7,7 +7,7 @@ export default function Meetings() {
   useSetPageHeader('Meetings', 'Coming soon');
   return (
     <Page.full>
-      <T.body>Coming soon</T.body>
+      <T.body>Meetings coming soon</T.body>
     </Page.full>
   );
 }

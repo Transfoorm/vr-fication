@@ -1,13 +1,13 @@
 'use client';
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
-import { Page } from '@/vr';
+import { Page, T } from '@/vr';
 
 export default function Payments() {
   useSetPageHeader('Payments', 'Coming soon');
   return (
     <Page.constrained>
-      {/* Coming soon */}
+      <T.body>Payments coming soon</T.body>
     </Page.constrained>
   );
 }

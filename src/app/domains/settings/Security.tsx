@@ -1,13 +1,13 @@
 'use client';
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
-import { Page } from '@/vr';
+import { Page, T } from '@/vr';
 
 export default function Security() {
   useSetPageHeader('Security', 'Coming soon');
   return (
     <Page.constrained>
-      {/* Coming soon */}
+      <T.body>Security coming soon</T.body>
     </Page.constrained>
   );
 }

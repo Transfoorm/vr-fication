@@ -19,8 +19,6 @@
   width: 100%;
   margin-left: var(--page-margin-left);
   margin-right: var(--page-margin-right);
-  padding-left: var(--page-content-padding-left);
-  padding-right: var(--page-content-padding-right);
-  padding-bottom: var(--page-content-padding-bottom);
+  padding: var(--page-content-padding-top) var(--page-content-padding-right) var(--page-content-padding-bottom) var(--page-content-padding-left);
   box-sizing: border-box;
 }

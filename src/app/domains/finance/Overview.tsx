@@ -1,13 +1,13 @@
 'use client';
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
-import { Page } from '@/vr';
+import { Page, T } from '@/vr';
 
 export default function Overview() {
   useSetPageHeader('Financial Overview', 'Coming soon');
   return (
     <Page.constrained>
-      {/* Coming soon */}
+      <T.body>Financial Overview coming soon</T.body>
     </Page.constrained>
   );
 }

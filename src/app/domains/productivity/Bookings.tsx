@@ -7,7 +7,7 @@ export default function Bookings() {
   useSetPageHeader('Bookings', 'Coming soon');
   return (
     <Page.full>
-      <T.body>Coming soon</T.body>
+      <T.body>Bookings coming soon</T.body>
     </Page.full>
   );
 }
