@@ -1,13 +1,15 @@
 #!/usr/bin/env tsx
-/**─────────────────────────────────────────────────────────────────────────┐
-│  🦠 CLERK VIRUS SCANNER - VRP Pre-commit Protection                    │
-│  scripts/checkClerkVirus.ts                                             │
-│                                                                          │
-│  Scans staged files for Clerk contamination before commit.              │
-│  Part of Clerk Knox enforcement layer.                                  │
-│                                                                          │
-│  Usage: npm run vrp:clerk                                                │
-└───────────────────────────────────────────────────────────────────────────┘ */
+/**
+ * +------------------------------------------------------------------------+
+ * |  CLERK VIRUS SCANNER - VRP Pre-commit Protection                       |
+ * |  scripts/checkClerkVirus.ts                                            |
+ * |                                                                         |
+ * |  Scans staged files for Clerk contamination before commit.             |
+ * |  Part of Clerk Knox enforcement layer.                                 |
+ * |                                                                         |
+ * |  Usage: npm run vrp:clerk                                              |
+ * +------------------------------------------------------------------------+
+ */
 
 import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
