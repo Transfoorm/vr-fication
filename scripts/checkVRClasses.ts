@@ -1,7 +1,14 @@
 #!/usr/bin/env tsx
 /**
- * VR Class Scanner - Pre-commit enforcement
- * Implements key checks from VR-class-scanner.md spec
+ * +----------------------------------------------------------------------+
+ * |  🤖 VR CLASS SCANNER - Pre-commit Enforcement                        |
+ * |  scripts/checkVRClasses.ts                                           |
+ * |                                                                      |
+ * |  Implements key checks from VR-class-scanner.md spec.                |
+ * |  Ensures VR class naming conventions are followed.                   |
+ * |                                                                      |
+ * |  Usage: npm run check:vr                                             |
+ * +----------------------------------------------------------------------+
  */
 
 import { execSync } from 'child_process';

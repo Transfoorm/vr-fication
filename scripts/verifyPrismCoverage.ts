@@ -1,15 +1,17 @@
-/**─────────────────────────────────────────────────────────────────────────┐
-│  🛡️ VRP: PRISM COVERAGE VERIFICATION                                   │
-│  /scripts/verifyPrismCoverage.ts                                        │
-│                                                                          │
-│  TTTS-3 Enforcement: Ensures every nav domain has PRISM coverage        │
-│  in the Sidebar's SECTION_TO_DOMAIN map.                                │
-│                                                                          │
-│  Checks:                                                                 │
-│  1. Sidebar has SECTION_TO_DOMAIN map                                   │
-│  2. Every nav domain is registered in the map                           │
-│  3. No orphan PRISM entries without nav domains                         │
-└───────────────────────────────────────────────────────────────────────────┘ */
+/**
+ * +----------------------------------------------------------------------+
+ * |  🛡️ VRP: PRISM COVERAGE VERIFICATION                                 |
+ * |  scripts/verifyPrismCoverage.ts                                      |
+ * |                                                                      |
+ * |  TTTS-3 Enforcement: Ensures every nav domain has PRISM coverage     |
+ * |  in the Sidebar's SECTION_TO_DOMAIN map.                             |
+ * |                                                                      |
+ * |  Checks:                                                             |
+ * |  1. Sidebar has SECTION_TO_DOMAIN map                                |
+ * |  2. Every nav domain is registered in the map                        |
+ * |  3. No orphan PRISM entries without nav domains                      |
+ * +----------------------------------------------------------------------+
+ */
 
 import * as fs from 'fs';
 import * as path from 'path';

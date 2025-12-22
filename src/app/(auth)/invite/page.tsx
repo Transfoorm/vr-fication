@@ -1,16 +1,16 @@
 /**──────────────────────────────────────────────────────────────────────┐
-│  🎟️ INVITE PAGE - Admin Magic Link Handler for New Users              │
-│  /src/app/(auth)/invite/page.tsx                                      │
-│                                                                       │
-│  VR DOCTRINE: Page Layer (in auth boundary)                           │
-│  - Handles __clerk_ticket from admin invite links                     │
-│  - Creates new account via Clerk invitation                           │
-│  - Shows password entry form for new user setup                       │
-│                                                                       │
-│  Flow:                                                                │
-│  1. Admin sends invite link with ?__clerk_ticket=xxx                  │
-│  2. New user clicks link → lands here                                 │
-│  3. User enters password → account created → logged in                │
+│  🎟️ INVITE PAGE - Admin Magic Link Handler for New Users               │
+│  /src/app/(auth)/invite/page.tsx                                       │
+│                                                                        │
+│  VR DOCTRINE: Page Layer (in auth boundary)                            │
+│  - Handles __clerk_ticket from admin invite links                      │
+│  - Creates new account via Clerk invitation                            │
+│  - Shows password entry form for new user setup                        │
+│                                                                        │
+│  Flow:                                                                 │
+│  1. Admin sends invite link with ?__clerk_ticket=xxx                   │
+│  2. New user clicks link → lands here                                  │
+│  3. User enters password → account created → logged in                 │
 └────────────────────────────────────────────────────────────────────────┘ */
 
 'use client';

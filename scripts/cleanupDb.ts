@@ -1,14 +1,16 @@
-/**─────────────────────────────────────────────────────────────────────────┐
-│  🧹 DATABASE CLEANUP CLI SCRIPT                                           │
-│  /scripts/cleanupDb.ts                                                    │
-│                                                                           │
-│  Usage:                                                                   │
-│    npm run cleanup:db -- --mode=productivity_only                         │
-│    npm run cleanup:db -- --mode=data_only                                 │
-│    npm run cleanup:db -- --mode=full_wipe                                 │
-│                                                                           │
-│  ⚠️ REQUIRES: User to be logged in (cookies must be set)                 │
-└───────────────────────────────────────────────────────────────────────────┘ */
+/**
+ * +----------------------------------------------------------------------+
+ * |  🧹 DATABASE CLEANUP CLI SCRIPT                                      |
+ * |  scripts/cleanupDb.ts                                                |
+ * |                                                                      |
+ * |  Usage:                                                              |
+ * |    npm run cleanup:db -- --mode=productivity_only                    |
+ * |    npm run cleanup:db -- --mode=data_only                            |
+ * |    npm run cleanup:db -- --mode=full_wipe                            |
+ * |                                                                      |
+ * |  WARNING: User must be logged in (cookies must be set)               |
+ * +----------------------------------------------------------------------+
+ */
 
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '@/convex/_generated/api';

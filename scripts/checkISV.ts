@@ -1,13 +1,15 @@
 #!/usr/bin/env tsx
-/**─────────────────────────────────────────────────────────────────────────┐
-│  🛡️ ISV PROTECTION - Real-time Inline Style Virus Detection            │
-│  scripts/checkISV.ts                                                     │
-│                                                                          │
-│  Scans staged files for inline style violations before commit.          │
-│  Part of the ISV Protection System.                                     │
-│                                                                          │
-│  Usage: npm run check:isv                                               │
-└───────────────────────────────────────────────────────────────────────────┘ */
+/**
+ * +----------------------------------------------------------------------+
+ * |  🛡️ ISV PROTECTION - Real-time Inline Style Virus Detection          |
+ * |  scripts/checkISV.ts                                                 |
+ * |                                                                      |
+ * |  Scans staged files for inline style violations before commit.       |
+ * |  Part of the ISV Protection System.                                  |
+ * |                                                                      |
+ * |  Usage: npm run check:isv                                            |
+ * +----------------------------------------------------------------------+
+ */
 
 import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
