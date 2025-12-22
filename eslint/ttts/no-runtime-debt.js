@@ -34,11 +34,13 @@ module.exports = {
       create(context) {
         const filename = context.getFilename();
 
-        // Skip API routes, scripts, and server-only files
+        // Skip API routes, scripts, server-only files, and sync hooks
+        // Sync hooks (use*Sync.ts) are TTTS Golden Bridge - they use useQuery to hydrate FUSE
         if (
           filename.includes('/api/') ||
           filename.includes('/scripts/') ||
-          filename.includes('.server.')
+          filename.includes('.server.') ||
+          (filename.includes('/hooks/') && filename.includes('Sync.ts'))
         ) {
           return {};
         }

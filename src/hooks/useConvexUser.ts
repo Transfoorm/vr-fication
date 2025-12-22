@@ -1,5 +1,5 @@
 /**─────────────────────────────────────────────────────────────────────────┐
-│  🔥 VANISH PROTOCOL 2.0 - SINGLE SOURCE OF IDENTITY                      │
+│  🔥 VANISH PROTOCOL 2.0 - SINGLE SOURCE OF IDENTITY                       │
 │  /src/hooks/useConvexUser.ts                                              │
 │                                                                           │
 │  GOLDEN BRIDGE COMPLIANT (TTTS-2):                                        │
@@ -13,7 +13,7 @@
 │   No component shall accept userId as prop."                              │
 │                                                                           │
 │  TTT CERTIFIED: Single source prevents identity confusion at scale        │
-└──────────────────────────────────────────────────────────────────────────┘ */
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 "use client";
 

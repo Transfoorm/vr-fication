@@ -1,15 +1,15 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🔄 CURRENT USER SYNC HOOK                                            │
-│  /src/hooks/useCurrentUserSync.ts                                     │
-│                                                                        │
-│  Real-time sync of current user data from Convex to FUSE store        │
-│  Ensures subscription status updates instantly without logout/login   │
-│                                                                        │
-│  ARCHITECTURE:                                                         │
-│  - Convex live query: Real-time updates (WebSocket subscription)      │
-│  - Auto-sync: Convex → FUSE store (seamless reactivity)              │
-│  - Result: Instant updates when subscription status changes           │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🔄 CURRENT USER SYNC HOOK                                                │
+│  /src/hooks/useCurrentUserSync.ts                                         │
+│                                                                           │
+│  Real-time sync of current user data from Convex to FUSE store            │
+│  Ensures subscription status updates instantly without logout/login       │
+│                                                                           │
+│  ARCHITECTURE:                                                            │
+│  - Convex live query: Real-time updates (WebSocket subscription)          │
+│  - Auto-sync: Convex → FUSE store (seamless reactivity)                   │
+│  - Result: Instant updates when subscription status changes               │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 'use client';
 
