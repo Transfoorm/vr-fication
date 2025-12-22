@@ -12,6 +12,7 @@
 import { ReactNode, useEffect } from 'react';
 import { useFuse } from '@/store/fuse';
 import type { ProductivitySlice } from '@/store/types';
+import { useProductivitySync } from '@/hooks/useProductivitySync';
 
 interface ProductivityProviderProps {
   children: ReactNode;
@@ -29,6 +30,9 @@ interface ProductivityProviderProps {
  */
 export function ProductivityProvider({ children, initialData }: ProductivityProviderProps) {
   const hydrateProductivity = useFuse((state) => state.hydrateProductivity);
+
+  // 🌉 GOLDEN BRIDGE: Real-time Convex → FUSE sync
+  useProductivitySync();
 
   useEffect(() => {
     if (initialData) {

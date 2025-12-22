@@ -29,6 +29,7 @@ import { VerifyEmail } from '@/app/(clerk)/features/VerifyEmail';
 import { VerifySecondary } from '@/app/(clerk)/features/VerifySecondary';
 import { swapEmailsToPrimary, deleteSecondaryEmail } from '@/app/(clerk)/actions/email';
 import { refreshSessionAfterUpload } from '@/app/actions/user-mutations';
+import { useProductivityData } from '@/hooks/useProductivityData';
 
 type ActionState = 'idle' | 'confirming' | 'executing';
 
@@ -39,6 +40,10 @@ export function EmailFields() {
   const user = useFuse((s) => s.user);
   const primaryEmail = user?.email ?? '';
   const secondaryEmail = user?.secondaryEmail ?? '';
+
+  // Productivity data (email accounts)
+  const { data: { email } } = useProductivityData();
+  const connectedAccounts = email?.accounts ?? [];
 
   // ─────────────────────────────────────────────────────────────────────
   // Convex Mutations
@@ -307,15 +312,54 @@ export function EmailFields() {
           </div>
         </Card.standard>
 
-        {/* TODO: Connected Email Accounts Card - Temporarily disabled pending useProductivitySync implementation
+        {/* Connected Email Accounts */}
         <Card.standard
           title="Connected Accounts"
           subtitle="Manage your connected email providers for unified inbox"
         >
-          Connected accounts feature will be re-enabled after implementing useProductivitySync hook
-          that follows TTTS Golden Bridge pattern (sync hook → FUSE → component reads via useFuse)
+          {connectedAccounts.length === 0 ? (
+            <div className="ft-emailtab-empty-accounts">
+              <T.body size="sm" color="secondary">
+                No email accounts connected yet.
+              </T.body>
+              <div className="ft-emailtab-connect-button-container">
+                <a
+                  href="/api/auth/outlook/authorize"
+                  className="ft-emailtab-connect-button"
+                >
+                  <T.body size="sm" weight="medium">
+                    Connect Outlook
+                  </T.body>
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="ft-emailtab-connected-accounts">
+              {connectedAccounts.map((account) => (
+                <div key={account._id} className="ft-emailtab-account-row">
+                  <div className="ft-emailtab-account-info">
+                    <T.body size="md" weight="medium">
+                      {account.label}
+                    </T.body>
+                    <T.caption size="sm" color="secondary">
+                      {account.emailAddress}
+                    </T.caption>
+                    {account.status === 'active' && (
+                      <T.caption size="xs" color="primary">
+                        ✓ Connected
+                      </T.caption>
+                    )}
+                    {account.status === 'error' && account.lastSyncError && (
+                      <T.caption size="xs" color="muted">
+                        ⚠ {account.lastSyncError}
+                      </T.caption>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card.standard>
-        */}
       </Stack>
 
       {/* Verification Modal - VerifyEmail for primary, VerifySecondary for secondary */}
