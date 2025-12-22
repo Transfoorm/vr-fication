@@ -1,11 +1,11 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  ⚙️ GOLDEN BRIDGE HOOK - Settings Domain                              │
-│  /src/hooks/useSettingsData.ts                                         │
-│                                                                        │
-│  Clean API for accessing settings domain data                          │
-│  Abstracts FUSE store complexity from components                       │
-│  Following proven _T2 Golden Bridge pattern                            │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  ⚙️ GOLDEN BRIDGE HOOK - Settings Domain                                  │
+│  /src/hooks/useSettingsData.ts                                            │
+│                                                                           │
+│  Clean API for accessing settings domain data                             │
+│  Abstracts FUSE store complexity from components                          │
+│  Following proven _T2 Golden Bridge pattern                               │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 'use client';
 

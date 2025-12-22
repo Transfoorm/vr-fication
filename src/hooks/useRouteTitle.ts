@@ -1,12 +1,12 @@
 /**─────────────────────────────────────────────────────────────────────────┐
-│  🧭 USE ROUTE TITLE HOOK                                                 │
-│  /src/hooks/useRouteTitle.ts                                             │
+│  🧭 USE ROUTE TITLE HOOK                                                  │
+│  /src/hooks/useRouteTitle.ts                                              │
 │                                                                           │
-│  Auto-generates page titles from Next.js routes (PoLR pattern)           │
+│  Auto-generates page titles from Next.js routes (PoLR pattern)            │
 │                                                                           │
 │  ⚠️  APPLICATION LAYER - NOT FUSE                                         │
-│  This hook is Next.js-specific and lives in /src/, not /fuse/            │
-│  FUSE = framework-agnostic primitives only (store + style)               │
+│  This hook is Next.js-specific and lives in /src/, not /fuse/             │
+│  FUSE = framework-agnostic primitives only (store + style)                │
 │                                                                           │
 │  Examples:                                                                │
 │  /home              → "Home"                                              │

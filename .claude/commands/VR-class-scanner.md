@@ -3,7 +3,7 @@
 ```
 ███████████████████████████████████████████████████████████████
 █                                                             █
-█   A B S O L U T E   M O D E   E N G A G E D                █
+█   A B S O L U T E   M O D E   E N G A G E D                 █
 █                                                             █
 █   This specification is LITERAL MACHINE LAW.                █
 █   There is no interpretation. There is no discretion.       █

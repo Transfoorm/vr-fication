@@ -1,16 +1,16 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🎯 USE SET PAGE HEADER HOOK                                           │
-│  /src/hooks/useSetPageHeader.ts                                        │
-│                                                                        │
-│  Pages call this hook to set their title and optional subtitle        │
-│                                                                        │
-│  Examples:                                                             │
-│  • Auto-generated: useSetPageHeader()        → Uses route title        │
-│  • Static: useSetPageHeader("Dashboard")     → Custom title            │
-│  • With subtitle: useSetPageHeader("Clients", "Manage your clients")   │
-│  • Dynamic: useSetPageHeader(client.name, "Client details")            │
-│  • No header: Don't call the hook at all                               │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🎯 USE SET PAGE HEADER HOOK                                              │
+│  /src/hooks/useSetPageHeader.ts                                           │
+│                                                                           │
+│  Pages call this hook to set their title and optional subtitle            │
+│                                                                           │
+│  Examples:                                                                │
+│  • Auto-generated: useSetPageHeader()        → Uses route title           │
+│  • Static: useSetPageHeader("Dashboard")     → Custom title               │
+│  • With subtitle: useSetPageHeader("Clients", "Manage your clients")      │
+│  • Dynamic: useSetPageHeader(client.name, "Client details")               │
+│  • No header: Don't call the hook at all                                  │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 "use client";
 
