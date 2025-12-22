@@ -9,6 +9,7 @@
 import type { ProductivityEmail } from './types';
 
 export const MOCK_EMAIL_DATA: ProductivityEmail = {
+  accounts: [], // No mock accounts - will be populated by real Outlook/Gmail connections
   threads: [
     {
       threadId: 'thread-1',

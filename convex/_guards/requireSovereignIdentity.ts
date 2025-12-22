@@ -1,32 +1,33 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🔱 SOVEREIGN IDENTITY GUARD - Convex Layer Protection                │
-│  /convex/_guards/requireSovereignIdentity.ts                          │
-│                                                                        │
-│  Validates that callerClerkId was passed from Server Action           │
-│  (via FUSE session cookie), NOT injected via ctx.auth token.          │
-│                                                                        │
-│  THE LAW:                                                              │
-│    Server Actions read identity from FUSE session cookie.             │
-│    Identity is passed to Convex as callerClerkId argument.            │
-│    Convex validates the caller by looking up the user record.         │
-│    ctx.auth.getUserIdentity() is FORBIDDEN for domain mutations.      │
-│                                                                        │
-│  Usage in Convex mutations:                                           │
-│    import { requireSovereignIdentity } from './_guards/requireSovereignIdentity';  │
-│                                                                        │
-│    export const myMutation = mutation({                               │
-│      args: {                                                          │
-│        callerClerkId: v.string(),  // 🔱 SOVEREIGN                    │
-│        ...otherArgs                                                   │
-│      },                                                               │
-│      handler: async (ctx, args) => {                                  │
-│        const caller = await requireSovereignIdentity(ctx, args.callerClerkId);  │
-│        // caller is now the validated user record                     │
-│      },                                                               │
-│    });                                                                │
-│                                                                        │
-│  Ref: Clerk Knox, Golden Bridge Pattern                               │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🔱 SOVEREIGN IDENTITY GUARD - Convex Layer Protection                    │
+│  /convex/_guards/requireSovereignIdentity.ts                              │
+│                                                                           │
+│  Validates that callerClerkId was passed from Server Action               │
+│  (via FUSE session cookie), NOT injected via ctx.auth token.              │
+│                                                                           │
+│  THE LAW:                                                                 │
+│    Server Actions read identity from FUSE session cookie.                 │
+│    Identity is passed to Convex as callerClerkId argument.                │
+│    Convex validates the caller by looking up the user record.             │
+│    ctx.auth.getUserIdentity() is FORBIDDEN for domain mutations.          │
+│                                                                           │
+│  Usage in Convex mutations:                                               │
+│    import { requireSovereignIdentity } from './_guards/...';              │
+│                                                                           │
+│    export const myMutation = mutation({                                   │
+│      args: {                                                              │
+│        callerClerkId: v.string(),  // 🔱 SOVEREIGN                        │
+│        ...otherArgs                                                       │
+│      },                                                                   │
+│      handler: async (ctx, args) => {                                      │
+│        const caller = await requireSovereignIdentity(                     │
+│          ctx, args.callerClerkId);                                        │
+│        // caller is now the validated user record                         │
+│      },                                                                   │
+│    });                                                                    │
+│                                                                           │
+│  Ref: Clerk Knox, Golden Bridge Pattern                                   │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { QueryCtx, MutationCtx } from "@/convex/_generated/server";
 import { Doc } from "@/convex/_generated/dataModel";
