@@ -406,6 +406,180 @@ No props, no configuration, just semantic clarity.
 
 ---
 
+# 📑 FEATURE TABS PATTERN: THE _TABS ARCHITECTURE
+
+## THE PHILOSOPHY
+
+When a feature needs multiple tab views, use the **_tabs subdirectory pattern**.
+
+This is the TTT-compliant way to organize tab components - simpler, clearer, less indirection than folder-based patterns.
+
+## THE PATTERN
+
+```
+feature-name/
+├── index.tsx              ← Feature component (imports Tabs.panels VR)
+├── feature-name.css       ← Shared styles for entire feature
+└── _tabs/
+    ├── TabOne.tsx         ← Tab component (exported function)
+    ├── TabTwo.tsx
+    ├── TabThree.tsx
+    └── tab-specific.css   ← Optional: tab-specific styles
+```
+
+## WHY _TABS WINS (TTT Compliance)
+
+**Simpler than folder pattern:**
+- ❌ Folder pattern: Feature → Domain tab wrapper → Feature tab → Component (3 layers!)
+- ✅ _tabs pattern: Feature → Tab component (1 layer!)
+
+**Better TTT scores:**
+- **Clarity**: Tab files live next to the feature that uses them
+- **Simplicity**: No indirection through domain layer
+- **Consistency**: Same pattern as user-drawer, showcase-page, etc.
+- **Architecture**: Feature owns its tabs, not scattered across domain
+
+## REAL EXAMPLE: users-page
+
+**Structure:**
+```
+src/features/admin/users-page/
+├── index.tsx                    ← Renders Tabs.panels
+└── _tabs/
+    ├── ActiveUsersTab.tsx       ← Active users table
+    ├── DeletedUsersTab.tsx      ← Deletion logs table
+    ├── InvitesTab.tsx          ← Invite management
+    ├── StatusTab.tsx           ← Status monitoring
+    └── invites-tab.css         ← Invites-specific styles
+```
+
+**Feature index.tsx:**
+```tsx
+import { Tabs, Stack } from '@/vr';
+import { ActiveUsersFeature } from './_tabs/ActiveUsersTab';
+import { DeletedUsersFeature } from './_tabs/DeletedUsersTab';
+import { InvitesFeature } from './_tabs/InvitesTab';
+import { StatusTabFeature } from './_tabs/StatusTab';
+
+export function UsersPageFeature() {
+  return (
+    <Stack>
+      <Tabs.panels
+        tabs={[
+          { id: 'active', label: 'Active Users', content: <ActiveUsersFeature /> },
+          { id: 'deleted', label: 'Deleted Users', content: <DeletedUsersFeature /> },
+          { id: 'invite', label: 'Invite Users', content: <InvitesFeature /> },
+          { id: 'status', label: 'Status', content: <StatusTabFeature /> }
+        ]}
+      />
+    </Stack>
+  );
+}
+```
+
+**Tab component (_tabs/ActiveUsersTab.tsx):**
+```tsx
+'use client';
+
+import { Table, Search, Stack } from '@/vr';
+import { useAdminData } from '@/hooks/useAdminData';
+
+export function ActiveUsersFeature() {
+  const { data } = useAdminData();
+
+  return (
+    <Stack>
+      <Search.bar />
+      <Table.sortable columns={columns} data={data.users} />
+    </Stack>
+  );
+}
+```
+
+## THE ALTERNATIVE (DON'T DO THIS)
+
+**Folder pattern** (more complex, more files, more indirection):
+```
+src/features/admin/users-page/
+├── index.tsx
+├── active-users-tab/
+│   └── index.tsx                    ← Tab feature
+├── deleted-users-tab/
+│   └── index.tsx                    ← Tab feature
+└── invites-tab/
+    ├── index.tsx                    ← Tab feature
+    └── invites-tab.css
+
+src/app/domains/admin/users/_tabs/
+├── ActiveUsers.tsx                  ← Domain wrapper (just imports feature!)
+├── DeletedUsers.tsx                 ← Domain wrapper
+└── Invites.tsx                      ← Domain wrapper
+
+// Domain wrapper just imports feature (unnecessary indirection!)
+import { ActiveUsersFeature } from '@/features/admin/users-page/active-users-tab';
+
+export default function ActiveUsers() {
+  return <ActiveUsersFeature />;  // Why does this file exist?!
+}
+```
+
+**Problems:**
+- 3 layers instead of 1 (Feature → Domain tab → Feature tab)
+- Domain tab files exist just to import (pointless indirection)
+- Harder to navigate (jump between domain and features directories)
+- More files to maintain
+
+## WHEN TO USE _TABS
+
+**Use this pattern when:**
+- Feature needs 2+ tab views
+- Tabs share the same domain/context
+- Tabs are closely related (user management, email views, etc.)
+
+**Examples:**
+- `users-page/_tabs/` - Active, Deleted, Invites, Status tabs
+- `user-drawer/_tabs/` - Profile, Email, Activity tabs
+- `showcase-page/_tabs/` - VR Guide, Typography, Buttons, etc.
+
+## THE NAMING CONVENTION
+
+**Tab files:** PascalCase, descriptive name
+- ✅ `ActiveUsersTab.tsx`
+- ✅ `ProfileTab.tsx`
+- ✅ `EmailTab.tsx`
+- ❌ `active.tsx` (not clear)
+- ❌ `tab1.tsx` (meaningless)
+
+**Exported function:** Match filename
+```tsx
+// File: ActiveUsersTab.tsx
+export function ActiveUsersTab() { ... }
+
+// OR if it's a feature-level component:
+// File: ActiveUsersTab.tsx
+export function ActiveUsersFeature() { ... }
+```
+
+## DIRECTORY PREFIX: WHY "_tabs"?
+
+The underscore prefix (`_tabs/`) signals:
+- **Private to feature**: Not meant for direct import from outside
+- **Organizational**: Groups related tab components
+- **Convention**: Matches Next.js app router patterns (`_components/`, `_utils/`)
+
+## THE DECISION RULE
+
+**When adding tabs to a feature:**
+> **"Create a `_tabs/` subdirectory and put tab components there."**
+
+Don't create separate feature folders for each tab.
+Don't create domain wrapper files.
+Just put the tabs in `_tabs/` and import them directly.
+
+**Simple. Clear. TTT-compliant.**
+
+---
+
 # 🛑 KNOX PROTOCOL - PROTECTED FILE BLOCKING
 
 **CRITICAL: When ANY git commit fails with a pre-commit hook error containing:**

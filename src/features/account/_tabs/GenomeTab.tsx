@@ -13,7 +13,7 @@
 
 import { Field, Dropdown, Card, T, Stack } from '@/vr';
 import { useFuse } from '@/store/fuse';
-import './genome-tab.css';
+import '../account.css';
 
 // ─────────────────────────────────────────────────────────────────────
 // Dropdown Options
@@ -87,7 +87,7 @@ export function GenomeFields() {
   return (
     <Stack>
       <Card.standard
-        title={<>Professional Genome <T.body size="sm" className="ft-genometab-percent">{completionPercent}% Complete</T.body></>}
+        title={<><T.body>Professional Genome</T.body> <T.body size="sm" className="ft-genometab-percent">{completionPercent}% Complete</T.body></>}
         subtitle="Complete your profile to unlock personalised Al coaching and transformation insights"
         footer={
           <div className="ft-genometab-completion">

@@ -8,8 +8,8 @@
 │  - Pure declaration                                                   │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-import { RadiosShowcase } from '@/features/admin/showcase-page';
+import { RadiosTab } from '@/features/admin/showcase-page';
 
 export default function Radios() {
-  return <RadiosShowcase />;
+  return <RadiosTab />;
 }

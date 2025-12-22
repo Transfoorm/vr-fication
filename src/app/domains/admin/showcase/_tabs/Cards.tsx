@@ -1,7 +1,5 @@
-'use client';
-
-import { T } from '@/vr';
+import { CardsTab } from '@/features/admin/showcase-page';
 
 export default function Cards() {
-  return <div><T.body>Cards Showcase</T.body></div>;
+  return <CardsTab />;
 }

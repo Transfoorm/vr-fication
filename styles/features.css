@@ -18,17 +18,8 @@
 /* Setup Modal */
 @import url('../src/features/setup/setup-modal/setup-modal.css');
 
-/* Email Tab */
-@import url('../src/features/account/email-tab/email-tab.css');
-
-/* Genome Tab */
-@import url('../src/features/account/genome-tab/genome-tab.css');
-
-/* Password Tab */
-@import url('../src/features/account/password-tab/password-tab.css');
-
-/* Profile Tab */
-@import url('../src/features/account/profile-tab/profile-tab.css');
+/* Account Feature (Profile, Email, Password, Genome tabs) */
+@import url('../src/features/account/account.css');
 
 /* Miror AI Fields */
 @import url('../src/features/preferences/miror-ai-tab/miror-ai-tab.css');

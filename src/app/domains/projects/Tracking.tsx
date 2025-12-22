@@ -1,40 +1,13 @@
 'use client';
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
-import { Card } from '@/vr/card';
-import { Grid } from '@/vr/grid';
 import { Page } from '@/vr';
 
 export default function Tracking() {
-  useSetPageHeader('Tracking', 'Monitor project progress and timelines');
-
+  useSetPageHeader('Project Tracking', 'Coming soon');
   return (
     <Page.constrained>
-      <Grid.verticalBig>
-        <Grid.cards>
-          <Card.metric
-            title="Active Projects"
-            value={14}
-            trend={2}
-            trendDirection="up"
-            context="started this week"
-          />
-          <Card.metric
-            title="Hours Tracked"
-            value="326"
-            trend={18}
-            trendDirection="up"
-            context="this month"
-          />
-          <Card.metric
-            title="On Schedule"
-            value="92%"
-            trend={5}
-            trendDirection="up"
-            context="improvement"
-          />
-        </Grid.cards>
-      </Grid.verticalBig>
+      {/* Coming soon */}
     </Page.constrained>
   );
 }

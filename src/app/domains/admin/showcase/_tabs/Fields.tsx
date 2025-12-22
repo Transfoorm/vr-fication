@@ -1,7 +1,5 @@
-'use client';
-
-import { T } from '@/vr';
+import { FieldsTab } from '@/features/admin/showcase-page';
 
 export default function Fields() {
-  return <div><T.body>Fields Showcase</T.body></div>;
+  return <FieldsTab />;
 }

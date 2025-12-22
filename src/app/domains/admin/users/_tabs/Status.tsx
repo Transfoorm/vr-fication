@@ -10,7 +10,7 @@
 │  - Pure declaration                                                  │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-import { StatusTabFeature } from '@/features/admin/users-page/status-tab';
+import { StatusTabFeature } from '@/features/admin/users-page/_tabs/StatusTab';
 
 export default function Status() {
   return <StatusTabFeature />;

@@ -11,7 +11,7 @@
 
 'use client';
 
-import './profile-tab.css';
+import '../account.css';
 import { useState, useCallback, useRef } from 'react';
 import { useFuse } from '@/store/fuse';
 import { Field, Card } from '@/vr';

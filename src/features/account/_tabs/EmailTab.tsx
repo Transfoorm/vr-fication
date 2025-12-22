@@ -18,7 +18,7 @@
 
 'use client';
 
-import './email-tab.css';
+import '../account.css';
 import { useState, useCallback } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';

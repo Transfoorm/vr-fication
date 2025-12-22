@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🔱 ACCOUNT PAGE FEATURE                                              │
-│  /src/features/account/account-page/index.tsx                          │
+│  /src/features/account/AccountPageFeature.tsx                         │
 │                                                                       │
 │  VR Doctrine: Feature Layer                                           │
 │  - Wires FUSE (user state, genome data)                               │

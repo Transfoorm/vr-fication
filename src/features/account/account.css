@@ -1,3 +1,166 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PROFILE FIELDS - Country selector button styling
+   ═══════════════════════════════════════════════════════════════════ */
+
+button.ft-profiletab-country-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 8px);
+  text-align: left;
+  cursor: pointer;
+  height: var(--form-input-height);
+}
+
+.ft-profiletab-country-button__flag {
+  /* Emoji sizing - not Typography text */
+}
+
+.ft-profiletab-country-button__text {
+  flex: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EMAIL FIELDS - Feature-specific styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-emailtab-field-with-action {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.ft-emailtab-action-pills {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.ft-emailtab-action-pill {
+  /* Typography handled by T.caption */
+  padding: 6px 12px;
+  min-width: 110px;
+  height: 28px;
+  color: var(--text-secondary);
+  background-color: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.ft-emailtab-action-pill:hover:not(.ft-emailtab-action-pill--active, .ft-emailtab-action-pill--confirm) {
+  background-color: #e5e7eb;
+  color: var(--text-primary);
+}
+
+.ft-emailtab-action-pill:disabled:not(.ft-emailtab-action-pill--confirm, .ft-emailtab-action-pill--active) {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Confirmation state - orange with subtle shake */
+.ft-emailtab-action-pill--confirm {
+  background-color: var(--brand-primary);
+  color: #fff;
+  animation: ft-emailtab-nudge 0.3s ease;
+}
+
+.ft-emailtab-action-pill--confirm:hover {
+  background-color: var(--brand-hover);
+  color: #fff;
+}
+
+@keyframes ft-emailtab-nudge {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* Active operation (swapping/removing) - yellow with typing animation */
+.ft-emailtab-action-pill--active {
+  background-color: var(--editing-bg);
+  color: var(--editing-text);
+}
+
+.ft-emailtab-action-pill__typing {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: ft-emailtab-typing-cycle 6s ease-in-out infinite;
+}
+
+@keyframes ft-emailtab-typing-cycle {
+  0% { width: 0; }
+  40% { width: 100%; }
+  80% { width: 100%; }
+  100% { width: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CONNECTED EMAIL ACCOUNTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-emailtab-connected-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.ft-emailtab-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.ft-emailtab-account-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.ft-emailtab-empty-accounts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xl) 0;
+  text-align: center;
+}
+
+.ft-emailtab-connect-button-container {
+  margin-top: var(--space-lg);
+  display: flex;
+  justify-content: center;
+}
+
+.ft-emailtab-connect-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm) var(--space-lg);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  color: var(--text-inverse);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--easing);
+  box-shadow: 0 2px 8px rgb(59 130 246 / 20%);
+}
+
+.ft-emailtab-connect-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(59 130 246 / 30%);
+}
+
 /* ──────────────────────────────────────────────────────────────────────┐
 │  🔱 PASSWORD CHANGE CEREMONY - Styles                                 │
 │  /src/features/VerifyPassword/password-ceremony.css                   │
@@ -316,4 +479,94 @@
 .ft-passwordtab__box--idle .ft-passwordtab__input:not(.ft-passwordtab__input--empty):hover {
   border-color: var(--brand-primary);
   cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   🧬 GENOME FIELDS FEATURE - Layout Styles
+   /src/features/account/GenomeFields/genome-fields.css
+
+   Feature-level CSS (ft-*) - Cards use Card.standard VR
+   Card stacking handled by Stack VR
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   Completion Bar (footer progress indicator)
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-genometab-completion {
+  width: 100%;
+}
+
+.ft-genometab-completion-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.ft-genometab-completion-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--status-success);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+/* Data-driven width steps (0-100 in 10% increments) */
+.ft-genometab-completion-fill[data-percent="0"] { width: 0%; }
+.ft-genometab-completion-fill[data-percent="10"] { width: 10%; }
+.ft-genometab-completion-fill[data-percent="20"] { width: 20%; }
+.ft-genometab-completion-fill[data-percent="30"] { width: 30%; }
+.ft-genometab-completion-fill[data-percent="40"] { width: 40%; }
+.ft-genometab-completion-fill[data-percent="50"] { width: 50%; }
+.ft-genometab-completion-fill[data-percent="60"] { width: 60%; }
+.ft-genometab-completion-fill[data-percent="70"] { width: 70%; }
+.ft-genometab-completion-fill[data-percent="80"] { width: 80%; }
+.ft-genometab-completion-fill[data-percent="90"] { width: 90%; }
+.ft-genometab-completion-fill[data-percent="100"] { width: 100%; }
+
+/* Percentage text in title - lighter, smaller */
+.ft-genometab-percent {
+  /* Typography handled by T.body */
+  color: var(--brand-primary-dark) !important;
+}
+
+/* Card header gradient styling removed - violates VR cross-contamination rules */
+
+/* Features should not target VR classes directly */
+
+/* If needed, add feature className to Card component and style through that */
+
+/* Inner card gradient styling removed - violates VR cross-contamination rules */
+
+/* Features should not target VR internal classes */
+
+/* If needed, create a new Card variant or use feature wrapper div */
+
+/* ─────────────────────────────────────────────────────────────────────
+   Field Rows - Genome-specific grid with smart child-count detection
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-genometab-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+}
+
+/* Single field takes full width */
+.ft-genometab-row:has(> :only-child) {
+  grid-template-columns: 1fr;
+}
+
+/* Three children = three columns */
+.ft-genometab-row:has(> :nth-child(3):last-child) {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Mobile adjustments - always single column */
+@media (max-width: 640px) {
+  .ft-genometab-row {
+    grid-template-columns: 1fr;
+  }
 }

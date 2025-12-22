@@ -1,9 +1,17 @@
+/**──────────────────────────────────────────────────────────────────────┐
+│  📚 VR GUIDE TAB FEATURE                                              │
+│  /src/features/admin/showcase-page/_tabs/VrGuide.tsx                 │
+│                                                                       │
+│  VR Doctrine: Feature Layer                                          │
+│  Documents the VR philosophy and component library                    │
+└────────────────────────────────────────────────────────────────────────┘ */
+
 'use client';
 
-import '@/features/admin/showcase-page/showcase-page.css';
+import '../showcase-page.css';
 import { Card, Divider, T } from '@/vr';
 
-export default function Guide() {
+export function VrGuideTab() {
   return (
     <Card.standard
       title="The VR Doctrine"
@@ -129,7 +137,7 @@ export default function Guide() {
         </ul>
         </div>
 
-    
+
 
         {/* Main Section Title - Full Width, Centered */}
         <T.title size="xl" weight="bold" align="center">SET UP PAGES WITH VR&apos;s and FEATURES</T.title>

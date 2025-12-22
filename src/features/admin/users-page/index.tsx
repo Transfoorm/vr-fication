@@ -14,10 +14,10 @@
 import { useAdminData } from '@/hooks/useAdminData';
 import { useAdminSync } from '@/hooks/useAdminSync';
 import { Tabs, Stack } from '@/vr';
-import ActiveUsers from '@/app/domains/admin/users/_tabs/ActiveUsers';
-import DeletedUsers from '@/app/domains/admin/users/_tabs/DeletedUsers';
-import Invites from '@/app/domains/admin/users/_tabs/Invites';
-import Status from '@/app/domains/admin/users/_tabs/Status';
+import { ActiveUsersFeature } from './_tabs/ActiveUsersTab';
+import { DeletedUsersFeature } from './_tabs/DeletedUsersTab';
+import { InvitesFeature } from './_tabs/InvitesTab';
+import { StatusTabFeature } from './_tabs/StatusTab';
 
 export function UsersTabsFeature() {
   // 🔄 Real-time sync: Convex → FUSE (live subscription)
@@ -30,10 +30,10 @@ export function UsersTabsFeature() {
     <Stack>
       <Tabs.panels
         tabs={[
-          { id: 'active', label: 'Active Users', count: computed.usersCount, content: <ActiveUsers /> },
-          { id: 'deleted', label: 'Deleted Users', count: computed.deletionLogsCount, content: <DeletedUsers /> },
-          { id: 'invite', label: 'Invite Users', content: <Invites /> },
-          { id: 'status', label: 'Status', content: <Status /> }
+          { id: 'active', label: 'Active Users', count: computed.usersCount, content: <ActiveUsersFeature /> },
+          { id: 'deleted', label: 'Deleted Users', count: computed.deletionLogsCount, content: <DeletedUsersFeature /> },
+          { id: 'invite', label: 'Invite Users', content: <InvitesFeature /> },
+          { id: 'status', label: 'Status', content: <StatusTabFeature /> }
         ]}
       />
     </Stack>

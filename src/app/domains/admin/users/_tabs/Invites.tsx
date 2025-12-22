@@ -10,7 +10,7 @@
 │  - Pure declaration                                                   │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-import { InvitesFeature } from '@/features/admin/users-page/invites-tab';
+import { InvitesFeature } from '@/features/admin/users-page/_tabs/InvitesTab';
 
 export default function Invites() {
   return <InvitesFeature />;

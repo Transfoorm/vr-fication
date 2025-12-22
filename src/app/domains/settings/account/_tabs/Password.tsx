@@ -12,7 +12,7 @@
 │  SOVEREIGNTY: No Clerk imports in domains - Golden Bridge enforced    │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-import { PasswordFields } from '@/features/account/password-tab';
+import { PasswordFields } from '@/features/account';
 
 export default function Security() {
   return <PasswordFields />;

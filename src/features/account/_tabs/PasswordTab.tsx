@@ -21,7 +21,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Icon, T, Card } from '@/vr';
 import { changePassword } from '@/app/(clerk)/actions/password';
-import './password-tab.css';
+import '../account.css';
 
 type CeremonyStage = 'fresh' | 'typing' | 'valid' | 'confirming' | 'committing' | 'success';
 

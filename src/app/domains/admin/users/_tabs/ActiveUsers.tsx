@@ -10,7 +10,7 @@
 │  - Pure declaration                                                   │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-import { ActiveUsersFeature } from '@/features/admin/users-page/active-users-tab';
+import { ActiveUsersFeature } from '@/features/admin/users-page/_tabs/ActiveUsersTab';
 
 export default function ActiveUsers() {
   return <ActiveUsersFeature />;

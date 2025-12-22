@@ -14,7 +14,7 @@
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { usePageTiming } from '@/fuse/hooks/usePageTiming';
-import { AccountPageFeature } from '@/features/account/account-page';
+import { AccountPageFeature } from '@/features/account';
 import { Page } from '@/vr';
 
 export default function Account() {
