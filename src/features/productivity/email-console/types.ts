@@ -54,9 +54,25 @@ export interface EmailMessage {
 }
 
 /**
+ * Connected email account
+ */
+export interface EmailAccount {
+  _id: string;
+  label: string;
+  emailAddress: string;
+  provider: 'outlook' | 'gmail';
+  status: 'active' | 'error' | 'disconnected';
+  syncEnabled: boolean;
+  connectedAt?: number;
+  lastSyncAt?: number;
+  lastSyncError?: string;
+}
+
+/**
  * FUSE email data structure
  */
 export interface ProductivityEmail {
   threads: EmailThread[];
   messages: EmailMessage[];
+  accounts: EmailAccount[];
 }
