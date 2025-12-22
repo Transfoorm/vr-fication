@@ -1,9 +1,9 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  📧 OUTLOOK EMAIL SYNC - Convex Functions                              │
-│  /convex/productivity/email/outlook.ts                                │
-│                                                                        │
-│  OAuth token management + metadata sync from Microsoft Graph API      │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  📧 OUTLOOK EMAIL SYNC - Convex Functions                                 │
+│  /convex/productivity/email/outlook.ts                                    │
+│                                                                           │
+│  OAuth token management + metadata sync from Microsoft Graph API          │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { v } from 'convex/values';
 import { mutation, query, action } from '@/convex/_generated/server';
@@ -328,7 +328,9 @@ export const storeOutlookMessages = mutation({
         assetCount: 0,
 
         // SRS rank-scoping
-        orgId: user.orgSlug || user._id, // TODO: Use proper orgId when orgs domain is implemented
+        // 🛡️ SID-ORG: Use userId directly until orgs domain is implemented
+        // orgSlug may contain test/default values like "go" - ignore it for now
+        orgId: user._id as string,
 
         // Timestamps
         createdAt: now,

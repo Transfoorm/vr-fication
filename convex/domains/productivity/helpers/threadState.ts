@@ -1,14 +1,14 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  📧 EMAIL THREAD STATE DERIVATION - Pure Function                     │
-│  /convex/domains/productivity/helpers/threadState.ts                   │
-│                                                                        │
-│  DOCTRINE:                                                             │
-│  - Thread state is DERIVED, never stored                               │
-│  - Pure function (no side effects, no database access)                 │
-│  - Single source of truth: message resolutionState fields              │
-│                                                                        │
-│  See: /docs/EMAIL_THREAD_STATE_DERIVATION.md                           │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  📧 EMAIL THREAD STATE DERIVATION - Pure Function                         │
+│  /convex/domains/productivity/helpers/threadState.ts                      │
+│                                                                           │
+│  DOCTRINE:                                                                │
+│  - Thread state is DERIVED, never stored                                  │
+│  - Pure function (no side effects, no database access)                    │
+│  - Single source of truth: message resolutionState fields                 │
+│                                                                           │
+│  See: /docs/EMAIL_THREAD_STATE_DERIVATION.md                              │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import type { Doc } from "@/convex/_generated/dataModel";
 

@@ -1,21 +1,21 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  ✅ SRS MANIFEST VALIDATOR - Sovereign Router Enforcement            │
-│  /scripts/validateManifest.ts                                         │
-│                                                                        │
-│  Validates SRS architecture integrity:                                │
-│  1. Every manifest route has a Router.tsx case                        │
-│  2. Every Router.tsx case has an import                               │
-│  3. Every import points to an existing file                           │
-│  4. Every Router.tsx case is in KNOWN_ROUTES (navigation.ts)          │
-│                                                                        │
-│  SRS Layer 1: Compile-Time Validation                                 │
-│  • Catches manifest ↔ Router drift before deployment                  │
-│  • Ensures nav configs match actual views                             │
-│  • Prevents unknown route errors in production                        │
-│  • Zero runtime surprises                                             │
-│                                                                        │
-│  References: SRS-ARCHITECTURE.md                                      │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  ✅ SRS MANIFEST VALIDATOR - Sovereign Router Enforcement             │
+│  /scripts/validateManifest.ts                                           │
+│                                                                          │
+│  Validates SRS architecture integrity:                                  │
+│  1. Every manifest route has a Router.tsx case                          │
+│  2. Every Router.tsx case has an import                                 │
+│  3. Every import points to an existing file                             │
+│  4. Every Router.tsx case is in KNOWN_ROUTES (navigation.ts)            │
+│                                                                          │
+│  SRS Layer 1: Compile-Time Validation                                   │
+│  • Catches manifest ↔ Router drift before deployment                    │
+│  • Ensures nav configs match actual views                               │
+│  • Prevents unknown route errors in production                          │
+│  • Zero runtime surprises                                               │
+│                                                                          │
+│  References: SRS-ARCHITECTURE.md                                        │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import fs from 'node:fs';
 import path from 'node:path';

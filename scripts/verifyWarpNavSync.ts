@@ -1,16 +1,16 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🛡️ VRP: WARP-NAV SYNC VERIFICATION                                   │
-│  /scripts/verifyWarpNavSync.ts                                        │
-│                                                                        │
-│  TTTS-4 Enforcement: Ensures WARP Orchestrator stays synced with      │
-│  sidebar navigation configs. Catches maverick hardcoding.             │
-│                                                                        │
-│  Checks:                                                               │
-│  1. Orchestrator imports all rank nav configs                         │
-│  2. No hardcoded domain arrays in orchestrator                        │
-│  3. Every nav domain has matching /api/warp/{domain} endpoint         │
-│  4. No orphan WARP endpoints without nav entries                      │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🛡️ VRP: WARP-NAV SYNC VERIFICATION                                    │
+│  /scripts/verifyWarpNavSync.ts                                          │
+│                                                                          │
+│  TTTS-4 Enforcement: Ensures WARP Orchestrator stays synced with        │
+│  sidebar navigation configs. Catches maverick hardcoding.               │
+│                                                                          │
+│  Checks:                                                                 │
+│  1. Orchestrator imports all rank nav configs                           │
+│  2. No hardcoded domain arrays in orchestrator                          │
+│  3. Every nav domain has matching /api/warp/{domain} endpoint           │
+│  4. No orphan WARP endpoints without nav entries                        │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import * as fs from 'fs';
 import * as path from 'path';

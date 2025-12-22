@@ -1,18 +1,18 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🔌 PRODUCTIVITY DOMAIN QUERIES - SRS Layer 4                         │
-│  /convex/domains/productivity/queries.ts                               │
-│                                                                        │
-│  🛡️ S.I.D. COMPLIANT - Phase 10                                       │
-│  - All queries accept callerUserId: v.id("admin_users")                │
-│  - No ctx.auth.getUserIdentity() usage                                 │
-│                                                                        │
-│  Rank-based data scoping for productivity tools:                       │
-│  • Crew: Organization-scoped (read/write their org's data)             │
-│  • Captain/Commodore: Organization-scoped (full access)                │
-│  • Admiral: All data (cross-org, platform-wide)                        │
-│                                                                        │
-│  SRS Commandment #4: Data scoping via Convex query filters            │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🔌 PRODUCTIVITY DOMAIN QUERIES - SRS Layer 4                             │
+│  /convex/domains/productivity/queries.ts                                  │
+│                                                                           │
+│  🛡️ S.I.D. COMPLIANT - Phase 10                                           │
+│  - All queries accept callerUserId: v.id("admin_users")                   │
+│  - No ctx.auth.getUserIdentity() usage                                    │
+│                                                                           │
+│  Rank-based data scoping for productivity tools:                          │
+│  • Crew: Organization-scoped (read/write their org's data)                │
+│  • Captain/Commodore: Organization-scoped (full access)                   │
+│  • Admiral: All data (cross-org, platform-wide)                           │
+│                                                                           │
+│  SRS Commandment #4: Data scoping via Convex query filters                │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { query } from "@/convex/_generated/server";
 import { v } from "convex/values";
@@ -215,7 +215,8 @@ export const listThreads = query({
         .order("desc") // Most recent first
         .collect();
     } else {
-      const orgId = user.orgSlug || "";
+      // 🛡️ SID-ORG: Use userId directly until orgs domain is implemented
+      const orgId = user._id as string;
       allMessages = await ctx.db
         .query("productivity_email_Index")
         .withIndex("by_org", (q) => q.eq("orgId", orgId))
@@ -272,7 +273,8 @@ export const listMessages = query({
         .order("desc") // Most recent first
         .collect();
     } else {
-      const orgId = user.orgSlug || "";
+      // 🛡️ SID-ORG: Use userId directly until orgs domain is implemented
+      const orgId = user._id as string;
       return await ctx.db
         .query("productivity_email_Index")
         .withIndex("by_org", (q) => q.eq("orgId", orgId))

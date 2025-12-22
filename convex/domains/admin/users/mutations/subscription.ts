@@ -1,17 +1,17 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🎖️ SUBSCRIPTION MUTATIONS - Admiral Controls                          │
-│  /convex/domains/admin/users/mutations/subscription.ts                 │
-│                                                                        │
-│  🛡️ S.I.D. COMPLIANT - Phase 10                                       │
-│  - All mutations accept callerUserId: v.id("admin_users")              │
-│  - No ctx.auth.getUserIdentity() usage                                 │
-│                                                                        │
-│  Admiral-only mutations for managing user trials, subscriptions,       │
-│  and rank assignments. Part of the Rank-Aware Management System.       │
-│                                                                        │
-│  God Mode: Admiral has complete control over all subscription          │
-│  settings, trial periods, and lifetime grants.                         │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🎖️ SUBSCRIPTION MUTATIONS - Admiral Controls                             │
+│  /convex/domains/admin/users/mutations/subscription.ts                    │
+│                                                                           │
+│  🛡️ S.I.D. COMPLIANT - Phase 10                                           │
+│  - All mutations accept callerUserId: v.id("admin_users")                 │
+│  - No ctx.auth.getUserIdentity() usage                                    │
+│                                                                           │
+│  Admiral-only mutations for managing user trials, subscriptions,          │
+│  and rank assignments. Part of the Rank-Aware Management System.          │
+│                                                                           │
+│  God Mode: Admiral has complete control over all subscription             │
+│  settings, trial periods, and lifetime grants.                            │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { v } from "convex/values";
 import { mutation } from "@/convex/_generated/server";

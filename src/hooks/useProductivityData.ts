@@ -1,5 +1,5 @@
 /**─────────────────────────────────────────────────────────────────────────┐
-│  ⚡ FUSE READER - Productivity Domain                                      │
+│  ⚡ FUSE READER - Productivity Domain                                     │
 │  /src/hooks/useProductivityData.ts                                        │
 │                                                                           │
 │  TTTS-2 COMPLIANT: Reads from FUSE only.                                  │

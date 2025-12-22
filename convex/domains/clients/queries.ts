@@ -1,19 +1,19 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🔌 CLIENT DOMAIN QUERIES - SRS Layer 4                               │
-│  /convex/domains/clients/queries.ts                                    │
-│                                                                        │
-│  🛡️ S.I.D. COMPLIANT - Phase 10                                       │
-│  - All queries accept callerUserId: v.id("admin_users")                │
-│  - No ctx.auth.getUserIdentity() usage                                 │
-│                                                                        │
-│  Rank-based data scoping for client management:                        │
-│  • Crew: Assigned clients only (by_assigned index)                     │
-│  • Captain: Organization-scoped clients (by_org index)                 │
-│  • Commodore: Organization-scoped clients (by_org index)               │
-│  • Admiral: All clients (cross-org, platform-wide)                     │
-│                                                                        │
-│  SRS Commandment #4: Data scoping via Convex query filters            │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🔌 CLIENT DOMAIN QUERIES - SRS Layer 4                                   │
+│  /convex/domains/clients/queries.ts                                       │
+│                                                                           │
+│  🛡️ S.I.D. COMPLIANT - Phase 10                                           │
+│  - All queries accept callerUserId: v.id("admin_users")                   │
+│  - No ctx.auth.getUserIdentity() usage                                    │
+│                                                                           │
+│  Rank-based data scoping for client management:                           │
+│  • Crew: Assigned clients only (by_assigned index)                        │
+│  • Captain: Organization-scoped clients (by_org index)                    │
+│  • Commodore: Organization-scoped clients (by_org index)                  │
+│  • Admiral: All clients (cross-org, platform-wide)                        │
+│                                                                           │
+│  SRS Commandment #4: Data scoping via Convex query filters                │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { query } from "@/convex/_generated/server";
 import type { QueryCtx } from "@/convex/_generated/server";

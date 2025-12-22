@@ -1,5 +1,5 @@
 /**─────────────────────────────────────────────────────────────────────────┐
-│  ⚙️ GOLDEN BRIDGE HOOK - Settings Domain                                  │
+│  ⚙️ GOLDEN BRIDGE HOOK - Settings Domain                                │
 │  /src/hooks/useSettingsData.ts                                            │
 │                                                                           │
 │  Clean API for accessing settings domain data                             │

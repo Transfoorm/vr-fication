@@ -10,7 +10,7 @@
 │  - Append-pattern audit logging (complete forensic trail)                 │
 │  - Storage file cleanup (avatars, attachments, etc.)                      │
 │                                                                           │
-│  TTT CERTIFIED: 100K admin_users → 50K transactions per user → INSTANT          │
+│  TTT CERTIFIED: 100K admin_users → 50K transactions per user → INSTANT    │
 └───────────────────────────────────────────────────────────────────────────┘ */
 
 import { DatabaseWriter } from "@/convex/_generated/server";

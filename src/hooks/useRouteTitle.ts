@@ -4,7 +4,7 @@
 │                                                                           │
 │  Auto-generates page titles from Next.js routes (PoLR pattern)            │
 │                                                                           │
-│  ⚠️  APPLICATION LAYER - NOT FUSE                                         │
+│  ⚠️  APPLICATION LAYER - NOT FUSE                                       │
 │  This hook is Next.js-specific and lives in /src/, not /fuse/             │
 │  FUSE = framework-agnostic primitives only (store + style)                │
 │                                                                           │

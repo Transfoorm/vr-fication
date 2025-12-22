@@ -1,14 +1,14 @@
 #!/usr/bin/env tsx
-/**──────────────────────────────────────────────────────────────────────┐
-│  🛡️ VRP TYPOGRAPHY SOVEREIGNTY CHECK                                  │
-│  /scripts/checkTypography.ts                                          │
-│                                                                        │
-│  Enforces Typography VR sovereignty by blocking font properties       │
-│  in feature, shell, and domain CSS files.                             │
-│                                                                        │
-│  Typography VRs are the SOLE authority for font decisions.            │
-│  Feature CSS may not define font-size, font-weight, or font-family.   │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🛡️ VRP TYPOGRAPHY SOVEREIGNTY CHECK                                   │
+│  /scripts/checkTypography.ts                                            │
+│                                                                          │
+│  Enforces Typography VR sovereignty by blocking font properties         │
+│  in feature, shell, and domain CSS files.                               │
+│                                                                          │
+│  Typography VRs are the SOLE authority for font decisions.              │
+│  Feature CSS may not define font-size, font-weight, or font-family.     │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { execSync } from 'child_process';
 import { existsSync } from 'fs';

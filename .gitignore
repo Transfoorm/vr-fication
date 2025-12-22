@@ -54,3 +54,4 @@ convex/_generated/
 # VRP (Virgin Repo Protocol) - Approval Bridge System
 .vrp-approval  # Temporary approval token for protected file edits
 .vrp-approval
+email.md

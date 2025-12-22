@@ -1,20 +1,20 @@
 #!/usr/bin/env tsx
-/**──────────────────────────────────────────────────────────────────────┐
-│  🧹 BUILDINFO CLEANUP SCRIPT                                          │
-│  /scripts/cleanBuildinfo.ts                                           │
-│                                                                        │
-│  Removes stale TypeScript buildinfo files that accumulate during      │
-│  builds and commits. Keeps only the main tsconfig.tsbuildinfo.        │
-│                                                                        │
-│  SAFE:                                                                 │
-│  - Only removes files matching tsconfig.*.tsbuildinfo pattern         │
-│  - Never removes the main tsconfig.tsbuildinfo                        │
-│  - Dry run mode available                                             │
-│                                                                        │
-│  USAGE:                                                                │
-│    npm run clean:buildinfo          # Delete stale buildinfo files    │
-│    npm run clean:buildinfo -- --dry # Preview what would be deleted   │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🧹 BUILDINFO CLEANUP SCRIPT                                           │
+│  /scripts/cleanBuildinfo.ts                                             │
+│                                                                          │
+│  Removes stale TypeScript buildinfo files that accumulate during        │
+│  builds and commits. Keeps only the main tsconfig.tsbuildinfo.          │
+│                                                                          │
+│  SAFE:                                                                   │
+│  - Only removes files matching tsconfig.*.tsbuildinfo pattern           │
+│  - Never removes the main tsconfig.tsbuildinfo                          │
+│  - Dry run mode available                                               │
+│                                                                          │
+│  USAGE:                                                                  │
+│    npm run clean:buildinfo          # Delete stale buildinfo files      │
+│    npm run clean:buildinfo -- --dry # Preview what would be deleted     │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { readdirSync, unlinkSync, statSync } from 'fs';
 import { join } from 'path';

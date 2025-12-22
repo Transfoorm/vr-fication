@@ -1,19 +1,19 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🔌 PROJECT DOMAIN QUERIES - SRS Layer 4                              │
-│  /convex/domains/projects/queries.ts                                   │
-│                                                                        │
-│  🛡️ S.I.D. COMPLIANT - Phase 10                                       │
-│  - All queries accept callerUserId: v.id("admin_users")                │
-│  - No ctx.auth.getUserIdentity() usage                                 │
-│                                                                        │
-│  Rank-based data scoping for project management:                       │
-│  • Crew: Assigned projects only                                        │
-│  • Captain: Organization-scoped projects                               │
-│  • Commodore: Organization-scoped projects                             │
-│  • Admiral: All projects (cross-org, platform-wide)                    │
-│                                                                        │
-│  SRS Commandment #4: Data scoping via Convex query filters            │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🔌 PROJECT DOMAIN QUERIES - SRS Layer 4                                  │
+│  /convex/domains/projects/queries.ts                                      │
+│                                                                           │
+│  🛡️ S.I.D. COMPLIANT - Phase 10                                           │
+│  - All queries accept callerUserId: v.id("admin_users")                   │
+│  - No ctx.auth.getUserIdentity() usage                                    │
+│                                                                           │
+│  Rank-based data scoping for project management:                          │
+│  • Crew: Assigned projects only                                           │
+│  • Captain: Organization-scoped projects                                  │
+│  • Commodore: Organization-scoped projects                                │
+│  • Admiral: All projects (cross-org, platform-wide)                       │
+│                                                                           │
+│  SRS Commandment #4: Data scoping via Convex query filters                │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { query } from "@/convex/_generated/server";
 import type { QueryCtx } from "@/convex/_generated/server";

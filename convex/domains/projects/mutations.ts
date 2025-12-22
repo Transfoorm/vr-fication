@@ -1,19 +1,19 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🔌 PROJECT DOMAIN MUTATIONS - SRS Layer 4                            │
-│  /convex/domains/projects/mutations.ts                                 │
-│                                                                        │
-│  🛡️ S.I.D. COMPLIANT - Phase 10                                       │
-│  - All mutations accept callerUserId: v.id("admin_users")              │
-│  - No ctx.auth.getUserIdentity() usage                                 │
-│                                                                        │
-│  Project CRUD with rank-based authorization:                           │
-│  • Create: Captain/Commodore/Admiral only                              │
-│  • Update: Captain/Commodore/Admiral only (org-scoped)                 │
-│  • Delete: Captain/Commodore/Admiral only (org-scoped)                 │
-│  • Crew: Read-only access (cannot create/update/delete)                │
-│                                                                        │
-│  SRS Commandment #4: Data scoping via Convex mutations                │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🔌 PROJECT DOMAIN MUTATIONS - SRS Layer 4                                │
+│  /convex/domains/projects/mutations.ts                                    │
+│                                                                           │
+│  🛡️ S.I.D. COMPLIANT - Phase 10                                           │
+│  - All mutations accept callerUserId: v.id("admin_users")                 │
+│  - No ctx.auth.getUserIdentity() usage                                    │
+│                                                                           │
+│  Project CRUD with rank-based authorization:                              │
+│  • Create: Captain/Commodore/Admiral only                                 │
+│  • Update: Captain/Commodore/Admiral only (org-scoped)                    │
+│  • Delete: Captain/Commodore/Admiral only (org-scoped)                    │
+│  • Crew: Read-only access (cannot create/update/delete)                   │
+│                                                                           │
+│  SRS Commandment #4: Data scoping via Convex mutations                    │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { mutation } from "@/convex/_generated/server";
 import type { MutationCtx } from "@/convex/_generated/server";

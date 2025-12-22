@@ -1,14 +1,14 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  ⚙️ SETTINGS DOMAIN MUTATIONS - SRS Layer 3                           │
-│  /convex/domains/settings/mutations.ts                                 │
-│                                                                        │
-│  🛡️ S.I.D. COMPLIANT - Phase 10                                       │
-│  - All mutations accept callerUserId: v.id("admin_users")              │
-│  - No ctx.auth.getUserIdentity() usage                                 │
-│                                                                        │
-│  All-rank self-scoped mutations for user settings                      │
-│  Users can only update their own settings (enforced by callerUserId)   │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  ⚙️ SETTINGS DOMAIN MUTATIONS - SRS Layer 3                               │
+│  /convex/domains/settings/mutations.ts                                    │
+│                                                                           │
+│  🛡️ S.I.D. COMPLIANT - Phase 10                                           │
+│  - All mutations accept callerUserId: v.id("admin_users")                 │
+│  - No ctx.auth.getUserIdentity() usage                                    │
+│                                                                           │
+│  All-rank self-scoped mutations for user settings                         │
+│  Users can only update their own settings (enforced by callerUserId)      │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { mutation } from "@/convex/_generated/server";
 import type { MutationCtx } from "@/convex/_generated/server";

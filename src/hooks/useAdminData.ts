@@ -1,5 +1,5 @@
 /**─────────────────────────────────────────────────────────────────────────┐
-│  🛡️ GOLDEN BRIDGE HOOK - Admin Domain                                     │
+│  🛡️ GOLDEN BRIDGE HOOK - Admin Domain                                   │
 │  /src/hooks/useAdminData.ts                                               │
 │                                                                           │
 │  TTTS-2 COMPLIANT: Reads from FUSE only.                                  │
