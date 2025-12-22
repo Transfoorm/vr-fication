@@ -1,13 +1,13 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  ⚡ FUSE READER - Productivity Domain                                 │
-│  /src/hooks/useProductivityData.ts                                     │
-│                                                                        │
-│  TTTS-2 COMPLIANT: Reads from FUSE only.                               │
-│  NO useQuery here - sync happens in useProductivitySync().             │
-│                                                                        │
-│  Usage:                                                                │
-│  const { data, computed, flags } = useProductivityData();              │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  ⚡ FUSE READER - Productivity Domain                                      │
+│  /src/hooks/useProductivityData.ts                                        │
+│                                                                           │
+│  TTTS-2 COMPLIANT: Reads from FUSE only.                                  │
+│  NO useQuery here - sync happens in useProductivitySync().                │
+│                                                                           │
+│  Usage:                                                                   │
+│  const { data, computed, flags } = useProductivityData();                 │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 'use client';
 
