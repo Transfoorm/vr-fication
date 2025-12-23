@@ -1,11 +1,12 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  📐 FT GUIDE TAB FEATURE                                              │
-│  /src/features/admin/showcase-page/_tabs/FtGuide.tsx                 │
+│  /src/features/admin/showcase-page/_tabs/FtGuideTab.tsx               │
 │                                                                       │
 │  VR Doctrine: Feature Layer                                          │
 │  Documents architectural patterns for building features:              │
+│  - Folder naming conventions                                          │
 │  - _tabs pattern (TTT-compliant tab organization)                     │
-│  - Feature structure guidelines                                       │
+│  - CSS file naming rules                                              │
 │  - Code examples and comparisons                                      │
 └────────────────────────────────────────────────────────────────────────┘ */
 
@@ -17,38 +18,72 @@ import { Card, Stack, T } from '@/vr';
 export function FtGuideTab() {
   return (
     <Stack>
-      {/* _tabs Pattern Overview */}
+      {/* Folder Naming Convention */}
       <Card.standard
-        title="The _tabs Pattern"
-        subtitle="TTT-compliant tab organization for features"
+        title="Folder Naming Convention"
+        subtitle="How to name feature folders"
       >
         <Stack>
           <T.body size="md">
-            When a feature needs multiple tab views, use the <strong>_tabs subdirectory pattern</strong>.
-            This is simpler, clearer, and more TTT-compliant than folder-based patterns.
+            Feature folders use <strong>kebab-case</strong> with a <strong>type suffix</strong> describing what they are.
           </T.body>
 
           <div>
-            <T.caption color="secondary" size="sm">RECOMMENDED STRUCTURE:</T.caption>
+            <T.caption color="secondary" size="sm">NAMING PATTERN:</T.caption>
             <pre className="ft-patterns__code-block">
-{`feature-name/
-├── index.tsx              ← Feature (imports Tabs.panels VR)
-├── feature-name.css       ← Shared styles
-└── _tabs/
-    ├── TabOne.tsx         ← Tab component
-    ├── TabTwo.tsx
-    └── tab-styles.css     ← Optional tab-specific CSS`}
+{`feature-name-type/
+       │         │
+       │         └── -page, -drawer, -modal, etc.
+       │
+       └── descriptive name in kebab-case`}
+            </pre>
+          </div>
+
+          <div>
+            <T.body size="md" weight="semibold">Examples:</T.body>
+            <div className="ft-patterns__check-list">
+              <T.body size="md" color="success">users-page/</T.body>
+              <T.body size="md" color="success">user-drawer/</T.body>
+              <T.body size="md" color="success">showcase-page/</T.body>
+              <T.body size="md" color="success">account-page/</T.body>
+              <T.body size="md" color="success">preferences-page/</T.body>
+              <T.body size="md" color="tertiary">account/ (missing type suffix)</T.body>
+              <T.body size="md" color="tertiary">UsersPage/ (wrong case)</T.body>
+            </div>
+          </div>
+        </Stack>
+      </Card.standard>
+
+      {/* The Feature Structure */}
+      <Card.standard
+        title="The Feature Structure"
+        subtitle="Rock-solid, replicable pattern for all features"
+      >
+        <Stack>
+          <T.body size="md">
+            Every feature follows this exact structure. No exceptions.
+          </T.body>
+
+          <div>
+            <T.caption color="secondary" size="sm">THE PATTERN:</T.caption>
+            <pre className="ft-patterns__code-block">
+{`feature-name-type/
+├── index.tsx              ← Main component (owns Tabs.panels if tabbed)
+├── feature-name-type.css  ← CSS matches folder name EXACTLY
+└── _tabs/                 ← Tab components (if needed)
+    ├── SomethingTab.tsx
+    ├── AnotherTab.tsx
+    └── ...`}
             </pre>
           </div>
 
           <T.body size="md">
-            <strong>Why this wins (TTT Compliance):</strong>
+            <strong>Critical rules:</strong>
           </T.body>
           <ul className="ft-patterns__list">
-            <li><T.body size="md"><strong>Clarity:</strong> Tab files live next to the feature that uses them</T.body></li>
-            <li><T.body size="md"><strong>Simplicity:</strong> No indirection through domain layer (1 layer, not 3!)</T.body></li>
-            <li><T.body size="md"><strong>Consistency:</strong> Same pattern across users-page, user-drawer, etc.</T.body></li>
-            <li><T.body size="md"><strong>Architecture:</strong> Feature owns its tabs, not scattered across domain</T.body></li>
+            <li><T.body size="md"><strong>CSS filename = folder name:</strong> <code>users-page/users-page.css</code></T.body></li>
+            <li><T.body size="md"><strong>One CSS file per feature:</strong> Lives at root, not inside _tabs/</T.body></li>
+            <li><T.body size="md"><strong>Tabs import parent CSS:</strong> <code>import &apos;../feature-name-type.css&apos;</code></T.body></li>
           </ul>
         </Stack>
       </Card.standard>
@@ -56,28 +91,29 @@ export function FtGuideTab() {
       {/* Real Example: users-page */}
       <Card.standard
         title="Real Example: users-page"
-        subtitle="How the _tabs pattern looks in production code"
+        subtitle="How the pattern looks in production code"
       >
         <Stack>
           <T.caption color="secondary" size="sm">DIRECTORY STRUCTURE:</T.caption>
           <pre className="ft-patterns__code-block">
 {`src/features/admin/users-page/
 ├── index.tsx                    ← Renders Tabs.panels
+├── users-page.css               ← ALL styles for this feature
 └── _tabs/
     ├── ActiveUsersTab.tsx       ← Active users table
     ├── DeletedUsersTab.tsx      ← Deletion logs table
-    ├── InvitesTab.tsx          ← Invite management
-    ├── StatusTab.tsx           ← Status monitoring
-    └── invites-tab.css         ← Tab-specific styles`}
+    ├── InvitesTab.tsx           ← Invite management
+    └── StatusTab.tsx            ← Status monitoring`}
           </pre>
 
           <T.caption color="secondary" size="sm">FEATURE INDEX.TSX:</T.caption>
           <pre className="ft-patterns__code-block">
-{`import { Tabs, Stack } from '@/vr';
-import { ActiveUsersFeature } from './_tabs/ActiveUsersTab';
-import { DeletedUsersFeature } from './_tabs/DeletedUsersTab';
-import { InvitesFeature } from './_tabs/InvitesTab';
-import { StatusTabFeature } from './_tabs/StatusTab';
+{`import './users-page.css';
+import { Tabs, Stack } from '@/vr';
+import { ActiveUsersTab } from './_tabs/ActiveUsersTab';
+import { DeletedUsersTab } from './_tabs/DeletedUsersTab';
+import { InvitesTab } from './_tabs/InvitesTab';
+import { StatusTab } from './_tabs/StatusTab';
 
 export function UsersPageFeature() {
   return (
@@ -85,13 +121,13 @@ export function UsersPageFeature() {
       <Tabs.panels
         tabs={[
           { id: 'active', label: 'Active Users',
-            content: <ActiveUsersFeature /> },
+            content: <ActiveUsersTab /> },
           { id: 'deleted', label: 'Deleted Users',
-            content: <DeletedUsersFeature /> },
+            content: <DeletedUsersTab /> },
           { id: 'invite', label: 'Invite Users',
-            content: <InvitesFeature /> },
+            content: <InvitesTab /> },
           { id: 'status', label: 'Status',
-            content: <StatusTabFeature /> }
+            content: <StatusTab /> }
         ]}
       />
     </Stack>
@@ -99,23 +135,19 @@ export function UsersPageFeature() {
 }`}
           </pre>
 
-          <T.caption color="secondary" size="sm">TAB COMPONENT (_tabs/ActiveUsersTab.tsx):</T.caption>
+          <T.caption color="secondary" size="sm">TAB COMPONENT (_tabs/InvitesTab.tsx):</T.caption>
           <pre className="ft-patterns__code-block">
 {`'use client';
 
-import { Table, Search, Stack } from '@/vr';
-import { useAdminData } from '@/hooks/useAdminData';
+import '../users-page.css';  // ← Import parent CSS
+import { Field, Card, Stack } from '@/vr';
 
-export function ActiveUsersFeature() {
-  const { data } = useAdminData();
-
+export function InvitesTab() {
   return (
     <Stack>
-      <Search.bar />
-      <Table.sortable
-        columns={columns}
-        data={data.users}
-      />
+      <Card.standard title="Invite Users">
+        {/* Tab content */}
+      </Card.standard>
     </Stack>
   );
 }`}
@@ -123,113 +155,104 @@ export function ActiveUsersFeature() {
         </Stack>
       </Card.standard>
 
-      {/* The Anti-Pattern (What NOT to do) */}
+      {/* CSS Naming Rules */}
       <Card.standard
-        title="The Anti-Pattern"
-        subtitle="Folder-based pattern with unnecessary indirection (DON'T DO THIS)"
-      >
-        <Stack>
-          <T.body size="md" color="tertiary">
-            This is the old way - more complex, more files, more layers of indirection.
-          </T.body>
-
-          <T.caption color="secondary" size="sm">FOLDER PATTERN (3 LAYERS OF INDIRECTION):</T.caption>
-          <pre className="ft-patterns__code-block ft-patterns__code-block--error">
-{`src/features/admin/users-page/
-├── index.tsx
-├── active-users-tab/
-│   └── index.tsx                    ← Tab feature
-├── deleted-users-tab/
-│   └── index.tsx                    ← Tab feature
-└── invites-tab/
-    ├── index.tsx                    ← Tab feature
-    └── invites-tab.css
-
-src/app/domains/admin/users/_tabs/
-├── ActiveUsers.tsx                  ← Domain wrapper
-├── DeletedUsers.tsx                 ← Domain wrapper
-└── Invites.tsx                      ← Domain wrapper
-
-// Domain wrapper just imports feature (WHY?!)
-import { ActiveUsersFeature } from
-  '@/features/admin/users-page/active-users-tab';
-
-export default function ActiveUsers() {
-  return <ActiveUsersFeature />;
-  // ↑ This file exists ONLY to import. Pointless!
-}`}
-          </pre>
-
-          <T.body size="md">
-            <strong>Problems with folder pattern:</strong>
-          </T.body>
-          <ul className="ft-patterns__list">
-            <li><T.body size="md">3 layers instead of 1 (Feature → Domain tab → Feature tab)</T.body></li>
-            <li><T.body size="md">Domain tab files exist ONLY to import (pointless indirection)</T.body></li>
-            <li><T.body size="md">Harder to navigate (jump between domain and features directories)</T.body></li>
-            <li><T.body size="md">More files to maintain with no architectural benefit</T.body></li>
-          </ul>
-        </Stack>
-      </Card.standard>
-
-      {/* When to Use _tabs */}
-      <Card.standard
-        title="When to Use _tabs"
-        subtitle="Decision guide for organizing tab components"
-      >
-        <Stack>
-          <T.body size="md">
-            <strong>Use the _tabs pattern when:</strong>
-          </T.body>
-          <ul className="ft-patterns__list">
-            <li><T.body size="md">Feature needs 2+ tab views</T.body></li>
-            <li><T.body size="md">Tabs share the same domain/context</T.body></li>
-            <li><T.body size="md">Tabs are closely related (user management, email views, etc.)</T.body></li>
-          </ul>
-
-          <T.body size="md">
-            <strong>Examples in this codebase:</strong>
-          </T.body>
-          <ul className="ft-patterns__list-spaced">
-            <li><T.body size="md"><code>users-page/_tabs/</code> - Active, Deleted, Invites, Status tabs</T.body></li>
-            <li><T.body size="md"><code>user-drawer/_tabs/</code> - Profile, Email, Activity tabs</T.body></li>
-            <li><T.body size="md"><code>showcase/_tabs/</code> - VR Guide, Typography, Buttons, etc.</T.body></li>
-          </ul>
-        </Stack>
-      </Card.standard>
-
-      {/* Naming Conventions */}
-      <Card.standard
-        title="Naming Conventions"
-        subtitle="How to name tab files and exported functions"
+        title="CSS Naming Rules"
+        subtitle="One file, matching name, at root level"
       >
         <Stack>
           <div>
-            <T.body size="md" weight="semibold">Tab Files (PascalCase, descriptive):</T.body>
+            <T.body size="md" weight="semibold">Correct:</T.body>
             <div className="ft-patterns__check-list">
-              <T.body size="md" color="success">✅ <code>ActiveUsersTab.tsx</code></T.body>
-              <T.body size="md" color="success">✅ <code>ProfileTab.tsx</code></T.body>
-              <T.body size="md" color="success">✅ <code>EmailTab.tsx</code></T.body>
-              <T.body size="md" color="tertiary">❌ <code>active.tsx</code> (not clear)</T.body>
-              <T.body size="md" color="tertiary">❌ <code>tab1.tsx</code> (meaningless)</T.body>
+              <T.body size="md" color="success">showcase-page/showcase-page.css</T.body>
+              <T.body size="md" color="success">user-drawer/user-drawer.css</T.body>
+              <T.body size="md" color="success">users-page/users-page.css</T.body>
+              <T.body size="md" color="success">account-page/account-page.css</T.body>
             </div>
           </div>
 
           <div>
-            <T.body size="md" weight="semibold">Exported Function (matches filename):</T.body>
-            <pre className="ft-patterns__code-block">
-{`// File: ActiveUsersTab.tsx
-export function ActiveUsersTab() { ... }
+            <T.body size="md" weight="semibold">Wrong:</T.body>
+            <div className="ft-patterns__check-list">
+              <T.body size="md" color="tertiary">users-page/_tabs/invites-tab.css (inside _tabs/)</T.body>
+              <T.body size="md" color="tertiary">account-page/account.css (does not match folder)</T.body>
+              <T.body size="md" color="tertiary">users-page/styles.css (generic name)</T.body>
+            </div>
+          </div>
 
-// OR if it's a feature-level component:
-// File: ActiveUsersTab.tsx
-export function ActiveUsersFeature() { ... }`}
+          <T.body size="md">
+            <strong>Why one CSS file?</strong> All tabs in a feature share the same <code>ft-featurename__*</code> class namespace.
+            Splitting CSS across files creates confusion about where styles live.
+          </T.body>
+        </Stack>
+      </Card.standard>
+
+      {/* The Anti-Pattern (What NOT to do) */}
+      <Card.standard
+        title="The Anti-Pattern"
+        subtitle="What NOT to do (folder-based tabs, CSS in wrong places)"
+      >
+        <Stack>
+          <T.body size="md" color="tertiary">
+            These patterns are forbidden. They create unnecessary complexity.
+          </T.body>
+
+          <T.caption color="secondary" size="sm">FOLDER PATTERN (DO NOT DO THIS):</T.caption>
+          <pre className="ft-patterns__code-block ft-patterns__code-block--error">
+{`src/features/admin/users-page/
+├── index.tsx
+├── active-users-tab/
+│   └── index.tsx          ← Subfolder per tab (WRONG)
+├── deleted-users-tab/
+│   └── index.tsx
+└── invites-tab/
+    ├── index.tsx
+    └── invites-tab.css    ← CSS inside tab folder (WRONG)`}
+          </pre>
+
+          <T.body size="md">
+            <strong>Problems:</strong>
+          </T.body>
+          <ul className="ft-patterns__list">
+            <li><T.body size="md">Subfolders per tab = unnecessary nesting</T.body></li>
+            <li><T.body size="md">CSS scattered across folders = hard to find styles</T.body></li>
+            <li><T.body size="md">Breaks the simple flat _tabs/ pattern</T.body></li>
+          </ul>
+        </Stack>
+      </Card.standard>
+
+      {/* Tab File Naming */}
+      <Card.standard
+        title="Tab File Naming"
+        subtitle="PascalCase with Tab suffix"
+      >
+        <Stack>
+          <div>
+            <T.body size="md" weight="semibold">Tab Files:</T.body>
+            <div className="ft-patterns__check-list">
+              <T.body size="md" color="success">ActiveUsersTab.tsx</T.body>
+              <T.body size="md" color="success">ProfileTab.tsx</T.body>
+              <T.body size="md" color="success">EmailTab.tsx</T.body>
+              <T.body size="md" color="success">MirorAiTab.tsx</T.body>
+              <T.body size="md" color="tertiary">active.tsx (not descriptive)</T.body>
+              <T.body size="md" color="tertiary">tab1.tsx (meaningless)</T.body>
+            </div>
+          </div>
+
+          <div>
+            <T.body size="md" weight="semibold">Exported function matches filename:</T.body>
+            <pre className="ft-patterns__code-block">
+{`// File: ProfileTab.tsx
+export function ProfileTab() { ... }
+
+// File: InvitesTab.tsx
+export function InvitesTab() { ... }`}
             </pre>
           </div>
         </Stack>
       </Card.standard>
 
-      {/* Why the underscore prefix? */}
+      {/* Why _tabs? */}
       <Card.standard
         title="Why _tabs?"
         subtitle="The meaning of the underscore prefix"
@@ -246,24 +269,218 @@ export function ActiveUsersFeature() { ... }`}
         </Stack>
       </Card.standard>
 
+      {/* Domain Layer */}
+      <Card.standard
+        title="Domain Layer"
+        subtitle="The page configuration layer"
+      >
+        <Stack>
+          <T.body size="md">
+            Domains are <strong>thin page shells</strong> that configure page-level concerns.
+            They are NOT where features live - they just host features.
+          </T.body>
+
+          <T.caption color="secondary" size="sm">THE 4 CONCERNS OF A DOMAIN:</T.caption>
+          <pre className="ft-patterns__code-block">
+{`export default function Users() {
+  useSetPageHeader('Users', 'Manage users');  // 1. Page title/subtitle
+  usePageTiming('/admin/users');              // 2. Analytics tracking
+
+  return (
+    <Page.constrained>                        // 3. Layout mode
+      <UsersPageFeature />                    // 4. Which feature
+    </Page.constrained>
+  );
+}`}
+          </pre>
+
+          <T.body size="md" weight="semibold">A Domain answers 4 questions:</T.body>
+          <ul className="ft-patterns__list">
+            <li><T.body size="md">1. What is the page title? → <code>useSetPageHeader()</code></T.body></li>
+            <li><T.body size="md">2. What route for analytics? → <code>usePageTiming()</code></T.body></li>
+            <li><T.body size="md">3. Full width or constrained? → <code>&lt;Page.full&gt;</code> or <code>&lt;Page.constrained&gt;</code></T.body></li>
+            <li><T.body size="md">4. Which feature? → <code>&lt;SomeFeature /&gt;</code></T.body></li>
+          </ul>
+
+          <T.body size="md" weight="semibold">A Domain does NOT:</T.body>
+          <ul className="ft-patterns__list">
+            <li><T.body size="md" color="tertiary">Wire FUSE</T.body></li>
+            <li><T.body size="md" color="tertiary">Handle events</T.body></li>
+            <li><T.body size="md" color="tertiary">Manage state</T.body></li>
+            <li><T.body size="md" color="tertiary">Know about tabs</T.body></li>
+            <li><T.body size="md" color="tertiary">Contain business logic</T.body></li>
+            <li><T.body size="md" color="tertiary">Import VRs directly (only imports the feature)</T.body></li>
+          </ul>
+        </Stack>
+      </Card.standard>
+
+      {/* Domains vs Features */}
+      <Card.standard
+        title="Domains vs Features"
+        subtitle="Understanding the relationship"
+      >
+        <Stack>
+          <T.body size="md">
+            The Sovereign Router switches between <strong>Domains</strong>.
+            Each Domain renders one <strong>Feature</strong>.
+          </T.body>
+
+          <T.caption color="secondary" size="sm">THE RELATIONSHIP:</T.caption>
+          <pre className="ft-patterns__code-block">
+{`Router.tsx  →  Domain (Users.tsx)  →  Feature (UsersPageFeature)
+     │              │                        │
+     │              │                        └── Owns tabs, FUSE, logic
+     │              │
+     │              └── Page shell (header, layout, analytics)
+     │
+     └── Switches views based on sovereign.route`}
+          </pre>
+
+          <T.body size="md" weight="semibold">Why this separation?</T.body>
+          <T.body size="md">
+            Features should be <strong>reusable</strong> and <strong>context-agnostic</strong>.
+            A feature does not know (or care) about:
+          </T.body>
+          <ul className="ft-patterns__list">
+            <li><T.body size="md">What page title wraps it</T.body></li>
+            <li><T.body size="md">What route it lives on</T.body></li>
+            <li><T.body size="md">Whether layout is full or constrained</T.body></li>
+          </ul>
+          <T.body size="md">
+            This makes features portable. The same feature could theoretically
+            be rendered in different domains with different page titles.
+          </T.body>
+        </Stack>
+      </Card.standard>
+
+      {/* Domain Structure */}
+      <Card.standard
+        title="Domain Structure"
+        subtitle="Flat files only - no subfolders"
+      >
+        <Stack>
+          <T.caption color="secondary" size="sm">CORRECT DOMAIN STRUCTURE:</T.caption>
+          <pre className="ft-patterns__code-block">
+{`src/app/domains/
+├── Dashboard.tsx
+├── admin/
+│   ├── Users.tsx           ← Flat file
+│   ├── Plans.tsx           ← Flat file
+│   └── Showcase.tsx        ← Flat file
+├── system/
+│   ├── Database.tsx        ← Flat file
+│   ├── AI.tsx              ← Flat file
+│   └── Ranks.tsx           ← Flat file
+└── settings/
+    ├── Account.tsx         ← Flat file
+    └── Preferences.tsx     ← Flat file`}
+          </pre>
+
+          <T.caption color="secondary" size="sm">WRONG (NO _TABS IN DOMAINS):</T.caption>
+          <pre className="ft-patterns__code-block ft-patterns__code-block--error">
+{`src/app/domains/admin/users/
+├── Users.tsx
+└── _tabs/                  ← WRONG! Tabs belong in features
+    ├── ActiveUsers.tsx
+    └── DeletedUsers.tsx`}
+          </pre>
+
+          <T.body size="md">
+            <strong>Rule:</strong> Domains are flat files. If you need tabs, that logic
+            lives in the Feature, not the Domain.
+          </T.body>
+        </Stack>
+      </Card.standard>
+
+      {/* The Three-Layer Stack */}
+      <Card.standard
+        title="The Three-Layer Stack"
+        subtitle="VR → Feature → Domain"
+      >
+        <Stack>
+          <T.body size="md">
+            The architecture has three distinct layers, each with a clear responsibility:
+          </T.body>
+
+          <pre className="ft-patterns__code-block">
+{`┌─────────────────────────────────────────────────────────────┐
+│  DOMAIN LAYER                                               │
+│  src/app/domains/admin/Users.tsx                            │
+│                                                             │
+│  Responsibility: Page configuration                         │
+│  • Page header (title, subtitle)                            │
+│  • Layout mode (Page.full vs Page.constrained)              │
+│  • Analytics tracking                                       │
+│  • Which feature to render                                  │
+│                                                             │
+│  Contains: useSetPageHeader, usePageTiming, <Page.*>        │
+│  Imports: ONE feature                                       │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  FEATURE LAYER                                              │
+│  src/features/admin/users-page/index.tsx                    │
+│                                                             │
+│  Responsibility: Business logic + composition               │
+│  • FUSE wiring (state, data)                                │
+│  • Event handlers and callbacks                             │
+│  • Tab organization (Tabs.panels)                           │
+│  • Composing VRs with data                                  │
+│                                                             │
+│  Contains: useFuse, useAdminData, handlers, _tabs/          │
+│  Imports: VR components                                     │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  VR LAYER                                                   │
+│  src/vr/table/index.tsx                                     │
+│                                                             │
+│  Responsibility: Pure UI primitives                         │
+│  • Visual presentation                                      │
+│  • Interaction patterns                                     │
+│  • Accessibility                                            │
+│  • Consistent styling                                       │
+│                                                             │
+│  Contains: JSX, CSS classes, aria attributes                │
+│  Imports: Nothing from features or domains                  │
+└─────────────────────────────────────────────────────────────┘`}
+          </pre>
+
+          <T.body size="md" weight="semibold">The Golden Rule:</T.body>
+          <ul className="ft-patterns__list">
+            <li><T.body size="md"><strong>VRs</strong> know nothing about Features or Domains</T.body></li>
+            <li><T.body size="md"><strong>Features</strong> know nothing about Domains</T.body></li>
+            <li><T.body size="md"><strong>Domains</strong> know only which Feature to render</T.body></li>
+          </ul>
+
+          <T.body size="md">
+            Dependencies flow <strong>downward only</strong>. Domain imports Feature imports VR.
+            Never the reverse.
+          </T.body>
+        </Stack>
+      </Card.standard>
+
       {/* The Decision Rule */}
       <Card.standard
         title="The Decision Rule"
-        subtitle="Simple guideline for tab organization"
+        subtitle="Simple guideline for any new feature"
       >
         <Stack>
           <T.body size="lg" weight="semibold" className="ft-patterns__decision-box">
-            &ldquo;Create a _tabs/ subdirectory and put tab components there.&rdquo;
+            folder-name-type/ + folder-name-type.css + _tabs/
           </T.body>
 
           <T.body size="md">
-            Don&apos;t create separate feature folders for each tab.<br />
-            Don&apos;t create domain wrapper files.<br />
-            Just put the tabs in <code>_tabs/</code> and import them directly.
+            1. Name folder with type suffix: <code>feature-name-page/</code><br />
+            2. Create CSS with matching name: <code>feature-name-page.css</code><br />
+            3. Put tabs in <code>_tabs/</code> as PascalCase files<br />
+            4. Domain just imports <code>&lt;FeatureNamePageFeature /&gt;</code>
           </T.body>
 
           <T.body size="lg" weight="bold">
-            Simple. Clear. TTT-compliant.
+            Rock solid. Replicable. No exceptions.
           </T.body>
         </Stack>
       </Card.standard>

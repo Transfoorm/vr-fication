@@ -10,7 +10,7 @@
 
 'use client';
 
-import './invites-tab.css';
+import '../users-page.css';
 import { useState, useRef } from 'react';
 import { Field, Card, T, Stack } from '@/vr';
 import { sendInviteLink } from '@/app/(clerk)/actions/invite';
@@ -243,7 +243,7 @@ export function InvitesFeature() {
       >
         <Stack.lg>
           <Stack.row.equal>
-            <div className={lastSentTo ? 'ft-invitestab__success' : ''}>
+            <div className={lastSentTo ? 'ft-userspage__success' : ''}>
               <Field.verify
                 label="Send an Invite Link to the user's email"
                 value=""
@@ -257,21 +257,21 @@ export function InvitesFeature() {
             <div />
           </Stack.row.equal>
 
-          <div className="ft-invitestab__link-box">
-            <T.caption className="ft-invitestab__link-label">Invite Link (expires in 24 hours):</T.caption>
-            <div className="ft-invitestab__link-row">
+          <div className="ft-userspage__link-box">
+            <T.caption className="ft-userspage__link-label">Invite Link (expires in 24 hours):</T.caption>
+            <div className="ft-userspage__link-row">
               <input
                 type="text"
                 value={magicLink || ''}
                 readOnly
                 placeholder="Generate a link above"
-                className="ft-invitestab__link-input"
+                className="ft-userspage__link-input"
               />
               <button
                 type="button"
                 onClick={handleButtonClick}
                 disabled={!magicLink && !hasCopied}
-                className={`ft-invitestab__copy-btn ${copied ? 'ft-invitestab__copy-btn--copied' : ''} ${hasCopied && !copied ? 'ft-invitestab__copy-btn--clear' : ''}`}
+                className={`ft-userspage__copy-btn ${copied ? 'ft-userspage__copy-btn--copied' : ''} ${hasCopied && !copied ? 'ft-userspage__copy-btn--clear' : ''}`}
               >
                 {getButtonText()}
               </button>
@@ -287,49 +287,49 @@ export function InvitesFeature() {
       >
         <Stack.lg>
           {/* Method 1: Queue - Add one at a time */}
-          <div className="ft-invitestab__queue-section">
-            <T.caption className="ft-invitestab__queue-label">Add emails one by one:</T.caption>
-            <div className="ft-invitestab__queue-input-row">
+          <div className="ft-userspage__queue-section">
+            <T.caption className="ft-userspage__queue-label">Add emails one by one:</T.caption>
+            <div className="ft-userspage__queue-input-row">
               <input
                 type="email"
                 value={queueInput}
                 onChange={(e) => setQueueInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddToQueue()}
                 placeholder="Enter email address"
-                className="ft-invitestab__queue-input"
+                className="ft-userspage__queue-input"
                 disabled={isBatchProcessing}
               />
               <button
                 type="button"
                 onClick={handleAddToQueue}
                 disabled={isBatchProcessing || !queueInput.includes('@')}
-                className="ft-invitestab__send-btn"
+                className="ft-userspage__send-btn"
               >
                 Add
               </button>
             </div>
 
             {emailQueue.length > 0 && (
-              <div className="ft-invitestab__queue-list">
+              <div className="ft-userspage__queue-list">
                 {emailQueue.map((email, i) => (
-                  <div key={i} className="ft-invitestab__queue-item">
-                    <T.caption className="ft-invitestab__queue-email">{email}</T.caption>
+                  <div key={i} className="ft-userspage__queue-item">
+                    <T.caption className="ft-userspage__queue-email">{email}</T.caption>
                     <button
                       type="button"
                       onClick={() => handleRemoveFromQueue(i)}
-                      className="ft-invitestab__queue-remove"
+                      className="ft-userspage__queue-remove"
                       disabled={isBatchProcessing}
                     >
                       ×
                     </button>
                   </div>
                 ))}
-                <div className="ft-invitestab__batch-actions">
+                <div className="ft-userspage__batch-actions">
                   <button
                     type="button"
                     onClick={handleSendQueue}
                     disabled={isBatchProcessing}
-                    className="ft-invitestab__send-btn"
+                    className="ft-userspage__send-btn"
                   >
                     {isBatchProcessing
                       ? `Sending ${batchProgress.current}/${batchProgress.total}...`
@@ -339,7 +339,7 @@ export function InvitesFeature() {
                     type="button"
                     onClick={handleClearQueue}
                     disabled={isBatchProcessing}
-                    className="ft-invitestab__clear-btn"
+                    className="ft-userspage__clear-btn"
                   >
                     Clear
                   </button>
@@ -349,28 +349,28 @@ export function InvitesFeature() {
           </div>
 
           {/* Method 2: Textarea - Comma/newline separated */}
-          <div className="ft-invitestab__queue-section">
-            <T.caption className="ft-invitestab__queue-label">Or paste multiple emails:</T.caption>
+          <div className="ft-userspage__queue-section">
+            <T.caption className="ft-userspage__queue-label">Or paste multiple emails:</T.caption>
             <textarea
               value={batchEmails}
               onChange={(e) => setBatchEmails(e.target.value)}
               placeholder="Enter emails separated by commas, newlines, or spaces&#10;&#10;e.g.&#10;john@example.com&#10;jane@example.com, bob@example.com"
-              className="ft-invitestab__batch-textarea"
+              className="ft-userspage__batch-textarea"
               rows={5}
               disabled={isBatchProcessing}
             />
           </div>
 
-          <div className="ft-invitestab__batch-actions">
+          <div className="ft-userspage__batch-actions">
             <input
               ref={fileInputRef}
               type="file"
               accept=".csv,.txt"
               onChange={handleCsvUpload}
-              className="ft-invitestab__file-input"
+              className="ft-userspage__file-input"
               id="csv-upload"
             />
-            <label htmlFor="csv-upload" className="ft-invitestab__upload-btn">
+            <label htmlFor="csv-upload" className="ft-userspage__upload-btn">
               Upload CSV
             </label>
 
@@ -378,7 +378,7 @@ export function InvitesFeature() {
               type="button"
               onClick={handleBatchInvite}
               disabled={isBatchProcessing || parseEmails(batchEmails).length === 0}
-              className="ft-invitestab__send-btn"
+              className="ft-userspage__send-btn"
             >
               {isBatchProcessing
                 ? `Sending ${batchProgress.current}/${batchProgress.total}...`
@@ -389,7 +389,7 @@ export function InvitesFeature() {
               <button
                 type="button"
                 onClick={handleClearBatch}
-                className="ft-invitestab__clear-btn"
+                className="ft-userspage__clear-btn"
               >
                 Clear
               </button>
@@ -398,24 +398,24 @@ export function InvitesFeature() {
 
           {/* Batch Results */}
           {batchResults.length > 0 && (
-            <div className="ft-invitestab__batch-results">
-              <div className="ft-invitestab__batch-summary">
-                <T.body weight="semibold" className="ft-invitestab__batch-success">✓ {successCount} Invites Sent</T.body>
+            <div className="ft-userspage__batch-results">
+              <div className="ft-userspage__batch-summary">
+                <T.body weight="semibold" className="ft-userspage__batch-success">✓ {successCount} Invites Sent</T.body>
                 {failCount > 0 && (
-                  <T.body weight="semibold" className="ft-invitestab__batch-fail">✗ {failCount} failed</T.body>
+                  <T.body weight="semibold" className="ft-userspage__batch-fail">✗ {failCount} failed</T.body>
                 )}
               </div>
-              <div className="ft-invitestab__batch-list">
+              <div className="ft-userspage__batch-list">
                 {batchResults.map((result, i) => (
                   <div
                     key={i}
-                    className={`ft-invitestab__batch-item ${result.success ? 'ft-invitestab__batch-item--success' : 'ft-invitestab__batch-item--fail'}`}
+                    className={`ft-userspage__batch-item ${result.success ? 'ft-userspage__batch-item--success' : 'ft-userspage__batch-item--fail'}`}
                   >
-                    <T.caption className={`ft-invitestab__batch-email ${copiedEmails.has(result.email) ? 'ft-invitestab__batch-email--copied' : ''}`}>{result.email}</T.caption>
+                    <T.caption className={`ft-userspage__batch-email ${copiedEmails.has(result.email) ? 'ft-userspage__batch-email--copied' : ''}`}>{result.email}</T.caption>
                     {result.success && result.magicLink ? (
                       <button
                         type="button"
-                        className={`ft-invitestab__batch-copy ${copiedIndex === i ? 'ft-invitestab__batch-copy--copied' : ''}`}
+                        className={`ft-userspage__batch-copy ${copiedIndex === i ? 'ft-userspage__batch-copy--copied' : ''}`}
                         onClick={() => {
                           navigator.clipboard.writeText(result.magicLink!);
                           setCopiedIndex(i);
@@ -426,9 +426,9 @@ export function InvitesFeature() {
                         {copiedIndex === i ? 'Copied!' : 'Copy Link'}
                       </button>
                     ) : result.success ? (
-                      <T.caption className="ft-invitestab__batch-status">✓</T.caption>
+                      <T.caption className="ft-userspage__batch-status">✓</T.caption>
                     ) : (
-                      <T.caption className="ft-invitestab__batch-status">{result.error}</T.caption>
+                      <T.caption className="ft-userspage__batch-status">{result.error}</T.caption>
                     )}
                   </div>
                 ))}

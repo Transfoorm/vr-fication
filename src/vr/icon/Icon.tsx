@@ -83,6 +83,9 @@ import {
   Wrench,
   Speech,
   TableProperties,
+  Database,
+  Cpu,
+  Shield,
   X,
   SquareX,
   Info,
@@ -174,6 +177,9 @@ const iconRegistry = {
   'wrench': Wrench,
   'speech': Speech,
   'table-properties': TableProperties,
+  'database': Database,
+  'cpu': Cpu,
+  'shield': Shield,
 
   // Actions
   'pencil': Pencil,

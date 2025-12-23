@@ -19,10 +19,10 @@
 @import url('../src/features/setup/setup-modal/setup-modal.css');
 
 /* Account Feature (Profile, Email, Password, Genome tabs) */
-@import url('../src/features/settings/account/account.css');
+@import url('../src/features/settings/account-page/account-page.css');
 
-/* Miror AI Fields */
-@import url('../src/features/preferences/miror-ai-tab/miror-ai-tab.css');
+/* Preferences Feature (Miror AI, Theme, Controls) */
+@import url('../src/features/settings/preferences-page/preferences-page.css');
 
 /* Flying Button (Phoenix) */
 @import url('../src/features/setup/flying-button/flying-button.css');
@@ -34,5 +34,5 @@
    Clean feature - no Clerk imports. Clerk calls happen via Convex actions. */
 @import url('../src/features/vanish/vanish.css');
 
-/* System Database - DB Check */
-@import url('../src/features/system/database/db-check/db-check.css');
+/* System Database */
+@import url('../src/features/system/database-page/database-page.css');

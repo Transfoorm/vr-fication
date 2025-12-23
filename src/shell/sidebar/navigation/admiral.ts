@@ -37,6 +37,7 @@ export const admiralNav: NavSection[] = [
     label: 'System',
     icon: 'activity',
     children: [
+      { path: ROUTES.system.database, label: 'Database' },
       { path: ROUTES.system.ai, label: 'AI' },
       { path: ROUTES.system.ranks, label: 'Ranks' }
     ]

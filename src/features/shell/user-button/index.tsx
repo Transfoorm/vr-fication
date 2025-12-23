@@ -519,7 +519,7 @@ export default function UserButton() {
                 className="ft-userbutton-menu-item"
               >
                 <Icon variant="camera" size="xs" />
-                <T.body size="sm">{hasCustomAvatar ? 'Change Your Photo' : 'Add Photo'}</T.body>
+                <T.body size="sm">{hasCustomAvatar ? 'Change Your Photo' : 'Add Your Photo'}</T.body>
               </button>
             </div>
           </div>
