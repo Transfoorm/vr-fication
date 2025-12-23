@@ -536,7 +536,7 @@ export default function Profile() {
 }
 
 // ✅ RIGHT - Tab is pure declaration
-import { ProfileFields } from '@/features/account/ProfileFields';
+import { ProfileFields } from '@/features/settings/account';
 
 export default function Profile() {
   return <ProfileFields />;

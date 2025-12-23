@@ -83,6 +83,7 @@ export async function fetchUserServer(): Promise<ServerUser | null> {
       clerkId: session.clerkId,
       email: convexUser.email || session.email || '',
       secondaryEmail: convexUser.secondaryEmail ?? session.secondaryEmail,
+      emailVerified: convexUser.emailVerified ?? session.emailVerified,
       firstName: convexUser.firstName ?? session.firstName,
       lastName: convexUser.lastName ?? session.lastName,
       avatarUrl: convexUser.avatarUrl ?? undefined,

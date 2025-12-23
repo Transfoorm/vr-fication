@@ -1179,6 +1179,11 @@ export const useFuse = create<FuseStore>()((set, get) => {
       if (typeof window !== 'undefined') {
         const urlPath = route === 'dashboard' ? '/' : `/${route}`;
         window.history.pushState({ route }, '', urlPath);
+
+        // If route has a hash, dispatch hashchange event for tab components
+        if (route.includes('#')) {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        }
       }
 
       const duration = fuseTimer.end('navigate', start);

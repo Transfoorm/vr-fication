@@ -440,7 +440,7 @@ export default function CompanyButton() {
                   }}
                 >
                   <Edit className="ft-company-button-menu-link-icon" />
-                  <T.body size="sm">Update Details</T.body>
+                  <T.body size="sm">Update Profile</T.body>
                 </button>
               </div>
             </div>

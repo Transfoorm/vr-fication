@@ -30,26 +30,23 @@ export function AccountPageFeature() {
   const genomePercent = genome?.completionPercent ?? 0;
 
   // If frozen, intercept field interactions only - tabs are allowed
+  // Based purely on setupStatus === 'pending' (not emailVerified)
   const handleInteraction = (e: React.MouseEvent | React.FocusEvent) => {
     if (!freeze) return;
 
     const target = e.target as HTMLElement;
 
-    // Allow tab clicks - only block input/field interactions
+    // Allow tab clicks - user can browse all tabs
     const isTabClick = target.closest('[role="tab"]') || target.closest('.vr-tabs-tab');
     if (isTabClick) return;
 
-    // Allow Email and Password tabs - entice interaction
-    const isEmailTab = target.closest('[class*="ft-emailtab"]');
+    // Allow Password tab ONLY - changing password doesn't need setup
     const isPasswordTab = target.closest('.ft-passwordtab');
-    if (isEmailTab || isPasswordTab) return;
+    if (isPasswordTab) return;
 
-    // Block Profile fields - trigger ShadowKing
-    // Profile uses .vr-field-row without ft-emailtab* (Email's field-row contains ft-emailtab* elements)
-    const fieldRow = target.closest('.vr-field-row');
-    const isProfile = fieldRow && !fieldRow.querySelector('[class*="ft-emailtab"]');
-
-    // Block Genome fields - already working, preserve original detection
+    // Block Profile and Genome fields - trigger ShadowKing
+    // Email tab is allowed - user can change/verify email during setup
+    const isProfile = target.closest('.vr-stack-row-equal') && !target.closest('[class*="ft-emailtab"]');
     const isGenome = target.closest('.ft-genometab');
 
     if (isProfile || isGenome) {

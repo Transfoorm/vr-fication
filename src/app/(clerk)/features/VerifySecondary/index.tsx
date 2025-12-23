@@ -17,7 +17,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Modal } from '@/vr/modal';
-import { addEmailAndSendCode, deleteEmail } from '@/app/(clerk)/actions/email';
+import { addEmailAndSendCode, deleteEmail, ensurePrimaryEmail } from '@/app/(clerk)/actions/email';
 
 export interface VerifySecondaryProps {
   /** Control visibility */
@@ -63,6 +63,7 @@ export function VerifySecondary({
   const [isResending, setIsResending] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [pendingEmailId, setPendingEmailId] = useState<string | null>(null);
+  const [originalPrimaryEmail, setOriginalPrimaryEmail] = useState<string | null>(null);
 
   // Guard to prevent duplicate preparation attempts
   const preparationAttemptedRef = useRef<string | null>(null);
@@ -91,6 +92,12 @@ export function VerifySecondary({
     setShowSuccess(false);
     setIsResending(false);
     setPendingEmailId(null);
+
+    // CRITICAL: Capture original primary email BEFORE any operations
+    // This ensures we can restore it if Clerk auto-promotes the new email
+    if (clerkUser?.primaryEmailAddress?.emailAddress) {
+      setOriginalPrimaryEmail(clerkUser.primaryEmailAddress.emailAddress);
+    }
 
     // Prepare secondary email
     const prepareSecondaryEmail = async () => {
@@ -275,6 +282,19 @@ export function VerifySecondary({
           await deleteEmail(oldEmailClerkId);
         }
 
+        // CRITICAL: Ensure the original primary stays primary
+        // Clerk may auto-promote newly verified emails, so we restore using captured value
+        if (originalPrimaryEmail && originalPrimaryEmail.toLowerCase() !== email.toLowerCase()) {
+          const restoreResult = await ensurePrimaryEmail(originalPrimaryEmail);
+          if (restoreResult.restored) {
+            console.log('✅ Restored original primary email:', originalPrimaryEmail);
+          } else if (restoreResult.alreadyPrimary) {
+            console.log('✓ Original primary email is still primary');
+          } else if (restoreResult.error) {
+            console.error('❌ Failed to restore primary:', restoreResult.error);
+          }
+        }
+
         setIsLoading(false);
         setShowSuccess(true);
 
@@ -302,7 +322,7 @@ export function VerifySecondary({
       }
       setIsLoading(false);
     }
-  }, [isLoaded, clerkUser, pendingEmailId, code, currentEmail, onSuccess]);
+  }, [isLoaded, clerkUser, pendingEmailId, code, currentEmail, onSuccess, originalPrimaryEmail, email]);
 
   const handleResend = useCallback(async () => {
     if (!isLoaded || !clerkUser || !pendingEmailId || isResending) return;

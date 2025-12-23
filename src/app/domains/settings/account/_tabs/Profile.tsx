@@ -10,7 +10,7 @@
 │  - Pure declaration                                                   │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-import { ProfileFields } from '@/features/account';
+import { ProfileFields } from '@/features/settings/account';
 
 export default function Profile() {
   return <ProfileFields />;

@@ -38,8 +38,11 @@ export function EmailFields() {
   // FUSE State (source of truth)
   // ─────────────────────────────────────────────────────────────────────
   const user = useFuse((s) => s.user);
+  const setShadowKingActive = useFuse((s) => s.setShadowKingActive);
   const primaryEmail = user?.email ?? '';
   const secondaryEmail = user?.secondaryEmail ?? '';
+  const emailVerified = user?.emailVerified ?? false;
+  const setupPending = user?.setupStatus === 'pending';
 
   // Productivity data (email accounts)
   const { data: { email } } = useProductivityData();
@@ -84,29 +87,24 @@ export function EmailFields() {
   const handleVerificationSuccess = useCallback(async () => {
     const { user: currentUser, setUser } = useFuse.getState();
     if (currentUser && pendingEmail && pendingField) {
-      // 🛡️ SID-5.3: Convex mutations require callerUserId (from FUSE store's convexId)
       const callerUserId = currentUser.convexId as Id<'admin_users'>;
 
-      if (pendingField === 'secondaryEmail') {
-        setUser({ ...currentUser, secondaryEmail: pendingEmail });
-        try {
-          await updateUserSettings({ callerUserId, secondaryEmail: pendingEmail });
-        } catch (err) {
-          console.error('Failed to update secondary email in Convex:', err);
-        }
-      } else {
-        setUser({ ...currentUser, email: pendingEmail });
-        try {
-          await updateUserSettings({ callerUserId, email: pendingEmail });
-        } catch (err) {
-          console.error('Failed to update email in Convex:', err);
-        }
-      }
-
       try {
+        // Step 1: Update Convex FIRST (before FUSE)
+        if (pendingField === 'secondaryEmail') {
+          await updateUserSettings({ callerUserId, secondaryEmail: pendingEmail });
+          // Step 2: Only update FUSE after Convex succeeds
+          setUser({ ...currentUser, secondaryEmail: pendingEmail });
+        } else {
+          await updateUserSettings({ callerUserId, email: pendingEmail });
+          setUser({ ...currentUser, email: pendingEmail });
+        }
+
         await refreshSessionAfterUpload();
       } catch (err) {
-        console.error('Failed to refresh session cookie:', err);
+        console.error('Failed to update email in Convex:', err);
+        // Clerk already verified, but Convex failed - modal will close but data won't sync
+        // TODO: Show user error and potentially retry
       }
     }
 
@@ -139,6 +137,7 @@ export function EmailFields() {
 
     setSwapState('executing');
     try {
+      // Step 1: Swap in Clerk (source of auth truth)
       const result = await swapEmailsToPrimary(secondaryEmail);
       if (result.error) {
         console.error('Swap error:', result.error);
@@ -146,30 +145,33 @@ export function EmailFields() {
       }
 
       const { user: currentUser, setUser } = useFuse.getState();
-      if (currentUser) {
-        const oldPrimary = currentUser.email;
-        setUser({
-          ...currentUser,
-          email: secondaryEmail,
-          secondaryEmail: oldPrimary,
-        });
+      if (!currentUser) return;
 
-        // 🛡️ SID-5.3: Convex mutations require callerUserId (from FUSE store's convexId)
-        const callerUserId = currentUser.convexId as Id<'admin_users'>;
-        await updateUserSettings({
-          callerUserId,
-          email: secondaryEmail || undefined,
-          secondaryEmail: primaryEmail || undefined,
-        });
-      }
+      const oldPrimary = currentUser.email;
+      const callerUserId = currentUser.convexId as Id<'admin_users'>;
+
+      // Step 2: Update Convex FIRST (before FUSE) - ensures DB matches Clerk
+      await updateUserSettings({
+        callerUserId,
+        email: secondaryEmail || undefined,
+        secondaryEmail: oldPrimary || undefined,
+      });
+
+      // Step 3: Only update FUSE after Convex succeeds
+      setUser({
+        ...currentUser,
+        email: secondaryEmail,
+        secondaryEmail: oldPrimary,
+      });
 
       await refreshSessionAfterUpload();
     } catch (err) {
       console.error('Failed to swap emails:', err);
+      // TODO: Consider rolling back Clerk if Convex fails, or show user error
     } finally {
       setSwapState('idle');
     }
-  }, [primaryEmail, removeState, secondaryEmail, swapState, updateUserSettings]);
+  }, [removeState, secondaryEmail, swapState, updateUserSettings]);
 
   const handleSwapBlur = useCallback(() => {
     if (swapState === 'confirming') {
@@ -191,6 +193,7 @@ export function EmailFields() {
 
     setRemoveState('executing');
     try {
+      // Step 1: Remove from Clerk (source of auth truth)
       const result = await deleteSecondaryEmail(secondaryEmail);
       if (result.error) {
         console.error('Remove error:', result.error);
@@ -198,19 +201,21 @@ export function EmailFields() {
       }
 
       const { user: currentUser, setUser } = useFuse.getState();
-      if (currentUser) {
-        setUser({
-          ...currentUser,
-          secondaryEmail: undefined,
-        });
+      if (!currentUser) return;
 
-        // 🛡️ SID-5.3: Convex mutations require callerUserId (from FUSE store's convexId)
-        const callerUserId = currentUser.convexId as Id<'admin_users'>;
-        await updateUserSettings({
-          callerUserId,
-          secondaryEmail: undefined,
-        });
-      }
+      const callerUserId = currentUser.convexId as Id<'admin_users'>;
+
+      // Step 2: Update Convex FIRST (before FUSE) - pass null to CLEAR
+      await updateUserSettings({
+        callerUserId,
+        secondaryEmail: null,
+      });
+
+      // Step 3: Only update FUSE after Convex succeeds
+      setUser({
+        ...currentUser,
+        secondaryEmail: undefined,
+      });
 
       await refreshSessionAfterUpload();
     } catch (err) {
@@ -232,6 +237,17 @@ export function EmailFields() {
 
   const currentEmailForModal = pendingField === 'email' ? primaryEmail : secondaryEmail;
 
+  // ─────────────────────────────────────────────────────────────────────
+  // Shadow King Guard (blocks email editing until setup complete)
+  // ─────────────────────────────────────────────────────────────────────
+  const handleSetupGuard = useCallback((e: React.MouseEvent) => {
+    if (setupPending) {
+      e.preventDefault();
+      e.stopPropagation();
+      setShadowKingActive(true);
+    }
+  }, [setupPending, setShadowKingActive]);
+
   const swapClasses = [
     'ft-emailtab-action-pill',
     swapState === 'executing' && 'ft-emailtab-action-pill--active',
@@ -250,30 +266,36 @@ export function EmailFields() {
 
   return (
     <>
-      <Stack>
+      <Stack.lg>
         <Card.standard
           title="Email Settings"
           subtitle="Manage your email addresses and preferences"
+          className="ft-emailtab-settings-card"
         >
-          <div className="vr-field-spacing">
-            <div className="vr-field-row">
-              {/* Primary Email */}
-              <Field.verify
-                label="Primary Email"
-                value={primaryEmail}
-                onCommit={(v) => handleEmailCommit('email', v)}
-                type="email"
-                helper="* Changing your email will require verification"
-              />
+          <Stack.lg>
+            <Stack.row.equal>
+              {/* Primary Email - guarded by Shadow King when setup pending */}
+              <div onClickCapture={handleSetupGuard}>
+                <Field.verify
+                  label="Primary Email"
+                  value={primaryEmail}
+                  onCommit={(v) => handleEmailCommit('email', v)}
+                  type="email"
+                  helper={setupPending
+                    ? '* Complete setup to modify email'
+                    : '* Changing your email will require verification'}
+                  isVerified={emailVerified}
+                />
+              </div>
 
-              {/* Secondary Email + Actions */}
-              <div className="ft-emailtab-field-with-action">
+              {/* Secondary Email + Actions - guarded by Shadow King when setup pending */}
+              <div className="ft-emailtab-field-with-action" onClickCapture={handleSetupGuard}>
                 <Field.verify
                   label="Secondary Email (Optional)"
                   value={secondaryEmail}
                   onCommit={(v) => handleEmailCommit('secondaryEmail', v)}
                   type="email"
-                  placeholder="Not set"
+                  placeholder={setupPending ? 'Complete setup first' : 'Not set'}
                 />
 
                 {/* Actions - only show when secondary email exists */}
@@ -308,8 +330,8 @@ export function EmailFields() {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
+            </Stack.row.equal>
+          </Stack.lg>
         </Card.standard>
 
         {/* Connected Email Accounts */}
@@ -360,7 +382,7 @@ export function EmailFields() {
             </div>
           )}
         </Card.standard>
-      </Stack>
+      </Stack.lg>
 
       {/* Verification Modal - VerifyEmail for primary, VerifySecondary for secondary */}
       {pendingField === 'email' ? (

@@ -573,9 +573,8 @@ export default function SetupModal() {
           <div className="ft-setup-form-container">
             {/* Welcome message */}
             <div className="ft-setup-welcome">
-              <T.caption size="xs" className="ft-setup-welcome-text">
-                <i>*Completing your setup will unlock personalised features with smarter AI assistance and full site functionality. Go to <button type="button" onClick={() => navigate('settings/account')} className="ft-setup-welcome-link">Account</button> after setup to update your details at any time.</i>
-              </T.caption>
+              <T.caption italic align="justify">
+    Completing your setup will <b>verify your email</b> and unlock personalised features. Plus smarter AI assistance. Go to the <button type="button" onClick={() => navigate('settings/account')} className="ft-setup-welcome-link">Account</button> page at any time to update your details.</T.caption>
             </div>
 
             {/* Form */}

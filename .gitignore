@@ -55,3 +55,12 @@ convex/_generated/
 .vrp-approval  # Temporary approval token for protected file edits
 .vrp-approval
 email.md
+
+# Temporary WIP exclusions (remove when ready to commit)
+src/app/domains/productivity/Email2.tsx
+src/app/domains/productivity/email2/
+src/features/productivity/email2-console/
+docs/EMAIL-IMPLEMENTATION-PLAN.md
+docs/EMAIL_DESIGN_PLAN.md
+docs/poppins-emai-design.md
+docs/ASSET & STORAGE DIRECTION.txt

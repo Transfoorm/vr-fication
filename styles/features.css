@@ -19,7 +19,7 @@
 @import url('../src/features/setup/setup-modal/setup-modal.css');
 
 /* Account Feature (Profile, Email, Password, Genome tabs) */
-@import url('../src/features/account/account.css');
+@import url('../src/features/settings/account/account.css');
 
 /* Miror AI Fields */
 @import url('../src/features/preferences/miror-ai-tab/miror-ai-tab.css');

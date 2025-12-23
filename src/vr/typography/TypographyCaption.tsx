@@ -16,6 +16,8 @@ export interface TypographyCaptionProps {
   color?: 'primary' | 'secondary' | 'tertiary' | 'muted';
   /** Style variant */
   italic?: boolean;
+  /** Text alignment */
+  align?: 'left' | 'center' | 'right' | 'justify';
   /** Optional className for domain-specific styling */
   className?: string;
 }
@@ -30,6 +32,7 @@ export default function TypographyCaption({
   weight = 'normal',
   color = 'tertiary',
   italic = false,
+  align,
   className
 }: TypographyCaptionProps) {
   const classes = [
@@ -38,6 +41,7 @@ export default function TypographyCaption({
     `vr-typography-caption--${weight}`,
     `vr-typography-caption--${color}`,
     italic && 'vr-typography-caption--italic',
+    align && `vr-typography-caption--${align}`,
     className
   ].filter(Boolean).join(' ');
 

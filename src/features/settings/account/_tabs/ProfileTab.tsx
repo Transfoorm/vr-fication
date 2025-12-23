@@ -14,7 +14,7 @@
 import '../account.css';
 import { useState, useCallback, useRef } from 'react';
 import { useFuse } from '@/store/fuse';
-import { Field, Card } from '@/vr';
+import { Field, Card, Stack } from '@/vr';
 import CountrySelector from '@/features/shell/country-selector';
 
 // ─────────────────────────────────────────────────────────────────────
@@ -126,9 +126,9 @@ export function ProfileFields() {
       title="Your Profile"
       subtitle="Click inside any field to update them"
     >
-      <div className="vr-field-spacing">
+      <Stack.lg>
         {/* Row 1: First Name + Last Name */}
-        <div className="vr-field-row">
+        <Stack.row.equal>
           <Field.live
             label="First Name"
             value={user?.firstName ?? ''}
@@ -141,10 +141,10 @@ export function ProfileFields() {
             onSave={(v) => updateUserLocal({ lastName: v })}
             placeholder="Not set"
           />
-        </div>
+        </Stack.row.equal>
 
         {/* Row 2: Entity/Organisation + Social Name */}
-        <div className="vr-field-row">
+        <Stack.row.equal>
           <Field.live
             label="Entity/Organisation"
             value={user?.entityName ?? ''}
@@ -155,14 +155,15 @@ export function ProfileFields() {
             label="Username"
             value={user?.socialName ?? ''}
             onSave={(v) => updateUserLocal({ socialName: v || undefined })}
-            placeholder="Not set'"
+            placeholder="Not set"
             transform="username"
-            helper="* Letters, numbers, and one dot only"
+            helper="*Letters, numbers, and one dot only"
+            helperOnFocus
           />
-        </div>
+        </Stack.row.equal>
 
         {/* Row 3: Phone Number + Business Location */}
-        <div className="vr-field-row">
+        <Stack.row.equal>
           <Field.live
             label="Phone Number (Optional)"
             value={user?.phoneNumber ?? ''}
@@ -174,8 +175,8 @@ export function ProfileFields() {
             label="Business Location"
             onSave={(country) => updateUserLocal({ businessCountry: country })}
           />
-        </div>
-      </div>
+        </Stack.row.equal>
+      </Stack.lg>
     </Card.standard>
   );
 }

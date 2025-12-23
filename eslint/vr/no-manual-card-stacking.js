@@ -76,10 +76,10 @@ module.exports = {
         if (cardStandardChildren.length >= 2) {
           const parentName = node.openingElement.name;
 
-          // Check if parent is Stack component
+          // Check if parent is Stack component (Stack, Stack.lg, Stack.md, etc.)
           const isStack =
-            parentName.type === 'JSXIdentifier' &&
-            parentName.name === 'Stack';
+            (parentName.type === 'JSXIdentifier' && parentName.name === 'Stack') ||
+            (parentName.type === 'JSXMemberExpression' && parentName.object.name === 'Stack');
 
           if (!isStack) {
             // Report violation

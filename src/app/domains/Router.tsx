@@ -50,6 +50,7 @@ import Calendar from './productivity/Calendar';
 import Bookings from './productivity/Bookings';
 import Tasks from './productivity/Tasks';
 import Email from './productivity/Email';
+import Email2 from './productivity/email2/page';
 import Meetings from './productivity/Meetings';
 
 // Projects
@@ -98,9 +99,17 @@ export default function Router() {
 
   // Use URL directly on first render, then store takes over after sync
   // Since this component is client-only, window is always available
-  const route = storeRoute === 'dashboard' && getRouteFromURL() !== 'dashboard'
+  const rawRoute = storeRoute === 'dashboard' && getRouteFromURL() !== 'dashboard'
     ? getRouteFromURL()
     : storeRoute;
+
+  // Strip hash from route for matching (hash is for tab selection within page)
+  const route = rawRoute.split('#')[0];
+
+  // 🔱 Auth routes are handled by Next.js (auth) route group, not Sovereign Router
+  if (route === 'sign-in' || route === 'sign-up' || route === 'sso-callback') {
+    return null;
+  }
 
   // Performance measurement
   const startRender = performance.now();
@@ -127,6 +136,8 @@ export default function Router() {
         return <Tasks />;
       case 'productivity/email':
         return <Email />;
+      case 'productivity/email2':
+        return <Email2 />;
       case 'productivity/meetings':
         return <Meetings />;
 

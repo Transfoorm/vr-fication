@@ -10,12 +10,12 @@
 │  - Pure declaration                                                   │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-import { T } from '@/vr';
+import { T, Stack } from '@/vr';
 
 export default function Controls() {
   return (
-    <div className="vr-field-spacing">
+    <Stack.lg>
       <T.body className="text-secondary">Controls settings coming soon...</T.body>
-    </div>
+    </Stack.lg>
   );
 }

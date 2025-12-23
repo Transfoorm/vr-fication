@@ -98,6 +98,23 @@
   color: var(--warning-600);
 }
 
+/* Alignment variants */
+.vr-typography-body--left {
+  text-align: left;
+}
+
+.vr-typography-body--center {
+  text-align: center;
+}
+
+.vr-typography-body--right {
+  text-align: right;
+}
+
+.vr-typography-body--justify {
+  text-align: justify;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    CAPTION VARIANT - Small Caption Text
    ═══════════════════════════════════════════════════════════════════ */
@@ -146,6 +163,23 @@
 /* Style variants */
 .vr-typography-caption--italic {
   font-style: italic;
+}
+
+/* Alignment variants */
+.vr-typography-caption--left {
+  text-align: left;
+}
+
+.vr-typography-caption--center {
+  text-align: center;
+}
+
+.vr-typography-caption--right {
+  text-align: right;
+}
+
+.vr-typography-caption--justify {
+  text-align: justify;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -262,6 +296,10 @@
 
 .vr-typography-title--right {
   text-align: right;
+}
+
+.vr-typography-title--justify {
+  text-align: justify;
 }
 
 /* ═══════════════════════════════════════════════════════════════════

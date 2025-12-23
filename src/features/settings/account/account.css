@@ -11,10 +11,6 @@ button.ft-profiletab-country-button {
   height: var(--form-input-height);
 }
 
-.ft-profiletab-country-button__flag {
-  /* Emoji sizing - not Typography text */
-}
-
 .ft-profiletab-country-button__text {
   flex: 1;
 }
@@ -22,6 +18,11 @@ button.ft-profiletab-country-button {
 /* ═══════════════════════════════════════════════════════════════════
    EMAIL FIELDS - Feature-specific styles
    ═══════════════════════════════════════════════════════════════════ */
+
+/* Extra padding for floating helper text at bottom of card */
+.ft-emailtab-settings-card .vr-card-standard-surface .vr-card-standard-content {
+  padding-bottom: calc(var(--space-lg) + 28px);
+}
 
 .ft-emailtab-field-with-action {
   display: flex;
@@ -33,11 +34,11 @@ button.ft-profiletab-country-button {
 .ft-emailtab-action-pills {
   display: flex;
   gap: var(--space-sm);
-  margin-top: var(--space-xs);
+  margin-top: var(--space-sm);   /* 8px - breathing room from field */
+  margin-bottom: -36px;           /* tighten gap to card edge */
 }
 
 .ft-emailtab-action-pill {
-  /* Typography handled by T.caption */
   padding: 6px 12px;
   min-width: 110px;
   height: 28px;
@@ -51,6 +52,12 @@ button.ft-profiletab-country-button {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+}
+
+/* T.caption inside pill must inherit button's color */
+.ft-emailtab-action-pill .vr-typography-caption {
+  color: inherit;
+  line-height: 1;
 }
 
 .ft-emailtab-action-pill:hover:not(.ft-emailtab-action-pill--active, .ft-emailtab-action-pill--confirm) {
@@ -531,7 +538,7 @@ button.ft-profiletab-country-button {
 span.ft-genometab-percent {
   color: var(--brand-primary);
   position: relative;
-  top: 0;
+  top: 1;
 }
 
 /* ─────────────────────────────────────────────────────────────────────

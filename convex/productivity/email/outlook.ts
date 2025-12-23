@@ -8,6 +8,7 @@
 import { v } from 'convex/values';
 import { mutation, query, action } from '@/convex/_generated/server';
 import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 
 /**
  * Store Outlook OAuth tokens for current user
@@ -150,13 +151,18 @@ export const triggerOutlookSync = mutation({
 /**
  * Sync messages from Outlook Graph API
  *
+ * PHASE 1 IMPLEMENTATION:
+ * - Paginated sync: fetches ALL emails via @odata.nextLink
+ * - Stores HTML bodies in Convex storage
+ * - Broken images expected (asset rewriting is Phase 2)
+ *
  * This is an action (not mutation) so it can make external HTTP requests
  */
 export const syncOutlookMessages = action({
   args: {
     userId: v.id('admin_users'), // User ID to sync for
   },
-  handler: async (ctx, args): Promise<{ success: boolean; messageCount?: number; error?: string }> => {
+  handler: async (ctx, args): Promise<{ success: boolean; messageCount?: number; pagesProcessed?: number; error?: string }> => {
     // Get tokens from database
     const tokens = await ctx.runQuery(api.productivity.email.outlook.getOutlookTokens, {
       userId: args.userId,
@@ -167,58 +173,106 @@ export const syncOutlookMessages = action({
     }
 
     try {
-      // Fetch messages from Microsoft Graph API
-      const response: Response = await fetch(
+      let totalMessages = 0;
+      let pagesProcessed = 0;
+      const BATCH_SIZE = 50; // Smaller batches to avoid Convex mutation size limits
+
+      // Build initial URL with fields we need
+      let nextUrl: string | null =
         'https://graph.microsoft.com/v1.0/me/messages?' +
-          new URLSearchParams({
-            $select: [
-              'id',
-              'conversationId',
-              'subject',
-              'from',
-              'toRecipients',
-              'ccRecipients',
-              'receivedDateTime',
-              'sentDateTime',
-              'hasAttachments',
-              'importance',
-              'isRead',
-              'isDraft',
-              'webLink',
-              'bodyPreview',
-              'body', // Full HTML/text body
-              'inferenceClassification',
-              'flag',
-            ].join(','),
-            $top: '100', // Fetch last 100 messages initially
-            $orderby: 'receivedDateTime desc',
-          }),
-        {
+        new URLSearchParams({
+          $select: [
+            'id',
+            'conversationId',
+            'subject',
+            'from',
+            'toRecipients',
+            'ccRecipients',
+            'receivedDateTime',
+            'sentDateTime',
+            'hasAttachments',
+            'importance',
+            'isRead',
+            'isDraft',
+            'webLink',
+            'bodyPreview',
+            'body', // Full HTML/text body for storage
+            'inferenceClassification',
+            'flag',
+          ].join(','),
+          $top: String(BATCH_SIZE),
+          $orderby: 'receivedDateTime desc',
+        });
+
+      console.log('📧 Starting paginated Outlook sync...');
+
+      // Paginate through ALL messages
+      while (nextUrl) {
+        const response: Response = await fetch(nextUrl, {
           headers: {
             Authorization: `Bearer ${tokens.accessToken}`,
             'Content-Type': 'application/json',
           },
-        }
-      );
+        });
 
-      if (!response.ok) {
-        const errorText: string = await response.text();
-        console.error('Graph API error:', errorText);
-        throw new Error(`Graph API returned ${response.status}`);
+        if (!response.ok) {
+          const errorText: string = await response.text();
+          console.error('Graph API error:', errorText);
+          throw new Error(`Graph API returned ${response.status}`);
+        }
+
+        const data = (await response.json()) as {
+          value: unknown[];
+          '@odata.nextLink'?: string;
+        };
+
+        const messages: unknown[] = data.value;
+        pagesProcessed++;
+
+        console.log(`📧 Page ${pagesProcessed}: Fetched ${messages.length} messages`);
+
+        if (messages.length > 0) {
+          // Store HTML bodies in Convex storage first (actions have storage access)
+          const bodyStorageMap: Record<string, string> = {};
+
+          for (const msg of messages as Array<{
+            id: string;
+            body?: { contentType?: string; content?: string };
+          }>) {
+            if (msg.body?.content) {
+              try {
+                // Create blob from body HTML/text content
+                const contentType = msg.body.contentType === 'html' ? 'text/html' : 'text/plain';
+                const blob = new Blob([msg.body.content], { type: contentType });
+                const storageId = await ctx.storage.store(blob);
+                bodyStorageMap[msg.id] = storageId;
+              } catch (err) {
+                console.warn(`⚠️ Failed to store body for ${msg.id}:`, err);
+              }
+            }
+          }
+
+          // Store messages with body storage references
+          await ctx.runMutation(api.productivity.email.outlook.storeOutlookMessages, {
+            userId: args.userId,
+            messages,
+            bodyStorageMap,
+          });
+          totalMessages += messages.length;
+        }
+
+        // Get next page URL (Microsoft Graph pagination)
+        nextUrl = data['@odata.nextLink'] || null;
+
+        // Safety valve: stop after 100 pages (5000 emails) to prevent runaway syncs
+        if (pagesProcessed >= 100) {
+          console.warn('⚠️ Reached 100 pages limit, stopping sync');
+          break;
+        }
       }
 
-      const data: { value: unknown[] } = await response.json();
-      const messages: unknown[] = data.value;
-
-      console.log(`📧 Fetched ${messages.length} messages from Outlook`);
-
-      // Store messages in Convex (call mutation)
-      await ctx.runMutation(api.productivity.email.outlook.storeOutlookMessages, {
-        userId: args.userId,
-        messages,
-      });
-
-      return { success: true, messageCount: messages.length };
+      console.log(`✅ Outlook sync complete: ${totalMessages} messages across ${pagesProcessed} pages`);
+      return { success: true, messageCount: totalMessages, pagesProcessed };
     } catch (error) {
       console.error('Outlook sync error:', error);
       return { success: false, error: String(error) };
@@ -229,12 +283,18 @@ export const syncOutlookMessages = action({
 /**
  * Store Outlook messages in Convex database
  *
- * Stores individual messages in productivity_email_Index table
+ * PHASE 1: Stores messages with HTML bodies in Convex storage
+ * - Creates entries in productivity_email_Index
+ * - Creates body assets in productivity_email_Assets
+ * - Links assets via bodyAssetId
+ *
+ * Note: Images will be broken (Phase 2 handles asset rewriting)
  */
 export const storeOutlookMessages = mutation({
   args: {
     userId: v.id('admin_users'), // User ID to store messages for
     messages: v.array(v.any()), // OutlookMessage[] (typed on client)
+    bodyStorageMap: v.optional(v.record(v.string(), v.string())), // externalMessageId → storageId
   },
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
@@ -295,8 +355,39 @@ export const storeOutlookMessages = mutation({
         resolutionState = 'awaiting_them';
       }
 
-      // Insert message (assets will be processed separately in background)
-      // messageId will be used when assets.ts is implemented for background processing
+      // Phase 1: Create body asset if we have storage for it
+      let bodyAssetId: Id<'productivity_email_Assets'> | undefined = undefined;
+      let assetCount = 0;
+
+      const bodyStorageId = args.bodyStorageMap?.[message.id];
+      if (bodyStorageId) {
+        // Get body metadata for asset record
+        const bodyContent = message.body?.content || '';
+        const contentType = message.body?.contentType === 'html' ? 'text/html' : 'text/plain';
+
+        // Create content hash for deduplication (simple hash for Phase 1)
+        const hash = `outlook-body-${message.id}`;
+        const key = `email-assets/body/${hash}`;
+
+        // Create asset record
+        const assetId = await ctx.db.insert('productivity_email_Assets', {
+          hash,
+          key,
+          contentType,
+          size: new TextEncoder().encode(bodyContent).length,
+          source: 'body',
+          storageId: bodyStorageId as Id<'_storage'>,
+          lastAccessedAt: now,
+          referenceCount: 1,
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        bodyAssetId = assetId;
+        assetCount = 1;
+      }
+
+      // Insert message with body asset link
       await ctx.db.insert('productivity_email_Index', {
         // External IDs
         externalMessageId: message.id,
@@ -321,11 +412,11 @@ export const storeOutlookMessages = mutation({
         // Resolution state
         resolutionState,
 
-        // Asset processing (will be done in background)
-        bodyAssetId: undefined,
-        assetsProcessed: false,
-        assetsProcessedAt: undefined,
-        assetCount: 0,
+        // Body asset (Phase 1: HTML stored, images may be broken)
+        bodyAssetId,
+        assetsProcessed: !!bodyAssetId, // Body is processed if we have it
+        assetsProcessedAt: bodyAssetId ? now : undefined,
+        assetCount,
 
         // SRS rank-scoping
         // 🛡️ SID-ORG: Use userId directly until orgs domain is implemented
@@ -336,14 +427,6 @@ export const storeOutlookMessages = mutation({
         createdAt: now,
         updatedAt: now,
       });
-
-      // TODO: Schedule asset processing for this message (background, non-blocking)
-      // Disabled until assets.ts is implemented
-      // ctx.scheduler.runAfter(0, api.productivity.email.assets.processMessageAssets, {
-      //   userId: args.userId,
-      //   messageId,
-      //   externalMessageId: message.id,
-      // });
 
       messagesStored++;
     }

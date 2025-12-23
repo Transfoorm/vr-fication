@@ -16,6 +16,17 @@ export function TypographyTab() {
       title="Typography Showcase"
       subtitle="All Typography VR components with their variants"
     >
+      {/* Typography.hero Examples */}
+      <Typography.heading level={2} weight="bold">Typography.hero</Typography.heading>
+      <Typography.caption color="secondary">Large hero headlines (48px / 3rem), fixed size for landing pages and major sections</Typography.caption>
+
+      <Typography.hero weight="bold">Extra Bold Hero Headline (Default)</Typography.hero>
+      <Typography.hero weight="semibold">Semibold Hero Headline</Typography.hero>
+      <Typography.hero weight="medium">Medium Hero Headline</Typography.hero>
+      <Typography.hero weight="normal">Normal Hero Headline</Typography.hero>
+
+      <Divider.line size="sm" />
+
       {/* Typography.title Examples */}
       <Typography.heading level={2} weight="bold">Typography.title</Typography.heading>
       <Typography.caption color="secondary">Page-level titles (h1), rare, high-impact</Typography.caption>
@@ -27,19 +38,9 @@ export function TypographyTab() {
 
       <Typography.title size="lg" weight="semibold" align="center">Centered Title</Typography.title>
       <Typography.title size="lg" weight="semibold" align="right">Right-Aligned Title</Typography.title>
+      <Typography.title size="lg" weight="semibold" align="justify">Justified Title (works best on multi-line text that wraps to show the effect)</Typography.title>
 
-      <Divider.line />
-
-      {/* Typography.hero Examples */}
-      <Typography.heading level={2} weight="bold">Typography.hero</Typography.heading>
-      <Typography.caption color="secondary">Large hero headlines (48px / 3rem), fixed size for landing pages and major sections</Typography.caption>
-
-      <Typography.hero weight="bold">Extra Bold Hero Headline (Default)</Typography.hero>
-      <Typography.hero weight="semibold">Semibold Hero Headline</Typography.hero>
-      <Typography.hero weight="medium">Medium Hero Headline</Typography.hero>
-      <Typography.hero weight="normal">Normal Hero Headline</Typography.hero>
-
-      <Divider.line />
+      <Divider.line size="sm" />
 
       {/* Typography.heading Examples */}
       <Typography.heading level={2} weight="bold">Typography.heading</Typography.heading>
@@ -51,7 +52,7 @@ export function TypographyTab() {
       <Typography.heading level={5} weight="normal">H5 Extra Small Normal Heading</Typography.heading>
       <Typography.heading level={6} weight="normal">H6 Extra Small Normal Heading</Typography.heading>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       {/* Typography.body Examples */}
       <Typography.heading level={2} weight="bold">Typography.body</Typography.heading>
@@ -93,7 +94,19 @@ export function TypographyTab() {
         Warning color body text (md, normal, warning). Used for warning messages and cautions.
       </Typography.body>
 
-      <Divider.line />
+      <Typography.body size="md" align="center">
+        Center-aligned body text. Useful for introductory paragraphs or callouts.
+      </Typography.body>
+
+      <Typography.body size="md" align="right">
+        Right-aligned body text. Useful for signatures or attribution.
+      </Typography.body>
+
+      <Typography.body size="md" align="justify">
+        Justified body text creates clean edges on both left and right sides. This is particularly effective for longer paragraphs of text where you want a formal, newspaper-like appearance. The text stretches to fill the full width of its container, creating even margins on both sides.
+      </Typography.body>
+
+      <Divider.line size="sm" />
 
       {/* Typography.caption Examples */}
       <Typography.heading level={2} weight="bold">Typography.caption</Typography.heading>
@@ -147,13 +160,31 @@ export function TypographyTab() {
         </Typography.caption>
       </div>
 
-      <Divider.line />
+      <div>
+        <Typography.caption align="center">
+          Center-aligned caption text
+        </Typography.caption>
+      </div>
+
+      <div>
+        <Typography.caption align="right">
+          Right-aligned caption text
+        </Typography.caption>
+      </div>
+
+      <div>
+        <Typography.caption align="justify">
+          Justified caption text works best on longer text that wraps to multiple lines. This demonstrates how justify alignment creates clean edges on both sides of the text container.
+        </Typography.caption>
+      </div>
+
+      <Divider.line size="sm" />
 
       {/* Combined Example */}
       <Typography.heading level={2} weight="bold">Combined Example (TypographyHeading)</Typography.heading>
       <Typography.caption color="secondary">How Typography components work together in real content (TypographyCaption)</Typography.caption>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       <Typography.heading level={3} weight="semibold">Typography Sovereignty (body sm example)</Typography.heading>
 
@@ -169,7 +200,7 @@ export function TypographyTab() {
         Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
       </Typography.body>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       <Typography.heading level={3} weight="semibold">Typography Sovereignty (body md example)</Typography.heading>
 
@@ -185,7 +216,7 @@ export function TypographyTab() {
         Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
       </Typography.body>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       <Typography.heading level={3} weight="semibold">Typography Sovereignty (body lg example)</Typography.heading>
 
@@ -201,7 +232,7 @@ export function TypographyTab() {
         Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
       </Typography.body>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       <Typography.title size="lg" weight="bold">Welcome to Transfoorm [Typography.title - large, bold]</Typography.title>
 
@@ -241,7 +272,7 @@ export function TypographyTab() {
         Last updated 3 hours ago • 5 min read [Typography.caption - small, normal, tertiary]
       </Typography.caption>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       <Typography.heading level={2} weight="bold">Complete Typography VR Reference</Typography.heading>
       <Typography.caption color="secondary">Every variant, every size, every combination</Typography.caption>
@@ -269,7 +300,7 @@ export function TypographyTab() {
       <Typography.title size="sm" weight="medium">Small (medium)</Typography.title>
       <Typography.title size="sm" weight="normal">Small (normal)</Typography.title>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       {/* TypographyHeading - The Pure System */}
       <Typography.heading level={3} weight="semibold">TypographyHeading — The Pure System</Typography.heading>
@@ -281,7 +312,7 @@ export function TypographyTab() {
       <Typography.heading level={5}>H5 Heading (Level 5)</Typography.heading>
       <Typography.heading level={6}>H6 Heading (Level 6)</Typography.heading>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       {/* TypographyHeading - All Weights */}
       <Typography.heading level={3} weight="semibold">TypographyHeading Weights</Typography.heading>
@@ -292,7 +323,7 @@ export function TypographyTab() {
       <Typography.heading level={3} weight="medium">Medium weight</Typography.heading>
       <Typography.heading level={3} weight="normal">Normal weight</Typography.heading>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       {/* TypographyBody - All Sizes */}
       <Typography.heading level={3} weight="semibold">TypographyBody Sizes</Typography.heading>
@@ -301,7 +332,7 @@ export function TypographyTab() {
       <Typography.body size="md">Medium size - default, standard body text for most content</Typography.body>
       <Typography.body size="sm">Small size - for supporting information</Typography.body>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       {/* TypographyBody - All Weights */}
       <Typography.heading level={3} weight="semibold">TypographyBody Weights</Typography.heading>
@@ -317,7 +348,7 @@ export function TypographyTab() {
       <Typography.body size="md" weight="black">Black weight (800 - very heavy)</Typography.body>
       <Typography.body size="md" weight="boss">Boss weight (900 - maximum weight)</Typography.body>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       {/* TypographyBody - All Colors */}
       <Typography.heading level={3} weight="semibold">TypographyBody Colors</Typography.heading>
@@ -330,7 +361,7 @@ export function TypographyTab() {
       <Typography.body size="md" weight="normal" color="success">Success color (success messages and confirmations)</Typography.body>
       <Typography.body size="md" weight="normal" color="warning">Warning color (warning messages and cautions)</Typography.body>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       {/* TypographyCaption - All Variants */}
       <Typography.heading level={3} weight="semibold">TypographyCaption - All Variants</Typography.heading>
@@ -378,7 +409,7 @@ export function TypographyTab() {
         <Typography.caption size="sm" italic>Small caption with italic</Typography.caption>
       </div>
 
-      <Divider.line />
+      <Divider.line size="sm" />
 
       <Typography.heading level={2} weight="bold">Typography VR Props Reference</Typography.heading>
       <Typography.caption color="secondary">Quick reference for available props per component</Typography.caption>
@@ -393,7 +424,8 @@ export function TypographyTab() {
       <Typography.heading level={3} weight="semibold">TypographyTitle</Typography.heading>
       <Typography.body size="md">
         <strong>Sizes:</strong> 4 (sm, md, lg, xl)<br />
-        <strong>Weights:</strong> 4 (normal, medium, semibold, bold)
+        <strong>Weights:</strong> 4 (normal, medium, semibold, bold)<br />
+        <strong>Align:</strong> 4 (left, center, right, justify)
       </Typography.body>
 
       <Typography.heading level={3} weight="semibold">TypographyHeading</Typography.heading>
@@ -407,7 +439,8 @@ export function TypographyTab() {
       <Typography.body size="md">
         <strong>Sizes:</strong> 3 (sm, md, lg)<br />
         <strong>Weights:</strong> 9 (micro, ultra, thin, normal, medium, semibold, bold, black, boss) — Full 100-900 scale<br />
-        <strong>Colors:</strong> 6 (primary, secondary, tertiary, error, success, warning)
+        <strong>Colors:</strong> 6 (primary, secondary, tertiary, error, success, warning)<br />
+        <strong>Align:</strong> 4 (left, center, right, justify)
       </Typography.body>
 
       <Typography.heading level={3} weight="semibold">TypographyCaption</Typography.heading>
@@ -415,6 +448,7 @@ export function TypographyTab() {
         <strong>Sizes:</strong> 2 (xs, sm)<br />
         <strong>Weights:</strong> 2 (normal, medium)<br />
         <strong>Colors:</strong> 4 (primary, secondary, tertiary, muted)<br />
+        <strong>Align:</strong> 4 (left, center, right, justify)<br />
         <strong>Default:</strong> sm/normal/tertiary (muted is explicitly softer)<br />
         <strong>Plus:</strong> italic variant
       </Typography.body>

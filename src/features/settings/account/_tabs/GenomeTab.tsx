@@ -85,8 +85,7 @@ export function GenomeFields() {
   const completionPercent = genome?.completionPercent ?? 0;
 
   return (
-    <Stack>
-      <Card.standard
+    <Card.standard
         title={<><span>Professional Genome</span> <T.caption weight="normal" className="ft-genometab-percent">{completionPercent}% Complete</T.caption></>}
         subtitle="Complete your profile to unlock personalised Al coaching and transformation insights"
         footer={
@@ -97,7 +96,7 @@ export function GenomeFields() {
           </div>
         }
       >
-        <div className="vr-field-spacing">
+        <Stack.lg>
           {/* Professional Identity */}
           <div className="ft-genometab-row">
             <Field.live
@@ -155,7 +154,7 @@ export function GenomeFields() {
           <div className="ft-genometab-journey">
             <T.title size="sm" weight="semibold">🔥 Transformation Journey</T.title>
             <T.body size="sm" color="secondary">Your transformation context will define how the AI can assist you to create the greatest change!</T.body>
-            <div className="vr-field-spacing">
+            <Stack.lg>
               <div className="ft-genometab-row">
                 <Field.live
                   label="Transformation Goal"
@@ -196,7 +195,7 @@ export function GenomeFields() {
                   otherPlaceholder="e.g. Q1 2025"
                 />
               </div>
-            </div>
+            </Stack.lg>
           </div>
 
           {/* Growth Intel */}
@@ -229,8 +228,7 @@ export function GenomeFields() {
               placeholder="e.g. $500K ARR, $2M in new revenue"
             />
           </div>
-        </div>
-      </Card.standard>
-    </Stack>
+        </Stack.lg>
+    </Card.standard>
   );
 }

@@ -29,7 +29,8 @@
 .ft-showcasetabs-guide {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg, 20px);
+
+  /* Gap removed - Card.standard handles spacing via lobotomized owl */
 }
 
 /* 2-column section */

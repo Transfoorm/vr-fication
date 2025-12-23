@@ -43,7 +43,8 @@ export const updateUserSettings = mutation({
     callerUserId: v.id("admin_users"),
     // Identity fields (verified externally)
     email: v.optional(v.string()),
-    secondaryEmail: v.optional(v.string()),
+    // secondaryEmail accepts null to CLEAR the field (undefined = don't update)
+    secondaryEmail: v.optional(v.union(v.string(), v.null())),
     // Profile fields
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
@@ -53,17 +54,26 @@ export const updateUserSettings = mutation({
     businessCountry: v.optional(v.string()),
   },
   handler: async (ctx: MutationCtx, args) => {
-    const { callerUserId, ...updateFields } = args;
+    const { callerUserId, secondaryEmail, ...otherFields } = args;
 
     // 🛡️ SID-5.3: Direct lookup by sovereign _id
     const user = await ctx.db.get(callerUserId);
     if (!user) throw new Error("User not found");
 
-    // Update user with provided fields
-    await ctx.db.patch(user._id, {
-      ...updateFields,
+    // Build update object - null means CLEAR the field
+    const updateFields: Record<string, unknown> = {
+      ...otherFields,
       updatedAt: Date.now(),
-    });
+    };
+
+    // Handle secondaryEmail: null = clear, string = update, undefined = skip
+    if (secondaryEmail === null) {
+      updateFields.secondaryEmail = undefined; // Convex: undefined in patch = remove field
+    } else if (secondaryEmail !== undefined) {
+      updateFields.secondaryEmail = secondaryEmail;
+    }
+
+    await ctx.db.patch(user._id, updateFields);
 
     return { success: true };
   },

@@ -37,7 +37,7 @@ This account will be PROTECTED from deletion.
 
 ### Phase 2: Mode Selection
 
-Present EXACTLY these 3 options using AskUserQuestion:
+Present EXACTLY these 4 options using AskUserQuestion:
 
 **Question:** "Which cleanup mode do you want to execute?"
 
@@ -54,9 +54,15 @@ Present EXACTLY these 3 options using AskUserQuestion:
 3. **full_wipe** ⚠️ NUCLEAR
    - Description: "Clears EVERYTHING including all users except you (admin_users, ClerkRegistry, DeleteLog). Complete database reset. EXTREMELY DANGEROUS - only use for full dev environment reset."
 
+4. **atomic** ☢️ EXTINCTION
+   - Description: "Clears ABSOLUTELY EVERYTHING including YOU, all storage files, every document. Database becomes pristine like a brand new Convex project. You will need to sign up again from scratch."
+
+5. **atomic_with_clerk** ☢️💀 TOTAL ANNIHILATION
+   - Description: "Clears EVERYTHING from Convex AND deletes all users from Clerk. Complete system reset - both database AND authentication provider. The ultimate fresh start."
+
 ---
 
-### Phase 3: Nuclear Confirmation (full_wipe only)
+### Phase 3: Nuclear Confirmation (full_wipe, atomic, and atomic_with_clerk)
 
 If user selects `full_wipe`, show additional AskUserQuestion:
 
@@ -68,19 +74,80 @@ If user selects `full_wipe`, show additional AskUserQuestion:
 1. **yes_nuke_everything** - Description: "YES, I understand this will delete everything. Proceed with full wipe."
 2. **cancel** - Description: "CANCEL - I changed my mind. Go back to mode selection."
 
-If user selects `cancel`, restart from Phase 2.
+If user selects `atomic`, show DOUBLE confirmation:
+
+**First AskUserQuestion:**
+**Question:** "You selected ATOMIC EXTINCTION. This will DELETE ABSOLUTELY EVERYTHING including YOUR OWN ACCOUNT. You will need to sign up again from scratch. Are you absolutely certain?"
+
+**Header:** "Atomic Confirm"
+
+**Options:**
+1. **yes_extinction** - Description: "YES, I understand I will be deleted too. Proceed with atomic extinction."
+2. **cancel** - Description: "CANCEL - I changed my mind. Go back to mode selection."
+
+**Second AskUserQuestion (if first confirmed):**
+**Question:** "FINAL WARNING: Type 'EXTINCTION' to confirm you want to completely erase the database. This cannot be undone."
+
+**Header:** "Final Confirm"
+
+**Options:**
+1. **EXTINCTION** - Description: "I understand. Delete everything. Make it pristine."
+2. **ABORT** - Description: "ABORT - This is too dangerous. Cancel the operation."
+
+If user selects `atomic_with_clerk`, show TRIPLE confirmation (affects external system):
+
+**First AskUserQuestion:**
+**Question:** "You selected TOTAL ANNIHILATION. This will delete ALL data from Convex AND delete ALL users from Clerk. This affects an EXTERNAL authentication system. Are you absolutely certain?"
+
+**Header:** "Annihilation Confirm"
+
+**Options:**
+1. **yes_annihilation** - Description: "YES, I understand this affects Clerk too. Proceed."
+2. **cancel** - Description: "CANCEL - I changed my mind. Go back to mode selection."
+
+**Second AskUserQuestion (if first confirmed):**
+**Question:** "This will permanently delete users from Clerk's authentication system. They will need to sign up again. There is NO recovery. Continue?"
+
+**Header:** "Clerk Confirm"
+
+**Options:**
+1. **yes_delete_clerk** - Description: "YES, delete all Clerk users."
+2. **cancel** - Description: "CANCEL - Don't touch Clerk."
+
+**Third AskUserQuestion (if second confirmed):**
+**Question:** "FINAL WARNING: Type 'ANNIHILATE' to confirm total system wipe (Convex + Clerk)."
+
+**Header:** "Final Confirm"
+
+**Options:**
+1. **ANNIHILATE** - Description: "I understand. Delete everything from everywhere."
+2. **ABORT** - Description: "ABORT - This is too dangerous."
+
+If user selects `cancel` or `ABORT`, restart from Phase 2.
 
 ---
 
 ### Phase 4: Execute Cleanup
 
-Call the Convex mutation:
+For `productivity_only`, `data_only`, `full_wipe`, or `atomic`, call the Convex mutation:
 
 ```typescript
 const result = await convex.mutation(api.admin.dbCleanup.cleanupDatabase, {
-  mode: selectedMode, // 'productivity_only' | 'data_only' | 'full_wipe'
-  callerUserId: callerUserId,
+  mode: selectedMode, // 'productivity_only' | 'data_only' | 'full_wipe' | 'atomic'
+  callerUserId: callerUserId, // Note: atomic mode ignores this and deletes caller too
 });
+```
+
+For `atomic_with_clerk`, call the Convex ACTION (not mutation):
+
+```typescript
+// This is an ACTION because it needs to call Clerk API
+const result = await convex.action(api.admin.dbCleanup.atomicNukeWithClerk, {});
+```
+
+**Or via CLI:**
+```bash
+npx convex run admin/dbCleanup:atomicNukeWithClerk '{}'
 ```
 
 **Show progress:**
@@ -149,6 +216,30 @@ Provide context-specific next steps based on mode:
 5. This was a nuclear reset - rebuild everything from scratch
 ```
 
+**For atomic:**
+```
+☢️ Next Steps:
+1. Clear ALL browser cookies and local storage
+2. Clear Clerk test users if any remain (Clerk dashboard)
+3. Sign up as a completely new user via Clerk
+4. Complete full onboarding flow from scratch
+5. Reconnect all OAuth integrations (Outlook, Gmail, etc.)
+6. This was EXTINCTION - the database is now pristine like a new project
+7. All previous data, users, files, and history are permanently gone
+```
+
+**For atomic_with_clerk:**
+```
+☢️💀 Next Steps:
+1. Clear ALL browser cookies and local storage
+2. Clerk users are ALREADY DELETED - no need to clear manually
+3. Sign up as a completely new user via Clerk (you'll be creating a fresh account)
+4. Complete full onboarding flow from scratch
+5. Reconnect all OAuth integrations (Outlook, Gmail, etc.)
+6. This was TOTAL ANNIHILATION - both Convex and Clerk are pristine
+7. All previous data, users, files, auth accounts are permanently gone
+```
+
 ---
 
 ## MODES REFERENCE
@@ -198,13 +289,48 @@ Provide context-specific next steps based on mode:
 
 ---
 
+### atomic ☢️ EXTINCTION
+**Deletes:** ABSOLUTELY EVERYTHING:
+- All from `full_wipe` INCLUDING the caller's account
+- admin_users (ALL users, no exceptions)
+- admin_users_ClerkRegistry (ALL entries)
+- admin_users_DeleteLog (ALL entries)
+- _storage (ALL uploaded files)
+
+**Preserves:**
+- NOTHING. Database is completely pristine.
+- Schema remains (tables exist but are empty)
+
+---
+
+### atomic_with_clerk ☢️💀 TOTAL ANNIHILATION
+**Deletes:** ABSOLUTELY EVERYTHING from BOTH systems:
+
+**From Convex:**
+- All from `atomic` (every table, every file)
+
+**From Clerk:**
+- ALL user accounts via Clerk API
+- Authentication records
+- User metadata
+
+**Preserves:**
+- NOTHING. Both systems are completely pristine.
+- Convex schema remains (tables exist but are empty)
+- Clerk application config remains (but no users)
+
+---
+
 ## SAFETY FEATURES
 
-✅ **Caller Protection** - Your account is NEVER deleted (even in full_wipe)
+✅ **Caller Protection** - Your account is preserved in full_wipe mode (NOT in atomic!)
 ✅ **Confirmation Prompts** - Extra warning for nuclear mode
+✅ **Double Confirmation** - Atomic mode requires TWO confirmations
+✅ **Triple Confirmation** - Atomic with Clerk requires THREE confirmations
 ✅ **Detailed Logging** - See exactly what's being deleted
 ✅ **Summary Report** - Breakdown by table after completion
 ✅ **Mode Descriptions** - Clear explanations to prevent accidents
+✅ **Batch Processing** - Handles large datasets without hitting Convex limits
 
 ---
 
@@ -242,6 +368,14 @@ Would you like to retry or cancel?
 **Problem:** Need to test onboarding flow from scratch
 **Solution:** Run `/db-nuke` → Select `full_wipe` → Sign up as new user
 
+### Use Case 4: Pristine Database (Brand New Project State)
+**Problem:** Database has accumulated test data, orphaned records, corrupt state - need a completely fresh start like spinning up a new Convex project
+**Solution:** Run `/db-nuke` → Select `atomic` → Confirm twice → Clear browser → Sign up fresh from scratch
+
+### Use Case 5: Complete System Reset (Convex + Clerk)
+**Problem:** Test users in Clerk are polluting the auth system, need to wipe both database AND authentication provider for a truly clean slate
+**Solution:** Run `/db-nuke` → Select `atomic_with_clerk` → Confirm three times → Clear browser → Sign up as brand new user
+
 ---
 
 ## IMPORTANT NOTES
@@ -251,6 +385,10 @@ Would you like to retry or cancel?
 ⚠️ **All deletions are IRREVERSIBLE**
 ⚠️ **Always verify mode selection before confirming**
 ⚠️ **Full wipe requires complete app re-setup**
+☢️ **Atomic mode deletes EVERYTHING including your own account**
+☢️ **Atomic mode also deletes all uploaded files in Convex storage**
+💀 **Atomic with Clerk affects EXTERNAL system (Clerk authentication)**
+💀 **Clerk users are deleted via API - this cannot be undone**
 
 ---
 
@@ -259,11 +397,14 @@ Would you like to retry or cancel?
 If you prefer CLI instead of slash command:
 
 ```bash
-# Via npm script
-npm run cleanup:db -- --mode=productivity_only --userId=YOUR_USER_ID
+# Batch delete a single table (for large datasets)
+npx convex run admin/dbCleanup:batchDeleteTable '{"table": "productivity_email_Index"}'
 
-# Or directly with tsx
-tsx scripts/cleanupDb.ts --mode=productivity_only --userId=YOUR_USER_ID
+# Check what's in the database
+npx convex run admin/dbCleanup:getDatabaseCounts '{}'
+
+# Atomic nuke with Clerk (deletes from Clerk AND Convex)
+npx convex run admin/dbCleanup:atomicNukeWithClerk '{}'
 ```
 
 ---

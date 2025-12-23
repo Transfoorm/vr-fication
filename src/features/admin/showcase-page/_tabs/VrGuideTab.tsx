@@ -9,7 +9,7 @@
 'use client';
 
 import '../showcase-page.css';
-import { Card, Divider, T } from '@/vr';
+import { Card, Divider, T, Stack } from '@/vr';
 
 export function VrGuideTab() {
   return (
@@ -17,11 +17,11 @@ export function VrGuideTab() {
       title="The VR Doctrine"
       subtitle="Variant Robots (VRs) are the DNA of this application. They're dumb, beautiful, reusable UI shells that know nothing about your data — and that's exactly what makes them powerful."
     >
-      <div className="ft-showcasetabs-guide">
+      <Stack.lg className="ft-showcasetabs-guide">
         {/* Main Section Title - Full Width, Centered */}
-        <T.title size="xl" weight="bold" align="center">WHAT IS A VR?</T.title>
+        <T.title size="lg" weight="bold" align="left">WHAT IS A VR?</T.title>
 
-        <Divider.line />
+        <Divider.line size="sm" />
 
         <div className="ft-showcasetabs-guide-columns">
           {/* Introduction */}
@@ -45,7 +45,7 @@ export function VrGuideTab() {
           </li>
         </ul>
 
-        <Divider.line />
+        <Divider.line size="sm" />
 
         {/* The Sponge Principle */}
         <T.h3 weight="bold">The Sponge Principle</T.h3>
@@ -60,7 +60,7 @@ export function VrGuideTab() {
           If yes, it goes in a Feature.
         </T.body>
 
-        <Divider.line />
+        <Divider.line size="sm" />
 
         {/* CSS Prefixes */}
         <T.h3 weight="bold">CSS Prefixes</T.h3>
@@ -101,7 +101,7 @@ export function VrGuideTab() {
           Everything below is encapsulated. Everything above just composes it.
         </T.body>
 
-        <Divider.line />
+        <Divider.line size="sm" />
 
         {/* Deep Dive Documentation */}
         <T.h3 weight="bold">Deep Dive Documentation</T.h3>
@@ -141,7 +141,7 @@ export function VrGuideTab() {
 
         {/* Main Section Title - Full Width, Centered */}
         <T.title size="xl" weight="bold" align="center">SET UP PAGES WITH VR&apos;s and FEATURES</T.title>
-            <Divider.line />
+            <Divider.line size="sm" />
 
         {/* Second 2-column section - Page & Tab Setup */}
         <div className="ft-showcasetabs-guide-columns">
@@ -249,7 +249,7 @@ export function VrGuideTab() {
 
         {/* Main Section Title - Full Width, Centered */}
         <T.title size="xl" weight="bold" align="center">PAGE LAYOUT PATTERNS</T.title>
-        <Divider.line />
+        <Divider.line size="sm" />
 
         {/* Third 2-column section - Page Layout */}
         <div className="ft-showcasetabs-guide-columns">
@@ -334,7 +334,7 @@ export default function Users() {
             <li><T.body size="sm">&quot;Create a user management table&quot; → Developer uses Page.constrained</T.body></li>
           </ul>
         </div>
-      </div>
+      </Stack.lg>
     </Card.standard>
   );
 }

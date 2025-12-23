@@ -235,14 +235,14 @@ export function InvitesFeature() {
   const failCount = batchResults.filter(r => !r.success).length;
 
   return (
-    <Stack>
+    <Stack.lg>
       {/* Single Invite Card */}
       <Card.standard
         title="Single Invite"
         subtitle="Send one invitation link"
       >
-        <div className="vr-field-spacing">
-          <div className="vr-field-row">
+        <Stack.lg>
+          <Stack.row.equal>
             <div className={lastSentTo ? 'ft-invitestab__success' : ''}>
               <Field.verify
                 label="Send an Invite Link to the user's email"
@@ -255,7 +255,7 @@ export function InvitesFeature() {
               />
             </div>
             <div />
-          </div>
+          </Stack.row.equal>
 
           <div className="ft-invitestab__link-box">
             <T.caption className="ft-invitestab__link-label">Invite Link (expires in 24 hours):</T.caption>
@@ -277,7 +277,7 @@ export function InvitesFeature() {
               </button>
             </div>
           </div>
-        </div>
+        </Stack.lg>
       </Card.standard>
 
       {/* Batch Invite Card */}
@@ -285,7 +285,7 @@ export function InvitesFeature() {
         title="Batch Invite"
         subtitle="Send multiple invitations at once"
       >
-        <div className="vr-field-spacing">
+        <Stack.lg>
           {/* Method 1: Queue - Add one at a time */}
           <div className="ft-invitestab__queue-section">
             <T.caption className="ft-invitestab__queue-label">Add emails one by one:</T.caption>
@@ -435,8 +435,8 @@ export function InvitesFeature() {
               </div>
             </div>
           )}
-        </div>
+        </Stack.lg>
       </Card.standard>
-    </Stack>
+    </Stack.lg>
   );
 }

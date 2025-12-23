@@ -434,13 +434,12 @@ export default function UserButton() {
               <button
                 onClick={() => {
                   closeAllModals();
-                  // Always navigate to Account - page handles freeze + Shadow King
-                  navigate('settings/account');
+                  navigate('settings/account#password');
                 }}
                 className="ft-userbutton-menu-item"
               >
-                <Icon variant="user" size="xs" />
-                <T.body size="sm">Your Account Details</T.body>
+                <Icon variant="lock" size="xs" />
+                <T.body size="sm">Manage Password</T.body>
               </button>
             </div>
 
@@ -453,7 +452,7 @@ export default function UserButton() {
                 className="ft-userbutton-menu-item"
               >
                 <Icon variant="sparkles" size="xs" />
-                <T.body size="sm">Site Preferences</T.body>
+                <T.body size="sm">Your Preferences</T.body>
               </button>
             </div>
 

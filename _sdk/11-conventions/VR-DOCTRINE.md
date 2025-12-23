@@ -350,7 +350,7 @@ export function ProfileFields() {
 ### Tab (domains/settings/account/_tabs/Profile.tsx)
 ```tsx
 // Pure declaration - one line
-import { ProfileFields } from '@/features/account/ProfileTab';
+import { ProfileFields } from '@/features/settings/account';
 
 export default function Profile() {
   return <ProfileFields />;

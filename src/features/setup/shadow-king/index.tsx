@@ -29,6 +29,19 @@ export default function ShadowKing() {
   // Only show if Shadow King is active AND setup is actually pending
   const shouldShow = shadowKingActive && user?.setupStatus === 'pending';
 
+  // Lock body scroll AND hide scrollbar when Shadow King is active
+  useEffect(() => {
+    if (shouldShow) {
+      // Hide scrollbar on both html and body to prevent double scrollbar
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      };
+    }
+  }, [shouldShow]);
+
   // Show red arrow when Shadow King activates
   useEffect(() => {
     if (shouldShow) {
@@ -42,18 +55,22 @@ export default function ShadowKing() {
 
   if (!shouldShow) return null;
 
-  const handleBackdropClick = () => {
-    // Outside click = just close, NOT skip
+  const handleClose = () => {
     setShadowKingActive(false);
-    setShowRedArrow(false);  // Hide arrow when closing
-    // Note: Do NOT set modalSkipped - user didn't explicitly skip
+    setShowRedArrow(false);
   };
 
   return (
     <>
-      <Backdrop onClick={handleBackdropClick} />
+      <Backdrop />
+      {/* Dedicated close layer - covers entire viewport, BEHIND modal */}
+      <div
+        className="ft-shadow-king-close-layer"
+        onClick={handleClose}
+        aria-label="Close modal"
+      />
+      {/* Modal container - scrollable, ABOVE close layer */}
       <div className="ft-shadow-king">
-        {/* SetupModal is VR-Sovereign: owns all behavior including server actions */}
         <SetupModal />
       </div>
     </>

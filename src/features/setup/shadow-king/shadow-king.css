@@ -6,15 +6,49 @@
    This is the sovereign layer - nothing escapes.
    ═══════════════════════════════════════════════════════════════════ */
 
-.ft-shadow-king {
+/* Close layer - invisible clickable area BEHIND modal */
+.ft-shadow-king-close-layer {
   position: fixed;
   inset: 0;
   z-index: 901;
+  cursor: pointer;
+}
+
+/* Modal container - scrollable, ABOVE close layer */
+.ft-shadow-king {
+  position: fixed;
+  inset: 0;
+  z-index: 902;
   display: flex;
-  align-items: center;
+  align-items: flex-start;  /* Allow scroll from top */
   justify-content: center;
   animation: ft-shadow-king-fade-in 200ms ease-out;
-  pointer-events: none;  /* Let clicks pass through to backdrop */
+  pointer-events: none;  /* Let clicks pass through to close layer */
+  overflow: hidden auto;  /* Enable scrolling on the wrapper */
+  padding: var(--spacing-xl) var(--spacing-md);  /* Breathing room */
+  overscroll-behavior: contain;  /* Prevent scroll chaining to body */
+
+  /* Subtle scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 30%) transparent;
+}
+
+/* Webkit scrollbar styling */
+.ft-shadow-king::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ft-shadow-king::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ft-shadow-king::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 30%);
+  border-radius: 3px;
+}
+
+.ft-shadow-king::-webkit-scrollbar-thumb:hover {
+  background: rgb(255 255 255 / 50%);
 }
 
 @keyframes ft-shadow-king-fade-in {
@@ -27,14 +61,14 @@
   }
 }
 
-/* Override SetupModal positioning when inside Shadow King */
+/* Modal content - centered, clickable, scrollable */
 .ft-shadow-king .ft-setup-modal {
-  position: relative;
-  margin: auto;
-  max-width: min(1200px, 95vw);
-  overflow: hidden;  /* No scroll - scale to fit instead */
   pointer-events: auto;  /* Re-enable clicks on modal itself */
-  transform-origin: center center;
+  flex-shrink: 0;  /* Don't compress - let wrapper scroll instead */
+  margin: auto;  /* Center vertically AND horizontally - collapses when overflow */
+  position: relative;
+  max-width: min(1200px, 95vw);
+  transform-origin: center top;  /* Scale from top when shrinking */
 }
 
 /* Viewport-based scaling - modal fits without scroll */
