@@ -1,0 +1,170 @@
+Here is a clean, copy-pasteable UI + function statement for the developer.
+No fluff. No options. No ambiguity.
+
+⸻
+
+TRANSFOORM EMAIL — UI & FUNCTION STATEMENT (DEV)
+
+Core Mental Model
+
+Transfoorm Email has two modes operating on the same data:
+	•	Live — safe, continuous, traditional email consumption
+	•	Impact — outcome-driven action and resolution
+
+This is not two inboxes.
+It is one email system with two action grammars.
+
+Same threads. Same sync. Same storage. Different defaults and affordances.
+
+⸻
+
+Mode Names (UI)
+
+Live | Impact
+	•	Live
+	•	Conveys streaming, continuity, safety
+	•	User will not miss anything
+	•	Replaces “Mail” without explanation
+	•	Impact
+	•	Conveys outcome, agency, consequence
+	•	Email is treated as input → action → resolution
+	•	Initial friction is intentional and offset by strong affordances
+
+These names are final for UI. Backend naming may differ but must not leak.
+
+⸻
+
+Live Mode (Baseline)
+
+Purpose: Trust + Familiarity
+	•	Standard email reading/replying
+	•	Thread list + reading pane
+	•	Traditional affordances
+	•	No pressure to “act”
+	•	This mode must feel safe and unsurprising
+
+Live mode exists so users trust the system.
+
+⸻
+
+Impact Mode (Primary Differentiator)
+
+Purpose: Turn email into outcomes
+
+Impact mode applies a different action grammar to the same threads.
+
+Layout (Three-Pane Console)
+	•	Left Rail — Resolution Queue
+	•	State filters (awaiting_me / awaiting_them / resolved / none)
+	•	Thread list
+	•	Search
+	•	Center — Conversation (Transient)
+	•	Chat-style bubbles
+	•	Minimal chrome
+	•	Reply is secondary, not primary
+	•	Right Rail — Intelligence (Primary)
+	•	Thread state
+	•	AI insights
+	•	Linked objects
+	•	Temporal data
+	•	Sender profile
+
+⸻
+
+The “Big 3” Actions (Impact Mode)
+
+Impact mode exposes exactly three primary actions.
+Nothing else is promoted to first-class.
+
+All three are split buttons:
+	•	Primary click (≈90%) → fastest, opinionated path
+	•	Dropdown (≈10%) → explicit control
+
+1. Promote
+
+Primary action:
+→ Promote to Task
+
+Dropdown options:
+	•	Promote to Task
+	•	Promote to Calendar
+	•	Promote to Pipeline
+	•	Promote to Note
+
+Intent:
+	•	“Promote” means elevate email into work
+	•	Intent comes first, destination second
+	•	Avoids file/folder metaphors entirely
+
+⸻
+
+2. Link
+
+Primary action (AI-assisted):
+→ Link to Project (auto-suggested)
+
+Dropdown options:
+	•	Link to Project…
+	•	Create New Project
+	•	Pin to Timeline / Gantt
+	•	Attach to Notes
+	•	Reference Only (no state change)
+
+Intent:
+	•	Linking provides context, not commitment
+	•	Projects are containers of impact, not inboxes
+
+⸻
+
+3. Resolve
+
+Primary action:
+→ Resolve Thread
+
+(Default behavior configurable: archive / delete / mark done)
+
+Dropdown options:
+	•	Resolve & Archive
+	•	Resolve & Delete
+	•	Snooze
+	•	Mark “No Action”
+	•	Undo Resolution (time-boxed)
+
+Intent:
+	•	“Resolve” is psychologically final but neutral
+	•	Dangerous verbs (Delete) never appear on the main path
+
+⸻
+
+Sacred Constraints (Non-Negotiable)
+	1.	Impact mode does not fork data
+	•	Same threads, same IDs, same sync
+	•	Only UI + defaults change
+	2.	No extra primary buttons
+	•	Promote, Link, Resolve only
+	3.	No folder-first thinking
+	•	States and outcomes replace folders
+	4.	AI suggests, humans commit
+	•	AI never changes state autonomously
+	5.	Email is intake, not destination
+	•	Inbox is a queue to clear, not a place to live
+
+⸻
+
+One-Sentence Rule for Implementation
+
+Live mode optimizes for trust.
+Impact mode optimizes for outcomes.
+Both operate on the same email reality.
+
+If implementation violates that sentence, it’s wrong.
+
+⸻
+
+If you want next, I can produce:
+	•	keyboard shortcut spec
+	•	exact button copy
+	•	AI confidence thresholds
+	•	error states + undo timing
+
+But this document is sufficient for a developer to build without ambiguity.

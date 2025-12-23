@@ -1,12 +1,13 @@
 /**──────────────────────────────────────────────────────────────────────┐
-│  🧠 INTELLIGENCE RAIL - Right Panel Component                          │
-│  /src/features/productivity/email-console/IntelligenceRail.tsx         │
+│  🧠 INTELLIGENCE RAIL - Right Panel Component                         │
+│  /src/features/productivity/email-console/_impact/IntelligenceRail.tsx│
 │                                                                        │
-│  EMAIL UX DOCTRINE:                                                    │
+│  EMAIL DOCTRINE:                                                       │
 │  - AI suggests, humans commit (STATE OWNERSHIP BOUNDARY)               │
-│  - Promotion actions PRIMARY (Resolve/Promote large + top)             │
+│  - Big 3 Actions PRIMARY: Promote, Link, Resolve                      │
 │  - Reply actions SECONDARY (below, smaller)                            │
 │  - Structured, system-like (not conversational)                        │
+│  - Thread state, AI insights, linked objects, temporal data           │
 │                                                                        │
 │  Visual ref: Linear's sidebar actions, Superhuman's command bar        │
 └────────────────────────────────────────────────────────────────────────┘ */
@@ -15,16 +16,13 @@
 
 import { useFuse } from '@/store/fuse';
 import { T } from '@/vr';
-import './intelligence-rail.css';
 
 export interface IntelligenceRailProps {
   threadId: string | null;
 }
 
 /**
- * 🧠 INTELLIGENCE RAIL
- *
- * Right panel: AI insights + primary actions (Resolve/Promote).
+ * Intelligence Rail - AI insights + primary actions (Big 3: Promote, Link, Resolve)
  *
  * DOCTRINE:
  * - Renders from FUSE (AI classification preloaded)
@@ -39,10 +37,10 @@ export function IntelligenceRail({ threadId }: IntelligenceRailProps) {
   // Early return if no thread selected
   if (!threadId) {
     return (
-      <div className="ft-intelligence-rail-empty">
-        <div className="ft-intelligence-rail-empty__content">
+      <div className="ft-intelligence-empty">
+        <div className="ft-intelligence-empty__content">
           <T.body>No thread selected</T.body>
-          <T.caption color="secondary" className="ft-intelligence-rail-empty__hint">
+          <T.caption color="secondary" className="ft-intelligence-empty__hint">
             Select a thread to see AI insights and actions
           </T.caption>
         </div>
@@ -55,8 +53,8 @@ export function IntelligenceRail({ threadId }: IntelligenceRailProps) {
 
   if (!thread) {
     return (
-      <div className="ft-intelligence-rail-empty">
-        <div className="ft-intelligence-rail-empty__content">
+      <div className="ft-intelligence-empty">
+        <div className="ft-intelligence-empty__content">
           <T.body>Thread not found</T.body>
         </div>
       </div>
@@ -70,16 +68,16 @@ export function IntelligenceRail({ threadId }: IntelligenceRailProps) {
 
   return (
     <div className="ft-intelligence-rail">
-      {/* PRIMARY ACTIONS - Top Section */}
+      {/* BIG 3 ACTION #3: RESOLVE - Primary Thread Action */}
       <div className="ft-intelligence-rail__section">
-        <T.caption weight="medium" className="ft-intelligence-rail__section-title">Thread Actions</T.caption>
+        <T.caption weight="medium" className="ft-intelligence-rail__section-title">Resolve</T.caption>
         <div className="ft-intelligence-rail__actions-primary">
           <button className="ft-ir-action ft-ir-action--primary ft-ir-action--resolve">
-            ✓ Resolve Thread
+            Resolve Thread
           </button>
           {thread.state === 'resolved' && (
             <button className="ft-ir-action ft-ir-action--secondary">
-              ↺ Reopen Thread
+              Reopen Thread
             </button>
           )}
           {thread.state !== 'awaiting_me' && (
@@ -90,21 +88,40 @@ export function IntelligenceRail({ threadId }: IntelligenceRailProps) {
         </div>
       </div>
 
-      {/* PROMOTION ACTIONS - Primary Outcomes */}
+      {/* BIG 3 ACTION #1: PROMOTE - Primary Outcomes */}
       <div className="ft-intelligence-rail__section">
-        <T.caption weight="medium" className="ft-intelligence-rail__section-title">Promote To</T.caption>
+        <T.caption weight="medium" className="ft-intelligence-rail__section-title">Promote</T.caption>
         <div className="ft-intelligence-rail__promotions">
-          <button className="ft-ir-promotion">
-            <span className="ft-ir-promotion__icon">✓</span>
-            <span className="ft-ir-promotion__label">Task</span>
+          <button className="ft-ir-promotion ft-ir-promotion--primary">
+            <span className="ft-ir-promotion__label">Promote to Task</span>
           </button>
           <button className="ft-ir-promotion">
-            <span className="ft-ir-promotion__icon">📁</span>
-            <span className="ft-ir-promotion__label">Project</span>
+            <span className="ft-ir-promotion__label">Promote to Calendar</span>
           </button>
           <button className="ft-ir-promotion">
-            <span className="ft-ir-promotion__icon">📅</span>
-            <span className="ft-ir-promotion__label">Booking</span>
+            <span className="ft-ir-promotion__label">Promote to Pipeline</span>
+          </button>
+          <button className="ft-ir-promotion">
+            <span className="ft-ir-promotion__label">Promote to Note</span>
+          </button>
+        </div>
+      </div>
+
+      {/* BIG 3 ACTION #2: LINK - Context Association */}
+      <div className="ft-intelligence-rail__section">
+        <T.caption weight="medium" className="ft-intelligence-rail__section-title">Link</T.caption>
+        <div className="ft-intelligence-rail__links">
+          <button className="ft-ir-link ft-ir-link--primary">
+            <span className="ft-ir-link__label">Link to Project</span>
+          </button>
+          <button className="ft-ir-link">
+            <span className="ft-ir-link__label">Create New Project</span>
+          </button>
+          <button className="ft-ir-link">
+            <span className="ft-ir-link__label">Pin to Timeline</span>
+          </button>
+          <button className="ft-ir-link">
+            <span className="ft-ir-link__label">Reference Only</span>
           </button>
         </div>
       </div>

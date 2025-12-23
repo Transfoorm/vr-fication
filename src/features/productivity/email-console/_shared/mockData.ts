@@ -1,12 +1,12 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  📧 EMAIL CONSOLE MOCK DATA - Development Only                        │
-│  /src/features/productivity/email-console/mockData.ts                 │
+│  /src/features/productivity/email-console/_shared/mockData.ts         │
 │                                                                        │
 │  Temporary mock data to visualize the email console UI                │
 │  DELETE THIS FILE once real email sync is implemented                 │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-import type { ProductivityEmail } from './types';
+import type { ProductivityEmail } from '@/features/productivity/email-console/types';
 
 export const MOCK_EMAIL_DATA: ProductivityEmail = {
   accounts: [], // No mock accounts - will be populated by real Outlook/Gmail connections
@@ -155,7 +155,7 @@ export const MOCK_EMAIL_DATA: ProductivityEmail = {
         { name: 'David Kim', email: 'david@acme.com' },
       ],
       receivedAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
-      snippet: 'Hey team! Want to grab lunch Friday at that new Thai place? My treat 🍜',
+      snippet: 'Hey team! Want to grab lunch Friday at that new Thai place? My treat',
       hasAttachments: false,
       resolutionState: 'awaiting_them',
     },

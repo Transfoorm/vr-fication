@@ -20,7 +20,7 @@ import type { ProductivityEmail } from '@/features/productivity/email-console/ty
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type EmailViewMode = 'standard' | 'await';
+export type EmailViewMode = 'live' | 'impact';
 
 export interface ProductivityData {
   email?: ProductivityEmail;
@@ -62,7 +62,7 @@ const initialProductivityState: ProductivitySlice = {
   bookings: [],
   tasks: [],
   // UI preferences
-  emailViewMode: 'standard', // Default to standard view
+  emailViewMode: 'live', // Default to Live mode (traditional Outlook-style)
   // ADP Coordination
   status: 'idle',
   lastFetchedAt: undefined,

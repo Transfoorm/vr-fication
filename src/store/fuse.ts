@@ -183,7 +183,7 @@ interface FuseStore {
   // ─────────────────────────────────────────────────────────────────────────────
   hydrateProductivity: (data: Partial<ProductivityData>, source?: ADPSource) => void;
   clearProductivity: () => void;
-  setEmailViewMode: (mode: 'standard' | 'await') => void;
+  setEmailViewMode: (mode: 'live' | 'impact') => void;
 
   hydrateAdmin: (data: Partial<AdminData>, source?: ADPSource) => void;
   clearAdmin: () => void;
@@ -268,7 +268,7 @@ export const useFuse = create<FuseStore>()((set, get) => {
       meetings: [],
       bookings: [],
       tasks: [],
-      emailViewMode: 'standard',
+      emailViewMode: 'live',
       status: 'idle',
       lastFetchedAt: undefined,
       source: undefined,
@@ -380,7 +380,7 @@ export const useFuse = create<FuseStore>()((set, get) => {
           meetings: [],
           bookings: [],
           tasks: [],
-          emailViewMode: 'standard',
+          emailViewMode: 'live',
           status: 'idle',
           lastFetchedAt: undefined,
           source: undefined,

@@ -1,6 +1,6 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  📧 OUTLOOK INTEGRATION TYPES                                          │
-│  /src/features/productivity/email-console/outlook-types.ts            │
+│  /src/features/productivity/email-console/_shared/outlook-types.ts    │
 │                                                                        │
 │  Microsoft Graph API response types for email sync                    │
 │  https://learn.microsoft.com/en-us/graph/api/user-list-messages       │
