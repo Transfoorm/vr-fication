@@ -15,16 +15,6 @@ export const admiralNav: NavSection[] = [
     path: ROUTES.dashboard
   },
   {
-    label: 'Productivity',
-    icon: 'send',
-    children: [
-      { path: ROUTES.productivity.email, label: 'Email' },
-      { path: ROUTES.productivity.calendar, label: 'Calendar' },
-      { path: ROUTES.productivity.meetings, label: 'Meetings' },
-      { path: ROUTES.productivity.bookings, label: 'Bookings' }
-    ]
-  },
-  {
     label: 'Admin',
     icon: 'user-star',
     children: [
@@ -40,6 +30,16 @@ export const admiralNav: NavSection[] = [
       { path: ROUTES.system.database, label: 'Database' },
       { path: ROUTES.system.ai, label: 'AI' },
       { path: ROUTES.system.ranks, label: 'Ranks' }
+    ]
+  },
+  {
+    label: 'Productivity',
+    icon: 'square-check-big',
+    children: [
+      { path: ROUTES.productivity.email, label: 'Email' },
+      { path: ROUTES.productivity.calendar, label: 'Calendar' },
+      { path: ROUTES.productivity.meetings, label: 'Meetings' },
+      { path: ROUTES.productivity.bookings, label: 'Bookings' }
     ]
   },
   {

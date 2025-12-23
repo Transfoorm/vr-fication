@@ -57,7 +57,7 @@ export function ChecksTab() {
           <div className="ft-database-indicator">
             <div className="ft-database-light ft-database-light--green" />
             <T.body size="sm" color="success" weight="medium">
-              Database records reflect that the &apos;delete user cascade&apos; is balanced
+              Database records reflect that the &apos;delete user cascade&apos; is balanced and match.
             </T.body>
           </div>
 

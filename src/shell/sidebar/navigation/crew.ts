@@ -15,7 +15,7 @@ export const crewNav: NavSection[] = [
   },
 /*  {
     label: 'Productivity',
-    icon: 'calendar-check-2',
+    icon: 'square-check-big',
     children: [
       { path: '/productivity/calendar', label: 'Calendar' },
       { path: '/productivity/meetings', label: 'Meetings' }

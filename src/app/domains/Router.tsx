@@ -50,7 +50,6 @@ import Calendar from './productivity/Calendar';
 import Bookings from './productivity/Bookings';
 import Tasks from './productivity/Tasks';
 import Email from './productivity/Email';
-import Email2 from './productivity/email2/page';
 import Meetings from './productivity/Meetings';
 
 // Projects
@@ -136,8 +135,6 @@ export default function Router() {
         return <Tasks />;
       case 'productivity/email':
         return <Email />;
-      case 'productivity/email2':
-        return <Email2 />;
       case 'productivity/meetings':
         return <Meetings />;
 

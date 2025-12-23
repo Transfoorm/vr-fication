@@ -30,7 +30,7 @@ import '@/styles/globals.css';
 // ═══════════════════════════════════════════════════════════════════════
 export const metadata: Metadata = {
   title: {
-    default: 'Transfoorm - Make Your Difference',
+    default: 'Turn Purpose Into Profit | Transfoorm',
     template: '%s | FUSE 6.0'
   },
   description: 'Instant everything. Zero loading states. The future of web applications.',

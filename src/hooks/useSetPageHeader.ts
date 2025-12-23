@@ -61,8 +61,13 @@ export function useSetPageHeader(
   const hidden = options?.hidden ?? false;
 
   useEffect(() => {
+    const pageTitle = title || autoTitle;
+
+    // Set browser tab title
+    document.title = `Transfoorm | ${pageTitle}`;
+
     setHeaderData({
-      title: title || autoTitle,
+      title: pageTitle,
       subtitle: subtitle || null,
       action: action || undefined,
       actionPosition: action ? actionPosition : undefined,
