@@ -121,6 +121,8 @@
 .vr-dropdown-simple-placeholder {
   color: var(--text-tertiary);
   font-weight: var(--font-weight-normal);
+  font-style: italic;
+  font-size: var(--font-size-xs);
 }
 
 /* Arrow icon */
@@ -312,6 +314,8 @@
 .vr-dropdown-with-icons-placeholder {
   color: var(--text-tertiary);
   font-weight: var(--font-weight-normal);
+  font-style: italic;
+  font-size: var(--font-size-xs);
 }
 
 /* Arrow icon */
@@ -462,6 +466,8 @@
 .vr-dropdown-with-avatars-placeholder {
   color: var(--text-tertiary);
   font-weight: var(--font-weight-normal);
+  font-style: italic;
+  font-size: var(--font-size-xs);
 }
 
 /* Arrow icon */
@@ -624,6 +630,8 @@
 .vr-dropdown-multi-select-placeholder {
   color: var(--text-tertiary);
   font-weight: var(--font-weight-normal);
+  font-style: italic;
+  font-size: var(--font-size-xs);
 }
 
 /* Actions (clear + arrow) */

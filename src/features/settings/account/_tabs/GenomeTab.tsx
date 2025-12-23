@@ -87,7 +87,7 @@ export function GenomeFields() {
   return (
     <Card.standard
         title={<><span>Professional Genome</span> <T.caption weight="normal" className="ft-genometab-percent">{completionPercent}% Complete</T.caption></>}
-        subtitle="Complete your profile to unlock personalised Al coaching and transformation insights"
+        subtitle="Complete your profile to maximise personalised Al coaching and transformation insights"
         footer={
           <div className="ft-genometab-completion">
             <div className="ft-genometab-completion-bar">
@@ -153,14 +153,14 @@ export function GenomeFields() {
           {/* Transformation Journey - Shaded Section (no card, just background) */}
           <div className="ft-genometab-journey">
             <T.title size="sm" weight="semibold">🔥 Transformation Journey</T.title>
-            <T.body size="sm" color="secondary">Your transformation context will define how the AI can assist you to create the greatest change!</T.body>
+            <T.body size="sm" color="secondary">Your transformation context will define how Miror AI can assist your transformation goals. <br></br><i>*Include any information about the industry you are targeting and where you want to make the most change.</i></T.body>
             <Stack.lg>
               <div className="ft-genometab-row">
                 <Field.live
                   label="Transformation Goal"
                   value={genome?.transformationGoal ?? ''}
                   onSave={(v) => handleSave('transformationGoal', v || undefined)}
-                  placeholder="e.g. Drive digital transformation and improve customer experience"
+                  placeholder="e.g. Drive company transformation and improve employee experience across a targeted..."
                   multiline
                   maxLength={3000}
                   rows={3}

@@ -347,6 +347,12 @@ button.ft-profiletab-country-button {
   color: var(--text-tertiary);
 }
 
+/* T.caption inside pill must inherit button's color */
+.ft-passwordtab__pill .vr-typography-caption {
+  color: inherit;
+  line-height: 1;
+}
+
 .ft-passwordtab__pill--empty {
   background-color: var(--bg-tertiary);
   color: var(--text-tertiary);

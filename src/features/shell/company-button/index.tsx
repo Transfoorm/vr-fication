@@ -359,29 +359,6 @@ export default function CompanyButton() {
                   onClick={() => {
                     closeMenu();
                     navigate('settings/account');
-                    // Set hash to profile tab, then focus First Name field
-                    setTimeout(() => {
-                      window.location.hash = 'profile';
-                      setTimeout(() => {
-                        const input = document.querySelector('[data-field="first-name"]') as HTMLInputElement;
-                        input?.focus();
-                      }, 50);
-                    }, 50);
-                  }}
-                >
-                  <Icon variant="user-pen" size="sm" className="ft-company-button-menu-icon" />
-                  <T.body size="sm" className={`ft-company-button-menu-value ${!user?.firstName || !user?.lastName ? 'ft-company-button-menu-value--placeholder' : ''}`}>
-                    {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'Your Name Here'}
-                  </T.body>
-                </button>
-              </div>
-
-              <div className="ft-company-button-menu-item-wrapper">
-                <button
-                  className="ft-company-button-menu-item"
-                  onClick={() => {
-                    closeMenu();
-                    navigate('settings/account');
                     // Set hash after navigate so Tabs.panels can read it
                     setTimeout(() => {
                       window.location.hash = 'genome';
@@ -418,9 +395,9 @@ export default function CompanyButton() {
                     closeMenu();
                   }}
                 >
-                  <Icon variant="image-plus" size="sm" className="ft-company-button-menu-icon" />
+                  <Icon variant="image-up" size="sm" className="ft-company-button-menu-icon" />
                   <T.body size="sm" className="ft-company-button-menu-value">
-                    {user?.brandLogoUrl ? 'Change Your Logo' : 'Add Your Logo'}
+                    {user?.brandLogoUrl ? 'Update Your Logo' : 'Add Your Brand'}
                   </T.body>
                 </button>
               </div>
@@ -433,14 +410,18 @@ export default function CompanyButton() {
                   onClick={() => {
                     closeMenu();
                     navigate('settings/account');
-                    // Set hash to profile tab
+                    // Set hash to profile tab, then focus Entity field
                     setTimeout(() => {
                       window.location.hash = 'profile';
+                      setTimeout(() => {
+                        const input = document.querySelector('[data-field="entity/organisation"]') as HTMLInputElement;
+                        input?.focus();
+                      }, 50);
                     }, 50);
                   }}
                 >
                   <Edit className="ft-company-button-menu-link-icon" />
-                  <T.body size="sm">Update Profile</T.body>
+                  <T.body size="sm">Update Your Details</T.body>
                 </button>
               </div>
             </div>

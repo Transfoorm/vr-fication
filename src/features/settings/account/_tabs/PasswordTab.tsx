@@ -129,10 +129,14 @@ export function PasswordFields() {
     }
   }, [stage, isPasswordValid]);
 
-  // Blur handler - document click listener handles reset, this is just for cleanup
+  // Blur handler - reset unless we're proceeding to Box 2 (confirming stage)
   const handleBox1Blur = useCallback(() => {
-    // Reset is handled by document click listener
-  }, []);
+    // If we're in confirming stage (valid password, moving to Box 2), don't reset
+    // Otherwise, blur = abandon - reset to fresh
+    if (stage !== 'confirming') {
+      resetToFresh();
+    }
+  }, [stage, resetToFresh]);
 
   // ─────────────────────────────────────────────────────────────────────
   // Box 2 Handlers
@@ -351,11 +355,11 @@ export function PasswordFields() {
               onChange={handleBox2Change}
               onBlur={handleBox2Blur}
               autoComplete="new-password"
-              placeholder="Retype new password"
+              placeholder="Retype password here"
             />
           ) : (
             <div className="ft-passwordtab__input ft-passwordtab__input--empty">
-              {box2State.isDormant ? '' : <T.body size="sm">Retype new password</T.body>}
+              {box2State.isDormant ? '' : <T.body size="sm">← Enter new password</T.body>}
             </div>
           )}
           {/* Only show pill when passwords match, committing, success, or error */}

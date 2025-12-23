@@ -229,17 +229,27 @@ export default function Sidebar() {
         <div className="ly-sidebar-footer-text">
           <div className="ly-sidebar-footer-name">
             <T.body size="sm" weight="semibold">
-              {(user as Record<string, unknown>)?.socialName as string || user?.email?.split('@')[0] || ''}
+              {user?.emailVerified && user?.firstName && user?.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : (user as Record<string, unknown>)?.socialName as string || user?.email?.split('@')[0] || ''}
             </T.body>
           </div>
           <div className="ly-sidebar-footer-email">
-            <T.caption size="xs" className="ly-sidebar-footer-email-text">{user?.email || ''}</T.caption>
+            <T.caption size="xs" className="ly-sidebar-footer-email-text">
+              {user?.emailVerified
+                ? (user as Record<string, unknown>)?.socialName as string || ''
+                : user?.email || ''}
+            </T.caption>
           </div>
         </div>
         <ChevronsUpDown
           className={`ly-sidebar-footer-chevron ${
-            ((user as Record<string, unknown>)?.socialName as string || user?.email?.split('@')[0] || '').length > 12 ||
-            (user?.email || '').length > 14
+            (user?.emailVerified && user?.firstName && user?.lastName
+              ? `${user.firstName} ${user.lastName}`
+              : (user as Record<string, unknown>)?.socialName as string || user?.email?.split('@')[0] || '').length > 12 ||
+            (user?.emailVerified
+              ? ((user as Record<string, unknown>)?.socialName as string || '').length > 14
+              : (user?.email || '').length > 14)
               ? 'ly-sidebar-footer-chevron--hidden'
               : ''
           }`}

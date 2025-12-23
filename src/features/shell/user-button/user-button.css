@@ -198,6 +198,22 @@
   gap: var(--user-button-gap-sm);
 }
 
+.ft-userbutton-menu-header--clickable {
+  cursor: pointer;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  transition: background-color var(--user-button-transition-fast) ease;
+}
+
+.ft-userbutton-menu-header--clickable,
+.ft-userbutton-menu-header--clickable * {
+  cursor: pointer !important;
+  user-select: none !important;
+}
+
+.ft-userbutton-menu-header--clickable:hover {
+  background-color: var(--bg-secondary);
+}
+
 .ft-userbutton-menu-header-icon {
   width: var(--user-button-icon-lg);
   height: var(--user-button-icon-lg);
@@ -306,6 +322,10 @@
 
 .ft-userbutton-menu-item:hover {
   background-color: var(--bg-secondary);
+}
+
+.ft-userbutton-menu-value--placeholder {
+  color: var(--text-tertiary);
 }
 
 /* Theme Toggle Button - reduce padding to match other buttons */

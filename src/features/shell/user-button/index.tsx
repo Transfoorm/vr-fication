@@ -370,7 +370,16 @@ export default function UserButton() {
             ×
           </button>
 
-          <div className="ft-userbutton-menu-header" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="ft-userbutton-menu-header ft-userbutton-menu-header--clickable"
+            onClick={() => {
+              closeAllModals();
+              navigate('settings/account');
+              setTimeout(() => {
+                window.location.hash = 'email';
+              }, 50);
+            }}
+          >
             <div className="ft-userbutton-menu-header-content">
               {user.emailVerified ? (
                 <img
@@ -434,6 +443,23 @@ export default function UserButton() {
               <button
                 onClick={() => {
                   closeAllModals();
+                  navigate('settings/account');
+                  // Set hash to profile tab
+                  setTimeout(() => {
+                    window.location.hash = 'profile';
+                  }, 50);
+                }}
+                className="ft-userbutton-menu-item"
+              >
+                <Icon variant="user-pen" size="xs" />
+                <T.body size="sm">Manage Profile</T.body>
+              </button>
+            </div>
+
+            <div className="ft-userbutton-menu-item-wrapper">
+              <button
+                onClick={() => {
+                  closeAllModals();
                   navigate('settings/account#password');
                 }}
                 className="ft-userbutton-menu-item"
@@ -452,7 +478,20 @@ export default function UserButton() {
                 className="ft-userbutton-menu-item"
               >
                 <Icon variant="sparkles" size="xs" />
-                <T.body size="sm">Your Preferences</T.body>
+                <T.body size="sm">Manage Preferences</T.body>
+              </button>
+            </div>
+
+            <div className="ft-userbutton-menu-item-wrapper">
+              <button
+                onClick={() => {
+                  navigate('settings/plan');
+                  closeAllModals();
+                }}
+                className="ft-userbutton-menu-item"
+              >
+                <Icon variant="gem" size="xs" />
+                <T.body size="sm">Manage Subscription</T.body>
               </button>
             </div>
 
@@ -467,19 +506,6 @@ export default function UserButton() {
               >
                 <ThemeToggle />
                 <span className="ft-userbutton-theme-text"><T.body size="sm">Light / Dark Mode</T.body></span>
-              </button>
-            </div>
-
-            <div className="ft-userbutton-menu-item-wrapper">
-              <button
-                onClick={() => {
-                  navigate('settings/plan');
-                  closeAllModals();
-                }}
-                className="ft-userbutton-menu-item"
-              >
-                <Icon variant="gem" size="xs" />
-                <T.body size="sm">Manage Subscription</T.body>
               </button>
             </div>
 

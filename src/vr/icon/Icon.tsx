@@ -98,6 +98,8 @@ import {
   Venus,
   Mars,
   UsersRound,
+  // Image icons
+  ImageUp,
 } from 'lucide-react';
 
 // Icon registry - maps string variants to Lucide components
@@ -201,6 +203,9 @@ const iconRegistry = {
   'venus': Venus,
   'mars': Mars,
   'users-round': UsersRound,
+
+  // Image icons
+  'image-up': ImageUp,
 } as const;
 
 export type IconVariant = keyof typeof iconRegistry;

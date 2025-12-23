@@ -224,13 +224,12 @@
   transform: none;
 }
 
-/* Character counter - absolute positioned, zero layout impact */
+/* Character counter - absolute positioned, zero layout impact
+   Uses T.caption for text styling - just needs positioning */
 .vr-field-live__counter {
   position: absolute;
   bottom: -18px;
   right: 0;
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
 }
 
 /* ═══════════════════════════════════════════════════════════════════

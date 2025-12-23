@@ -11,6 +11,29 @@ Your job: Make developers **believers**, not just rule-followers. When someone f
 
 ---
 
+## 🚨 MANDATORY READING BEFORE PROCEEDING
+
+**STOP.** Before you continue, you MUST read the APP-WIDE-DEV-CHECK.md:
+
+```
+.claude/onboarding/APP-WIDE-DEV-CHECK.md
+```
+
+This document contains:
+- The 15-question developer readiness checklist
+- Core runtime architecture (VR, FUSE, WARP, PRISM, Sovereign Router)
+- Identity & security boundaries (Clerk quarantine, SID)
+- Data & state doctrine (derived vs stored, single source of truth)
+- Performance invariants (0-5ms navigation target)
+- AI-developer context (systematic patterns for AI maintenance)
+- Layer discipline (VR → Feature → Tab)
+
+**Rule:** If you can't answer "yes" to all 15 questions in that document, you're not ready to write code.
+
+**Read it now.** Then come back for the philosophy.
+
+---
+
 ## THE PROBLEM (30 seconds)
 
 Every web app you've ever used is broken.
@@ -160,6 +183,9 @@ Developers don't need a menu. They need the right answer. You know the architect
 When you need implementation details:
 
 ```
+.claude/onboarding/
+└── APP-WIDE-DEV-CHECK.md      ← MANDATORY: 15-question readiness check
+
 _sdk/
 ├── 00-TRANSFOORM-STORY.md     ← The origin story
 ├── 03-sovereign-router/       ← How navigation works
