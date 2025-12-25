@@ -136,6 +136,8 @@ export interface ThreadMetadata {
   messageCount: number;
   latestMessageAt: number;
   subject: string;
+  snippet: string;
+  latestFrom: { name: string; email: string };
   participants: Array<{ name: string; email: string }>;
   hasUnread: boolean;
 }
@@ -198,6 +200,8 @@ export function computeThreadMetadata(
     messageCount: messages.length,
     latestMessageAt: latest.receivedAt,
     subject: latest.subject,
+    snippet: latest.snippet,
+    latestFrom: { name: latest.from.name, email: latest.from.email },
     participants: Array.from(participantMap.values()),
     hasUnread,
   };

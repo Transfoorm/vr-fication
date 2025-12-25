@@ -179,7 +179,7 @@
   --page-content-padding-top: 25px;         /* 🟡 Set to 40px when --page-header-display: none */
   --page-content-padding-left: 25px;     /* Left content padding */
   --page-content-padding-right: 25px;    /* Right content padding */
-  --page-content-padding-bottom: 60px;   /* Bottom content padding */
+  --page-content-padding-bottom: 25px;   /* Bottom content padding */
 
   /* Footer */
   --footer-height: 20px;                 /* Bottom footer bar height */

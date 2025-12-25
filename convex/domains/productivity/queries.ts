@@ -152,7 +152,8 @@ export const getThreadState = query({
         .withIndex("by_external_thread_id", (q) => q.eq("externalThreadId", args.threadId))
         .collect();
     } else {
-      const orgId = user.orgSlug || "";
+      // 🛡️ SID-ORG: Use userId directly until orgs domain is implemented
+      const orgId = user._id as string;
       messages = await ctx.db
         .query("productivity_email_Index")
         .withIndex("by_external_thread_id", (q) => q.eq("externalThreadId", args.threadId))
@@ -307,8 +308,9 @@ export const getEmailMessage = query({
     }
 
     // Check authorization (org-scoping)
+    // 🛡️ SID-ORG: Use userId directly until orgs domain is implemented
     if (rank !== "admiral") {
-      const orgId = user.orgSlug || "";
+      const orgId = user._id as string;
       if (message.orgId !== orgId) {
         throw new Error("Unauthorized: Message not in your organization");
       }

@@ -28,6 +28,7 @@ import { Field, Card, T, Stack } from '@/vr';
 import { VerifyEmail } from '@/app/(clerk)/features/VerifyEmail';
 import { VerifySecondary } from '@/app/(clerk)/features/VerifySecondary';
 import { swapEmailsToPrimary, deleteSecondaryEmail } from '@/app/(clerk)/actions/email';
+import type { EmailAccount } from '@/features/productivity/email-console/types';
 import { refreshSessionAfterUpload } from '@/app/actions/user-mutations';
 import { useProductivityData } from '@/hooks/useProductivityData';
 
@@ -357,7 +358,7 @@ export function EmailFields() {
             </div>
           ) : (
             <div className="ft-emailtab-connected-accounts">
-              {connectedAccounts.map((account) => (
+              {connectedAccounts.map((account: EmailAccount) => (
                 <div key={account._id} className="ft-emailtab-account-row">
                   <div className="ft-emailtab-account-info">
                     <T.body size="md" weight="medium">

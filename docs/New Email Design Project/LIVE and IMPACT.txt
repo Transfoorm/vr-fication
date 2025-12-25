@@ -1,8 +1,3 @@
-Here is a clean, copy-pasteable UI + function statement for the developer.
-No fluff. No options. No ambiguity.
-
-⸻
-
 TRANSFOORM EMAIL — UI & FUNCTION STATEMENT (DEV)
 
 Core Mental Model
@@ -161,10 +156,65 @@ If implementation violates that sentence, it’s wrong.
 
 ⸻
 
-If you want next, I can produce:
-	•	keyboard shortcut spec
-	•	exact button copy
-	•	AI confidence thresholds
-	•	error states + undo timing
+RESPONSIVE MAILBOX RAIL
 
-But this document is sufficient for a developer to build without ambiguity.
+This is not a user preference and not a feature toggle.
+
+The Mailbox Rail is responsive infrastructure, not interactive UI.
+
+On wide viewports, the Mailbox Rail is rendered as a persistent column.
+On narrow viewports, the Mailbox Rail automatically collapses into a header dropdown above the Thread List.
+
+This behavior is:
+	•	Breakpoint-driven
+	•	Non-configurable
+	•	Non-persistent
+	•	Not user-controlled
+
+There must be:
+	•	❌ No “show/hide mailbox” button
+	•	❌ No saved preference
+	•	❌ No manual toggle
+	•	❌ No animation implying choice
+
+The system decides based solely on available horizontal space.
+
+Rationale:
+	•	MacBook Air users already lose width to the global Transfoorm sidebar
+	•	Navigation is lower priority than Thread List and Reading Pane
+	•	Email scanning and reading must never be width-starved
+	•	Cognitive load is reduced when layout adapts without asking
+
+If the Mailbox Rail is treated like a sidebar or user-toggleable panel, the implementation is wrong.
+
+This rule applies only to Live mode.
+Impact mode has its own layout logic and is not governed by this constraint.
+
+⸻
+
+Canonical Model
+
+Primary container: In Play
+
+This represents active conversational momentum.
+It is not a folder, task list, or inbox variant.
+
+⸻
+
+Authoritative States (exclusive)
+	•	With Me
+Responsibility and next action sit with the user.
+	•	With Them
+Responsibility is external; user is waiting.
+	•	Done
+No active momentum. Conversation is finished or archived.
+
+⸻
+
+Why This Is Locked
+	•	Language expresses momentum ownership, not urgency or judgment
+	•	Terminology is human, neutral, and globally readable
+	•	No verbs, no “awaiting”, no productivity theatre
+	•	Visual scan is optimized (shared prefix)
+	•	Maps cleanly to Live → Impact workflow
+	•	Stable for AI, analytics, automation, and future features
