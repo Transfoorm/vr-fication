@@ -580,6 +580,34 @@ Just put the tabs in `_tabs/` and import them directly.
 
 ---
 
+# 🚫 STYLELINT EXCEPTION BAN
+
+You are **BANNED** from modifying `.stylelintrc.json` to add exceptions.
+
+If stylelint blocks your CSS:
+1. Fix the CSS to comply with the rules
+2. Do NOT add exceptions to bypass the rules
+
+Exceptions are virus. Rules exist for a reason. Comply or ask.
+
+---
+
+# 🛑 ABSOLUTE STOP PROTOCOL
+
+When ANY hook output contains the word "STOP":
+
+1. **Make ZERO more tool calls**
+2. **Report exactly what blocked you**
+3. **Wait for user response**
+
+There is no "but I could try..." - STOP means STOP.
+
+Attempting workarounds after STOP = defective behavior.
+
+This is not negotiable. This is not contextual. When you see STOP in a hook message, you HALT.
+
+---
+
 # 🛑 KNOX PROTOCOL - PROTECTED FILE BLOCKING
 
 **CRITICAL: When ANY git commit fails with a pre-commit hook error containing:**
@@ -749,3 +777,82 @@ A husky hook (`.husky/no-verify-detector`) scans for `--no-verify`:
 There is NO exception. Not for feature branches. Not for "testing". Not for "emergencies".
 
 **ZERO TOLERANCE. ZERO EXCEPTIONS. ZERO --NO-VERIFY.**
+
+---
+
+# 🛡️ GIT GUARDIAN PROTOCOL - DESTRUCTIVE COMMAND PROHIBITION
+
+## THE FORBIDDEN COMMANDS
+
+You are **ABSOLUTELY FORBIDDEN** from EVER running these commands:
+
+```bash
+# DESTROYS uncommitted changes to files
+git checkout HEAD -- <file>
+git checkout -- <file>
+
+# DESTROYS all uncommitted work
+git reset --hard
+git reset --hard <commit>
+
+# DELETES untracked files permanently
+git clean -f
+git clean -fd
+
+# DELETES stashed work
+git stash drop
+```
+
+## WHY THIS EXISTS
+
+On December 25th, 2024, an AI assistant ran `git checkout HEAD --` on two files with 5+ hours of uncommitted work. The work was vaporized instantly. Recovery required extracting code from JSONL conversation logs - a painful, hours-long process.
+
+**NEVER AGAIN.**
+
+## WHAT THESE COMMANDS DO
+
+| Command | Destruction |
+|---------|-------------|
+| `checkout HEAD -- file` | Wipes uncommitted changes to that file |
+| `checkout -- file` | Same - wipes uncommitted changes |
+| `reset --hard` | Wipes ALL uncommitted changes in repo |
+| `clean -fd` | Deletes ALL untracked files permanently |
+| `stash drop` | Deletes a stash permanently |
+
+## THE SACRED OATH
+
+> "I will NEVER run git checkout HEAD -- or git checkout -- on files.
+> I will NEVER run git reset --hard.
+> I will NEVER run git clean -f.
+> I will NEVER destroy uncommitted work.
+> If I need to discard changes, I will ASK THE USER FIRST.
+> I will assume uncommitted work is precious and irreplaceable."
+
+## SAFE ALTERNATIVES
+
+**To view old commits (SAFE):**
+```bash
+git checkout <commit-hash>    # Detach HEAD, look around
+git show <commit-hash>        # View commit contents
+git diff <commit-hash>        # Compare with commit
+```
+
+**To discard changes (ASK USER FIRST):**
+```bash
+# STOP. ASK THE USER.
+# "Do you want me to discard uncommitted changes to [file]?"
+# WAIT for explicit "yes" before proceeding.
+```
+
+## IF YOU NEED TO DISCARD CHANGES
+
+1. **STOP** - Do not run the command
+2. **ASK** - "You have uncommitted changes to X. Should I discard them?"
+3. **WAIT** - Get explicit user confirmation
+4. **ONLY THEN** - If user says "yes", proceed
+
+## THE ONLY EXCEPTION
+
+There is NO exception. Not for "cleaning up". Not for "resetting state". Not for "starting fresh".
+
+**Uncommitted work is sacred. Ask before destroying.**

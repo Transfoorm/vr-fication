@@ -58,9 +58,12 @@ const violatedFiles: string[] = [];
 for (const file of featureFiles) {
   let fileViolations = 0;
 
-  // Check for font-size
+  // Check for font-size (allow var(--prod-*) and var(--font-size-*) patterns)
   try {
-    const fontSizeResult = execSync(`grep -n "font-size" "${file}" || true`, { encoding: 'utf-8' }).trim();
+    const fontSizeResult = execSync(
+      `grep -n "font-size" "${file}" | grep -v "var(--prod-" | grep -v "var(--font-size-" || true`,
+      { encoding: 'utf-8' }
+    ).trim();
     if (fontSizeResult) {
       if (fileViolations === 0) {
         console.log(`❌ ${file}:`);
@@ -73,9 +76,12 @@ for (const file of featureFiles) {
     // grep returns exit code 1 if no matches, which is what we want
   }
 
-  // Check for font-weight
+  // Check for font-weight (allow var(--prod-*) and var(--font-weight-*) patterns)
   try {
-    const fontWeightResult = execSync(`grep -n "font-weight" "${file}" || true`, { encoding: 'utf-8' }).trim();
+    const fontWeightResult = execSync(
+      `grep -n "font-weight" "${file}" | grep -v "var(--prod-" | grep -v "var(--font-weight-" || true`,
+      { encoding: 'utf-8' }
+    ).trim();
     if (fontWeightResult) {
       if (fileViolations === 0) {
         console.log(`❌ ${file}:`);

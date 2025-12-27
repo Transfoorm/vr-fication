@@ -1,1212 +1,406 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   EMAIL CONSOLE FEATURE - Consolidated Styles
+   EMAIL CONSOLE - Wireframe Stage
    /src/features/productivity/email-console/email-console.css
 
-   DUAL-MODE EMAIL SYSTEM:
-   - LIVE MODE: Traditional Outlook-style (trust + familiarity)
-   - IMPACT MODE: Three-pane triage console (outcomes + agency)
-
-   Same data, different action grammars.
-
-   EMAIL DOCTRINE:
-   - High density (see more, scroll less)
-   - Strong state indicators (awaiting-me = bold + orange)
-   - Minimal chrome (no decorative borders)
-   - Actions inverted (Resolve/Promote primary, Reply secondary)
+   PRODUCTIVITY TOKEN COMPLIANT - Uses only var(--prod-*) references
+   No raw pixel values. No global typography binding.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 
-/* ╔═══════════════════════════════════════════════════════════════════════════╗
-   ║  SECTION 1: SHARED / GLOBAL STYLES                                        ║
-   ╚═══════════════════════════════════════════════════════════════════════════╝ */
-
 /* ─────────────────────────────────────────────────────────────────────────────
-   Header - View Mode Toggle (Live | Impact)
+   Container - Fill available height using calc with shell variables
    ───────────────────────────────────────────────────────────────────────────── */
 
-.ft-email-console-header {
+.ft-email {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-lg) var(--space-xl);
-  border-bottom: 2px solid var(--border-light, #e5e7eb);
-  background: var(--surface-raised, #fafafa);
+  flex-direction: column;
+
+  /* Explicit height = viewport minus shell elements (topbar, footer, page-arch padding)
+     Extra 2px buffer prevents micro-overflow that triggers page scrollbar */
+  height: calc(100vh - var(--topbar-height) - var(--footer-height) - var(--page-content-padding-top) - var(--page-content-padding-bottom) - var(--prod-space-xxs));
+  gap: var(--prod-space-xl);
+  padding: var(--prod-space-xl);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Header
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__header {
   flex-shrink: 0;
+  padding: var(--prod-space-xl) var(--prod-space-2xl);
+  border: 1px solid var(--prod-border-normal);
+  border-radius: var(--prod-radius-md);
+  background: var(--prod-bg-surface);
 }
 
-.ft-email-console-header__title {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.ft-email-view-toggle {
-  padding: var(--space-sm) var(--space-lg);
-  border: 2px solid var(--accent-primary, #3b82f6);
-  border-radius: var(--radius-md, 8px);
-  background: linear-gradient(135deg, rgb(59 130 246 / 5%), transparent);
-  color: var(--accent-primary, #3b82f6);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgb(59 130 246 / 10%);
-}
-
-.ft-email-view-toggle:hover {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgb(59 130 246 / 25%);
-  border-color: #2563eb;
-}
-
-.ft-email-view-toggle--active {
-  background: linear-gradient(135deg, #10b981, #059669);
-  border-color: #10b981;
-  color: #fff;
-  box-shadow: 0 2px 8px rgb(16 185 129 / 20%);
-}
-
-.ft-email-view-toggle--active:hover {
-  background: linear-gradient(135deg, #059669, #047857);
-  border-color: #059669;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgb(16 185 129 / 30%);
-}
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Empty State - Connect Email
+   Three-Rail Body - Takes remaining space
    ───────────────────────────────────────────────────────────────────────────── */
 
-.ft-email-console-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: calc(100vh - var(--shell-header-height, 80px));
-  background: var(--surface-base);
-}
-
-.ft-email-console-empty__content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-lg);
-  max-width: 400px;
-  text-align: center;
-  padding: var(--space-xl);
-}
-
-.ft-email-console-connect-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-md) var(--space-xl);
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-  color: var(--text-inverse);
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  transition: all var(--duration-fast) var(--easing);
-  box-shadow: 0 2px 8px rgb(59 130 246 / 20%);
-  margin-top: var(--space-sm);
-}
-
-.ft-email-console-connect-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgb(59 130 246 / 30%);
-}
-
-.ft-email-console-connect-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgb(59 130 246 / 20%);
-}
-
-.ft-email-console-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-md);
-  background: rgb(239 68 68 / 10%);
-  border: 1px solid rgb(239 68 68 / 30%);
-  border-radius: var(--radius-md);
-  text-align: center;
-}
-
-
-/* ╔═══════════════════════════════════════════════════════════════════════════╗
-   ║  SECTION 2: LIVE MODE - Traditional Two-Rail Layout                       ║
-   ║  Trust + Familiarity | Gmail/Outlook style                                ║
-   ╚═══════════════════════════════════════════════════════════════════════════╝ */
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Live View Container (35% + 65%)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-live-view {
+.ft-email__body {
+  flex: 1;
   display: grid;
-  grid-template-columns: 35% 65%;
+
+  /* 5 columns: mailbox | handle | threads | handle | reading */
+  grid-template-columns: var(--prod-mailbox-width) var(--prod-resize-handle) 1fr var(--prod-resize-handle) 2fr;
   gap: 0;
-  height: calc(100vh - var(--shell-header-height, 80px));
-  overflow: hidden;
-  background: var(--surface-base, #fff);
+  min-height: 0;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Live Mode: Thread List (Left 35%)
+   Resize Handles - Invisible until hover
    ───────────────────────────────────────────────────────────────────────────── */
 
-.ft-live-view__list {
-  border-right: 1px solid var(--border-light, #e5e7eb);
-  overflow: hidden;
+.ft-email__resize-handle {
+  width: var(--prod-resize-handle);
+  cursor: col-resize;
+  position: relative;
+
+  /* Invisible - no background, just the hit area */
+}
+
+.ft-email__resize-handle:hover {
+  /* Optional: subtle highlight on hover */
+  background: rgb(0 0 0 / 3%);
+}
+
+.ft-email__resize-handle:active {
+  background: rgb(0 0 0 / 6%);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Rail 1: Mailbox
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__mailbox {
+  padding: var(--prod-space-md);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: var(--surface-raised, #fafafa);
+  gap: var(--prod-space-xxs);
 }
 
-.ft-live-view__list-header {
-  padding: var(--space-lg);
-  border-bottom: 1px solid var(--border-light, #e5e7eb);
+.ft-email__folder {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  background: var(--surface-base, #fff);
-  flex-shrink: 0;
+  align-items: center;
+  gap: var(--prod-space-lg);
+  padding: var(--prod-space-md) var(--prod-space-xl);
+  border-radius: var(--prod-radius-sm);
+  cursor: pointer;
+  font-size: var(--prod-text-body-sm);
+  color: var(--prod-text-secondary);
+  transition: background var(--prod-transition-fast);
 }
 
-.ft-live-view__threads {
+.ft-email__folder:hover {
+  background: var(--prod-bg-section-hover);
+}
+
+.ft-email__folder--selected {
+  background: var(--prod-bg-selected);
+  color: var(--prod-selected-text);
+  font-weight: var(--prod-weight-medium);
+}
+
+.ft-email__folder--selected:hover {
+  background: var(--prod-bg-selected-hover);
+}
+
+.ft-email__folder-icon {
+  font-size: var(--prod-icon-sm);
+  width: var(--prod-folder-icon-width);
+  text-align: center;
+  opacity: 0.7;
+  filter: grayscale(100%);
+}
+
+.ft-email__folder--selected .ft-email__folder-icon {
+  opacity: 1;
+}
+
+.ft-email__folder-label {
   flex: 1;
-  overflow: hidden auto;
 }
 
-.ft-live-view__empty {
-  padding: var(--space-xl);
+.ft-email__folder-count {
+  font-size: var(--prod-text-micro);
+  color: var(--prod-text-muted);
+  background: var(--prod-bg-badge);
+  padding: var(--prod-space-xxs) var(--prod-space-sm);
+  border-radius: var(--prod-radius-pill);
+  min-width: var(--prod-badge-min-width);
   text-align: center;
 }
 
-.ft-live-view__no-selection {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+.ft-email__folder--selected .ft-email__folder-count {
+  background: var(--prod-selected-bg);
+  color: var(--prod-selected-contrast);
 }
+
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Live Mode: Thread Item
+   Rail 2: Thread List
    ───────────────────────────────────────────────────────────────────────────── */
 
-.ft-live-thread {
-  padding: var(--space-md) var(--space-lg);
-  border-bottom: 1px solid var(--border-light, #e5e7eb);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  background: var(--surface-base, #fff);
+.ft-email__threads {
+  border: 1px solid var(--prod-border-normal);
+  border-radius: var(--prod-radius-md);
+  background: var(--prod-bg-surface);
+  overflow: hidden; /* Clips scrollbar to border-radius */
+  display: flex;
+  flex-direction: column;
+  padding-top: 0; /* Gap at top for scrollbar to clear curve */
+  padding-bottom: 0; /* Gap at bottom for scrollbar to clear curve */
 }
 
-.ft-live-thread:hover {
-  background: var(--surface-hover, #f9fafb);
+.ft-email__threads-scroll {
+  flex: 1;
+  padding: var(--prod-space-xl);
+  overflow-y: auto;
+
+  /* Firefox thin scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--prod-border-normal) transparent;
 }
 
-.ft-live-thread--selected {
-  background: linear-gradient(to right, rgb(59 130 246 / 8%), transparent);
-  border-left: 3px solid var(--accent-primary, #3b82f6);
-  padding-left: calc(var(--space-lg) - 3px);
+/* Webkit (Chrome/Safari) thin scrollbar */
+.ft-email__threads-scroll::-webkit-scrollbar {
+  width: var(--prod-scrollbar-width) !important;
 }
 
-.ft-live-thread--unread {
-  background: var(--surface-base, #fff);
+.ft-email__threads-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
 }
 
-.ft-live-thread__header {
+.ft-email__threads-scroll::-webkit-scrollbar-thumb {
+  background: var(--prod-border-normal) !important;
+  border-radius: var(--prod-radius-xs) !important;
+}
+
+.ft-email__threads-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--prod-border-hover) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Rail 3: Reading Pane
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__reading {
+  border: 1px solid var(--prod-border-normal);
+  border-radius: var(--prod-radius-md);
+  background: var(--prod-bg-surface);
+  overflow: hidden; /* Clips scrollbar to border-radius */
+  display: flex;
+  flex-direction: column;
+  padding-top: 0; /* Gap at top for scrollbar to clear curve */
+}
+
+.ft-email__reading-scroll {
+  flex: 1;
+  padding: var(--prod-space-xl);
+  overflow-y: auto;
+
+  /* Firefox thin scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--prod-border-normal) transparent;
+}
+
+/* Webkit (Chrome/Safari) thin scrollbar */
+.ft-email__reading-scroll::-webkit-scrollbar {
+  width: var(--prod-scrollbar-width) !important;
+}
+
+.ft-email__reading-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.ft-email__reading-scroll::-webkit-scrollbar-thumb {
+  background: var(--prod-border-normal) !important;
+  border-radius: var(--prod-radius-xs) !important;
+}
+
+.ft-email__reading-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--prod-border-hover) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread List Items
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Section headers - minimal and modern */
+.ft-email__section-header {
+  font-size: var(--prod-text-micro);
+  font-weight: var(--prod-weight-semibold);
+  color: var(--prod-text-muted);
+  padding: var(--prod-space-xl) var(--prod-space-xl) var(--prod-space-sm);
+  background: var(--prod-bg-section);
+  border-bottom: 1px solid var(--prod-border-light);
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-md);
-  margin-bottom: var(--space-xs);
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
 }
 
-.ft-live-thread__sender {
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.ft-email__section-header:hover {
+  background: var(--prod-bg-section-hover);
 }
 
-.ft-live-thread__subject {
-  margin-bottom: var(--space-xs);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.ft-email__section-chevron {
+  font-size: var(--prod-icon-md);
+  transition: transform var(--prod-transition-normal);
+  transform: rotate(90deg);
 }
 
-.ft-live-thread__preview {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  opacity: 0.8;
+.ft-email__section-chevron--collapsed {
+  transform: rotate(0deg);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   Live Mode: Reading Pane (Right 65%)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-live-view__reading {
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background: var(--surface-base, #fff);
+.ft-email__thread-item {
+  padding: var(--prod-space-xl);
+  border-bottom: 1px solid var(--prod-border-light);
+  cursor: pointer;
+  transition: background var(--prod-transition-fast);
 }
 
-.ft-live-reading__header {
-  padding: var(--space-lg) var(--space-xl);
-  border-bottom: 1px solid var(--border-light, #e5e7eb);
-  background: var(--surface-raised, #fafafa);
-  flex-shrink: 0;
+.ft-email__thread-item:hover {
+  background: var(--prod-bg-hover);
 }
 
-.ft-live-reading__messages {
-  flex: 1;
-  overflow: hidden auto;
-  padding: var(--space-lg);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
+.ft-email__thread-item--selected {
+  background: var(--prod-bg-selected);
 }
 
-.ft-live-reading__actions {
-  display: flex;
-  gap: var(--space-sm);
-  padding: var(--space-md) var(--space-xl);
-  border-top: 1px solid var(--border-light, #e5e7eb);
-  background: var(--surface-raised, #fafafa);
-  flex-shrink: 0;
+.ft-email__thread-item--selected:hover {
+  background: var(--prod-bg-selected-hover);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   Live Mode: Message Card
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-live-message {
-  padding: var(--space-lg);
-  border: 1px solid var(--border-light, #e5e7eb);
-  border-radius: var(--radius-md, 8px);
-  background: var(--surface-raised, #fafafa);
-}
-
-.ft-live-message__header {
+.ft-email__thread-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--space-sm);
-  gap: var(--space-md);
+  gap: var(--prod-space-md);
+  margin-bottom: var(--prod-space-xxs);
 }
 
-.ft-live-message__from {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ft-live-message__recipients {
-  margin-bottom: var(--space-md);
-  padding-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--border-light, #e5e7eb);
-}
-
-.ft-live-message__body {
-  line-height: 1.6;
-  margin-bottom: var(--space-sm);
-}
-
-.ft-live-message__attachments {
-  padding: var(--space-sm) var(--space-md);
-  background: var(--surface-base, #fff);
-  border-radius: var(--radius-sm, 4px);
-  border: 1px solid var(--border-light, #e5e7eb);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Live Mode: Action Buttons
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-live-action {
-  padding: var(--space-sm) var(--space-lg);
-  border: 1px solid var(--border-medium, #d1d5db);
-  border-radius: var(--radius-md, 8px);
-  background: var(--surface-base, #fff);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.ft-live-action:hover {
-  background: var(--surface-hover, #f9fafb);
-  border-color: var(--border-dark, #9ca3af);
-}
-
-.ft-live-action--primary {
-  background: var(--accent-primary, #3b82f6);
-  border-color: var(--accent-primary, #3b82f6);
-  color: #fff;
-}
-
-.ft-live-action--primary:hover {
-  background: var(--accent-primary-hover, #2563eb);
-  border-color: var(--accent-primary-hover, #2563eb);
-}
-
-
-/* ╔═══════════════════════════════════════════════════════════════════════════╗
-   ║  SECTION 3: IMPACT MODE - Three-Rail Triage Console                       ║
-   ║  Outcomes + Agency | Big 3: Promote, Link, Resolve                        ║
-   ╚═══════════════════════════════════════════════════════════════════════════╝ */
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Impact View Container (30% + 45% + 25%)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-impact-view {
-  display: grid;
-  grid-template-columns: 30% 45% 25%;
-  gap: 0;
-  height: calc(100vh - var(--shell-header-height, 80px));
-  overflow: hidden;
-  background: var(--surface-base);
-}
-
-.ft-impact-view__queue {
-  border-right: 1px solid var(--border-light, #e5e7eb);
-  overflow: hidden auto;
-  background: var(--surface-raised, #fafafa);
-  box-shadow: inset -1px 0 0 rgb(0 0 0 / 3%);
-}
-
-.ft-impact-view__conversation {
-  overflow: hidden auto;
-  background: var(--surface-base);
-  padding: var(--space-lg);
-}
-
-.ft-impact-view__intelligence {
-  border-left: 1px solid var(--border-light, #e5e7eb);
-  overflow: hidden auto;
-  background: var(--surface-raised, #fafafa);
-  padding: var(--space-md);
-  box-shadow: inset 1px 0 0 rgb(0 0 0 / 3%);
-}
-
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Resolution Queue (Left Rail - 30%)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-resolution-queue {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
-.ft-resolution-queue__filters {
-  display: flex;
-  gap: var(--space-xs);
-  padding: var(--space-md);
-  border-bottom: 1px solid var(--border-light);
-  background: var(--surface-raised);
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-
-.ft-resolution-filter {
-  padding: var(--space-xs) var(--space-sm);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-sm);
-  background: var(--surface-base);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.ft-resolution-filter:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-medium);
-}
-
-.ft-resolution-filter--active {
-  background: var(--accent-primary);
-  color: var(--text-inverse);
-  border-color: var(--accent-primary);
-}
-
-.ft-resolution-filter--active:hover {
-  background: var(--accent-primary-hover);
-  border-color: var(--accent-primary-hover);
-}
-
-.ft-resolution-queue__list {
-  flex: 1;
-  overflow: hidden auto;
-}
-
-.ft-resolution-queue__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-sm);
-  padding: var(--space-xl);
-  text-align: center;
-  color: var(--text-tertiary);
-}
-
-.ft-resolution-queue__empty-hint {
-  font-style: italic;
-  opacity: 0.7;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Resolution Queue: Thread Item
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-resolution-thread {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
-  padding: var(--space-md);
-  border-bottom: 1px solid var(--border-light, #e5e7eb);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.ft-resolution-thread:hover {
-  background: var(--surface-hover, #f9fafb);
-  transform: translateX(4px);
-  border-left: 3px solid var(--border-medium, #d1d5db);
-  padding-left: calc(var(--space-md) - 3px);
-}
-
-.ft-resolution-thread--selected {
-  background: linear-gradient(to right, rgb(59 130 246 / 8%), transparent);
-  border-left: 4px solid var(--accent-primary, #3b82f6);
-  padding-left: calc(var(--space-md) - 4px);
-  box-shadow: inset 0 0 0 1px rgb(59 130 246 / 10%);
-}
-
-.ft-resolution-thread--selected:hover {
-  background: linear-gradient(to right, rgb(59 130 246 / 12%), transparent);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Resolution Queue: State Badge
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-resolution-thread__state {
-  flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-top: 6px;
-}
-
-.ft-resolution-thread__state--awaiting-me {
-  background: var(--status-warning, #f59e0b);
-  box-shadow: 0 0 8px rgb(245 158 11 / 40%);
-}
-
-.ft-resolution-thread__state--awaiting-them {
-  background: var(--status-info, #3b82f6);
-  opacity: 0.5;
-}
-
-.ft-resolution-thread__state--resolved {
-  background: var(--status-success, #10b981);
-  opacity: 0.6;
-}
-
-.ft-resolution-thread__state--none {
-  background: var(--border-medium, #d1d5db);
-  opacity: 0.2;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Resolution Queue: Thread Content
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-resolution-thread__content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.ft-resolution-thread__participants {
-  color: var(--text-primary, #111827);
+.ft-email__thread-sender {
+  font-size: var(--prod-text-body-sm);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.ft-resolution-thread--urgent .ft-resolution-thread__participants {
-  color: var(--status-warning, #f59e0b);
-  background: linear-gradient(to right, rgb(245 158 11 / 8%), transparent);
-  padding: 2px 6px;
-  margin: -2px -6px;
-  border-radius: 4px;
-}
-
-.ft-resolution-thread__subject {
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ft-resolution-thread--urgent .ft-resolution-thread__subject {
-  color: var(--text-primary);
-}
-
-.ft-resolution-thread__meta {
-  color: var(--text-tertiary);
-}
-
-.ft-resolution-thread__unread {
-  position: absolute;
-  right: var(--space-md);
-  top: 50%;
-  transform: translateY(-50%);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent-primary);
-  flex-shrink: 0;
-}
-
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Conversation Pane (Center - 45%)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-conversation-pane {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
-.ft-conversation-pane__header {
-  padding: var(--space-lg);
-  border-bottom: 1px solid var(--border-light);
-  background: var(--surface-base);
-  flex-shrink: 0;
-}
-
-.ft-conversation-pane__subject {
-  margin: 0 0 var(--space-sm) 0;
-  color: var(--text-primary);
-  line-height: 1.3;
-}
-
-.ft-conversation-pane__participants {
-  color: var(--text-secondary);
-}
-
-.ft-conversation-pane__messages {
-  flex: 1;
-  overflow: hidden auto;
-  padding: var(--space-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.ft-conversation-pane__actions {
-  display: flex;
-  gap: var(--space-sm);
-  padding: var(--space-md) var(--space-lg);
-  border-top: 1px solid var(--border-light);
-  background: var(--surface-base);
-  flex-shrink: 0;
-}
-
-.ft-conversation-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: var(--space-xl);
-}
-
-.ft-conversation-empty__content {
-  text-align: center;
-  color: var(--text-tertiary);
-}
-
-.ft-conversation-empty__hint {
-  opacity: 0.7;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Conversation Pane: Message Item
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-conversation-message {
-  padding: var(--space-lg);
-  border: 1px solid var(--border-light, #e5e7eb);
-  border-radius: var(--radius-md, 8px);
-  background: var(--surface-raised, #fff);
-  position: relative;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
-  transition: all 0.2s ease;
-}
-
-.ft-conversation-message:hover {
-  box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
-  border-color: var(--border-medium, #d1d5db);
-}
-
-.ft-conversation-message--urgent {
-  border-left: 4px solid var(--status-warning, #f59e0b);
-  padding-left: calc(var(--space-lg) - 3px);
-  background: linear-gradient(to right, rgb(245 158 11 / 3%), transparent);
-}
-
-.ft-conversation-message__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: var(--space-sm);
-  gap: var(--space-md);
-}
-
-.ft-conversation-message__from {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-xs);
-  flex: 1;
   min-width: 0;
 }
 
-.ft-conversation-message__from-name {
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.ft-email__thread-item--unread .ft-email__thread-sender {
+  font-weight: var(--prod-weight-semibold);
 }
 
-.ft-conversation-message__from-email {
-  color: var(--text-tertiary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ft-conversation-message__date {
-  color: var(--text-tertiary);
+.ft-email__thread-date {
+  font-size: var(--prod-text-micro);
+  color: var(--prod-text-muted);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.ft-conversation-message__recipients {
-  color: var(--text-secondary);
-  margin-bottom: var(--space-sm);
+.ft-email__thread-subject {
+  font-size: var(--prod-text-caption);
+  color: var(--prod-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: var(--prod-space-xxs);
 }
 
-.ft-conversation-message__recipients-label {
-  margin-right: var(--space-xs);
-}
-
-.ft-conversation-message__body {
-  color: var(--text-primary);
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  margin-bottom: var(--space-sm);
-}
-
-.ft-conversation-message__attachments {
-  color: var(--text-secondary);
-  padding: var(--space-xs) var(--space-sm);
-  background: var(--surface-base);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-light);
-  display: inline-block;
-  margin-bottom: var(--space-sm);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Conversation Pane: Resolution State Badge
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-conversation-message__state {
-  position: absolute;
-  top: var(--space-lg);
-  right: var(--space-lg);
-  padding: 6px 12px;
-  border-radius: 16px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
-}
-
-.ft-conversation-message__state--awaiting-me {
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  color: #92400e;
-  border: 1.5px solid #fbbf24;
-}
-
-.ft-conversation-message__state--awaiting-them {
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-  color: #1e40af;
-  border: 1.5px solid #60a5fa;
-}
-
-.ft-conversation-message__state--resolved {
-  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-  color: #065f46;
-  border: 1.5px solid #34d399;
-}
-
-.ft-conversation-message__state--none {
-  display: none;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Conversation Pane: Action Buttons (Secondary)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-conversation-action {
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-sm);
-  background: var(--surface-raised);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.ft-conversation-action:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-dark);
-  color: var(--text-primary);
-}
-
-.ft-conversation-action--secondary {
-  /* Secondary actions are smaller, less prominent */
+.ft-email__thread-snippet {
+  font-size: var(--prod-text-caption);
+  color: var(--prod-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Intelligence Rail (Right - 25%)
+   Reading Pane Messages
    ───────────────────────────────────────────────────────────────────────────── */
 
-.ft-intelligence-rail {
+.ft-email__reading-subject {
+  font-size: var(--prod-text-heading);
+  font-weight: var(--prod-weight-semibold);
+  margin-bottom: var(--prod-margin-section);
+}
+
+.ft-email__reading-meta {
+  font-size: var(--prod-text-body-sm);
+  color: var(--prod-text-tertiary);
+  margin-bottom: var(--prod-margin-block);
+}
+
+.ft-email__reading-messages {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
-  padding: var(--space-md);
-  height: 100%;
-  overflow: hidden auto;
+  gap: var(--prod-margin-block);
 }
 
-.ft-intelligence-rail__section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+.ft-email__message {
+  padding-bottom: var(--prod-margin-block);
 }
 
-.ft-intelligence-rail__section-title {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-tertiary);
+.ft-email__message-header {
+  font-size: var(--prod-text-body-sm);
+  color: var(--prod-text-secondary);
+  margin-bottom: var(--prod-margin-message);
+  line-height: var(--prod-line-height-relaxed);
 }
 
-.ft-intelligence-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: var(--space-xl);
+.ft-email__message-snippet {
+  font-size: var(--prod-text-body);
+  line-height: var(--prod-line-height-normal);
+  color: var(--prod-text-primary);
 }
 
-.ft-intelligence-empty__content {
+.ft-email__message-body {
+  font-size: var(--prod-text-body);
+  line-height: var(--prod-line-height-relaxed);
+  color: var(--prod-text-primary);
+}
+
+/* Reset some HTML email styles */
+.ft-email__message-body img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ft-email__message-body table {
+  max-width: 100%;
+}
+
+.ft-email__body-loading {
+  color: var(--prod-text-faint);
+  font-size: var(--prod-text-body-sm);
+  padding: var(--prod-space-md) 0;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Empty/Loading States
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__loading,
+.ft-email__empty {
+  padding: var(--prod-space-3xl);
   text-align: center;
-  color: var(--text-tertiary);
-}
-
-.ft-intelligence-empty__hint {
-  opacity: 0.7;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Intelligence Rail: Action Buttons
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-intelligence-rail__actions-primary {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.ft-ir-action {
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-align: center;
-}
-
-.ft-ir-action:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-dark);
-}
-
-.ft-ir-action--primary {
-  background: var(--accent-primary);
-  color: var(--text-inverse);
-  border-color: var(--accent-primary);
-  padding: var(--space-md);
-}
-
-.ft-ir-action--primary:hover {
-  background: var(--accent-primary-hover);
-  border-color: var(--accent-primary-hover);
-}
-
-.ft-ir-action--resolve {
-  background: linear-gradient(135deg, #10b981, #059669);
-  border-color: #10b981;
-  color: #fff;
-  box-shadow: 0 4px 12px rgb(16 185 129 / 25%);
-}
-
-.ft-ir-action--resolve:hover {
-  background: linear-gradient(135deg, #059669, #047857);
-  border-color: #059669;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgb(16 185 129 / 35%);
-}
-
-.ft-ir-action--secondary {
-  background: var(--surface-raised);
-  color: var(--text-secondary);
-  border-color: var(--border-light);
-}
-
-.ft-ir-action--secondary:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
-  border-color: var(--border-medium);
-}
-
-.ft-ir-action--tertiary {
-  background: transparent;
-  color: var(--text-tertiary);
-  border: 1px solid var(--border-light);
-  padding: var(--space-xs) var(--space-sm);
-}
-
-.ft-ir-action--tertiary:hover {
-  background: var(--surface-hover);
-  color: var(--text-secondary);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Intelligence Rail: Promotion Buttons (Big 3 Action #1: PROMOTE)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-intelligence-rail__promotions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.ft-ir-promotion {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
-  padding: var(--space-md) var(--space-sm);
-  border: 2px solid var(--border-light, #e5e7eb);
-  border-radius: var(--radius-md, 8px);
-  background: var(--surface-base);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.ft-ir-promotion:hover {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgb(59 130 246 / 25%);
-  border-color: #2563eb;
-}
-
-.ft-ir-promotion--primary {
-  border-color: var(--accent-primary, #3b82f6);
-  background: linear-gradient(135deg, rgb(59 130 246 / 5%), transparent);
-  color: var(--accent-primary, #3b82f6);
-}
-
-.ft-ir-promotion__label {
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Intelligence Rail: Link Buttons (Big 3 Action #2: LINK)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-intelligence-rail__links {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.ft-ir-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--border-light, #e5e7eb);
-  border-radius: var(--radius-md, 8px);
-  background: var(--surface-base);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.ft-ir-link:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-medium);
-  color: var(--text-primary);
-}
-
-.ft-ir-link--primary {
-  border-color: var(--accent-primary, #3b82f6);
-  background: linear-gradient(135deg, rgb(59 130 246 / 5%), transparent);
-  color: var(--accent-primary, #3b82f6);
-}
-
-.ft-ir-link--primary:hover {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #fff;
-  border-color: #2563eb;
-}
-
-.ft-ir-link__label {
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Intelligence Rail: AI Insights
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-intelligence-rail__insights {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  padding: var(--space-md);
-  background: linear-gradient(135deg, rgb(59 130 246 / 3%), rgb(147 51 234 / 3%));
-  border: 1.5px solid rgb(59 130 246 / 20%);
-  border-radius: var(--radius-md, 8px);
-  box-shadow: 0 4px 12px rgb(59 130 246 / 6%);
-}
-
-.ft-ir-insight {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: var(--space-sm);
-  align-items: baseline;
-}
-
-.ft-ir-insight--full {
-  grid-template-columns: 1fr;
-}
-
-.ft-ir-insight__label {
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-tertiary);
-}
-
-.ft-ir-insight__value {
-  color: var(--text-primary);
-  text-transform: capitalize;
-}
-
-.ft-ir-insight__value--high {
-  color: var(--status-error, #ef4444);
-  background: linear-gradient(to right, rgb(239 68 68 / 10%), transparent);
-  padding: 2px 8px;
-  margin: -2px -8px;
-  border-radius: 4px;
-  border-left: 3px solid #ef4444;
-  padding-left: 6px;
-}
-
-.ft-ir-insight__value--medium {
-  color: var(--status-warning, #f59e0b);
-  background: linear-gradient(to right, rgb(245 158 11 / 10%), transparent);
-  padding: 2px 8px;
-  margin: -2px -8px;
-  border-radius: 4px;
-  border-left: 3px solid #f59e0b;
-  padding-left: 6px;
-}
-
-.ft-ir-insight__value--low {
-  color: var(--status-info, #3b82f6);
-  opacity: 0.8;
-}
-
-.ft-ir-insight__explanation {
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin-top: var(--space-xs);
-}
-
-.ft-ir-insight__confidence {
-  color: var(--text-tertiary);
-  font-style: italic;
-  text-align: right;
-  margin-top: var(--space-xs);
-  padding-top: var(--space-xs);
-  border-top: 1px solid var(--border-light);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Intelligence Rail: Thread Metadata
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-intelligence-rail__metadata {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.ft-ir-meta-item {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: var(--space-sm);
-  align-items: baseline;
-  padding: var(--space-xs) 0;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.ft-ir-meta-item:last-child {
-  border-bottom: none;
-}
-
-.ft-ir-meta-item__label {
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-tertiary);
-}
-
-.ft-ir-meta-item__value {
-  color: var(--text-primary);
-  word-wrap: break-word;
-}
-
-.ft-ir-meta-item__value--awaiting-me {
-  color: var(--status-warning);
-}
-
-.ft-ir-meta-item__value--awaiting-them {
-  color: var(--status-info);
-}
-
-.ft-ir-meta-item__value--resolved {
-  color: var(--status-success);
-}
-
-.ft-ir-meta-item__value--none {
-  color: var(--text-tertiary);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Intelligence Rail: Secondary Actions
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-intelligence-rail__actions-secondary {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-
-/* ╔═══════════════════════════════════════════════════════════════════════════╗
-   ║  SECTION 4: RESPONSIVE BREAKPOINTS                                        ║
-   ╚═══════════════════════════════════════════════════════════════════════════╝ */
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Header Mobile
-   ───────────────────────────────────────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-  .ft-email-console-header {
-    flex-direction: column;
-    gap: var(--space-md);
-    align-items: stretch;
-  }
-
-  .ft-email-view-toggle {
-    width: 100%;
-    text-align: center;
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Live View Mobile (Stack Vertically)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-@media (max-width: 1024px) {
-  .ft-live-view {
-    grid-template-columns: 1fr;
-    grid-template-rows: 40vh 1fr;
-  }
-
-  .ft-live-view__list {
-    border-right: none;
-    border-bottom: 1px solid var(--border-light, #e5e7eb);
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Impact View Mobile (Stack Vertically)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-@media (max-width: 1024px) {
-  .ft-impact-view {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
-    gap: var(--space-md);
-  }
-
-  .ft-impact-view__queue {
-    border-right: none;
-    border-bottom: 1px solid var(--border-light);
-    max-height: 40vh;
-  }
-
-  .ft-impact-view__conversation {
-    order: 2;
-  }
-
-  .ft-impact-view__intelligence {
-    order: 3;
-    border-left: none;
-    border-top: 1px solid var(--border-light);
-    max-height: 30vh;
-  }
+  color: var(--prod-text-faint);
+  font-size: var(--prod-text-body);
 }

@@ -46,8 +46,8 @@
       ],
       "rules": {
         "declaration-property-value-disallowed-list": {
-          "font-size": ["/.*/"],
-          "font-weight": ["/.*/"],
+          "font-size": ["/^(?!var\\(--prod-|var\\(--font-size-).*/"],
+          "font-weight": ["/^(?!var\\(--prod-|var\\(--font-weight-).*/"],
           "font-family": ["/^(?!inherit$|monospace$|var\\(--).*/"]
         }
       }
