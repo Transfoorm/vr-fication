@@ -36,6 +36,8 @@ export interface EmailThread {
   messageCount: number;
   latestMessageAt: number;
   hasUnread?: boolean;
+  snippet?: string;
+  latestFrom?: Participant;
 }
 
 /**

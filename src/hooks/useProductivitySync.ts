@@ -17,7 +17,12 @@ import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useFuse } from '@/store/fuse';
-import type { EmailAccount } from '@/features/productivity/email-console/types';
+import type {
+  EmailAccount,
+  EmailThread,
+  EmailMessage,
+  Participant,
+} from '@/features/productivity/email-console/types';
 
 /**
  * Productivity Domain Sync Hook
@@ -29,21 +34,49 @@ import type { EmailAccount } from '@/features/productivity/email-console/types';
  * - Sync hook: useQuery() → FUSE (this file)
  * - Reader hook: FUSE → components (useProductivityData.ts)
  * - Components: Never call useQuery directly
+ *
+ * HYDRATES:
+ * - email.accounts (connected email accounts)
+ * - email.threads (thread metadata with derived states)
+ * - email.messages (individual email messages)
  */
 export function useProductivitySync(): void {
   const hydrateProductivity = useFuse((state) => state.hydrateProductivity);
   const user = useFuse((state) => state.user);
   const callerUserId = user?.convexId as Id<'admin_users'> | undefined;
 
-  // 🌉 GOLDEN BRIDGE: Live query from Convex
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🌉 GOLDEN BRIDGE: Live queries from Convex
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // Email accounts (connected OAuth accounts)
   const liveEmailAccounts = useQuery(
     api.domains.productivity.queries.listEmailAccounts,
     callerUserId ? { callerUserId } : 'skip'
   );
 
-  // Hydrate FUSE when Convex data updates
+  // Email threads (grouped messages with derived state)
+  const liveThreads = useQuery(
+    api.domains.productivity.queries.listThreads,
+    callerUserId ? { callerUserId } : 'skip'
+  );
+
+  // Email messages (individual messages for reading pane)
+  const liveMessages = useQuery(
+    api.domains.productivity.queries.listMessages,
+    callerUserId ? { callerUserId } : 'skip'
+  );
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔄 HYDRATION: Transform and sync to FUSE
+  // ═══════════════════════════════════════════════════════════════════════
+
   useEffect(() => {
-    if (liveEmailAccounts) {
+    // Only hydrate when we have data from all three sources
+    // This prevents partial hydration and race conditions
+    if (liveEmailAccounts && liveThreads && liveMessages) {
+
+      // Transform accounts to FUSE format
       const accounts: EmailAccount[] = liveEmailAccounts.map((account) => ({
         _id: account._id,
         label: account.label,
@@ -56,9 +89,52 @@ export function useProductivitySync(): void {
         lastSyncError: account.lastSyncError,
       }));
 
+      // Transform threads to FUSE format (ThreadMetadata → EmailThread)
+      const threads: EmailThread[] = liveThreads.map((thread) => ({
+        threadId: thread.threadId,
+        subject: thread.subject,
+        participants: thread.participants.map((p): Participant => ({
+          name: p.name,
+          email: p.email,
+        })),
+        state: thread.state,
+        messageCount: thread.messageCount,
+        latestMessageAt: thread.latestMessageAt,
+        hasUnread: thread.hasUnread,
+        // Additional fields from ThreadMetadata for display
+        snippet: thread.snippet,
+        latestFrom: thread.latestFrom,
+      }));
+
+      // Transform messages to FUSE format (Doc<productivity_email_Index> → EmailMessage)
+      const messages: EmailMessage[] = liveMessages.map((msg) => ({
+        _id: msg._id,
+        externalThreadId: msg.externalThreadId,
+        from: {
+          name: msg.from.name,
+          email: msg.from.email,
+        },
+        to: msg.to.map((recipient): Participant => ({
+          name: recipient.name,
+          email: recipient.email,
+        })),
+        receivedAt: msg.receivedAt,
+        snippet: msg.snippet,
+        hasAttachments: msg.hasAttachments,
+        resolutionState: msg.resolutionState as 'awaiting_me' | 'awaiting_them' | 'resolved' | 'none',
+        aiClassification: msg.aiClassification ? {
+          intent: msg.aiClassification.intent,
+          priority: msg.aiClassification.priority as 'low' | 'medium' | 'high' | undefined,
+          senderType: msg.aiClassification.senderType,
+          explanation: msg.aiClassification.explanation,
+          confidence: msg.aiClassification.confidence,
+        } : undefined,
+      }));
+
+      // Hydrate FUSE with complete email data
       hydrateProductivity({
-        email: { threads: [], messages: [], accounts },
+        email: { accounts, threads, messages },
       }, 'CONVEX_LIVE');
     }
-  }, [liveEmailAccounts, hydrateProductivity]);
+  }, [liveEmailAccounts, liveThreads, liveMessages, hydrateProductivity]);
 }
