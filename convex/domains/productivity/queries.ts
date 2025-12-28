@@ -331,49 +331,9 @@ export const getEmailMessage = query({
  * @param messageId - Convex document ID of email message
  * @returns { bodyUrl: string | null, contentType: string }
  */
-export const getEmailBody = query({
-  args: {
-    callerUserId: v.id("admin_users"),
-    messageId: v.id("productivity_email_Index"),
-  },
-  handler: async (ctx, args) => {
-    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
-    const rank = user.rank || "crew";
-
-    // Get the email message
-    const message = await ctx.db.get(args.messageId);
-    if (!message) {
-      throw new Error("Message not found");
-    }
-
-    // Check authorization (org-scoping)
-    if (rank !== "admiral") {
-      const orgId = user._id as string;
-      if (message.orgId !== orgId) {
-        throw new Error("Unauthorized: Message not in your organization");
-      }
-    }
-
-    // If no body asset, return null
-    if (!message.bodyAssetId) {
-      return { bodyUrl: null, contentType: "text/plain" };
-    }
-
-    // Get the asset record
-    const asset = await ctx.db.get(message.bodyAssetId);
-    if (!asset || !asset.storageId) {
-      return { bodyUrl: null, contentType: "text/plain" };
-    }
-
-    // Get signed URL for the body content
-    const bodyUrl = await ctx.storage.getUrl(asset.storageId);
-
-    return {
-      bodyUrl,
-      contentType: asset.contentType,
-    };
-  },
-});
+// NOTE: getEmailBody has moved to actions.ts
+// Queries cannot read storage blobs - actions can.
+// See: convex/domains/productivity/actions.ts
 
 /**
  * 📧 LIST EMAIL ACCOUNTS (Connected Accounts)

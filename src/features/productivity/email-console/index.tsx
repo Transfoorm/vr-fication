@@ -17,7 +17,10 @@
 
 import { useRef, useCallback, useState, useMemo } from 'react';
 import { useProductivityData } from '@/hooks/useProductivityData';
+import { useEmailSyncIntent } from '@/hooks/useEmailSyncIntent';
 import { T } from '@/vr';
+import { MessageBody } from './MessageBody';
+import type { Id } from '@/convex/_generated/dataModel';
 import './email-console.css';
 
 /** Get time bucket for grouping */
@@ -74,6 +77,9 @@ export function EmailConsole() {
 
   // Get data from FUSE (Golden Bridge pattern)
   const { data, flags } = useProductivityData();
+
+  // Intent-based sync (triggers on focus, network, manual refresh)
+  const { triggerManualSync } = useEmailSyncIntent();
 
   // Memoize arrays to prevent new references on every render
   const allThreads = useMemo(() => data.email?.threads ?? [], [data.email?.threads]);
@@ -188,7 +194,18 @@ export function EmailConsole() {
           HEADER BAR
           ───────────────────────────────────────────────────────────── */}
       <header className="ft-email__header">
-        <T.body>Header</T.body>
+        <div className="ft-email__header-left">
+          <T.body weight="medium">Email</T.body>
+        </div>
+        <div className="ft-email__header-right">
+          <button
+            className="ft-email__refresh-btn"
+            onClick={triggerManualSync}
+            title="Refresh emails"
+          >
+            ↻
+          </button>
+        </div>
       </header>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -214,7 +231,7 @@ export function EmailConsole() {
             className={`ft-email__folder ${selectedFolder === 'drafts' ? 'ft-email__folder--selected' : ''}`}
             onClick={() => setSelectedFolder('drafts')}
           >
-            <span className="ft-email__folder-icon">✍️</span>
+            <span className="ft-email__folder-icon">📝</span>
             <span className="ft-email__folder-label">Drafts</span>
           </div>
           <div
@@ -239,7 +256,7 @@ export function EmailConsole() {
             onClick={() => setSelectedFolder('trash')}
           >
             <span className="ft-email__folder-icon">🗑️</span>
-            <span className="ft-email__folder-label">Trash</span>
+            <span className="ft-email__folder-label">Bin</span>
           </div>
           <div
             className={`ft-email__folder ${selectedFolder === 'junk' ? 'ft-email__folder--selected' : ''}`}
@@ -341,7 +358,9 @@ export function EmailConsole() {
                             <strong>Date:</strong> {new Date(message.receivedAt).toLocaleString()}<br />
                             <strong>To:</strong> {message.to.map(r => r.name || r.email).join(', ')}
                           </div>
-                          <div className="ft-email__message-snippet">{message.snippet}</div>
+                          <div className="ft-email__message-body">
+                            <MessageBody messageId={message._id as Id<'productivity_email_Index'>} />
+                          </div>
                           {index < selectedThread.messages.length - 1 && <hr />}
                         </div>
                       ))

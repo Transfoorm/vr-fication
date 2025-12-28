@@ -31,10 +31,50 @@
 
 .ft-email__header {
   flex-shrink: 0;
-  padding: var(--prod-space-xl) var(--prod-space-2xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--prod-space-lg) var(--prod-space-2xl);
   border: 1px solid var(--prod-border-normal);
   border-radius: var(--prod-radius-md);
   background: var(--prod-bg-surface);
+}
+
+.ft-email__header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--prod-space-md);
+}
+
+.ft-email__header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--prod-space-md);
+}
+
+.ft-email__refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--prod-space-3xl);
+  height: var(--prod-space-3xl);
+  padding: 0;
+  border: none;
+  border-radius: var(--prod-radius-sm);
+  background: transparent;
+  color: var(--prod-text-secondary);
+  font-size: var(--prod-icon-md);
+  cursor: pointer;
+  transition: background var(--prod-transition-fast), color var(--prod-transition-fast);
+}
+
+.ft-email__refresh-btn:hover {
+  background: var(--prod-bg-hover);
+  color: var(--prod-text-primary);
+}
+
+.ft-email__refresh-btn:active {
+  background: var(--prod-bg-pressed);
 }
 
 
@@ -116,8 +156,6 @@
   font-size: var(--prod-icon-sm);
   width: var(--prod-folder-icon-width);
   text-align: center;
-  opacity: 0.7;
-  filter: grayscale(100%);
 }
 
 .ft-email__folder--selected .ft-email__folder-icon {
@@ -155,8 +193,8 @@
   overflow: hidden; /* Clips scrollbar to border-radius */
   display: flex;
   flex-direction: column;
-  padding-top: 0; /* Gap at top for scrollbar to clear curve */
-  padding-bottom: 0; /* Gap at bottom for scrollbar to clear curve */
+  padding-top: 3; /* 🟥 Gap at top for scrollbar to clear curve */
+  padding-bottom: 2; /* 🟡 Gap at bottom for scrollbar to clear curve */
 }
 
 .ft-email__threads-scroll {
@@ -259,7 +297,6 @@
 
 .ft-email__section-chevron {
   font-size: var(--prod-icon-md);
-  transition: transform var(--prod-transition-normal);
   transform: rotate(90deg);
 }
 
@@ -386,10 +423,23 @@
   max-width: 100%;
 }
 
-.ft-email__body-loading {
+.ft-email__body-loading,
+.ft-email__body-error,
+.ft-email__body-empty {
   color: var(--prod-text-faint);
   font-size: var(--prod-text-body-sm);
   padding: var(--prod-space-md) 0;
+}
+
+/* Email body HTML container - allows natural content flow
+   Reading pane handles scrolling for entire thread */
+.ft-email__message-body img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ft-email__message-body table {
+  max-width: 100%;
 }
 
 

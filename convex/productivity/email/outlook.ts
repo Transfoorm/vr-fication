@@ -287,12 +287,68 @@ export const syncOutlookMessages = action({
   },
   handler: async (ctx, args): Promise<{ success: boolean; messageCount?: number; pagesProcessed?: number; error?: string }> => {
     // Get tokens from database
-    const tokens = await ctx.runQuery(api.productivity.email.outlook.getOutlookTokens, {
+    let tokens = await ctx.runQuery(api.productivity.email.outlook.getOutlookTokens, {
       userId: args.userId,
     });
     if (!tokens) {
       console.error('No Outlook tokens found');
       return { success: false, error: 'Not connected to Outlook' };
+    }
+
+    // Check if token is expired (with 5 min buffer)
+    const now = Date.now();
+    const tokenExpiresSoon = tokens.expiresAt < now + 5 * 60 * 1000;
+
+    if (tokenExpiresSoon && tokens.refreshToken) {
+      console.log('🔄 Access token expired, refreshing...');
+      try {
+        // Refresh the access token using Microsoft OAuth
+        const refreshResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            client_id: process.env.MICROSOFT_CLIENT_ID || '',
+            client_secret: process.env.MICROSOFT_CLIENT_SECRET || '',
+            refresh_token: tokens.refreshToken,
+            grant_type: 'refresh_token',
+            scope: 'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access',
+          }),
+        });
+
+        if (!refreshResponse.ok) {
+          const errorText = await refreshResponse.text();
+          console.error('Token refresh failed:', errorText);
+          return { success: false, error: 'Token refresh failed - please reconnect Outlook' };
+        }
+
+        const refreshData = await refreshResponse.json() as {
+          access_token: string;
+          refresh_token?: string;
+          expires_in: number;
+        };
+
+        // Store new tokens
+        await ctx.runMutation(api.productivity.email.outlook.storeOutlookTokens, {
+          userId: args.userId,
+          accessToken: refreshData.access_token,
+          refreshToken: refreshData.refresh_token || tokens.refreshToken,
+          expiresAt: now + refreshData.expires_in * 1000,
+          scope: 'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access',
+        });
+
+        // Update tokens for this sync
+        tokens = {
+          ...tokens,
+          accessToken: refreshData.access_token,
+          expiresAt: now + refreshData.expires_in * 1000,
+        };
+        console.log('✅ Token refreshed successfully');
+      } catch (refreshError) {
+        console.error('Token refresh error:', refreshError);
+        return { success: false, error: 'Token refresh error - please reconnect Outlook' };
+      }
     }
 
     try {

@@ -28,6 +28,8 @@ export interface ProductivityData {
   meetings: Record<string, unknown>[];
   bookings: Record<string, unknown>[];
   tasks: Record<string, unknown>[];
+  // Email bodies are hydrated on-demand (large HTML blobs)
+  emailBodies?: Record<string, string>;
 }
 
 export interface ProductivitySlice {
@@ -37,6 +39,8 @@ export interface ProductivitySlice {
   meetings: Record<string, unknown>[];
   bookings: Record<string, unknown>[];
   tasks: Record<string, unknown>[];
+  // Email bodies (hydrated on-demand, keyed by messageId)
+  emailBodies: Record<string, string>;
   // UI preferences (persisted)
   emailViewMode: EmailViewMode;
   // ADP Coordination (REQUIRED)
@@ -47,6 +51,7 @@ export interface ProductivitySlice {
 
 export interface ProductivityActions {
   hydrateProductivity: (data: Partial<ProductivityData>, source?: ADPSource) => void;
+  hydrateEmailBody: (messageId: string, htmlContent: string) => void;
   clearProductivity: () => void;
   setEmailViewMode: (mode: EmailViewMode) => void;
 }
@@ -61,6 +66,8 @@ const initialProductivityState: ProductivitySlice = {
   meetings: [],
   bookings: [],
   tasks: [],
+  // Email bodies (on-demand hydration)
+  emailBodies: {},
   // UI preferences
   emailViewMode: 'live', // Default to Live mode (traditional Outlook-style)
   // ADP Coordination
@@ -99,6 +106,19 @@ export const createProductivitySlice: StateCreator<
       });
     }
     fuseTimer.end('hydrateProductivity', start);
+  },
+
+  hydrateEmailBody: (messageId, htmlContent) => {
+    set((state) => ({
+      ...state,
+      emailBodies: {
+        ...state.emailBodies,
+        [messageId]: htmlContent,
+      },
+    }));
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`⚡ FUSE: Email body hydrated for ${messageId.slice(-8)}`);
+    }
   },
 
   clearProductivity: () => {
