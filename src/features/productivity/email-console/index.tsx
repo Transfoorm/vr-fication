@@ -214,14 +214,14 @@ export function EmailConsole() {
             className={`ft-email__folder ${selectedFolder === 'drafts' ? 'ft-email__folder--selected' : ''}`}
             onClick={() => setSelectedFolder('drafts')}
           >
-            <span className="ft-email__folder-icon">📝</span>
+            <span className="ft-email__folder-icon">✍️</span>
             <span className="ft-email__folder-label">Drafts</span>
           </div>
           <div
             className={`ft-email__folder ${selectedFolder === 'sent' ? 'ft-email__folder--selected' : ''}`}
             onClick={() => setSelectedFolder('sent')}
           >
-            <span className="ft-email__folder-icon">📤</span>
+            <span className="ft-email__folder-icon">📨</span>
             <span className="ft-email__folder-label">Sent</span>
             {folderCounts.sent > 0 && (
               <span className="ft-email__folder-count">{folderCounts.sent}</span>
@@ -231,7 +231,7 @@ export function EmailConsole() {
             className={`ft-email__folder ${selectedFolder === 'archive' ? 'ft-email__folder--selected' : ''}`}
             onClick={() => setSelectedFolder('archive')}
           >
-            <span className="ft-email__folder-icon">📦</span>
+            <span className="ft-email__folder-icon">📁</span>
             <span className="ft-email__folder-label">Archive</span>
           </div>
           <div
@@ -245,7 +245,7 @@ export function EmailConsole() {
             className={`ft-email__folder ${selectedFolder === 'junk' ? 'ft-email__folder--selected' : ''}`}
             onClick={() => setSelectedFolder('junk')}
           >
-            <span className="ft-email__folder-icon">⚠️</span>
+            <span className="ft-email__folder-icon">✋</span>
             <span className="ft-email__folder-label">Junk</span>
           </div>
         </aside>

@@ -529,6 +529,59 @@ export default defineSchema({
     isRead: v.boolean(),
     readAt: v.optional(v.number()),
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // CANONICAL EMAIL TAXONOMY (provider-agnostic classification)
+    // See: /src/domains/email/canonical.ts
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Canonical folder assignment (provider-agnostic).
+     * Maps Gmail labels, Outlook folders, Yahoo folders to unified taxonomy.
+     *
+     * Values: inbox | sent | drafts | archive | spam | trash | outbox | scheduled | system
+     *
+     * UI shows 6 folders: Inbox, Drafts, Sent, Archive, Trash, Spam
+     * Advanced folders (Outbox, Scheduled, System) accessible via search/filters.
+     */
+    canonicalFolder: v.optional(v.string()),
+
+    /**
+     * Canonical states (provider metadata, NOT workflow).
+     * Multiple states can apply to one message.
+     *
+     * Values: unread | starred | important | snoozed | muted | focused | other
+     *
+     * IMPORTANT: These are separate from resolutionState (Transfoorm workflow).
+     * canonicalStates = provider metadata (Gmail starred, Outlook flagged)
+     * resolutionState = Transfoorm workflow (with_me, with_them, done)
+     */
+    canonicalStates: v.optional(v.array(v.string())),
+
+    /**
+     * Provider-specific folder ID (for sync operations).
+     * Gmail: label ID | Outlook: parentFolderId | Yahoo: folderId
+     */
+    providerFolderId: v.optional(v.string()),
+
+    /**
+     * Provider-specific folder name (for debugging/display).
+     * Gmail: label name | Outlook: displayName | Yahoo: folder name
+     */
+    providerFolderName: v.optional(v.string()),
+
+    /**
+     * Provider-specific labels (Gmail only).
+     * Stores user-defined labels for preservation.
+     */
+    providerLabels: v.optional(v.array(v.string())),
+
+    /**
+     * Provider-specific categories (Gmail/Outlook).
+     * Gmail: CATEGORY_PERSONAL, CATEGORY_SOCIAL, etc.
+     * Outlook: user-defined color categories
+     */
+    providerCategories: v.optional(v.array(v.string())),
+
     // Asset processing status (optional)
     /** Reference to email body asset (HTML/text) */
     bodyAssetId: v.optional(v.id("productivity_email_Assets")),
@@ -551,6 +604,7 @@ export default defineSchema({
     .index("by_external_message_id", ["externalMessageId"])
     .index("by_external_thread_id", ["externalThreadId"])
     .index("by_resolution_state", ["resolutionState"])
+    .index("by_canonical_folder", ["canonicalFolder"])
     .index("by_received_at", ["receivedAt"])
     .index("by_sender_email", ["from.email"])
     .index("by_resolvedBy", ["resolvedBy"])
