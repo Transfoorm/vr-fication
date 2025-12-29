@@ -16,7 +16,7 @@
 
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useFuse } from '@/store/fuse';
@@ -51,8 +51,9 @@ export function useEmailSyncIntent(): UseEmailSyncIntentReturn {
 
   const requestSync = useMutation(api.productivity.email.sync.requestImmediateSync);
 
-  const isSyncingRef = useRef(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const lastResultRef = useRef<string | null>(null);
+  const isSyncingRef = useRef(false); // Prevent double-trigger
 
   /**
    * Request sync with specified intent
@@ -61,6 +62,7 @@ export function useEmailSyncIntent(): UseEmailSyncIntentReturn {
     if (!callerUserId || isSyncingRef.current) return;
 
     isSyncingRef.current = true;
+    setIsSyncing(true);
     try {
       const result = await requestSync({
         userId: callerUserId,
@@ -77,6 +79,7 @@ export function useEmailSyncIntent(): UseEmailSyncIntentReturn {
       console.error('Email sync failed:', error);
     } finally {
       isSyncingRef.current = false;
+      setIsSyncing(false);
     }
   }, [callerUserId, requestSync]);
 
@@ -119,7 +122,7 @@ export function useEmailSyncIntent(): UseEmailSyncIntentReturn {
 
   return {
     triggerManualSync,
-    isSyncing: isSyncingRef.current,
+    isSyncing,
     lastResult: lastResultRef.current,
   };
 }

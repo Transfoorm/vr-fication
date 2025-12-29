@@ -77,6 +77,26 @@
   background: var(--prod-bg-pressed);
 }
 
+.ft-email__refresh-btn--syncing {
+  animation: ft-email-spin 1.5s linear infinite;
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.ft-email__refresh-btn:disabled {
+  pointer-events: none;
+}
+
+@keyframes ft-email-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Three-Rail Body - Takes remaining space
@@ -201,14 +221,15 @@
 .ft-email__threads-header {
   flex-shrink: 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: var(--prod-space-lg);
   padding: var(--prod-space-lg) var(--prod-space-xl);
   border-bottom: 1px solid var(--prod-border-light);
   background: var(--prod-bg-section);
 }
 
 .ft-email__threads-title {
+  flex: 1;
   font-size: var(--prod-text-body-sm);
   font-weight: var(--prod-weight-semibold);
   color: var(--prod-text-primary);

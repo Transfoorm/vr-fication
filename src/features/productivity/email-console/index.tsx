@@ -114,7 +114,7 @@ export function EmailConsole() {
   const archiveMessage = useAction(api.productivity.email.outlook.archiveOutlookMessage);
 
   // Intent-based sync (triggers on focus, network, manual refresh)
-  const { triggerManualSync } = useEmailSyncIntent();
+  const { triggerManualSync, isSyncing } = useEmailSyncIntent();
 
   // Memoize arrays to prevent new references on every render
   const allMessages = useMemo(() => data.email?.messages ?? [], [data.email?.messages]);
@@ -563,15 +563,7 @@ export function EmailConsole() {
         <div className="ft-email__header-left">
           <T.body weight="medium">Email</T.body>
         </div>
-        <div className="ft-email__header-right">
-          <button
-            className="ft-email__refresh-btn"
-            onClick={triggerManualSync}
-            title="Refresh emails"
-          >
-            ↻
-          </button>
-        </div>
+        <div className="ft-email__header-right" />
       </header>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -628,7 +620,7 @@ export function EmailConsole() {
             className={`ft-email__folder ${selectedFolder === 'drafts' ? 'ft-email__folder--selected' : ''}`}
             onClick={() => handleFolderSelect('drafts')}
           >
-            <span className="ft-email__folder-icon">📝</span>
+            <span className="ft-email__folder-icon">✏️</span>
             <span className="ft-email__folder-label">Drafts</span>
             {folderCounts.drafts > 0 && (
               <span className="ft-email__folder-count">{folderCounts.drafts}</span>
@@ -661,7 +653,7 @@ export function EmailConsole() {
                   ›
                 </span>
               )}
-              <span className="ft-email__folder-icon">📁</span>
+              <span className="ft-email__folder-icon">🔍</span>
               <span className="ft-email__folder-label">Archive</span>
               {folderCounts.archive > 0 && (
                 <span className="ft-email__folder-count">{folderCounts.archive}</span>
@@ -701,8 +693,8 @@ export function EmailConsole() {
             className={`ft-email__folder ${selectedFolder === 'spam' ? 'ft-email__folder--selected' : ''}`}
             onClick={() => handleFolderSelect('spam')}
           >
-            <span className="ft-email__folder-icon">✋</span>
-            <span className="ft-email__folder-label">Junk</span>
+            <span className="ft-email__folder-icon">🗝️</span>
+            <span className="ft-email__folder-label">Spam</span>
             {folderCounts.spam > 0 && (
               <span className="ft-email__folder-count">{folderCounts.spam}</span>
             )}
@@ -752,8 +744,18 @@ export function EmailConsole() {
             </span>
             <span className="ft-email__threads-count">
               {messages.length} item{messages.length !== 1 ? 's' : ''}
-              {selectedMessageIds.size > 1 && ` · ${selectedMessageIds.size} selected`}
+              {isSyncing
+                ? ' · Syncing...'
+                : selectedMessageIds.size > 1 && ` · ${selectedMessageIds.size} selected`}
             </span>
+            <button
+              className={`ft-email__refresh-btn${isSyncing ? ' ft-email__refresh-btn--syncing' : ''}`}
+              onClick={triggerManualSync}
+              disabled={isSyncing}
+              title={isSyncing ? 'Syncing...' : 'Refresh emails'}
+            >
+              ↻
+            </button>
           </div>
           <div className="ft-email__threads-scroll" ref={scrollContainerRef}>
             {!flags.isHydrated ? (

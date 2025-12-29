@@ -627,6 +627,8 @@ export default defineSchema({
     label: v.string(),
     /** Email address of connected account */
     emailAddress: v.string(),
+    /** Owner's email (from admin_users) - for dashboard identification */
+    ownerEmail: v.optional(v.string()),
     /** Provider type */
     provider: v.union(
       v.literal("gmail"),
@@ -991,4 +993,45 @@ export default defineSchema({
     .index("by_subscription_id", ["subscriptionId"])
     .index("by_expiration", ["expirationDateTime"])
     .index("by_status", ["status"]),
+
+  /**
+   * 📦 EMAIL BODY CACHE
+   *
+   * Ring buffer cache for email body content.
+   * Accelerates repeat opens without becoming a system of record.
+   *
+   * DOCTRINE (from STORAGE-LIFECYCLE-DOCTRINE.md):
+   * - Cache Loss Invariant: System works perfectly if cache disappears
+   * - Bodies are disposable acceleration artifacts, never authoritative
+   * - Per-account granularity (100 bodies per account, not per user)
+   * - Ring buffer eviction: oldest evicted when count >= max
+   * - TTL cleanup: stale entries removed after 14 days
+   *
+   * GRADUATED ENABLEMENT:
+   * - CACHE_SIZE = 0: Pure on-demand (prefetch still works in memory)
+   * - CACHE_SIZE = 20-100: Working set coverage
+   * - Change requires deploy, not schema migration
+   */
+  productivity_email_BodyCache: defineTable({
+    // Identity (required)
+    /** Which email account this cached body belongs to */
+    accountId: v.id("productivity_email_Accounts"),
+    /** External message ID from Microsoft/Google (matches externalMessageId in Index) */
+    messageId: v.string(),
+
+    // Storage reference (required)
+    /** Convex Storage blob ID containing the HTML/text body */
+    storageId: v.id("_storage"),
+
+    // Eviction metadata (required)
+    /** When this body was cached (for LRU eviction) */
+    cachedAt: v.number(),
+    /** Body size in bytes (for future size-based limits) */
+    size: v.number(),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+  }).index("by_account", ["accountId"])
+    .index("by_message", ["messageId"])
+    .index("by_account_oldest", ["accountId", "cachedAt"]),
 });

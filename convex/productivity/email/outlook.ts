@@ -178,6 +178,7 @@ export const storeOutlookTokens = mutation({
       await ctx.db.insert('productivity_email_Accounts', {
         label: 'Outlook',
         emailAddress: args.emailAddress || user.email || 'unknown@outlook.com',
+        ownerEmail: user.email, // For dashboard identification
         provider: 'outlook',
         accessToken: args.accessToken,
         refreshToken: args.refreshToken,
@@ -473,10 +474,10 @@ export const syncOutlookMessages = action({
         childFolderCount: number;
       }> = [];
 
-      // Fetch top-level folders
+      // Fetch top-level folders (including wellKnownName for language-independent mapping)
       console.log('📁 Fetching Outlook folder list...');
       const foldersResponse = await fetch(
-        'https://graph.microsoft.com/v1.0/me/mailFolders?$select=id,displayName,childFolderCount&$top=100',
+        'https://graph.microsoft.com/v1.0/me/mailFolders?$select=id,displayName,wellKnownName,childFolderCount&$top=100',
         {
           headers: {
             Authorization: `Bearer ${tokens.accessToken}`,
@@ -487,7 +488,7 @@ export const syncOutlookMessages = action({
 
       if (foldersResponse.ok) {
         const foldersData = (await foldersResponse.json()) as {
-          value: Array<{ id: string; displayName: string; childFolderCount: number }>;
+          value: Array<{ id: string; displayName: string; wellKnownName?: string; childFolderCount: number }>;
         };
 
         console.log(`📁 Found ${foldersData.value.length} top-level folders`);
@@ -803,6 +804,15 @@ export const storeOutlookMessages = mutation({
         .first();
 
       if (existing) {
+        // ─────────────────────────────────────────────────────────────────────
+        // CRITICAL: Delete orphaned blob that was pre-stored in the action
+        // Without this, every sync creates duplicate blobs for existing emails!
+        // ─────────────────────────────────────────────────────────────────────
+        const orphanedStorageId = args.bodyStorageMap?.[message.id];
+        if (orphanedStorageId) {
+          await ctx.storage.delete(orphanedStorageId as Id<'_storage'>);
+        }
+
         // Update folder info for existing messages (migration path)
         if (message.parentFolderId && args.folderMap?.[message.parentFolderId]) {
           const folder = args.folderMap[message.parentFolderId];
@@ -1073,7 +1083,7 @@ export const storeOutlookFolders = mutation({
 
 /**
  * Disconnect Outlook account
- * Clears OAuth tokens and marks account as disconnected
+ * Clears OAuth tokens, cascades body cache deletion, marks account as disconnected
  */
 export const disconnectOutlookAccount = mutation({
   args: {
@@ -1092,6 +1102,25 @@ export const disconnectOutlookAccount = mutation({
       throw new Error('Account does not belong to user');
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // CASCADE DELETE: Body cache (doctrine requirement)
+    // ─────────────────────────────────────────────────────────────────────────
+    const cacheEntries = await ctx.db
+      .query('productivity_email_BodyCache')
+      .withIndex('by_account', (q) => q.eq('accountId', args.accountId))
+      .collect();
+
+    let cacheBodiesDeleted = 0;
+    for (const entry of cacheEntries) {
+      await ctx.storage.delete(entry.storageId);
+      await ctx.db.delete(entry._id);
+      cacheBodiesDeleted++;
+    }
+
+    if (cacheBodiesDeleted > 0) {
+      console.log(`🗑️ Cascade deleted ${cacheBodiesDeleted} cached bodies`);
+    }
+
     // Mark account as disconnected and clear tokens
     await ctx.db.patch(args.accountId, {
       status: 'disconnected',
@@ -1101,7 +1130,7 @@ export const disconnectOutlookAccount = mutation({
     });
 
     console.log(`✅ Disconnected Outlook account ${account.emailAddress}`);
-    return { success: true };
+    return { success: true, cacheBodiesDeleted };
   },
 });
 
@@ -1430,5 +1459,77 @@ export const getSyncableFolders = query({
         canonicalFolder: f.canonicalFolder,
         deltaToken: f.deltaToken,
       }));
+  },
+});
+
+/**
+ * Backfill ownerEmail for existing accounts (one-time migration)
+ */
+export const backfillOwnerEmail = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const accounts = await ctx.db.query('productivity_email_Accounts').collect();
+    let updated = 0;
+
+    for (const account of accounts) {
+      if (!account.ownerEmail && account.userId) {
+        const user = await ctx.db.get(account.userId);
+        if (user?.email) {
+          await ctx.db.patch(account._id, { ownerEmail: user.email });
+          updated++;
+        }
+      }
+    }
+
+    console.log(`✅ Backfilled ownerEmail for ${updated} accounts`);
+    return { updated };
+  },
+});
+
+/**
+ * Reset sync state - clears all delta tokens to force full resync
+ * Use when initial sync was incomplete or corrupted
+ */
+export const resetSyncState = mutation({
+  args: {
+    userId: v.id('admin_users'),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return { success: false, error: 'User not found' };
+
+    const account = await ctx.db
+      .query('productivity_email_Accounts')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .filter((q) => q.eq(q.field('provider'), 'outlook'))
+      .first();
+
+    if (!account) return { success: false, error: 'No Outlook account found' };
+
+    // Clear delta tokens from all folders
+    const folders = await ctx.db
+      .query('productivity_email_Folders')
+      .withIndex('by_account', (q) => q.eq('accountId', account._id))
+      .collect();
+
+    let cleared = 0;
+    for (const folder of folders) {
+      if (folder.deltaToken) {
+        await ctx.db.patch(folder._id, {
+          deltaToken: undefined,
+          deltaTokenUpdatedAt: undefined,
+        });
+        cleared++;
+      }
+    }
+
+    // Clear sync lock if stuck
+    await ctx.db.patch(account._id, {
+      syncStartedAt: undefined,
+      lastSyncError: undefined,
+    });
+
+    console.log(`🔄 Reset sync state: cleared ${cleared} delta tokens for ${account.emailAddress}`);
+    return { success: true, tokensCleared: cleared };
   },
 });

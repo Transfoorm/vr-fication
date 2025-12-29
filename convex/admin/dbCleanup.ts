@@ -549,3 +549,64 @@ export const getAllClerkIds = query({
     return await ctx.db.query('admin_users_ClerkRegistry').collect();
   },
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BULK STORAGE DELETION
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * 🗑️ BATCH DELETE STORAGE FILES
+ *
+ * Queries the _storage system table and deletes files in batches.
+ * Run repeatedly until hasMore is false.
+ *
+ * Usage:
+ *   npx convex run admin/dbCleanup:batchDeleteStorage '{}'
+ *   (run multiple times until hasMore: false)
+ */
+export const batchDeleteStorage = mutation({
+  args: {
+    batchSize: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.batchSize || 500; // Stay well under 4096 read limit
+
+    // Query _storage system table
+    const storageFiles = await ctx.db.system
+      .query('_storage')
+      .take(limit);
+
+    let deleted = 0;
+    for (const file of storageFiles) {
+      await ctx.storage.delete(file._id);
+      deleted++;
+    }
+
+    const hasMore = storageFiles.length === limit;
+
+    console.log(`🗑️ Deleted ${deleted} storage files. hasMore: ${hasMore}`);
+
+    return {
+      deleted,
+      hasMore,
+    };
+  },
+});
+
+/**
+ * 🔍 GET STORAGE COUNT
+ *
+ * Returns approximate count of files in storage.
+ * Note: System tables don't support .count(), so we paginate.
+ */
+export const getStorageCount = query({
+  args: {},
+  handler: async (ctx) => {
+    // Take a large sample to estimate
+    const sample = await ctx.db.system.query('_storage').take(10000);
+    return {
+      count: sample.length,
+      note: sample.length === 10000 ? 'More than 10,000 files' : 'Exact count',
+    };
+  },
+});

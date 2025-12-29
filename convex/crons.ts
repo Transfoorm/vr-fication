@@ -6,6 +6,8 @@
 │                                                                              │
 │  CURRENT CRONS:                                                             │
 │  - Email sync: Every 2 minutes, processes accounts due for sync             │
+│  - Webhook renewal: Every hour, renews expiring Microsoft webhooks          │
+│  - Body cache TTL: Daily at 3 AM UTC, cleans up expired cache entries       │
 │                                                                              │
 │  DOCTRINE:                                                                   │
 │  - Crons are server-controlled (no user-exposed intervals)                  │
@@ -59,6 +61,29 @@ crons.interval(
   'webhook-renewal-queue',
   { hours: 1 },
   internal.productivity.email.webhooks.processWebhookRenewalQueue
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BODY CACHE TTL CLEANUP
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Clean up expired body cache entries daily
+ *
+ * Removes cache entries older than TTL (default: 14 days).
+ * Prevents stale cache accumulation for light/inactive users.
+ *
+ * Why daily at 3 AM UTC:
+ * - Low traffic window
+ * - Single daily run is sufficient for TTL cleanup
+ * - Bounded cleanup time (even with many expired entries)
+ *
+ * See: /docs/EMAIL-BODY-CACHE-IMPLEMENTATION.md
+ */
+crons.daily(
+  'email-body-cache-ttl-cleanup',
+  { hourUTC: 3, minuteUTC: 0 },
+  internal.productivity.email.bodyCache.cleanupExpiredCache
 );
 
 export default crons;
