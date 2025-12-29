@@ -77,6 +77,8 @@ export interface EmailAccount {
   connectedAt?: number;
   lastSyncAt?: number;
   lastSyncError?: string;
+  /** Whether a sync is currently in progress (for UI spinner) */
+  isSyncing?: boolean;
 }
 
 /**

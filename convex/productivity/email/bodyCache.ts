@@ -24,31 +24,66 @@ import { CACHE_CONFIG } from './cacheConfig';
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * GET EMAIL BY ID (internal query)
+ *
+ * Looks up email record to get externalMessageId.
+ * Used by getEmailBody action.
+ */
+export const getEmailById = query({
+  args: {
+    messageId: v.id('productivity_email_Index'),
+  },
+  handler: async (ctx, args) => {
+    const message = await ctx.db.get(args.messageId);
+    if (!message) return null;
+    return {
+      externalMessageId: message.externalMessageId,
+      accountId: message.accountId,
+    };
+  },
+});
+
+/**
  * GET EMAIL BODY
  *
  * The main entry point for retrieving email content.
  * Implements the cache-loss invariant: always succeeds if token valid.
  *
  * Flow:
- * 1. Try cache first (fast path) - if CACHE_SIZE > 0
- * 2. Fallback to Microsoft Graph (always works)
- * 3. Populate cache for next time (fire and forget)
+ * 1. Look up email record to get external message ID
+ * 2. Try cache first (fast path) - if CACHE_SIZE > 0
+ * 3. Fallback to Microsoft Graph (always works)
+ * 4. Populate cache for next time (fire and forget)
  *
  * @returns Body HTML/text and whether it came from cache
  */
 export const getEmailBody = action({
   args: {
     userId: v.id('admin_users'),
-    messageId: v.string(), // External message ID from Microsoft
+    messageId: v.id('productivity_email_Index'), // Convex document ID
   },
   handler: async (ctx, args): Promise<{ body: string; fromCache: boolean }> => {
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 0: Look up email record to get external message ID
+    // ─────────────────────────────────────────────────────────────────────────
+    const emailRecord = await ctx.runQuery(
+      api.productivity.email.bodyCache.getEmailById,
+      { messageId: args.messageId }
+    );
+
+    if (!emailRecord) {
+      throw new Error('Email not found');
+    }
+
+    const externalMessageId = emailRecord.externalMessageId;
+
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 1: Try cache first (fast path)
     // ─────────────────────────────────────────────────────────────────────────
     if (CACHE_CONFIG.maxBodiesPerAccount > 0) {
       const cached = await ctx.runQuery(
         api.productivity.email.bodyCache.getCachedBody,
-        { messageId: args.messageId }
+        { messageId: externalMessageId }
       );
 
       if (cached) {
@@ -60,7 +95,7 @@ export const getEmailBody = action({
           // Update LRU timestamp (fire and forget)
           ctx.runMutation(
             api.productivity.email.bodyCache.touchCacheEntry,
-            { messageId: args.messageId }
+            { messageId: externalMessageId }
           ).catch(() => {
             // Touch failure is silent
           });
@@ -68,14 +103,14 @@ export const getEmailBody = action({
           return { body, fromCache: true };
         }
         // Blob missing — cache corrupted, fall through to fetch
-        console.warn(`⚠️ Cache blob missing for ${args.messageId}, fetching fresh`);
+        console.warn(`⚠️ Cache blob missing for ${externalMessageId}, fetching fresh`);
       }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 2: Fetch from Microsoft Graph (always works if token valid)
     // ─────────────────────────────────────────────────────────────────────────
-    const body = await fetchBodyFromMicrosoft(ctx, args.userId, args.messageId);
+    const body = await fetchBodyFromMicrosoft(ctx, args.userId, externalMessageId);
 
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 3: Populate cache for next time (fire and forget)
@@ -88,7 +123,7 @@ export const getEmailBody = action({
           api.productivity.email.bodyCache.recordCacheEntry,
           {
             userId: args.userId,
-            messageId: args.messageId,
+            messageId: externalMessageId,
             storageId,
             size: body.length,
           }

@@ -28,6 +28,8 @@ import type { Id } from '@/convex/_generated/dataModel';
 const MAX_CONCURRENT = 5;
 const HOVER_DELAY_MS = 300;
 
+type MessageId = Id<'productivity_email_Index'>;
+
 interface PrefetchState {
   /** Currently in-flight prefetch requests */
   inFlight: Set<string>;
@@ -42,7 +44,7 @@ export interface UseEmailPrefetchReturn {
    * Call when mouse enters an email row.
    * Starts 300ms timer before prefetch.
    */
-  onHover: (messageId: string) => void;
+  onHover: (messageId: MessageId) => void;
 
   /**
    * Call when mouse leaves an email row.
@@ -54,24 +56,24 @@ export interface UseEmailPrefetchReturn {
    * Call when email row receives keyboard focus.
    * Immediate prefetch (no delay).
    */
-  onFocus: (messageId: string) => void;
+  onFocus: (messageId: MessageId) => void;
 
   /**
    * Call when email row is selected (clicked).
    * Immediate prefetch (no delay).
    */
-  onSelect: (messageId: string) => void;
+  onSelect: (messageId: MessageId) => void;
 
   /**
    * Call with visible message IDs when viewport changes.
    * Prefetches first N visible emails.
    */
-  prefetchViewport: (messageIds: string[]) => void;
+  prefetchViewport: (messageIds: MessageId[]) => void;
 
   /**
    * Check if a body is already prefetched (in memory).
    */
-  isCached: (messageId: string) => boolean;
+  isCached: (messageId: MessageId) => boolean;
 }
 
 /**
@@ -105,13 +107,14 @@ export function useEmailPrefetch(): UseEmailPrefetchReturn {
    * - Rate-limited: Max 5 concurrent
    * - Deduplicated: Won't refetch completed/in-flight
    */
-  const prefetch = useCallback(async (messageId: string) => {
+  const prefetch = useCallback(async (messageId: MessageId) => {
     if (!userId) return;
 
     const s = state.current;
+    const idStr = messageId as string;
 
     // Skip if already done or in progress
-    if (s.completed.has(messageId) || s.inFlight.has(messageId)) {
+    if (s.completed.has(idStr) || s.inFlight.has(idStr)) {
       return;
     }
 
@@ -120,15 +123,15 @@ export function useEmailPrefetch(): UseEmailPrefetchReturn {
       return;
     }
 
-    s.inFlight.add(messageId);
+    s.inFlight.add(idStr);
 
     try {
       await getBody({ userId, messageId });
-      s.completed.add(messageId);
+      s.completed.add(idStr);
     } catch {
       // Prefetch failure is silent - user will just wait when they click
     } finally {
-      s.inFlight.delete(messageId);
+      s.inFlight.delete(idStr);
     }
   }, [userId, getBody]);
 
@@ -137,7 +140,7 @@ export function useEmailPrefetch(): UseEmailPrefetchReturn {
    *
    * Waits 300ms before prefetching to avoid spam during quick mouse movement.
    */
-  const onHover = useCallback((messageId: string) => {
+  const onHover = useCallback((messageId: MessageId) => {
     const s = state.current;
 
     // Clear any pending hover
@@ -167,7 +170,7 @@ export function useEmailPrefetch(): UseEmailPrefetchReturn {
    *
    * When user arrows to an email, prefetch immediately.
    */
-  const onFocus = useCallback((messageId: string) => {
+  const onFocus = useCallback((messageId: MessageId) => {
     prefetch(messageId);
   }, [prefetch]);
 
@@ -177,7 +180,7 @@ export function useEmailPrefetch(): UseEmailPrefetchReturn {
    * When user clicks an email, prefetch immediately.
    * (Body may already be fetched from hover/focus)
    */
-  const onSelect = useCallback((messageId: string) => {
+  const onSelect = useCallback((messageId: MessageId) => {
     prefetch(messageId);
   }, [prefetch]);
 
@@ -187,7 +190,7 @@ export function useEmailPrefetch(): UseEmailPrefetchReturn {
    * Call with array of visible message IDs when viewport changes.
    * Prefetches first 5 visible emails.
    */
-  const prefetchViewport = useCallback((messageIds: string[]) => {
+  const prefetchViewport = useCallback((messageIds: MessageId[]) => {
     // Prefetch first N visible
     const toPrefetch = messageIds.slice(0, 5);
     toPrefetch.forEach(prefetch);
@@ -199,8 +202,8 @@ export function useEmailPrefetch(): UseEmailPrefetchReturn {
    * Note: This only checks in-memory state from this session.
    * Convex cache hits are handled server-side.
    */
-  const isCached = useCallback((messageId: string) => {
-    return state.current.completed.has(messageId);
+  const isCached = useCallback((messageId: MessageId) => {
+    return state.current.completed.has(messageId as string);
   }, []);
 
   return {

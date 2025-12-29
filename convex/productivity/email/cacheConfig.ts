@@ -20,15 +20,15 @@ export const CACHE_CONFIG = {
    * Maximum bodies to cache per email account.
    *
    * GRADUATED ENABLEMENT:
-   * - 0   = Pure on-demand (Layer 0 only) - CURRENT SETTING
-   * - 20  = Friction smoother
+   * - 0   = Pure on-demand (Layer 0 only)
+   * - 20  = Friction smoother - CURRENT SETTING
    * - 50  = Working set coverage
    * - 100 = Full Layer 1
    *
-   * Start at 0, dial up based on user feedback.
+   * Dial up based on user feedback.
    * Prefetch still works at 0 (populates memory, not storage).
    */
-  maxBodiesPerAccount: 0,
+  maxBodiesPerAccount: 20,
 
   /**
    * Maximum age before body is evicted (days).
@@ -54,7 +54,7 @@ export const CACHE_CONFIG = {
    * Prevents prefetch spam during quick mouse movements.
    */
   hoverDelayMs: 300,
-} as const;
+};
 
 /**
  * Type for cache configuration

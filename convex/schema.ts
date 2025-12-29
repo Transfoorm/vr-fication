@@ -653,6 +653,8 @@ export default defineSchema({
     syncFrequency: v.number(),
     /** Whether background sync is enabled */
     syncEnabled: v.boolean(),
+    /** Whether a sync is currently in progress (for UI spinner) */
+    isSyncing: v.optional(v.boolean()),
     /** Last sync error (if any) */
     lastSyncError: v.optional(v.string()),
 

@@ -16,10 +16,11 @@
 
 'use client';
 
-import { useEffect, useCallback, useRef, useState } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useFuse } from '@/store/fuse';
+import { useProductivityData } from '@/hooks/useProductivityData';
 import type { Id } from '@/convex/_generated/dataModel';
 
 type SyncIntent = 'focus' | 'inbox_open' | 'manual' | 'reconnect';
@@ -27,7 +28,7 @@ type SyncIntent = 'focus' | 'inbox_open' | 'manual' | 'reconnect';
 interface UseEmailSyncIntentReturn {
   /** Manually trigger a sync refresh */
   triggerManualSync: () => Promise<void>;
-  /** Whether a sync is currently in progress */
+  /** Whether a sync is currently in progress (from server) */
   isSyncing: boolean;
   /** Last sync result message */
   lastResult: string | null;
@@ -44,25 +45,30 @@ interface UseEmailSyncIntentReturn {
  * Manual triggers available for:
  * - Inbox open (call when entering email view)
  * - Refresh button (user clicks refresh)
+ *
+ * isSyncing is read from server (account.isSyncing) for accurate spinner state.
  */
 export function useEmailSyncIntent(): UseEmailSyncIntentReturn {
   const user = useFuse((state) => state.user);
   const callerUserId = user?.convexId as Id<'admin_users'> | undefined;
 
+  // Get isSyncing from account record (server-controlled)
+  const { data } = useProductivityData();
+  const account = data.email?.accounts?.[0]; // First connected account
+  const isSyncing = account?.isSyncing ?? false;
+
   const requestSync = useMutation(api.productivity.email.sync.requestImmediateSync);
 
-  const [isSyncing, setIsSyncing] = useState(false);
   const lastResultRef = useRef<string | null>(null);
-  const isSyncingRef = useRef(false); // Prevent double-trigger
+  const isTriggeringRef = useRef(false); // Prevent double-trigger of request
 
   /**
    * Request sync with specified intent
    */
   const doSync = useCallback(async (intent: SyncIntent) => {
-    if (!callerUserId || isSyncingRef.current) return;
+    if (!callerUserId || isTriggeringRef.current) return;
 
-    isSyncingRef.current = true;
-    setIsSyncing(true);
+    isTriggeringRef.current = true;
     try {
       const result = await requestSync({
         userId: callerUserId,
@@ -78,8 +84,7 @@ export function useEmailSyncIntent(): UseEmailSyncIntentReturn {
       lastResultRef.current = 'Sync error';
       console.error('Email sync failed:', error);
     } finally {
-      isSyncingRef.current = false;
-      setIsSyncing(false);
+      isTriggeringRef.current = false;
     }
   }, [callerUserId, requestSync]);
 

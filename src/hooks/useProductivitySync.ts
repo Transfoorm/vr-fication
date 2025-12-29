@@ -94,6 +94,7 @@ export function useProductivitySync(): void {
         connectedAt: account.connectedAt,
         lastSyncAt: account.lastSyncAt,
         lastSyncError: account.lastSyncError,
+        isSyncing: account.isSyncing,
       }));
 
       // Transform threads to FUSE format (ThreadMetadata → EmailThread)

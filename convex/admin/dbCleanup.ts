@@ -39,6 +39,9 @@ export const getDatabaseCounts = query({
     counts['productivity_email_SenderCache'] = (await ctx.db.query('productivity_email_SenderCache').collect()).length;
     counts['productivity_email_AssetReferences'] = (await ctx.db.query('productivity_email_AssetReferences').collect()).length;
     counts['productivity_email_Assets'] = (await ctx.db.query('productivity_email_Assets').collect()).length;
+    counts['productivity_email_Folders'] = (await ctx.db.query('productivity_email_Folders').collect()).length;
+    counts['productivity_email_WebhookSubscriptions'] = (await ctx.db.query('productivity_email_WebhookSubscriptions').collect()).length;
+    counts['productivity_email_BodyCache'] = (await ctx.db.query('productivity_email_BodyCache').collect()).length;
     counts['productivity_calendar_Events'] = (await ctx.db.query('productivity_calendar_Events').collect()).length;
     counts['productivity_bookings_Form'] = (await ctx.db.query('productivity_bookings_Form').collect()).length;
     counts['productivity_pipeline_Prospects'] = (await ctx.db.query('productivity_pipeline_Prospects').collect()).length;
@@ -199,6 +202,24 @@ export const cleanupDatabase = mutation({
     const assets = await ctx.db.query('productivity_email_Assets').collect();
     for (const doc of assets) await ctx.db.delete(doc._id);
     logDeletion('productivity_email_Assets', assets.length);
+
+    // productivity_email_Folders
+    const emailFolders = await ctx.db.query('productivity_email_Folders').collect();
+    for (const doc of emailFolders) await ctx.db.delete(doc._id);
+    logDeletion('productivity_email_Folders', emailFolders.length);
+
+    // productivity_email_WebhookSubscriptions
+    const webhookSubs = await ctx.db.query('productivity_email_WebhookSubscriptions').collect();
+    for (const doc of webhookSubs) await ctx.db.delete(doc._id);
+    logDeletion('productivity_email_WebhookSubscriptions', webhookSubs.length);
+
+    // productivity_email_BodyCache (with storage blob cleanup)
+    const bodyCache = await ctx.db.query('productivity_email_BodyCache').collect();
+    for (const doc of bodyCache) {
+      await ctx.storage.delete(doc.storageId);
+      await ctx.db.delete(doc._id);
+    }
+    logDeletion('productivity_email_BodyCache', bodyCache.length);
 
     // productivity_calendar_Events
     const calendarEvents = await ctx.db.query('productivity_calendar_Events').collect();
@@ -485,6 +506,9 @@ export const atomicNukeWithClerk = action({
       { table: 'productivity_email_Messages', includeStorage: false },
       { table: 'productivity_email_Accounts', includeStorage: false },
       { table: 'productivity_email_SenderCache', includeStorage: false },
+      { table: 'productivity_email_Folders', includeStorage: false },
+      { table: 'productivity_email_WebhookSubscriptions', includeStorage: false },
+      { table: 'productivity_email_BodyCache', includeStorage: true },
       { table: 'productivity_calendar_Events', includeStorage: false },
       { table: 'productivity_bookings_Form', includeStorage: false },
       { table: 'productivity_pipeline_Prospects', includeStorage: false },
@@ -607,6 +631,59 @@ export const getStorageCount = query({
     return {
       count: sample.length,
       note: sample.length === 10000 ? 'More than 10,000 files' : 'Exact count',
+    };
+  },
+});
+
+/**
+ * 🧹 GARBAGE COLLECT ORPHANED ASSETS
+ *
+ * Deletes all assets that have no AssetReferences pointing to them.
+ * Also deletes their storage blobs.
+ * Call this after disconnect to ensure ZERO orphaned blobs.
+ */
+export const gcOrphanedAssets = mutation({
+  args: {
+    batchSize: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const batchSize = args.batchSize ?? 100;
+    let assetsDeleted = 0;
+    let blobsDeleted = 0;
+
+    // Get all assets (batch for safety)
+    const assets = await ctx.db.query('productivity_email_Assets').take(batchSize);
+
+    for (const asset of assets) {
+      // Check if this asset has ANY references
+      const hasRefs = await ctx.db
+        .query('productivity_email_AssetReferences')
+        .withIndex('by_asset', (q) => q.eq('assetId', asset._id))
+        .first();
+
+      if (!hasRefs) {
+        // Orphan - delete storage blob first
+        if (asset.storageId) {
+          try {
+            await ctx.storage.delete(asset.storageId);
+            blobsDeleted++;
+          } catch {
+            // Storage file may already be deleted
+          }
+        }
+        // Delete the asset record
+        await ctx.db.delete(asset._id);
+        assetsDeleted++;
+      }
+    }
+
+    const hasMore = assets.length === batchSize;
+    console.log(`🧹 GC: ${assetsDeleted} orphaned assets, ${blobsDeleted} storage blobs deleted. hasMore: ${hasMore}`);
+
+    return {
+      assetsDeleted,
+      blobsDeleted,
+      hasMore,
     };
   },
 });
