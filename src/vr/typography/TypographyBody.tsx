@@ -11,9 +11,11 @@ export interface TypographyBodyProps {
   /** Size variant */
   size?: 'sm' | 'md' | 'lg';
   /** Weight variant */
-  weight?: 'normal' | 'medium' | 'semibold';
+  weight?: 'micro' | 'ultra' | 'thin' | 'normal' | 'medium' | 'semibold' | 'bold' | 'black' | 'boss';
   /** Text color variant */
   color?: 'primary' | 'secondary' | 'tertiary' | 'error' | 'success' | 'warning';
+  /** Text alignment */
+  align?: 'left' | 'center' | 'right' | 'justify';
   /** Optional className for domain-specific styling */
   className?: string;
 }
@@ -27,6 +29,7 @@ export default function TypographyBody({
   size = 'md',
   weight = 'normal',
   color = 'primary',
+  align,
   className
 }: TypographyBodyProps) {
   const classes = [
@@ -34,6 +37,7 @@ export default function TypographyBody({
     `vr-typography-body--${size}`,
     `vr-typography-body--${weight}`,
     `vr-typography-body--${color}`,
+    align && `vr-typography-body--${align}`,
     className
   ].filter(Boolean).join(' ');
 

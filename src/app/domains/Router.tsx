@@ -27,9 +27,9 @@ import { useFuse } from '@/store/fuse';
 import Dashboard from './Dashboard';
 
 // Admin
-import Users from './admin/users/Users';
-import Plans from './admin/plans/Plans';
-import Showcase from './admin/showcase/Showcase';
+import Users from './admin/Users';
+import Plans from './admin/Plans';
+import Showcase from './admin/Showcase';
 
 // Clients
 import Contacts from './clients/Contacts';
@@ -58,8 +58,8 @@ import Locations from './projects/Locations';
 import Tracking from './projects/Tracking';
 
 // Settings
-import Account from './settings/account/Account';
-import Preferences from './settings/preferences/Preferences';
+import Account from './settings/Account';
+import Preferences from './settings/Preferences';
 import Security from './settings/Security';
 import Billing from './settings/Billing';
 import Plan from './settings/Plan';
@@ -98,9 +98,17 @@ export default function Router() {
 
   // Use URL directly on first render, then store takes over after sync
   // Since this component is client-only, window is always available
-  const route = storeRoute === 'dashboard' && getRouteFromURL() !== 'dashboard'
+  const rawRoute = storeRoute === 'dashboard' && getRouteFromURL() !== 'dashboard'
     ? getRouteFromURL()
     : storeRoute;
+
+  // Strip hash from route for matching (hash is for tab selection within page)
+  const route = rawRoute.split('#')[0];
+
+  // 🔱 Auth routes are handled by Next.js (auth) route group, not Sovereign Router
+  if (route === 'sign-in' || route === 'sign-up' || route === 'sso-callback') {
+    return null;
+  }
 
   // Performance measurement
   const startRender = performance.now();

@@ -370,7 +370,16 @@ export default function UserButton() {
             ×
           </button>
 
-          <div className="ft-userbutton-menu-header" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="ft-userbutton-menu-header ft-userbutton-menu-header--clickable"
+            onClick={() => {
+              closeAllModals();
+              navigate('settings/account');
+              setTimeout(() => {
+                window.location.hash = 'email';
+              }, 50);
+            }}
+          >
             <div className="ft-userbutton-menu-header-content">
               {user.emailVerified ? (
                 <img
@@ -434,13 +443,29 @@ export default function UserButton() {
               <button
                 onClick={() => {
                   closeAllModals();
-                  // Always navigate to Account - page handles freeze + Shadow King
                   navigate('settings/account');
+                  // Set hash to profile tab
+                  setTimeout(() => {
+                    window.location.hash = 'profile';
+                  }, 50);
                 }}
                 className="ft-userbutton-menu-item"
               >
-                <Icon variant="user" size="xs" />
-                <T.body size="sm">Your Account Details</T.body>
+                <Icon variant="user-pen" size="xs" />
+                <T.body size="sm">Manage Profile</T.body>
+              </button>
+            </div>
+
+            <div className="ft-userbutton-menu-item-wrapper">
+              <button
+                onClick={() => {
+                  closeAllModals();
+                  navigate('settings/account#password');
+                }}
+                className="ft-userbutton-menu-item"
+              >
+                <Icon variant="lock" size="xs" />
+                <T.body size="sm">Manage Password</T.body>
               </button>
             </div>
 
@@ -453,7 +478,20 @@ export default function UserButton() {
                 className="ft-userbutton-menu-item"
               >
                 <Icon variant="sparkles" size="xs" />
-                <T.body size="sm">Site Preferences</T.body>
+                <T.body size="sm">Manage Preferences</T.body>
+              </button>
+            </div>
+
+            <div className="ft-userbutton-menu-item-wrapper">
+              <button
+                onClick={() => {
+                  navigate('settings/plan');
+                  closeAllModals();
+                }}
+                className="ft-userbutton-menu-item"
+              >
+                <Icon variant="gem" size="xs" />
+                <T.body size="sm">Manage Subscription</T.body>
               </button>
             </div>
 
@@ -474,19 +512,6 @@ export default function UserButton() {
             <div className="ft-userbutton-menu-item-wrapper">
               <button
                 onClick={() => {
-                  navigate('settings/plan');
-                  closeAllModals();
-                }}
-                className="ft-userbutton-menu-item"
-              >
-                <Icon variant="gem" size="xs" />
-                <T.body size="sm">Manage Subscription</T.body>
-              </button>
-            </div>
-
-            <div className="ft-userbutton-menu-item-wrapper">
-              <button
-                onClick={() => {
                   setErrorMessage(null);
                   setIsFilePickerOpen(true);
                   fileInputRef.current?.click();
@@ -494,7 +519,7 @@ export default function UserButton() {
                 className="ft-userbutton-menu-item"
               >
                 <Icon variant="camera" size="xs" />
-                <T.body size="sm">{hasCustomAvatar ? 'Change Your Photo' : 'Add Photo'}</T.body>
+                <T.body size="sm">{hasCustomAvatar ? 'Change Your Photo' : 'Add Your Photo'}</T.body>
               </button>
             </div>
           </div>

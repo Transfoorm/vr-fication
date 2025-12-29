@@ -1,15 +1,17 @@
 #!/usr/bin/env tsx
-/**──────────────────────────────────────────────────────────────────────┐
-│  🛡️ FUSE-STYLE NAMING GUARD                                           │
-│  scripts/checkNaming.ts                                                │
-│                                                                        │
-│  Enforces FUSE-STYLE 7-layer naming conventions:                      │
-│  - CSS files must be lowercase-kebab-case.css                         │
-│  - CSS classes must be .kebab-case                                    │
-│  - No PascalCase or camelCase in CSS                                  │
-│                                                                        │
-│  Usage: npm run check:naming                                          │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**
+ * +----------------------------------------------------------------------+
+ * |  🛡️ FUSE-STYLE NAMING GUARD                                          |
+ * |  scripts/checkNaming.ts                                              |
+ * |                                                                      |
+ * |  Enforces FUSE-STYLE 7-layer naming conventions:                     |
+ * |  - CSS files must be lowercase-kebab-case.css                        |
+ * |  - CSS classes must be .kebab-case                                   |
+ * |  - No PascalCase or camelCase in CSS                                 |
+ * |                                                                      |
+ * |  Usage: npm run check:naming                                         |
+ * +----------------------------------------------------------------------+
+ */
 
 import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';

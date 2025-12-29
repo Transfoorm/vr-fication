@@ -73,6 +73,8 @@ export interface FieldLiveProps {
   required?: boolean;
   /** Helper text */
   helper?: string;
+  /** Only show helper when focused */
+  helperOnFocus?: boolean;
   /** Transform input as user types - function OR built-in name ('username') */
   transform?: TransformName | ((value: string, currentValue: string) => string);
   /** Multiline textarea mode */
@@ -105,6 +107,7 @@ export default function FieldLive({
   type = 'text',
   required = false,
   helper,
+  helperOnFocus = false,
   transform,
   multiline = false,
   maxLength,
@@ -326,15 +329,15 @@ export default function FieldLive({
             className="vr-field-live__input"
           />
         )}
-        {!multiline && <div className={chipClasses}>{chipText}</div>}
+        <div className={chipClasses}>{chipText}</div>
       </div>
       {multiline && (
         <div className="vr-field-live__counter">
           <T.caption>{localValue.length} / {effectiveMaxLength} characters</T.caption>
         </div>
       )}
-      {helper && state !== 'error' && (
-        <div className="vr-field__helper"><T.caption>{helper}</T.caption></div>
+      {helper && state !== 'error' && (!helperOnFocus || state !== 'idle') && (
+        <div className="vr-field__helper">{helper}</div>
       )}
       {errorMessage && state === 'error' && (
         <div className="vr-field__error"><T.caption>{errorMessage}</T.caption></div>

@@ -66,6 +66,12 @@ if [[ "$COMMAND" =~ git[[:space:]].*stash[[:space:]]+(drop|clear) ]]; then
   block "git stash drop/clear permanently loses stashed work"
 fi
 
+# git stash push (moves work to limbo - must ask user first)
+if [[ "$COMMAND" =~ git[[:space:]].*stash[[:space:]]*(push|$|[[:space:]]-) ]] && \
+   [[ ! "$COMMAND" =~ stash[[:space:]]+(pop|list|show|apply) ]]; then
+  block "git stash push moves work to limbo - STOP and ask user first, don't work around pre-commit hooks"
+fi
+
 # git branch -D (force delete, can lose commits)
 if [[ "$COMMAND" =~ git[[:space:]].*branch[[:space:]]+-D ]]; then
   block "git branch -D can lose unmerged commits"

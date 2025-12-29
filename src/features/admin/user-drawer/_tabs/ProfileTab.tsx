@@ -20,7 +20,7 @@ import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useAdminData } from '@/hooks/useAdminData';
 import { useFuse } from '@/store/fuse';
-import { Field, Button, Icon, T } from '@/vr';
+import { Field, Button, Icon, T, Stack } from '@/vr';
 import { useSideDrawer } from '@/vr/modal';
 import { useVanish } from '@/features/vanish/VanishContext';
 import CountrySelector from '@/features/shell/country-selector';
@@ -255,9 +255,9 @@ export function ProfileTab({ userId, isActive = true }: ProfileTabProps) {
 
   return (
     <div className="ft-profiletab">
-      <div className="vr-field-spacing">
+      <Stack.lg>
         {/* Row 1: First Name + Last Name */}
-        <div className="vr-field-row">
+        <Stack.row.equal>
           <Field.live
             label="First Name"
             value={String(user.firstName ?? '')}
@@ -272,10 +272,10 @@ export function ProfileTab({ userId, isActive = true }: ProfileTabProps) {
             placeholder="Not set"
             disabled={!isEditMode}
           />
-        </div>
+        </Stack.row.equal>
 
         {/* Row 2: Entity/Organisation + Username */}
-        <div className="vr-field-row">
+        <Stack.row.equal>
           <Field.live
             label="Entity/Organisation"
             value={String(user.entityName ?? '')}
@@ -289,13 +289,14 @@ export function ProfileTab({ userId, isActive = true }: ProfileTabProps) {
             onSave={(v) => handleSave('socialName', v)}
             placeholder="Not set"
             transform="username"
-            helper="* Letters, numbers, and one dot only"
+            helper="*Letters, numbers, and one dot only"
+            helperOnFocus
             disabled={!isEditMode}
           />
-        </div>
+        </Stack.row.equal>
 
         {/* Row 3: Phone Number + Business Location */}
-        <div className="vr-field-row">
+        <Stack.row.equal>
           <Field.live
             label="Phone Number (Optional)"
             value={String(user.phoneNumber ?? '')}
@@ -310,7 +311,7 @@ export function ProfileTab({ userId, isActive = true }: ProfileTabProps) {
             onSave={(country) => handleSave('businessCountry', country)}
             disabled={!isEditMode}
           />
-        </div>
+        </Stack.row.equal>
 
         {/* Row 4: Edit/Delete Buttons + Avatar/Logo Section */}
         <div className="ft-profiletab-media-section">
@@ -342,7 +343,7 @@ export function ProfileTab({ userId, isActive = true }: ProfileTabProps) {
             />
           </div>
         </div>
-      </div>
+      </Stack.lg>
     </div>
   );
 }

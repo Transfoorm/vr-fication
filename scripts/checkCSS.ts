@@ -1,15 +1,17 @@
 #!/usr/bin/env tsx
-
 /**
- * 🛡️ VRP CSS GUARD - CSS Variable Enforcement
- *
- * Validates CSS files to ensure:
- * - No hardcoded hex colors (#rrggbb)
- * - No hardcoded rgb/rgba/hsl/hsla functions
- * - No magic numbers (all numeric values use CSS variables)
- * - All colors flow through CSS custom properties
- *
- * Part of the Virgin Repo Protocol (VRP) - prevents CSS theme bypasses
+ * +----------------------------------------------------------------------+
+ * |  🛡️ VRP CSS GUARD - CSS Variable Enforcement                         |
+ * |  scripts/checkCSS.ts                                                 |
+ * |                                                                      |
+ * |  Validates CSS files to ensure:                                      |
+ * |  - No hardcoded hex colors (#rrggbb)                                 |
+ * |  - No hardcoded rgb/rgba/hsl/hsla functions                          |
+ * |  - No magic numbers (all numeric values use CSS variables)           |
+ * |  - All colors flow through CSS custom properties                     |
+ * |                                                                      |
+ * |  Part of the Virgin Repo Protocol (VRP)                              |
+ * +----------------------------------------------------------------------+
  */
 
 import { execSync } from 'child_process';

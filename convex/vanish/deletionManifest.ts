@@ -145,6 +145,9 @@ export const DELETION_MANIFEST: DeletionManifest = {
     productivity_pipeline_Prospects: {
       fields: { createdBy: 'delete' },
     },
+    productivity_email_WebhookSubscriptions: {
+      fields: { userId: 'delete' },
+    },
   },
 
   preserve: [

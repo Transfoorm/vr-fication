@@ -182,8 +182,9 @@ interface FuseStore {
   // Domain Actions
   // ─────────────────────────────────────────────────────────────────────────────
   hydrateProductivity: (data: Partial<ProductivityData>, source?: ADPSource) => void;
+  hydrateEmailBody: (messageId: string, htmlContent: string) => void;
   clearProductivity: () => void;
-  setEmailViewMode: (mode: 'standard' | 'await') => void;
+  setEmailViewMode: (mode: 'live' | 'impact') => void;
 
   hydrateAdmin: (data: Partial<AdminData>, source?: ADPSource) => void;
   clearAdmin: () => void;
@@ -268,7 +269,8 @@ export const useFuse = create<FuseStore>()((set, get) => {
       meetings: [],
       bookings: [],
       tasks: [],
-      emailViewMode: 'standard',
+      emailBodies: {},
+      emailViewMode: 'live',
       status: 'idle',
       lastFetchedAt: undefined,
       source: undefined,
@@ -371,6 +373,20 @@ export const useFuse = create<FuseStore>()((set, get) => {
       }
       fuseTimer.end('hydrateProductivity', start);
     },
+    hydrateEmailBody: (messageId, htmlContent) => {
+      set((state) => ({
+        productivity: {
+          ...state.productivity,
+          emailBodies: {
+            ...state.productivity.emailBodies,
+            [messageId]: htmlContent,
+          },
+        },
+      }));
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`⚡ FUSE: Email body hydrated for ${messageId.slice(-8)}`);
+      }
+    },
     clearProductivity: () => {
       const start = fuseTimer.start('clearProductivity');
       set({
@@ -380,7 +396,8 @@ export const useFuse = create<FuseStore>()((set, get) => {
           meetings: [],
           bookings: [],
           tasks: [],
-          emailViewMode: 'standard',
+          emailBodies: {},
+          emailViewMode: 'live',
           status: 'idle',
           lastFetchedAt: undefined,
           source: undefined,
@@ -1179,6 +1196,11 @@ export const useFuse = create<FuseStore>()((set, get) => {
       if (typeof window !== 'undefined') {
         const urlPath = route === 'dashboard' ? '/' : `/${route}`;
         window.history.pushState({ route }, '', urlPath);
+
+        // If route has a hash, dispatch hashchange event for tab components
+        if (route.includes('#')) {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        }
       }
 
       const duration = fuseTimer.end('navigate', start);

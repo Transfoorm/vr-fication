@@ -12,7 +12,7 @@
 import { ReactNode, useEffect } from 'react';
 import { useFuse } from '@/store/fuse';
 import type { ProductivitySlice } from '@/store/types';
-import { MOCK_EMAIL_DATA } from '@/features/productivity/email-console/mockData';
+import { useProductivitySync } from '@/hooks/useProductivitySync';
 
 interface ProductivityProviderProps {
   children: ReactNode;
@@ -31,15 +31,16 @@ interface ProductivityProviderProps {
 export function ProductivityProvider({ children, initialData }: ProductivityProviderProps) {
   const hydrateProductivity = useFuse((state) => state.hydrateProductivity);
 
+  // 🌉 GOLDEN BRIDGE: Real-time Convex → FUSE sync
+  useProductivitySync();
+
   useEffect(() => {
     if (initialData) {
       // 🔥 FUSE 6.0 + WARP: Hydrate productivity domain with server data
-      console.log('⚡ ProductivityProvider: Hydrating productivity domain (WARP)');
+      console.log('⚡ ProductivityProvider: Hydrating productivity domain (WARP)', initialData);
       hydrateProductivity(initialData);
-    } else if (process.env.NODE_ENV === 'development') {
-      // 🚧 DEV ONLY: Load mock email data for UI testing
-      console.log('⚡ ProductivityProvider: Loading MOCK email data (dev mode)');
-      hydrateProductivity({ email: MOCK_EMAIL_DATA });
+    } else {
+      console.log('⚠️ ProductivityProvider: No initialData received from WARP');
     }
   }, [hydrateProductivity, initialData]); // Only run on mount - initialData comes from server preload
 

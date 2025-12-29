@@ -154,6 +154,80 @@ export async function swapEmailsToPrimary(secondaryEmail: string) {
 }
 
 /**
+ * Ensure a specific email stays as primary (prevents auto-promotion of newly verified emails)
+ * 🛡️ SID-12.1: Uses session.clerkId for Clerk API calls
+ *
+ * @param primaryEmail - The email address string that MUST remain primary
+ */
+export async function ensurePrimaryEmail(primaryEmail: string) {
+  const session = await readSessionCookie();
+
+  console.log('[ensurePrimaryEmail] Starting for:', primaryEmail);
+  console.log('[ensurePrimaryEmail] Session clerkId:', session?.clerkId ? 'present' : 'MISSING');
+
+  if (!session?.clerkId) {
+    console.error('[ensurePrimaryEmail] No clerkId in session');
+    return { error: 'Not authenticated' };
+  }
+
+  try {
+    const client = await clerkClient();
+    console.log('[ensurePrimaryEmail] Got Clerk client, fetching user...');
+
+    const clerkUser = await client.users.getUser(session.clerkId);
+    console.log('[ensurePrimaryEmail] User has', clerkUser.emailAddresses.length, 'email addresses');
+    console.log('[ensurePrimaryEmail] Current primary:', clerkUser.primaryEmailAddress?.emailAddress);
+
+    // Find the email that should be primary
+    const targetEmail = clerkUser.emailAddresses.find(
+      (e) => e.emailAddress.toLowerCase() === primaryEmail.toLowerCase()
+    );
+
+    if (!targetEmail) {
+      console.error('[ensurePrimaryEmail] Target email not found:', primaryEmail);
+      console.error('[ensurePrimaryEmail] Available emails:', clerkUser.emailAddresses.map(e => e.emailAddress));
+      return { error: 'Primary email not found in Clerk' };
+    }
+
+    // If it's already primary, nothing to do
+    if (clerkUser.primaryEmailAddressId === targetEmail.id) {
+      console.log('[ensurePrimaryEmail] Already primary, no action needed');
+      return { success: true, alreadyPrimary: true };
+    }
+
+    // CRITICAL: Check if the target email is verified
+    // Clerk won't allow setting an unverified email as primary
+    // If the original primary was unverified and a new email got verified,
+    // Clerk auto-promotes the verified one - we should let that stand
+    if (targetEmail.verification?.status !== 'verified') {
+      console.log('[ensurePrimaryEmail] Target email is UNVERIFIED - letting Clerk auto-promotion stand');
+      console.log('[ensurePrimaryEmail] Current primary is now:', clerkUser.primaryEmailAddress?.emailAddress);
+      return {
+        success: true,
+        skipped: true,
+        reason: 'Original primary was unverified, Clerk auto-promoted the verified email',
+        newPrimary: clerkUser.primaryEmailAddress?.emailAddress,
+      };
+    }
+
+    // Set it back as primary
+    console.log('[ensurePrimaryEmail] Restoring primary to:', targetEmail.emailAddress);
+    await client.users.updateUser(session.clerkId, {
+      primaryEmailAddressID: targetEmail.id,
+    });
+
+    console.log('[ensurePrimaryEmail] Successfully restored primary');
+    return { success: true, restored: true };
+  } catch (err) {
+    const error = err as { message?: string; errors?: Array<{ message: string; code?: string }> };
+    console.error('[ensurePrimaryEmail] CAUGHT ERROR:', err);
+    console.error('[ensurePrimaryEmail] Error message:', error.message);
+    console.error('[ensurePrimaryEmail] Error details:', JSON.stringify(error.errors, null, 2));
+    return { error: error.errors?.[0]?.message || error.message || 'Failed to restore primary email' };
+  }
+}
+
+/**
  * Delete secondary email by email address string
  * 🛡️ SID-12.1: Uses session.clerkId for Clerk API calls
  */

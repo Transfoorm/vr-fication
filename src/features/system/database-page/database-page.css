@@ -1,0 +1,62 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🗄️ DATABASE PAGE FEATURE - Database monitoring styles
+   /src/features/system/database-page/database-page.css
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Status container - vertical layout */
+.ft-database-status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 8px);
+}
+
+/* Database name - monospace styling with orange color */
+.ft-database-dbname {
+  font-family: var(--font-mono, 'Monaco', 'Courier New', monospace);
+  color: rgb(234 88 12);
+}
+
+/* DB Check status indicator */
+.ft-database-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 8px);
+  margin-bottom: var(--space-xs, 4px);
+}
+
+/* Error state wrapper - red background for warnings */
+.ft-database-indicator--error {
+  background: linear-gradient(135deg, rgb(254 242 242) 0%, rgb(254 226 226) 100%);
+  border: 1px solid rgb(252 165 165 / 30%);
+  padding: var(--space-md, 16px);
+  border-radius: var(--radius-md, 8px);
+}
+
+/* Status light (circle indicator) */
+.ft-database-light {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ft-database-light--green {
+  background-color: rgb(34 197 94);
+  box-shadow: 0 0 8px rgb(34 197 94 / 40%);
+}
+
+.ft-database-light--red {
+  background-color: rgb(239 68 68);
+  box-shadow: 0 0 8px rgb(239 68 68 / 40%);
+}
+
+/* Sunken frame - inset shadow effect */
+.ft-database-sunken {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs, 4px);
+  padding: var(--space-md, 16px);
+  background-color: var(--color-bg-subtle, rgb(249 250 251));
+  border-radius: var(--radius-md, 8px);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / 6%);
+}

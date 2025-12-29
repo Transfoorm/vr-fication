@@ -1,12 +1,12 @@
 /**─────────────────────────────────────────────────────────────────────────┐
-│  🛡️ S.I.D. Phase 15 - VANISH Internal Query                              │
+│  🛡️ S.I.D. Phase 15 - VANISH Internal Query                               │
 │  /convex/vanish/getClerkIdForDeletion.ts                                  │
 │                                                                           │
-│  Internal query to look up clerkId from identity registry for deletion.  │
+│  Internal query to look up clerkId from identity registry for deletion.   │
 │  Used by deleteAnyUserWithClerkV2 action.                                 │
 │                                                                           │
-│  ⚠️ QUARANTINED: This query exists ONLY for VANISH deletion flows.       │
-│  Do NOT use this query for any other purpose.                            │
+│  ⚠️ QUARANTINED: This query exists ONLY for VANISH deletion flows.        │
+│  Do NOT use this query for any other purpose.                             │
 └───────────────────────────────────────────────────────────────────────────┘ */
 
 import { internalQuery } from "@/convex/_generated/server";

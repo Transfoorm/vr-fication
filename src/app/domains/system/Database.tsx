@@ -1,23 +1,29 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🗄️ DATABASE - Sovereign Domain                                       │
-│  /src/app/domains/admin/database/Database.tsx                         │
+│  /src/app/domains/system/Database.tsx                                 │
 │                                                                        │
 │  VR Doctrine: Domain Layer (Clean)                                    │
-│  - Page route and structure only                                      │
-│  - Imports Feature (DBCheckFeature)                                   │
-│  - No FUSE wiring, no business logic                                  │
-│  - Admiral rank only                                                  │
+│  - Feature imports only                                               │
+│  - ZERO FUSE                                                          │
+│  - ZERO callbacks                                                     │
+│  - ZERO state                                                         │
+│  - Pure declaration                                                   │
 └────────────────────────────────────────────────────────────────────────┘ */
 
 'use client';
 
 import { useSetPageHeader } from '@/hooks/useSetPageHeader';
 import { usePageTiming } from '@/fuse/hooks/usePageTiming';
-import { DBCheckFeature } from '@/features/system/database/db-check';
+import { DatabasePageFeature } from '@/features/system/database-page';
+import { Page } from '@/vr';
 
 export default function Database() {
-  useSetPageHeader("Database", 'Database integrity monitoring and health checks');
+  useSetPageHeader('Database', 'Database integrity monitoring and health checks');
   usePageTiming('/system/database');
 
-  return <DBCheckFeature />;
+  return (
+    <Page.constrained>
+      <DatabasePageFeature />
+    </Page.constrained>
+  );
 }

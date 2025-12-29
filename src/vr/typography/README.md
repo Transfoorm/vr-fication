@@ -163,6 +163,7 @@ import { Typography } from '@/vr';
 size?: 'sm' | 'md' | 'lg'  // default: 'md'
 weight?: 'normal' | 'medium' | 'semibold'  // default: 'normal' (NO 'bold')
 color?: 'primary' | 'secondary' | 'tertiary' | 'error' | 'success' | 'warning'  // default: 'primary'
+align?: 'left' | 'center' | 'right' | 'justify'  // default: undefined (inherits)
 className?: string
 ```
 
@@ -172,6 +173,7 @@ size?: 'xs' | 'sm'  // default: 'sm'
 weight?: 'normal' | 'medium'  // default: 'normal' (NO 'semibold' or 'bold')
 color?: 'primary' | 'secondary' | 'tertiary' | 'muted'  // default: 'tertiary'
 italic?: boolean  // default: false
+align?: 'left' | 'center' | 'right' | 'justify'  // default: undefined (inherits)
 className?: string
 ```
 
@@ -201,7 +203,7 @@ Level defaults:
 ```tsx
 size?: 'sm' | 'md' | 'lg' | 'xl'  // default: 'lg'
 weight?: 'normal' | 'medium' | 'semibold' | 'bold'  // default: 'semibold'
-align?: 'left' | 'center' | 'right'  // default: 'left'
+align?: 'left' | 'center' | 'right' | 'justify'  // default: 'left'
 className?: string
 ```
 

@@ -13,7 +13,7 @@ export interface TypographyTitleProps {
   /** Weight variant */
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
   /** Text alignment */
-  align?: 'left' | 'center' | 'right';
+  align?: 'left' | 'center' | 'right' | 'justify';
   /** Optional className for domain-specific styling */
   className?: string;
 }

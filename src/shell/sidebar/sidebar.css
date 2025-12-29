@@ -108,7 +108,7 @@
   background-color: var(--sidebar-main-button-rest);  /* 🟨 BUTTON REST COLOR */
   color: var(--sidebar-button-text);  /* 🟨 BUTTON TEXT COLOR */
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);  /* Matches email console bracket sharpness */
 
   /* Typography handled by button text */
   text-align: left;

@@ -17,7 +17,7 @@ export const commodoreNav: NavSection[] = [
   },
   {
     label: 'Productivity',
-    icon: 'send',
+    icon: 'square-check-big',
     children: [
       { path: ROUTES.productivity.email, label: 'Email' },
       { path: ROUTES.productivity.calendar, label: 'Calendar' },

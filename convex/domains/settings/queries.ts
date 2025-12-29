@@ -1,19 +1,19 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  ⚙️ SETTINGS DOMAIN QUERIES - SRS Layer 4                             │
-│  /convex/domains/settings/queries.ts                                   │
-│                                                                        │
-│  🛡️ S.I.D. COMPLIANT - Phase 10                                       │
-│  - All queries accept callerUserId: v.id("admin_users")                │
-│  - No ctx.auth.getUserIdentity() usage                                 │
-│                                                                        │
-│  All-rank self-scoped access to user settings and preferences          │
-│  • Crew: Own settings only                                             │
-│  • Captain: Own settings only                                          │
-│  • Commodore: Own settings only                                        │
-│  • Admiral: Own settings only                                          │
-│                                                                        │
-│  SRS Commandment #4: Data scoping via self-only user access           │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  ⚙️ SETTINGS DOMAIN QUERIES - SRS Layer 4                                 │
+│  /convex/domains/settings/queries.ts                                      │
+│                                                                           │
+│  🛡️ S.I.D. COMPLIANT - Phase 10                                           │
+│  - All queries accept callerUserId: v.id("admin_users")                   │
+│  - No ctx.auth.getUserIdentity() usage                                    │
+│                                                                           │
+│  All-rank self-scoped access to user settings and preferences             │
+│  • Crew: Own settings only                                                │
+│  • Captain: Own settings only                                             │
+│  • Commodore: Own settings only                                           │
+│  • Admiral: Own settings only                                             │
+│                                                                           │
+│  SRS Commandment #4: Data scoping via self-only user access               │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { query } from "@/convex/_generated/server";
 import type { QueryCtx } from "@/convex/_generated/server";

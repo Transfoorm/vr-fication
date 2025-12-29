@@ -15,7 +15,7 @@
 import { ReactNode } from 'react';
 
 export interface FullPageProps {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
 }
 

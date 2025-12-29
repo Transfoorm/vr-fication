@@ -1,19 +1,19 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🔌 FINANCE DOMAIN QUERIES - SRS Layer 4                              │
-│  /convex/domains/finance/queries.ts                                    │
-│                                                                        │
-│  🛡️ S.I.D. COMPLIANT - Phase 10                                       │
-│  - All queries accept callerUserId: v.id("admin_users")                │
-│  - No ctx.auth.getUserIdentity() usage                                 │
-│                                                                        │
-│  Rank-based data scoping for financial management:                     │
-│  • Crew: Read-only, organization-scoped                                │
-│  • Captain: Full access, organization-scoped                           │
-│  • Commodore: Full access, organization-scoped                         │
-│  • Admiral: All data (cross-org, platform-wide)                        │
-│                                                                        │
-│  SRS Commandment #4: Data scoping via Convex query filters            │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🔌 FINANCE DOMAIN QUERIES - SRS Layer 4                                  │
+│  /convex/domains/finance/queries.ts                                       │
+│                                                                           │
+│  🛡️ S.I.D. COMPLIANT - Phase 10                                           │
+│  - All queries accept callerUserId: v.id("admin_users")                   │
+│  - No ctx.auth.getUserIdentity() usage                                    │
+│                                                                           │
+│  Rank-based data scoping for financial management:                        │
+│  • Crew: Read-only, organization-scoped                                   │
+│  • Captain: Full access, organization-scoped                              │
+│  • Commodore: Full access, organization-scoped                            │
+│  • Admiral: All data (cross-org, platform-wide)                           │
+│                                                                           │
+│  SRS Commandment #4: Data scoping via Convex query filters                │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { query } from "@/convex/_generated/server";
 import type { QueryCtx } from "@/convex/_generated/server";

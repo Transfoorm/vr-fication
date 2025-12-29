@@ -1,16 +1,16 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🎖️ FUSE Rank Authentication Utilities                                 │
-│  /convex/system/utils/rankAuth.ts                                      │
-│                                                                        │
-│  Hierarchy: Admiral > Commodore > Captain > Crew                       │
-│                                                                        │
-│  🛡️ SID-5.3 COMPLIANT: All functions accept userId: Id<"admin_users"> │
-│  Sovereign identity lookup via ctx.db.get()                            │
-│                                                                        │
-│  NOTE: This file duplicates UserRank and RANK_HIERARCHY from           │
-│  /src/rank/types.ts. This is intentional for Convex isolation -        │
-│  Convex cannot import from src/. The canonical source is /src/rank/    │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🎖️ FUSE Rank Authentication Utilities                                    │
+│  /convex/system/utils/rankAuth.ts                                         │
+│                                                                           │
+│  Hierarchy: Admiral > Commodore > Captain > Crew                          │
+│                                                                           │
+│  🛡️ SID-5.3 COMPLIANT: All functions accept userId: Id<"admin_users">     │
+│  Sovereign identity lookup via ctx.db.get()                               │
+│                                                                           │
+│  NOTE: This file duplicates UserRank and RANK_HIERARCHY from              │
+│  /src/rank/types.ts. This is intentional for Convex isolation -           │
+│  Convex cannot import from src/. The canonical source is /src/rank/       │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { DatabaseReader } from "@/convex/_generated/server";
 import { Id } from "@/convex/_generated/dataModel";

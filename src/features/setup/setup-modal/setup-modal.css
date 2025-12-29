@@ -574,10 +574,19 @@
 
 .ft-setup-input::placeholder {
   color: var(--setup-placeholder) !important;
+  transition: opacity 150ms ease;
 }
 
+/* Error state - fade out both input text and placeholder to show error message */
 .ft-setup-input-error {
   border-color: var(--setup-border-error-input) !important;
+  color: transparent !important;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.ft-setup-input-error::placeholder {
+  opacity: 0;
+  transition: opacity 150ms ease;
 }
 
 .ft-setup-error-text {

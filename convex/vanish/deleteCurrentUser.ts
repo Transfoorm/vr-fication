@@ -3,7 +3,7 @@
 │  /convex/vanish/deleteCurrentUser.ts                                      │
 │                                                                           │
 │  User-initiated account deletion.                                         │
-│  Allows authenticated admin_users to delete their own accounts.                 │
+│  Allows authenticated admin_users to delete their own accounts.           │
 │                                                                           │
 │  VANISH LAW COMPLIANCE:                                                   │
 │  - No userId parameter accepted (derived from ctx.auth)                   │

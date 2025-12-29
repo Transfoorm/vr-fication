@@ -2,7 +2,7 @@
 │  🔒 SERVER-SIDE EMAIL MANAGEMENT                                       │
 │  /api/user/email/add                                                   │
 │                                                                        │
-│  🛡️ S.I.D. COMPLIANT - Phase 9                                        │
+│  🛡️ S.I.D. COMPLIANT - Phase 9                                         │
 │  - SID-9.1: Identity from readSessionCookie(), NOT auth()              │
 │  - SID-5.3: Convex queries use userId (sovereign _id)                  │
 │  - SID-12.1: Clerk API uses session.clerkId (permitted)                │

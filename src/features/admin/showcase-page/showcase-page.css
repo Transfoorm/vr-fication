@@ -1,0 +1,322 @@
+/* ═══════════════════════════════════════════════════════════════════
+   🎪 SHOWCASE BUNDLE CSS
+   /src/features/admin/showcase-bundle/showcase-bundle.css
+
+   Feature-layer styles for component showcase demos.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   GRID LAYOUTS
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-showcasetabs-grid-5 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md, 16px);
+  align-items: flex-start;
+}
+
+.ft-showcasetabs-item-label {
+  /* Typography handled by T.caption */
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-sm, 8px) 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   GUIDE TAB - VR Doctrine
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-showcasetabs-guide {
+  display: flex;
+  flex-direction: column;
+
+  /* Gap removed - Card.standard handles spacing via lobotomized owl */
+}
+
+/* 2-column section */
+.ft-showcasetabs-guide-columns {
+  column-count: 2;
+  column-gap: var(--space-xl, 24px);
+
+  /* Typography handled by child elements */
+}
+
+/* Prevent elements from breaking across columns */
+.ft-showcasetabs-guide-columns > * {
+  break-inside: avoid;
+  margin-bottom: var(--space-lg, 20px);
+}
+
+/* Introduction paragraph - larger, more prominent */
+.ft-showcasetabs-guide-intro {
+  line-height: 1.7;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm, 8px);
+}
+
+/* Flow diagram "VR → Feature → Tab" */
+.ft-showcasetabs-guide-flow {
+  display: block;
+  text-align: center;
+  color: var(--brand-primary, #f40);
+  letter-spacing: 0.05em;
+  margin: var(--space-md, 16px) 0;
+  padding: var(--space-xs, 4px) var(--space-md, 16px);
+  background: linear-gradient(135deg, rgb(255 247 237) 0%, rgb(254 242 242) 100%);
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid rgb(254 215 170 / 30%);
+}
+
+/* The Stack list - cleaner, more spacious */
+.ft-showcasetabs-guide-stack-list {
+  list-style: disc;
+  padding-left: var(--space-lg, 20px);
+  margin: var(--space-md, 16px) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 8px);
+}
+
+.ft-showcasetabs-guide-stack-list li {
+  margin-bottom: var(--space-xs, 4px);
+}
+
+/* Emphasis text - "Is this dirt?" */
+.ft-showcasetabs-guide-emphasis {
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
+  background: linear-gradient(135deg, rgb(255 251 235) 0%, rgb(254 243 199) 100%);
+  border-radius: var(--radius-md, 8px);
+  border-left: 3px solid var(--color-warning, #f59e0b);
+  font-style: italic;
+}
+
+/* Section subtitles under h2 */
+.ft-showcasetabs-guide-subtitle {
+  display: block;
+  color: var(--text-tertiary, #9ca3af);
+  margin-top: calc(var(--space-xs, 4px) * -1);
+  margin-bottom: var(--space-md, 16px);
+}
+
+/* CSS Prefix list - improved layout */
+.ft-showcasetabs-guide-prefix-list {
+  list-style: disc;
+  padding-left: var(--space-lg, 20px);
+  margin: var(--space-md, 16px) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 8px);
+}
+
+.ft-showcasetabs-guide-prefix-list li {
+  margin-bottom: var(--space-xs, 4px);
+}
+
+/* Code styling */
+.ft-showcasetabs-guide-code {
+  background: var(--bg-tertiary, #f3f4f6);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm, 4px);
+  font-family: var(--font-mono, monospace); /* Preserve monospace for code */
+
+  /* Typography handled by parent element */
+  color: var(--brand-primary, #f40);
+}
+
+/* Ontology chain - monospace flow */
+.ft-showcasetabs-guide-ontology {
+  font-family: var(--font-mono, monospace);
+  color: var(--text-secondary);
+  background: var(--bg-tertiary, #f3f4f6);
+  padding: var(--space-md, 16px);
+  border-radius: var(--radius-md, 8px);
+  line-height: 1.8;
+  margin: var(--space-md, 16px) 0;
+  overflow-x: auto;
+}
+
+.ft-showcasetabs-guide-links {
+  list-style: none;
+  padding: 0;
+}
+
+.ft-showcasetabs-guide-links li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs, 4px);
+  padding: var(--space-sm, 8px) 0;
+  border-bottom: 1px solid var(--border-light, #e5e7eb);
+}
+
+.ft-showcasetabs-guide-links li:last-child {
+  border-bottom: none;
+}
+
+.ft-showcasetabs-guide-links code {
+  /* Typography handled by parent element */
+  color: var(--brand-primary, #f40);
+}
+
+.ft-showcasetabs-guide-links span {
+  /* Typography handled by parent element */
+  color: var(--text-tertiary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   TOOLTIP SHOWCASE TAB
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-showcasetabs-tooltips-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.ft-showcasetabs-tooltips-title-hover {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.ft-showcasetabs-tooltips-link-inline {
+  min-height: auto;
+  padding: 0;
+  text-decoration-color: currentcolor;
+}
+
+.ft-showcasetabs-tooltips-underline {
+  cursor: pointer;
+  text-decoration-color: currentcolor;
+}
+
+.ft-showcasetabs-tooltips-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.ft-showcasetabs-tooltips-icon-color {
+  color: #999;
+}
+
+.ft-showcasetabs-tooltips-icons-row {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.ft-showcasetabs-tooltips-icons-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.ft-showcasetabs-tooltips-icon-accent {
+  cursor: pointer;
+  color: var(--color-accent);
+}
+
+.ft-showcasetabs-tooltips-icon-warning {
+  cursor: pointer;
+  color: var(--color-warning);
+}
+
+.ft-showcasetabs-tooltips-divider {
+  margin: var(--space-lg) 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+.ft-showcasetabs-tooltips-docs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.ft-showcasetabs-tooltips-docs-title {
+  margin-bottom: var(--space-md);
+}
+
+.ft-showcasetabs-tooltips-docs-intro {
+  margin-bottom: var(--space-md);
+}
+
+.ft-showcasetabs-tooltips-docs-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Numbered documentation titles - brand orange */
+/* stylelint-disable-next-line no-descending-specificity -- Different section from guide, no conflict */
+.ft-showcasetabs-tooltips-docs-list > div > h3 {
+  color: var(--brand-primary);
+}
+
+.ft-showcasetabs-tooltips-code-block {
+  background-color: #f5f5f5;
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+
+  /* Typography handled by child code elements */
+  overflow: auto;
+}
+
+.ft-showcasetabs-tooltips-props-summary {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background-color: #fffbeb;
+  border-radius: var(--radius-md);
+  border: 1px solid #fef3c7;
+}
+
+.ft-showcasetabs-tooltips-props-title {
+  margin-bottom: var(--space-xs);
+}
+
+.ft-showcasetabs-tooltips-props-list {
+  margin-left: var(--space-lg);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   FT GUIDE TAB - Feature Patterns Documentation
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-patterns__code-block {
+  background: var(--bg-secondary, #f9fafb);
+  padding: var(--space-md, 16px);
+  border-radius: var(--radius-sm, 6px);
+  overflow: auto;
+  line-height: 1.6;
+  white-space: pre;
+  margin: 0;
+}
+
+.ft-patterns__code-block--error {
+  background: #fee2e2;
+  border: 1px solid #dc2626;
+}
+
+.ft-patterns__list {
+  margin: 0;
+  padding-left: var(--space-lg, 24px);
+}
+
+.ft-patterns__list-spaced {
+  margin: 0;
+  padding-left: var(--space-lg, 24px);
+  margin-top: var(--space-md, 16px);
+}
+
+.ft-patterns__check-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs, 4px);
+  margin-top: var(--space-sm, 8px);
+}
+
+.ft-patterns__decision-box {
+  padding: var(--space-md, 16px);
+  background: var(--bg-secondary, #f9fafb);
+  border-radius: var(--radius-sm, 6px);
+  border-left: 4px solid var(--brand-primary, #f97316);
+}

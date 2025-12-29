@@ -29,7 +29,7 @@
   margin-left: 2px;
 }
 
-/* Helper text - absolute positioned, zero layout impact */
+/* Helper text - floats below field, doesn't push layout */
 .vr-field__helper {
   position: absolute;
   bottom: -18px;
@@ -79,6 +79,8 @@
 
 .vr-field-live__input::placeholder {
   color: var(--text-tertiary);
+  font-style: italic;
+  font-size: var(--font-size-xs);
 }
 
 /* Focused - brand orange ring + faint yellow 🟡 (same as Field.verify) */
@@ -216,13 +218,18 @@
   line-height: 1.5;
 }
 
-/* Character counter - absolute positioned, zero layout impact */
+/* Chip positioning for textarea - top right instead of center */
+.vr-field-live__input-wrapper:has(.vr-field-live__textarea) .vr-field-live__chip {
+  top: 12px;
+  transform: none;
+}
+
+/* Character counter - absolute positioned, zero layout impact
+   Uses T.caption for text styling - just needs positioning */
 .vr-field-live__counter {
   position: absolute;
   bottom: -18px;
   right: 0;
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -284,6 +291,8 @@
 
 .vr-field-verify__input::placeholder {
   color: var(--text-tertiary);
+  font-style: italic;
+  font-size: var(--font-size-xs);
 }
 
 /* Idle - quiet, display-like */
@@ -422,6 +431,14 @@
   cursor: default;
 }
 
+/* Pill unverified - has value but email not verified - warning orange */
+.vr-field-verify__pill--unverified {
+  background-color: var(--warning-100);
+  color: var(--warning-700);
+  pointer-events: none;
+  cursor: default;
+}
+
 .vr-field-verify__pill--active:hover {
   background-color: var(--brand-hover);
   box-shadow: 0 2px 8px var(--brand-light);
@@ -512,28 +529,5 @@
 .vr-field-readonly__error {
   font-size: var(--font-size-xs);
   color: var(--error-600);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   FIELD LAYOUT - Spacing utilities for field groups
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* Vertical stack - gaps between rows */
-.vr-field-spacing {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-}
-
-/* Horizontal row - fields side by side */
-.vr-field-row {
-  display: flex;
-  gap: var(--space-lg);
-  align-items: flex-start;
-}
-
-.vr-field-row > * {
-  flex: 1;
-  min-width: 0;
 }
 

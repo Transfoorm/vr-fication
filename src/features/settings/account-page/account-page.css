@@ -1,0 +1,588 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PROFILE FIELDS - Country selector button styling
+   ═══════════════════════════════════════════════════════════════════ */
+
+button.ft-profiletab-country-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 8px);
+  text-align: left;
+  cursor: pointer;
+  height: var(--form-input-height);
+}
+
+.ft-profiletab-country-button__text {
+  flex: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EMAIL FIELDS - Feature-specific styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Extra padding for floating helper text at bottom of card */
+.ft-emailtab-settings-card .vr-card-standard-surface .vr-card-standard-content {
+  padding-bottom: calc(var(--space-lg) + 28px);
+}
+
+.ft-emailtab-field-with-action {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.ft-emailtab-action-pills {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);   /* 8px - breathing room from field */
+  margin-bottom: -36px;           /* tighten gap to card edge */
+}
+
+.ft-emailtab-action-pill {
+  padding: 6px 12px;
+  min-width: 110px;
+  height: 28px;
+  color: var(--text-secondary);
+  background-color: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* T.caption inside pill must inherit button's color */
+.ft-emailtab-action-pill .vr-typography-caption {
+  color: inherit;
+  line-height: 1;
+}
+
+.ft-emailtab-action-pill:hover:not(.ft-emailtab-action-pill--active, .ft-emailtab-action-pill--confirm) {
+  background-color: #e5e7eb;
+  color: var(--text-primary);
+}
+
+.ft-emailtab-action-pill:disabled:not(.ft-emailtab-action-pill--confirm, .ft-emailtab-action-pill--active) {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Confirmation state - orange with subtle shake */
+.ft-emailtab-action-pill--confirm {
+  background-color: var(--brand-primary);
+  color: #fff;
+  animation: ft-emailtab-nudge 0.3s ease;
+}
+
+.ft-emailtab-action-pill--confirm:hover {
+  background-color: var(--brand-hover);
+  color: #fff;
+}
+
+@keyframes ft-emailtab-nudge {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* Active operation (swapping/removing) - yellow with typing animation */
+.ft-emailtab-action-pill--active {
+  background-color: var(--editing-bg);
+  color: var(--editing-text);
+}
+
+.ft-emailtab-action-pill__typing {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: ft-emailtab-typing-cycle 6s ease-in-out infinite;
+}
+
+@keyframes ft-emailtab-typing-cycle {
+  0% { width: 0; }
+  40% { width: 100%; }
+  80% { width: 100%; }
+  100% { width: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CONNECTED EMAIL ACCOUNTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-emailtab-connected-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.ft-emailtab-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.ft-emailtab-account-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.ft-emailtab-empty-accounts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xl) 0;
+  text-align: center;
+}
+
+.ft-emailtab-connect-button-container {
+  margin-top: var(--space-lg);
+  display: flex;
+  justify-content: center;
+}
+
+.ft-emailtab-connect-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm) var(--space-lg);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  color: var(--text-inverse);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--easing);
+  box-shadow: 0 2px 8px rgb(59 130 246 / 20%);
+}
+
+.ft-emailtab-connect-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(59 130 246 / 30%);
+}
+
+/* ──────────────────────────────────────────────────────────────────────┐
+│  🔱 PASSWORD CHANGE CEREMONY - Styles                                 │
+│  /src/features/VerifyPassword/password-ceremony.css                   │
+│                                                                        │
+│  MUST match Field.verify DNA exactly - same tokens, radius, states    │
+│  Uses .ft- prefix for feature CSS standard                            │
+└────────────────────────────────────────────────────────────────────────┘ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   COMPONENT TOKENS (WCCC Compliant - No Magic Numbers)
+   ───────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Password ceremony dimensions */
+  --password-tab-input-pill-space: 140px;
+  --password-tab-eye-size: 28px;
+  --password-tab-eye-offset: 12px;
+  --password-tab-pill-offset: 8px;
+  --password-tab-pill-padding: 8px 14px;
+  --password-tab-pill-min-width: 100px;
+  --password-tab-pill-shadow: 0 2px 8px;
+  --password-tab-ring-width: 3px;
+  --password-tab-letter-spacing: 2px;
+  --password-tab-line-height: 1.4;
+
+  /* Timing */
+  --password-tab-transition: 150ms ease;
+  --password-tab-transition-out: 150ms ease-out;
+
+  /* Colors */
+  --password-tab-focus-bg: #fffef5;
+  --password-tab-pill-text-light: #fff;
+}
+
+.ft-passwordtab {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   BOX - Each password field container (matches .vr-field-verify)
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-passwordtab__box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  position: relative;
+}
+
+.ft-passwordtab__label {
+  /* Typography handled by T.body in TSX */
+  color: var(--text-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   INPUT WRAPPER (matches .vr-field-verify__input-wrapper)
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-passwordtab__input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   INPUT (matches .vr-field-verify__input exactly)
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-passwordtab__input {
+  width: 100%;
+  padding: var(--space-md);
+  padding-right: var(--password-tab-input-pill-space);
+
+  /* Typography handled by input element and browser defaults */
+  font-family: inherit; /* Preserve inherited font-family for form inputs */
+  color: var(--text-primary);
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  line-height: normal;
+  height: var(--form-input-height);
+  box-sizing: border-box;
+  transition:
+    border-color var(--password-tab-transition-out),
+    box-shadow var(--password-tab-transition-out),
+    background-color var(--password-tab-transition-out);
+  position: relative;
+  z-index: 0;
+}
+
+.ft-passwordtab__input:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 var(--password-tab-ring-width) var(--brand-light);
+  background-color: var(--password-tab-focus-bg);
+}
+
+.ft-passwordtab__input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Masked dots display (matches .vr-field-verify__input--masked) */
+.ft-passwordtab__input--masked {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  letter-spacing: var(--password-tab-letter-spacing);
+
+  /* Typography handled by T.body */
+}
+
+/* Empty placeholder display (matches .vr-field-verify__input--empty) */
+.ft-passwordtab__input--empty {
+  display: flex;
+  align-items: center;
+  color: var(--text-tertiary);
+  border-color: var(--border-light);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   EYE TOGGLE (matches .vr-field-verify__eye-toggle)
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-passwordtab__eye {
+  position: absolute;
+  top: 50%;
+  right: var(--password-tab-eye-offset);
+  transform: translateY(-50%);
+  width: var(--password-tab-eye-size);
+  height: var(--password-tab-eye-size);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--password-tab-transition);
+}
+
+.ft-passwordtab__eye:hover {
+  color: var(--text-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   PILL (matches .vr-field-verify__pill exactly)
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-passwordtab__pill {
+  position: absolute;
+  top: 50%;
+  right: var(--password-tab-pill-offset);
+  transform: translateY(-50%);
+
+  /* Typography handled by button text */
+  padding: var(--password-tab-pill-padding);
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color var(--password-tab-transition),
+    box-shadow var(--password-tab-transition);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 1;
+  min-width: var(--password-tab-pill-min-width);
+
+  /* Default - gray empty */
+  background-color: var(--bg-tertiary);
+  color: var(--text-tertiary);
+}
+
+/* T.caption inside pill must inherit button's color */
+.ft-passwordtab__pill .vr-typography-caption {
+  color: inherit;
+  line-height: 1;
+}
+
+.ft-passwordtab__pill--empty {
+  background-color: var(--bg-tertiary);
+  color: var(--text-tertiary);
+  pointer-events: none;
+  cursor: default;
+}
+
+.ft-passwordtab__pill--active {
+  background-color: var(--verify-bg);
+  color: var(--verify-text);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.ft-passwordtab__pill--active:hover {
+  background-color: var(--brand-hover);
+  box-shadow: var(--password-tab-pill-shadow) var(--brand-light);
+}
+
+.ft-passwordtab__pill--committing {
+  background-color: var(--editing-bg);
+  color: var(--editing-text);
+  cursor: wait;
+  pointer-events: none;
+  opacity: 1;
+}
+
+/* Typing animation for committing state */
+.ft-passwordtab__typing {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: ft-passwordtab-typing-cycle 6s ease-in-out infinite;
+}
+
+@keyframes ft-passwordtab-typing-cycle {
+  0% { width: 0; }
+  40% { width: 100%; }
+  80% { width: 100%; }
+  100% { width: 0; }
+}
+
+.ft-passwordtab__pill--success {
+  background-color: var(--success-500);
+  color: var(--password-tab-pill-text-light);
+  pointer-events: none;
+}
+
+.ft-passwordtab__pill--error {
+  background-color: var(--error-500);
+  color: var(--password-tab-pill-text-light);
+  cursor: pointer;
+}
+
+.ft-passwordtab__pill:disabled {
+  pointer-events: none;
+  cursor: default;
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   HELPER & ERROR TEXT (matches .vr-field-verify__helper/error)
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-passwordtab__helper {
+  /* Typography handled by T.caption */
+  color: var(--text-tertiary);
+  font-style: italic;
+  line-height: var(--password-tab-line-height);
+}
+
+.ft-passwordtab__error {
+  /* Typography handled by T.caption */
+  color: var(--error-600);
+  line-height: var(--password-tab-line-height);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   BOX STATES (matches .vr-field-verify state classes)
+   Ordered by specificity: base states first, :not() and :hover last
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Idle state - quiet, display-like */
+.ft-passwordtab__box--idle .ft-passwordtab__input {
+  border-color: var(--border-light);
+  background-color: var(--bg-input);
+}
+
+/* Valid state - green ring (matches .vr-field-verify--success) */
+.ft-passwordtab__box--valid .ft-passwordtab__input {
+  border-color: var(--success-500);
+  box-shadow: 0 0 0 var(--password-tab-ring-width) var(--success-100);
+  background-color: var(--bg-input);
+}
+
+/* Error state - red ring (matches .vr-field-verify--error) */
+.ft-passwordtab__box--error .ft-passwordtab__input {
+  border-color: var(--error-500);
+  box-shadow: 0 0 0 var(--password-tab-ring-width) var(--error-100);
+  background-color: var(--warning-50);
+}
+
+/* Success state - green ring */
+.ft-passwordtab__box--success .ft-passwordtab__input {
+  border-color: var(--success-500);
+  box-shadow: 0 0 0 var(--password-tab-ring-width) var(--success-100);
+}
+
+/* Disabled state - alive, shows pointer cursor, but blocks editing */
+.ft-passwordtab__box--disabled .ft-passwordtab__input,
+.ft-passwordtab__box--disabled .ft-passwordtab__pill {
+  cursor: pointer;
+}
+
+/* Dormant state - opaque and dead */
+.ft-passwordtab__box--dormant {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Mismatch state - box 2 has content but doesn't match box 1 (orange focus) */
+.ft-passwordtab__box--mismatch .ft-passwordtab__input {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 var(--password-tab-ring-width) var(--brand-light);
+}
+
+/* Ready state - hover shows orange border */
+.ft-passwordtab__box--ready .ft-passwordtab__input--empty {
+  cursor: pointer;
+}
+
+.ft-passwordtab__box--ready .ft-passwordtab__input--empty:hover {
+  border-color: var(--brand-primary);
+}
+
+/* Idle hover - highest specificity, must come last */
+.ft-passwordtab__box--idle .ft-passwordtab__input:not(.ft-passwordtab__input--empty):hover {
+  border-color: var(--brand-primary);
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   🧬 GENOME FIELDS FEATURE - Layout Styles
+   /src/features/account/GenomeFields/genome-fields.css
+
+   Feature-level CSS (ft-*) - Cards use Card.standard VR
+   Card stacking handled by Stack VR
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   Completion Bar (footer progress indicator)
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-genometab-completion {
+  width: 100%;
+}
+
+.ft-genometab-completion-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.ft-genometab-completion-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--status-success);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+/* Data-driven width steps (0-100 in 10% increments) */
+.ft-genometab-completion-fill[data-percent="0"] { width: 0%; }
+.ft-genometab-completion-fill[data-percent="10"] { width: 10%; }
+.ft-genometab-completion-fill[data-percent="20"] { width: 20%; }
+.ft-genometab-completion-fill[data-percent="30"] { width: 30%; }
+.ft-genometab-completion-fill[data-percent="40"] { width: 40%; }
+.ft-genometab-completion-fill[data-percent="50"] { width: 50%; }
+.ft-genometab-completion-fill[data-percent="60"] { width: 60%; }
+.ft-genometab-completion-fill[data-percent="70"] { width: 70%; }
+.ft-genometab-completion-fill[data-percent="80"] { width: 80%; }
+.ft-genometab-completion-fill[data-percent="90"] { width: 90%; }
+.ft-genometab-completion-fill[data-percent="100"] { width: 100%; }
+
+/* Percentage text in title - brand color, baseline-aligned
+   Higher specificity to override T.caption color */
+span.ft-genometab-percent {
+  color: var(--brand-primary);
+  position: relative;
+  top: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Transformation Journey - Shaded section (no card, just background)
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-genometab-journey {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Field Rows - Genome-specific grid with smart child-count detection
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-genometab-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+}
+
+/* Single field takes full width */
+.ft-genometab-row:has(> :only-child) {
+  grid-template-columns: 1fr;
+}
+
+/* Three children = three columns */
+.ft-genometab-row:has(> :nth-child(3):last-child) {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Mobile adjustments - always single column */
+@media (max-width: 640px) {
+  .ft-genometab-row {
+    grid-template-columns: 1fr;
+  }
+}

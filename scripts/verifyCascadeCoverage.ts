@@ -1,21 +1,23 @@
-/**─────────────────────────────────────────────────────────────────────────┐
-│  🔍 VANISH PROTOCOL 2.0 - CASCADE COVERAGE VERIFIER                       │
-│  /convex/scripts/verifyCascadeCoverage.ts                                 │
-│                                                                           │
-│  AST-based build-time enforcement for deletion manifest compliance.       │
-│                                                                           │
-│  VERIFIES:                                                                │
-│  1. Every table with userId fields is registered in DELETION_MANIFEST     │
-│  2. Every user-linked field has an explicit deletion strategy             │
-│  3. Every user-linked field has a corresponding .index('by_user', [field])│
-│  4. Multi-ref tables (multiple user fields) have strategies for each      │
-│                                                                           │
-│  USAGE:                                                                   │
-│  npm run verify:cascade  (in package.json scripts)                        │
-│  Runs in CI/CD pipeline - fails build if violations detected              │
-│                                                                           │
-│  TTT CERTIFIED: Makes forgetting impossible at 1K developer scale         │
-└───────────────────────────────────────────────────────────────────────────┘ */
+/**
+ * +----------------------------------------------------------------------+
+ * |  🔍 VANISH PROTOCOL 2.0 - CASCADE COVERAGE VERIFIER                  |
+ * |  scripts/verifyCascadeCoverage.ts                                    |
+ * |                                                                      |
+ * |  AST-based build-time enforcement for deletion manifest compliance.  |
+ * |                                                                      |
+ * |  VERIFIES:                                                           |
+ * |  1. Every table with userId fields is in DELETION_MANIFEST           |
+ * |  2. Every user-linked field has an explicit deletion strategy        |
+ * |  3. Every user-linked field has .index('by_user', [field])           |
+ * |  4. Multi-ref tables have strategies for each user field             |
+ * |                                                                      |
+ * |  USAGE:                                                              |
+ * |  npm run verify:cascade                                              |
+ * |  Runs in CI/CD - fails build if violations detected                  |
+ * |                                                                      |
+ * |  TTT CERTIFIED: Makes forgetting impossible at scale                 |
+ * +----------------------------------------------------------------------+
+ */
 
 import * as ts from 'typescript';
 import * as fs from 'fs';

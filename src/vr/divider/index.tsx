@@ -1,24 +1,22 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🤖 VARIANT ROBOT - Divider Component Registry                         │
-│  /src/vr/divider/index.tsx                          │
-│                                                                        │
-│  DEPRECATED: Divider variants removed as dead code.                   │
-│  This file kept for backward compatibility.                           │
-│                                                                        │
-│  Migration: Use <hr /> or margin/padding for spacing.                 │
-└────────────────────────────────────────────────────────────────────────┘ */
-
+/**
+ * +----------------------------------------------------------------------+
+ * |  🤖 VARIANT ROBOT - Divider                                          |
+ * |  src/vr/divider/index.tsx                                            |
+ * |                                                                      |
+ * |  Visual separators for content sections.                             |
+ * |  Use instead of raw <hr /> - VR doctrine: "There's a VR for that!"   |
+ * |                                                                      |
+ * |  Variants: line, dashed, gradient, default                           |
+ * +----------------------------------------------------------------------+
+ */
 
 export type DividerSize = 'sm' | 'md' | 'lg' | 'xl';
-export type DividerColor = string;
-export type DividerWidth = string;
 
 interface DividerProps {
   size?: DividerSize;
   className?: string;
 }
 
-// Stub components for backward compatibility
 const DefaultDivider = ({ size = 'md', className = '' }: DividerProps) => {
   const sizeClass = size === 'md' ? '' : `vr-divider-default-${size}`;
   return <div className={`vr-divider-default ${sizeClass} ${className}`} />;

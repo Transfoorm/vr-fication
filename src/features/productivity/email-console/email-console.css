@@ -1,100 +1,600 @@
-/* ═══════════════════════════════════════════════════════════════════
-   📧 EMAIL CONSOLE FEATURE - Three-Rail Layout Styles
+/* ═══════════════════════════════════════════════════════════════════════════
+   EMAIL CONSOLE - Wireframe Stage
    /src/features/productivity/email-console/email-console.css
 
-   Feature-level CSS (ft-*) - NOT Gmail/Outlook clone
-   Three zones: Queue (30%) + Body (45%) + Intelligence (25%)
+   PRODUCTIVITY TOKEN COMPLIANT - Uses only var(--prod-*) references
+   No raw pixel values. No global typography binding.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-   EMAIL UX DOCTRINE:
-   - High density (see more, scroll less)
-   - Strong state indicators (awaiting-me = bold + orange)
-   - Minimal chrome (no decorative borders)
-   - Actions inverted (Resolve/Promote primary, Reply secondary)
-   ═══════════════════════════════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────────────────────────────────
-   Three-Rail Container
-   ─────────────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   Container - Fill available height using calc with shell variables
+   ───────────────────────────────────────────────────────────────────────────── */
 
-.ft-email-console {
-  display: grid;
-  grid-template-columns: 30% 45% 25%;
-  gap: 0;
-  height: calc(100vh - var(--shell-header-height, 80px));
+.ft-email {
+  display: flex;
+  flex-direction: column;
+
+  /* Explicit height = viewport minus shell elements (topbar, footer, page-arch padding)
+     Extra 2px buffer prevents micro-overflow that triggers page scrollbar */
+  height: calc(100vh - var(--topbar-height) - var(--footer-height) - var(--page-content-padding-top) - var(--page-content-padding-bottom) - var(--prod-space-xxs));
+  gap: var(--prod-space-xl);
+  padding: var(--prod-space-xl);
+  box-sizing: border-box;
   overflow: hidden;
-  background: var(--surface-base);
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   Left Rail: Inbox Queue (30%)
-   ─────────────────────────────────────────────────────────────────── */
 
-.ft-email-console__queue {
-  border-right: 1px solid var(--border-light, #e5e7eb);
-  overflow: hidden auto;
-  background: var(--surface-raised, #fafafa);
-  box-shadow: inset -1px 0 0 rgb(0 0 0 / 3%);
+/* ─────────────────────────────────────────────────────────────────────────────
+   Header
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__header {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--prod-space-lg) var(--prod-space-2xl);
+  border: 1px solid var(--prod-border-normal);
+  border-radius: var(--prod-radius-md);
+  background: var(--prod-bg-surface);
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   Center Panel: Message Body (45%)
-   ─────────────────────────────────────────────────────────────────── */
-
-.ft-email-console__body {
-  overflow: hidden auto;
-  background: var(--surface-base);
-  padding: var(--space-lg);
+.ft-email__header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--prod-space-md);
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   Right Rail: Intelligence & Actions (25%)
-   ─────────────────────────────────────────────────────────────────── */
-
-.ft-email-console__intelligence {
-  border-left: 1px solid var(--border-light, #e5e7eb);
-  overflow: hidden auto;
-  background: var(--surface-raised, #fafafa);
-  padding: var(--space-md);
-  box-shadow: inset 1px 0 0 rgb(0 0 0 / 3%);
+.ft-email__header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--prod-space-md);
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   Loading State
-   ─────────────────────────────────────────────────────────────────── */
-
-.ft-email-console-loading {
+.ft-email__refresh-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - var(--shell-header-height, 80px));
-  color: var(--text-tertiary);
+  width: var(--prod-space-3xl);
+  height: var(--prod-space-3xl);
+  padding: 0;
+  border: none;
+  border-radius: var(--prod-radius-sm);
+  background: transparent;
+  color: var(--prod-text-secondary);
+  font-size: var(--prod-icon-md);
+  cursor: pointer;
+  transition: background var(--prod-transition-fast), color var(--prod-transition-fast);
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   Mobile Responsive (stack vertically)
-   ─────────────────────────────────────────────────────────────────── */
+.ft-email__refresh-btn:hover {
+  background: var(--prod-bg-hover);
+  color: var(--prod-text-primary);
+}
 
-@media (max-width: 1024px) {
-  .ft-email-console {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
-    gap: var(--space-md);
-  }
+.ft-email__refresh-btn:active {
+  background: var(--prod-bg-pressed);
+}
 
-  .ft-email-console__queue {
-    border-right: none;
-    border-bottom: 1px solid var(--border-light);
-    max-height: 40vh;
-  }
 
-  .ft-email-console__body {
-    order: 2;
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   Three-Rail Body - Takes remaining space
+   ───────────────────────────────────────────────────────────────────────────── */
 
-  .ft-email-console__intelligence {
-    order: 3;
-    border-left: none;
-    border-top: 1px solid var(--border-light);
-    max-height: 30vh;
-  }
+.ft-email__body {
+  flex: 1;
+  display: grid;
+
+  /* 5 columns: mailbox | handle | threads | handle | reading */
+  grid-template-columns: var(--prod-mailbox-width) var(--prod-resize-handle) 1fr var(--prod-resize-handle) 2fr;
+  gap: 0;
+  min-height: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Resize Handles - Invisible until hover
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__resize-handle {
+  width: var(--prod-resize-handle);
+  cursor: col-resize;
+  position: relative;
+
+  /* Invisible - no background, just the hit area */
+}
+
+.ft-email__resize-handle:hover {
+  /* Optional: subtle highlight on hover */
+  background: rgb(0 0 0 / 3%);
+}
+
+.ft-email__resize-handle:active {
+  background: rgb(0 0 0 / 6%);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Rail 1: Mailbox
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__mailbox {
+  padding: var(--prod-space-md) var(--prod-space-md) var(--prod-space-md) 0; /* No left padding - container invisible */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--prod-space-xxs);
+  user-select: none;
+}
+
+.ft-email__folder {
+  display: flex;
+  align-items: center;
+  gap: var(--prod-space-lg);
+  padding: var(--prod-space-md) var(--prod-space-2xl) var(--prod-space-md) var(--prod-space-3xl); /* Extra left for chevron */
+  border-radius: var(--prod-radius-sm);
+  cursor: pointer;
+  font-size: var(--prod-text-body-sm);
+  color: var(--prod-text-secondary);
+  transition: background var(--prod-transition-fast);
+  position: relative;
+}
+
+.ft-email__folder:hover {
+  background: var(--prod-bg-section-hover);
+}
+
+.ft-email__folder--selected {
+  background: var(--prod-bg-selected);
+  color: var(--prod-selected-text);
+  font-weight: var(--prod-weight-medium);
+  box-shadow: inset 4px 0 0 var(--prod-selected-indicator);
+}
+
+.ft-email__folder--selected:hover {
+  background: var(--prod-bg-selected-hover);
+}
+
+.ft-email__folder-icon {
+  font-size: var(--prod-icon-sm);
+  width: var(--prod-folder-icon-width);
+  text-align: center;
+}
+
+.ft-email__folder--selected .ft-email__folder-icon {
+  opacity: 1;
+}
+
+.ft-email__folder-label {
+  flex: 1;
+}
+
+.ft-email__folder-count {
+  font-size: var(--prod-text-micro);
+  color: var(--prod-text-muted);
+  background: var(--prod-bg-badge);
+  padding: var(--prod-space-xxs) var(--prod-space-sm);
+  border-radius: var(--prod-radius-pill);
+  min-width: var(--prod-badge-min-width);
+  text-align: center;
+}
+
+.ft-email__folder--selected .ft-email__folder-count {
+  background: var(--prod-selected-bg);
+  color: var(--prod-selected-contrast);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Rail 2: Thread List
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__threads {
+  border: 1px solid var(--prod-border-normal);
+  border-radius: var(--prod-radius-md);
+  background: var(--prod-bg-surface);
+  overflow: hidden; /* Clips scrollbar to border-radius */
+  display: flex;
+  flex-direction: column;
+}
+
+.ft-email__threads-header {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--prod-space-lg) var(--prod-space-xl);
+  border-bottom: 1px solid var(--prod-border-light);
+  background: var(--prod-bg-section);
+}
+
+.ft-email__threads-title {
+  font-size: var(--prod-text-body-sm);
+  font-weight: var(--prod-weight-semibold);
+  color: var(--prod-text-primary);
+}
+
+.ft-email__threads-count {
+  font-size: var(--prod-text-caption);
+  color: var(--prod-text-muted);
+}
+
+.ft-email__threads-scroll {
+  flex: 1;
+  overflow-y: auto;
+
+  /* Firefox thin scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--prod-border-normal) transparent;
+}
+
+/* Webkit (Chrome/Safari) thin scrollbar */
+.ft-email__threads-scroll::-webkit-scrollbar {
+  width: var(--prod-scrollbar-width) !important;
+}
+
+.ft-email__threads-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.ft-email__threads-scroll::-webkit-scrollbar-thumb {
+  background: var(--prod-border-normal) !important;
+  border-radius: var(--prod-radius-xs) !important;
+}
+
+.ft-email__threads-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--prod-border-hover) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Rail 3: Reading Pane
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__reading {
+  border: 1px solid var(--prod-border-normal);
+  border-radius: var(--prod-radius-md);
+  background: var(--prod-bg-surface);
+  overflow: hidden; /* Clips scrollbar to border-radius */
+  display: flex;
+  flex-direction: column;
+  padding-top: 0; /* Gap at top for scrollbar to clear curve */
+}
+
+.ft-email__reading-scroll {
+  flex: 1;
+  padding: var(--prod-space-xl);
+  overflow-y: auto;
+
+  /* Firefox thin scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--prod-border-normal) transparent;
+}
+
+/* Webkit (Chrome/Safari) thin scrollbar */
+.ft-email__reading-scroll::-webkit-scrollbar {
+  width: var(--prod-scrollbar-width) !important;
+}
+
+.ft-email__reading-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.ft-email__reading-scroll::-webkit-scrollbar-thumb {
+  background: var(--prod-border-normal) !important;
+  border-radius: var(--prod-radius-xs) !important;
+}
+
+.ft-email__reading-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--prod-border-hover) !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread List Items
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Section headers - minimal and modern */
+.ft-email__section-header {
+  font-size: var(--prod-text-micro);
+  font-weight: var(--prod-weight-semibold);
+  color: var(--prod-text-muted);
+  padding: var(--prod-space-sm) var(--prod-space-xl);
+  background: var(--prod-bg-section);
+  border-bottom: 1px solid var(--prod-border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.ft-email__section-header:hover {
+  background: var(--prod-bg-section-hover);
+}
+
+.ft-email__section-chevron {
+  font-size: var(--prod-icon-md);
+  transform: rotate(90deg);
+}
+
+.ft-email__section-chevron--collapsed {
+  transform: rotate(0deg);
+}
+
+.ft-email__thread-item {
+  padding: var(--prod-space-lg) var(--prod-space-xl);
+  border-bottom: 1px solid var(--prod-border-light);
+  cursor: pointer;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.ft-email__thread-item:hover {
+  background: var(--prod-bg-hover);
+}
+
+.ft-email__thread-item--selected {
+  background: var(--prod-bg-selected);
+  box-shadow: inset 4px 0 0 var(--prod-selected-indicator);
+}
+
+.ft-email__thread-item--selected:hover {
+  background: var(--prod-bg-selected-hover);
+}
+
+.ft-email__thread-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--prod-space-md);
+  margin-bottom: var(--prod-space-xxs);
+}
+
+.ft-email__thread-sender {
+  font-size: var(--prod-text-body-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.ft-email__thread-item--unread .ft-email__thread-sender {
+  font-weight: var(--prod-weight-semibold);
+}
+
+.ft-email__thread-date {
+  font-size: var(--prod-text-micro);
+  color: var(--prod-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ft-email__thread-subject {
+  font-size: var(--prod-text-caption);
+  color: var(--prod-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: var(--prod-space-xxs);
+}
+
+.ft-email__thread-snippet {
+  font-size: var(--prod-text-caption);
+  color: var(--prod-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Reading Pane Messages
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__reading-subject {
+  font-size: var(--prod-text-heading);
+  font-weight: var(--prod-weight-semibold);
+  margin-bottom: var(--prod-margin-section);
+}
+
+.ft-email__reading-meta {
+  font-size: var(--prod-text-body-sm);
+  color: var(--prod-text-tertiary);
+  margin-bottom: var(--prod-margin-block);
+}
+
+.ft-email__reading-messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--prod-margin-block);
+}
+
+.ft-email__message {
+  padding-bottom: var(--prod-margin-block);
+}
+
+.ft-email__message-header {
+  font-size: var(--prod-text-body-sm);
+  color: var(--prod-text-secondary);
+  margin-bottom: var(--prod-margin-message);
+  line-height: var(--prod-line-height-relaxed);
+}
+
+.ft-email__message-snippet {
+  font-size: var(--prod-text-body);
+  line-height: var(--prod-line-height-normal);
+  color: var(--prod-text-primary);
+}
+
+/* Email body normalization rules are in email-normalize.css
+   NO styles here - let emails render exactly as sender intended */
+
+.ft-email__body-loading,
+.ft-email__body-error,
+.ft-email__body-empty {
+  color: var(--prod-text-faint);
+  font-size: var(--prod-text-body-sm);
+  padding: var(--prod-space-md) 0;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Empty/Loading States
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__loading,
+.ft-email__empty {
+  padding: var(--prod-space-3xl);
+  text-align: center;
+  color: var(--prod-text-faint);
+  font-size: var(--prod-text-body);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Folder Tree - Expandable subfolders
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__folder-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.ft-email__folder-chevron {
+  font-size: var(--prod-icon-md);
+  color: var(--prod-text-muted);
+  cursor: pointer;
+  transition: transform var(--prod-transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Position absolute so it doesn't affect layout */
+  position: absolute;
+  left: var(--prod-space-xxs); /* 2px nudge */
+  top: 0;
+  bottom: 0;
+  width: var(--prod-space-3xl);
+  border-radius: var(--prod-radius-sm);
+}
+
+.ft-email__folder-chevron:hover {
+  color: var(--prod-text-secondary);
+}
+
+.ft-email__folder-chevron--expanded {
+  transform: rotate(90deg);
+}
+
+.ft-email__subfolders {
+  display: flex;
+  flex-direction: column;
+  padding-left: var(--prod-space-3xl);
+}
+
+.ft-email__subfolder {
+  display: flex;
+  align-items: center;
+  gap: var(--prod-space-md);
+  padding: var(--prod-space-sm) var(--prod-space-lg);
+  border-radius: var(--prod-radius-sm);
+  cursor: pointer;
+  font-size: var(--prod-text-caption);
+  color: var(--prod-text-muted);
+  transition: background var(--prod-transition-fast), color var(--prod-transition-fast);
+}
+
+.ft-email__subfolder:hover {
+  background: var(--prod-bg-section-hover);
+  color: var(--prod-text-secondary);
+}
+
+.ft-email__subfolder--selected {
+  background: var(--prod-bg-selected);
+  color: var(--prod-selected-text);
+}
+
+.ft-email__subfolder--selected:hover {
+  background: var(--prod-bg-selected-hover);
+}
+
+.ft-email__subfolder-icon {
+  font-size: var(--prod-icon-xs);
+  opacity: 0.6;
+}
+
+.ft-email__subfolder-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Status Bar
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__status {
+  font-size: var(--prod-text-caption);
+  color: var(--prod-text-muted);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Context Menu (Right-click)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__context-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+.ft-email__context-menu {
+  position: fixed;
+  left: var(--ctx-x);
+  top: var(--ctx-y);
+  z-index: 1000;
+  background: var(--prod-bg-surface);
+  border: 1px solid var(--prod-border-normal);
+  border-radius: var(--prod-radius-md);
+  box-shadow: var(--prod-shadow-lg);
+  padding: var(--prod-space-sm) 0;
+  min-width: 180px;
+  user-select: none;
+}
+
+.ft-email__context-menu button {
+  display: block;
+  width: 100%;
+  padding: var(--prod-space-sm) var(--prod-space-xl);
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: var(--prod-text-body-sm);
+  color: var(--prod-text-primary);
+}
+
+.ft-email__context-menu button:hover {
+  background: var(--prod-bg-hover);
+}
+
+.ft-email__context-menu hr {
+  border: none;
+  border-top: 1px solid var(--prod-border-light);
+  margin: var(--prod-space-sm) 0;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Folder Divider (separates standard folders from custom folders)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__folder-divider {
+  height: 1px;
+  background: var(--prod-border-light);
+  margin: var(--prod-space-md) 0;
 }

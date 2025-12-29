@@ -3,9 +3,9 @@
 │  /convex/vanish/deleteAnyUser.ts                                          │
 │                                                                           │
 │  Admiral-initiated tenant-scale user deletion.                            │
-│  Allows Admiral rank admin_users to delete any user account.                    │
+│  Allows Admiral rank admin_users to delete any user account.              │
 │                                                                           │
-│  ⚠️ QUARANTINED FROM SID: VANISH requires ClerkID for cross-system       │
+│  ⚠️ QUARANTINED FROM SID: VANISH requires ClerkID for cross-system        │
 │  deletion integrity. Clerk account must be deleted alongside Convex.      │
 │                                                                           │
 │  RANK REQUIREMENTS:                                                       │

@@ -12,7 +12,7 @@
 import '../user-drawer.css';
 import { useState } from 'react';
 import { useAdminData } from '@/hooks/useAdminData';
-import { Field, T } from '@/vr';
+import { Field, T, Stack } from '@/vr';
 import { sendRecoveryLink } from '@/app/(clerk)/actions/recovery';
 
 interface EmailTabProps {
@@ -88,9 +88,9 @@ export function EmailTab({ userId }: EmailTabProps) {
 
   return (
     <div className="ft-emailtab">
-      <div className="vr-field-spacing">
+      <Stack.lg>
         {/* Row 1: Primary + Secondary email - read only */}
-        <div className="vr-field-row">
+        <Stack.row.equal>
           <Field.live
             label="Primary Email"
             value={String(user.email ?? '')}
@@ -105,12 +105,12 @@ export function EmailTab({ userId }: EmailTabProps) {
             placeholder="Not set"
             disabled
           />
-        </div>
+        </Stack.row.equal>
 
         {/* Magic Link Recovery Section */}
         <div className="ft-emailtab__recovery-section">
           <T.h4 className="ft-emailtab__recovery-header">Magic Link Recovery</T.h4>
-          <div className="vr-field-row">
+          <Stack.row.equal>
             <div className={lastSentTo ? 'ft-emailtab__recovery--success' : ''}>
               <Field.verify
                 label="Send a Recovery Link to the user's email"
@@ -123,7 +123,7 @@ export function EmailTab({ userId }: EmailTabProps) {
               />
             </div>
             <div />
-          </div>
+          </Stack.row.equal>
 
           {/* Magic link display - always visible to prevent layout shift */}
           <div className="ft-emailtab__magic-link">
@@ -147,7 +147,7 @@ export function EmailTab({ userId }: EmailTabProps) {
             </div>
           </div>
         </div>
-      </div>
+      </Stack.lg>
     </div>
   );
 }

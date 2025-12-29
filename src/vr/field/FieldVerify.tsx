@@ -41,6 +41,8 @@ export interface FieldVerifyProps {
   helperOnFocus?: boolean;
   /** Pill intent variant: verify (default), send */
   variant?: 'verify' | 'send';
+  /** External verification status (overrides default value-based check) */
+  isVerified?: boolean;
 }
 
 export default function FieldVerify({
@@ -53,6 +55,7 @@ export default function FieldVerify({
   helper,
   helperOnFocus = false,
   variant = 'verify',
+  isVerified,
 }: FieldVerifyProps) {
   const [state, setState] = useState<VerifyState>('idle');
   const [localValue, setLocalValue] = useState(value);
@@ -195,6 +198,8 @@ export default function FieldVerify({
 
   const isDirty = localValue !== originalValue.current;
   const isEmpty = !value; // Original value is empty (no verified value yet)
+  // Use explicit isVerified prop if provided, otherwise fall back to "has value = verified"
+  const verified = isVerified !== undefined ? isVerified : !isEmpty;
 
   // Pill content based on state
   const getPillContent = () => {
@@ -216,6 +221,10 @@ export default function FieldVerify({
     if (isEmpty) {
       return 'Not Set';
     }
+    // Use external verification status
+    if (!verified) {
+      return 'Unverified x';
+    }
     return 'Verified ✓';
   };
 
@@ -229,12 +238,13 @@ export default function FieldVerify({
     helper && 'vr-field--has-helper',
   ].filter(Boolean).join(' ');
 
-  // Pill state: active (dirty/committing) > editing (focused) > empty (not set) > verified (idle)
+  // Pill state: active (dirty/committing) > editing (focused) > empty (not set) > unverified > verified (idle)
   const getPillState = () => {
     if (state === 'committing') return 'vr-field-verify__pill--active';  // Stay orange while verifying
     if (isDirty) return 'vr-field-verify__pill--active';
     if (state === 'focused') return 'vr-field-verify__pill--editing';
     if (isEmpty) return 'vr-field-verify__pill--empty';  // Neutral gray for empty/not set
+    if (!verified) return 'vr-field-verify__pill--unverified';  // Has value but not verified
     return 'vr-field-verify__pill--verified';
   };
 

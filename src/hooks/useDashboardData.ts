@@ -1,15 +1,15 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  🎯 COMPOSITION HOOK - Dashboard Meta-Shell                           │
-│  /src/hooks/useDashboardData.ts                                        │
-│                                                                        │
-│  Dashboard owns ZERO data. Pure composition layer.                    │
-│  Reads from WARP-primed domain slices via their hooks.                │
-│                                                                        │
-│  CRITICAL: No Convex queries here - domains own their data            │
-│  Dashboard = Shell + Composition                                       │
-│                                                                        │
-│  References: TTT~DASHBOARD-IMPLEMENTATION-DOCTRINE.md §Composition    │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  🎯 COMPOSITION HOOK - Dashboard Meta-Shell                               │
+│  /src/hooks/useDashboardData.ts                                           │
+│                                                                           │
+│  Dashboard owns ZERO data. Pure composition layer.                        │
+│  Reads from WARP-primed domain slices via their hooks.                    │
+│                                                                           │
+│  CRITICAL: No Convex queries here - domains own their data                │
+│  Dashboard = Shell + Composition                                          │
+│                                                                           │
+│  References: TTT~DASHBOARD-IMPLEMENTATION-DOCTRINE.md §Composition        │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 'use client';
 

@@ -82,6 +82,7 @@ export default clerkMiddleware(async (auth, req) => {
           clerkId: session.clerkId,
           email: freshUser.email || session.email || '',
           secondaryEmail: freshUser.secondaryEmail ?? session.secondaryEmail,
+          emailVerified: freshUser.emailVerified ?? session.emailVerified,
           firstName: freshUser.firstName ?? session.firstName,
           lastName: freshUser.lastName ?? session.lastName,
           avatarUrl: freshUser.avatarUrl ?? undefined,

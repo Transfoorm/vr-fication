@@ -1,19 +1,19 @@
 /**─────────────────────────────────────────────────────────────────────────┐
-│  🔥 VANISH PROTOCOL 2.0 - SINGLE SOURCE OF IDENTITY                      │
-│  /src/hooks/useConvexUser.ts                                             │
-│                                                                            │
+│  🔥 VANISH PROTOCOL 2.0 - SINGLE SOURCE OF IDENTITY                       │
+│  /src/hooks/useConvexUser.ts                                              │
+│                                                                           │
 │  GOLDEN BRIDGE COMPLIANT (TTTS-2):                                        │
 │  - useQuery ONLY hydrates FUSE                                            │
 │  - Components read from FUSE only                                         │
 │  - NO direct Convex data returns                                          │
-│                                                                            │
-│  VANISH LAW:                                                               │
+│                                                                           │
+│  VANISH LAW:                                                              │
 │  "There is only one identity: the Convex user._id.                        │
 │   Clerk authenticates — Convex governs.                                   │
 │   No component shall accept userId as prop."                              │
-│                                                                            │
+│                                                                           │
 │  TTT CERTIFIED: Single source prevents identity confusion at scale        │
-└──────────────────────────────────────────────────────────────────────────┘ */
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 "use client";
 

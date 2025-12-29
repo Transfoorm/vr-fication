@@ -83,8 +83,12 @@ import {
   Wrench,
   Speech,
   TableProperties,
+  Database,
+  Cpu,
+  Shield,
   X,
   SquareX,
+  SquareCheckBig,
   Info,
   CheckCircle,
   AlertTriangle,
@@ -98,6 +102,8 @@ import {
   Venus,
   Mars,
   UsersRound,
+  // Image icons
+  ImageUp,
 } from 'lucide-react';
 
 // Icon registry - maps string variants to Lucide components
@@ -172,6 +178,9 @@ const iconRegistry = {
   'wrench': Wrench,
   'speech': Speech,
   'table-properties': TableProperties,
+  'database': Database,
+  'cpu': Cpu,
+  'shield': Shield,
 
   // Actions
   'pencil': Pencil,
@@ -181,6 +190,7 @@ const iconRegistry = {
   'image-plus': ImagePlus,
   'x': X,
   'square-x': SquareX,
+  'square-check-big': SquareCheckBig,
   'lasso-select': LassoSelect,
   'locate-fixed': LocateFixed,
   'globe': Globe,
@@ -201,6 +211,9 @@ const iconRegistry = {
   'venus': Venus,
   'mars': Mars,
   'users-round': UsersRound,
+
+  // Image icons
+  'image-up': ImageUp,
 } as const;
 
 export type IconVariant = keyof typeof iconRegistry;

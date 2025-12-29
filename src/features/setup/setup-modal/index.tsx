@@ -206,6 +206,7 @@ export default function SetupModal() {
 
       const timer = setTimeout(() => {
         setHiddenPlaceholders(new Set());
+        setErrors({}); // Clear errors - fades text back in, synced with placeholder
       }, 3500);
 
       return () => clearTimeout(timer);
@@ -572,9 +573,8 @@ export default function SetupModal() {
           <div className="ft-setup-form-container">
             {/* Welcome message */}
             <div className="ft-setup-welcome">
-              <T.caption size="xs" className="ft-setup-welcome-text">
-                <i>*Completing your setup will unlock personalised features with smarter AI assistance and full site functionality. Go to <button type="button" onClick={() => navigate('settings/account')} className="ft-setup-welcome-link">Account</button> after setup to update your details at any time.</i>
-              </T.caption>
+              <T.caption italic align="justify">
+    Completing your setup will <b>verify your email</b> and unlock personalised features. Plus smarter AI assistance. Go to the <button type="button" onClick={() => navigate('settings/account')} className="ft-setup-welcome-link">Account</button> page at any time to update your details.</T.caption>
             </div>
 
             {/* Form */}
@@ -610,7 +610,7 @@ export default function SetupModal() {
                   )}
                 </div>
                 {errors.firstName && (
-                  <T.body size="md" weight="medium" className="ft-setup-error-text">{errors.firstName}</T.body>
+                  <T.body size="md" weight="normal" className="ft-setup-error-text">{errors.firstName}</T.body>
                 )}
               </div>
 
@@ -630,7 +630,7 @@ export default function SetupModal() {
                   }`}
                 />
                 {errors.lastName && (
-                  <T.body size="md" weight="medium" className="ft-setup-error-text">{errors.lastName}</T.body>
+                  <T.body size="md" weight="normal" className="ft-setup-error-text">{errors.lastName}</T.body>
                 )}
               </div>
 
@@ -650,7 +650,7 @@ export default function SetupModal() {
                   }`}
                 />
                 {errors.entityName && (
-                  <T.body size="md" weight="medium" className="ft-setup-error-text">{errors.entityName}</T.body>
+                  <T.body size="md" weight="normal" className="ft-setup-error-text">{errors.entityName}</T.body>
                 )}
               </div>
 
@@ -674,7 +674,7 @@ export default function SetupModal() {
                   }`}
                 />
                 {errors.socialName && (
-                  <T.body size="md" weight="medium" className="ft-setup-error-text">{errors.socialName}</T.body>
+                  <T.body size="md" weight="normal" className="ft-setup-error-text">{errors.socialName}</T.body>
                 )}
                 <T.caption size="xs" className="ft-setup-help-text">
                   * Uppercase and lowercase letters, numbers and one period (dot). No symbols or special characters. You can change your username.

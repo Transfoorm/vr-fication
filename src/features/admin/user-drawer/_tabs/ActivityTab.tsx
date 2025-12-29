@@ -12,7 +12,7 @@
 'use client';
 
 import '../user-drawer.css';
-import { Card, Badge, T } from '@/vr';
+import { Card, Badge, T, Stack } from '@/vr';
 import { useAdminData } from '@/hooks/useAdminData';
 import type { RankType } from '@/vr/badge/Rank';
 
@@ -96,7 +96,7 @@ export function ActivityTab({ userId }: ActivityTabProps) {
   const isActive = lastLogin && daysSinceLogin <= 30;
 
   return (
-    <div className="ft-activity">
+    <Stack>
       {/* Identity Card */}
       <Card.standard
         title="Account Identity"
@@ -180,6 +180,6 @@ export function ActivityTab({ userId }: ActivityTabProps) {
           </div>
         </div>
       </Card.standard>
-    </div>
+    </Stack>
   );
 }

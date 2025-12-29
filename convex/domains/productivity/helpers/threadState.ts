@@ -1,14 +1,14 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  📧 EMAIL THREAD STATE DERIVATION - Pure Function                     │
-│  /convex/domains/productivity/helpers/threadState.ts                   │
-│                                                                        │
-│  DOCTRINE:                                                             │
-│  - Thread state is DERIVED, never stored                               │
-│  - Pure function (no side effects, no database access)                 │
-│  - Single source of truth: message resolutionState fields              │
-│                                                                        │
-│  See: /docs/EMAIL_THREAD_STATE_DERIVATION.md                           │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  📧 EMAIL THREAD STATE DERIVATION - Pure Function                         │
+│  /convex/domains/productivity/helpers/threadState.ts                      │
+│                                                                           │
+│  DOCTRINE:                                                                │
+│  - Thread state is DERIVED, never stored                                  │
+│  - Pure function (no side effects, no database access)                    │
+│  - Single source of truth: message resolutionState fields                 │
+│                                                                           │
+│  See: /docs/EMAIL_THREAD_STATE_DERIVATION.md                              │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import type { Doc } from "@/convex/_generated/dataModel";
 
@@ -136,8 +136,12 @@ export interface ThreadMetadata {
   messageCount: number;
   latestMessageAt: number;
   subject: string;
+  snippet: string;
+  latestFrom: { name: string; email: string };
   participants: Array<{ name: string; email: string }>;
   hasUnread: boolean;
+  /** Canonical folder of latest message (inbox, sent, drafts, trash, spam, etc.) */
+  canonicalFolder: string;
 }
 
 export function computeThreadMetadata(
@@ -198,7 +202,10 @@ export function computeThreadMetadata(
     messageCount: messages.length,
     latestMessageAt: latest.receivedAt,
     subject: latest.subject,
+    snippet: latest.snippet,
+    latestFrom: { name: latest.from.name, email: latest.from.email },
     participants: Array.from(participantMap.values()),
     hasUnread,
+    canonicalFolder: latest.canonicalFolder || 'inbox', // Default to inbox for legacy data
   };
 }

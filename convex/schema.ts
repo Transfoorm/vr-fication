@@ -529,9 +529,68 @@ export default defineSchema({
     isRead: v.boolean(),
     readAt: v.optional(v.number()),
 
-    // Body fetch status (optional - bodies fetched on-demand)
-    bodyFetched: v.boolean(), // Whether full body has been loaded
-    bodyStorageId: v.optional(v.id("_storage")), // Convex storage ID if body stored
+    // ─────────────────────────────────────────────────────────────────────────
+    // CANONICAL EMAIL TAXONOMY (provider-agnostic classification)
+    // See: /src/domains/email/canonical.ts
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Canonical folder assignment (provider-agnostic).
+     * Maps Gmail labels, Outlook folders, Yahoo folders to unified taxonomy.
+     *
+     * Values: inbox | sent | drafts | archive | spam | trash | outbox | scheduled | system
+     *
+     * UI shows 6 folders: Inbox, Drafts, Sent, Archive, Trash, Spam
+     * Advanced folders (Outbox, Scheduled, System) accessible via search/filters.
+     */
+    canonicalFolder: v.optional(v.string()),
+
+    /**
+     * Canonical states (provider metadata, NOT workflow).
+     * Multiple states can apply to one message.
+     *
+     * Values: unread | starred | important | snoozed | muted | focused | other
+     *
+     * IMPORTANT: These are separate from resolutionState (Transfoorm workflow).
+     * canonicalStates = provider metadata (Gmail starred, Outlook flagged)
+     * resolutionState = Transfoorm workflow (with_me, with_them, done)
+     */
+    canonicalStates: v.optional(v.array(v.string())),
+
+    /**
+     * Provider-specific folder ID (for sync operations).
+     * Gmail: label ID | Outlook: parentFolderId | Yahoo: folderId
+     */
+    providerFolderId: v.optional(v.string()),
+
+    /**
+     * Provider-specific folder name (for debugging/display).
+     * Gmail: label name | Outlook: displayName | Yahoo: folder name
+     */
+    providerFolderName: v.optional(v.string()),
+
+    /**
+     * Provider-specific labels (Gmail only).
+     * Stores user-defined labels for preservation.
+     */
+    providerLabels: v.optional(v.array(v.string())),
+
+    /**
+     * Provider-specific categories (Gmail/Outlook).
+     * Gmail: CATEGORY_PERSONAL, CATEGORY_SOCIAL, etc.
+     * Outlook: user-defined color categories
+     */
+    providerCategories: v.optional(v.array(v.string())),
+
+    // Asset processing status (optional)
+    /** Reference to email body asset (HTML/text) */
+    bodyAssetId: v.optional(v.id("productivity_email_Assets")),
+    /** Whether all assets (body + images + attachments) have been processed */
+    assetsProcessed: v.boolean(),
+    /** When assets were last processed */
+    assetsProcessedAt: v.optional(v.number()),
+    /** How many assets this message references (for quick stats) */
+    assetCount: v.number(),
 
     // SRS rank-scoping (required)
     /** @todo SID-ORG: Convert to v.id("admin_orgs") when orgs domain is implemented. */
@@ -545,6 +604,7 @@ export default defineSchema({
     .index("by_external_message_id", ["externalMessageId"])
     .index("by_external_thread_id", ["externalThreadId"])
     .index("by_resolution_state", ["resolutionState"])
+    .index("by_canonical_folder", ["canonicalFolder"])
     .index("by_received_at", ["receivedAt"])
     .index("by_sender_email", ["from.email"])
     .index("by_resolvedBy", ["resolvedBy"])
@@ -594,6 +654,12 @@ export default defineSchema({
     /** Last sync error (if any) */
     lastSyncError: v.optional(v.string()),
 
+    // Sync lock (prevents parallel syncs)
+    /** When current sync started (null = not syncing) */
+    syncStartedAt: v.optional(v.number()),
+    /** Sync lock TTL in ms - auto-release after this (default: 5 minutes) */
+    syncLockTTL: v.optional(v.number()),
+
     // Provider-specific metadata (optional)
     /** Gmail: historyId for incremental sync */
     gmailHistoryId: v.optional(v.string()),
@@ -624,6 +690,51 @@ export default defineSchema({
     .index("by_email", ["emailAddress"])
     .index("by_status", ["status"])
     .index("by_next_sync", ["nextSyncAt"]),
+
+  /**
+   * 📁 EMAIL FOLDERS
+   *
+   * Stores folder hierarchy from email providers (Outlook, Gmail).
+   * Used to display expandable folder tree in sidebar.
+   *
+   * DOCTRINE:
+   * - Folders are synced from provider during email sync
+   * - Child folders inherit parent's canonical type for message routing
+   * - UI displays full hierarchy with expand/collapse
+   */
+  productivity_email_Folders: defineTable({
+    // Folder identity (required)
+    /** External folder ID from provider (GUID for Outlook) */
+    externalFolderId: v.string(),
+    /** User-visible folder name */
+    displayName: v.string(),
+    /** Canonical folder type (inbox, sent, drafts, etc.) */
+    canonicalFolder: v.string(),
+
+    // Hierarchy (optional - null for top-level folders)
+    /** Parent folder's external ID (null for top-level) */
+    parentFolderId: v.optional(v.string()),
+    /** Number of child folders */
+    childFolderCount: v.number(),
+
+    // Ownership (required)
+    /** Which email account this folder belongs to */
+    accountId: v.id("productivity_email_Accounts"),
+    /** Provider type (for provider-specific handling) */
+    provider: v.union(v.literal("gmail"), v.literal("outlook")),
+
+    // Delta sync (for incremental updates)
+    /** Microsoft Graph deltaLink for this folder */
+    deltaToken: v.optional(v.string()),
+    /** When delta token was last updated */
+    deltaTokenUpdatedAt: v.optional(v.number()),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_account", ["accountId"])
+    .index("by_external_id", ["externalFolderId"])
+    .index("by_parent", ["accountId", "parentFolderId"]),
 
   /**
    * 🧠 EMAIL SENDER CACHE
@@ -690,6 +801,101 @@ export default defineSchema({
     .index("by_last_message", ["lastMessageAt"])
     .index("by_confirmedBy", ["confirmedBy"]),
 
+  /**
+   * 🖼️ EMAIL ASSETS
+   *
+   * Content-addressed storage for email bodies, images, and attachments.
+   * Uses SHA-256 hashing for deduplication and immutability.
+   *
+   * DOCTRINE:
+   * - Assets have identity before they have a home (hash-first)
+   * - Storage location is an implementation detail (provider-agnostic)
+   * - Deduplication via content-addressing (same hash = same asset)
+   * - Referenced by multiple messages (many-to-many via AssetReferences)
+   *
+   * STORAGE STRATEGY:
+   * - v1: Convex Storage (for ~100 emails, validation phase)
+   * - v2: S3-class object storage (for scale, cost, desktop mirroring)
+   * - Migration is mechanical (swap storage adapter, keys unchanged)
+   */
+  productivity_email_Assets: defineTable({
+    // Content-addressed identity (required)
+    /** SHA-256 hash of asset content (primary identifier) */
+    hash: v.string(),
+    /** Storage key (provider-agnostic): email-assets/sha256/{first2}/{fullhash} */
+    key: v.string(),
+
+    // Asset metadata (required)
+    /** MIME type (e.g., text/html, image/png, application/pdf) */
+    contentType: v.string(),
+    /** Size in bytes */
+    size: v.number(),
+    /** Asset source */
+    source: v.union(
+      v.literal("body"),       // Email HTML/text body
+      v.literal("attachment"), // Inline image (CID) or file attachment
+      v.literal("external")    // Downloaded external image
+    ),
+
+    // Storage location (implementation detail)
+    /** Convex storage ID (v1 - temporary warehouse) */
+    storageId: v.optional(v.id("_storage")),
+    /** S3/R2 key (v2 - future, mechanical migration) */
+    s3Key: v.optional(v.string()),
+
+    // Usage tracking (for garbage collection)
+    /** Last time this asset was accessed (via signed URL generation) */
+    lastAccessedAt: v.number(),
+    /** Reference count (how many messages use this asset) */
+    referenceCount: v.number(),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_hash", ["hash"])
+    .index("by_key", ["key"])
+    .index("by_source", ["source"])
+    .index("by_last_accessed", ["lastAccessedAt"]),
+
+  /**
+   * 🔗 EMAIL ASSET REFERENCES
+   *
+   * Many-to-many relationship: messages ↔ assets
+   * Tracks which messages use which assets (for deduplication and GC).
+   *
+   * DOCTRINE:
+   * - Assets are shared across messages (deduplication)
+   * - Reference counting for garbage collection
+   * - Asset deleted only when referenceCount = 0
+   * - Tracks original context (CID, external URL)
+   */
+  productivity_email_AssetReferences: defineTable({
+    // Relationship (required)
+    /** Message that references this asset */
+    messageId: v.id("productivity_email_Index"),
+    /** Asset being referenced */
+    assetId: v.id("productivity_email_Assets"),
+
+    // Reference context (required)
+    /** How this asset is used in the message */
+    referenceType: v.union(
+      v.literal("body"),         // Email HTML/text body
+      v.literal("inline_image"), // Inline image (embedded in body)
+      v.literal("attachment")    // File attachment
+    ),
+
+    // Original reference metadata (optional - for debugging/auditing)
+    /** Original URL for external images (before download) */
+    originalUrl: v.optional(v.string()),
+    /** Original CID reference for inline images (e.g., "image001@outlook") */
+    cidReference: v.optional(v.string()),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+  }).index("by_message", ["messageId"])
+    .index("by_asset", ["assetId"])
+    .index("by_reference_type", ["referenceType"]),
+
   productivity_calendar_Events: defineTable({
     title: v.string(),
     description: v.optional(v.string()),
@@ -734,4 +940,55 @@ export default defineSchema({
     createdBy: v.id("admin_users"),
   }).index("by_org", ["orgId"])
     .index("by_scheduled_time", ["scheduledTime"]),
+
+  /**
+   * 🔔 WEBHOOK SUBSCRIPTIONS
+   *
+   * Stores Microsoft Graph webhook subscriptions for push notifications.
+   * When email arrives, Microsoft calls our endpoint instead of us polling.
+   *
+   * DOCTRINE:
+   * - Subscriptions expire after ~3 days (Microsoft limit)
+   * - Must renew before expiration via scheduled job
+   * - One subscription per email account
+   * - clientState used to verify notifications are from Microsoft
+   */
+  productivity_email_WebhookSubscriptions: defineTable({
+    // Subscription identity (required)
+    /** Microsoft Graph subscription ID (GUID) */
+    subscriptionId: v.string(),
+    /** Which email account this subscription monitors */
+    accountId: v.id("productivity_email_Accounts"),
+    /** Which user owns this account */
+    userId: v.id("admin_users"),
+
+    // Subscription config (required)
+    /** Resource being monitored (e.g., "me/messages") */
+    resource: v.string(),
+    /** Change types: created, updated, deleted */
+    changeTypes: v.array(v.string()),
+    /** Secret for verifying notifications */
+    clientState: v.string(),
+
+    // Lifecycle (required)
+    /** When subscription expires (must renew before this) */
+    expirationDateTime: v.number(),
+    /** Status of subscription */
+    status: v.union(
+      v.literal("active"),
+      v.literal("expired"),
+      v.literal("error")
+    ),
+    /** Last error message if status is error */
+    lastError: v.optional(v.string()),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    /** Last time we received a notification */
+    lastNotificationAt: v.optional(v.number()),
+  }).index("by_account", ["accountId"])
+    .index("by_subscription_id", ["subscriptionId"])
+    .index("by_expiration", ["expirationDateTime"])
+    .index("by_status", ["status"]),
 });

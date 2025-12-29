@@ -70,6 +70,7 @@ export const ROUTES = {
   // System domain (Admiral only)
   system: {
     overview: '/system' as const,
+    database: '/system/database' as const,
     ai: '/system/ai' as const,
     ranks: '/system/ranks' as const,
   },

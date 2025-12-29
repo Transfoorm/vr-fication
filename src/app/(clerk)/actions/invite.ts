@@ -1,15 +1,15 @@
 /**─────────────────────────────────────────────────────────────────────────┐
-│  🛡️ S.I.D. COMPLIANT Invite Actions                                        │
-│  /src/app/(clerk)/actions/invite.ts                                         │
-│                                                                             │
-│  Admin-initiated user invitations via Clerk Invitations API.                │
-│  Creates a magic link that lets NEW users create an account.                │
-│                                                                             │
-│  SID Rules Enforced:                                                        │
-│  - SID-3.1: auth() does NOT appear here                                     │
-│  - SID-9.1: Identity originates from readSessionCookie()                    │
-│  - SID-12.1: Admin verification via FUSE cookie                             │
-└────────────────────────────────────────────────────────────────────────────┘ */
+│  🛡️ S.I.D. COMPLIANT Invite Actions                                       │
+│  /src/app/(clerk)/actions/invite.ts                                       │
+│                                                                           │
+│  Admin-initiated user invitations via Clerk Invitations API.              │
+│  Creates a magic link that lets NEW users create an account.              │
+│                                                                           │
+│  SID Rules Enforced:                                                      │
+│  - SID-3.1: auth() does NOT appear here                                   │
+│  - SID-9.1: Identity originates from readSessionCookie()                  │
+│  - SID-12.1: Admin verification via FUSE cookie                           │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 'use server';
 

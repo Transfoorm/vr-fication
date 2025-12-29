@@ -16,21 +16,33 @@
 
 /* ═══════════════════════════════════════════════════════════════════
    STANDARD CARD VARIANT - Default Card
+   Two-layer architecture for overflow sovereignty:
+   - Frame: owns visual chrome (border, radius, shadow), allows overflow
+   - Surface: owns content clipping, clips to rounded shape
    ═══════════════════════════════════════════════════════════════════ */
 
-.vr-card-standard {
+/* Outer frame - visual chrome container */
+.vr-card-standard-frame {
   background-color: var(--card-content-bg);
-  border-radius: var(--card-radius); /* Match parent radius before clipping */
-  overflow: hidden; /* Clip children to rounded corners */
+  border: var(--card-border-width) solid var(--border-normal);
+  border-radius: var(--card-radius);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 4%), 0 1px 2px rgb(0 0 0 / 6%);
+  overflow: visible; /* Allow children to escape for dropdowns/tooltips */
 }
 
-.vr-card-standard .vr-card-standard-header {
+/* Inner surface - content clip container */
+.vr-card-standard-surface {
+  border-radius: var(--card-radius); /* Match parent radius */
+  overflow: hidden; /* Clip content to rounded corners */
+}
+
+.vr-card-standard-surface .vr-card-standard-header {
   padding: var(--space-sm) var(--space-lg);
   background: linear-gradient(to bottom, var(--bg-secondary), var(--bg-tertiary));
   border-bottom: var(--card-border-width) solid var(--border-normal);
 }
 
-.vr-card-standard .vr-card-standard-title {
+.vr-card-standard-surface .vr-card-standard-title {
   margin: 0;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -41,13 +53,13 @@
   gap: var(--space-sm);
 }
 
-.vr-card-standard .vr-card-standard-subtitle {
+.vr-card-standard-surface .vr-card-standard-subtitle {
   margin: 6px 0 0;
 
   /* Typography handled by T.body size="sm" color="secondary" */
 }
 
-.vr-card-standard .vr-card-standard-content {
+.vr-card-standard-surface .vr-card-standard-content {
   padding: var(--space-lg);
   background-color: var(--card-content-bg);
 }
@@ -62,7 +74,7 @@
   margin-top: var(--space-md);
 }
 
-.vr-card-standard .vr-card-standard-footer {
+.vr-card-standard-surface .vr-card-standard-footer {
   padding: var(--space-md) var(--space-lg);
   background: linear-gradient(to bottom, var(--bg-secondary), var(--bg-tertiary));
   border-top: var(--card-border-width) solid var(--border-light);

@@ -310,6 +310,304 @@ When building features, always remember:
 
 ---
 
+# 📐 PAGE LAYOUT SYSTEM: TWO-MODE ARCHITECTURE
+
+## THE LAYOUT PHILOSOPHY
+
+Every page in the app follows one of two layout patterns based on its purpose:
+- **Productivity Pages** → Full-width workspace (`Page.full`)
+- **Data Pages** → Constrained readable width (`Page.constrained`)
+
+This isn't arbitrary - it's based on how humans interact with different types of content.
+
+## PRODUCTIVITY PAGES (Full-Width)
+
+**Use `<Page.full>` when building:**
+- Email interfaces
+- Calendar views
+- Task management boards
+- Messaging/chat interfaces
+- Booking/scheduling systems
+- Timeline-based workflows
+
+**Why full-width?**
+- Users spend extended time in these interfaces
+- Horizontal space improves usability (more visible items, less scrolling)
+- Canvas-based interactions benefit from maximum viewport
+- Examples: Gmail, Outlook Web, Slack, Asana
+
+**Code Example:**
+```tsx
+import { Page } from '@/vr';
+
+export default function Email() {
+  return (
+    <Page.full>
+      <EmailConsole />
+    </Page.full>
+  );
+}
+```
+
+## DATA PAGES (Constrained 1320px)
+
+**Use `<Page.constrained>` when building:**
+- Admin panels (user management, system config)
+- Settings/preferences pages
+- Financial dashboards (invoices, transactions, reports)
+- Data tables and lists
+- Form-heavy configuration screens
+- Analytics and reporting interfaces
+
+**Why constrained?**
+- Prevents eye strain from scanning ultra-wide tables
+- Maintains readable column widths (60-80 characters optimal)
+- Improves form usability (shorter line length = better UX)
+- Standard SaaS pattern (Stripe, Linear, Notion all use ~1320px)
+
+**Code Example:**
+```tsx
+import { Page } from '@/vr';
+
+export default function Users() {
+  return (
+    <Page.constrained>
+      <UsersTable />
+    </Page.constrained>
+  );
+}
+```
+
+## THE DECISION RULE
+
+**When creating a new page, ask:**
+> **"Is this a workspace where users work, or a surface where users view/manage data?"**
+
+- **Workspace** → `Page.full` (Email, Calendar, Tasks)
+- **Data** → `Page.constrained` (Admin, Settings, Finance)
+
+## COMMUNICATION PROTOCOL
+
+**What you say to developers:**
+- ❌ "Make this full-width" or "Make this constrained"
+- ✅ "Create an email interface" → Dev knows → Productivity → `Page.full`
+- ✅ "Create a user management page" → Dev knows → Data → `Page.constrained`
+- ✅ "Create a settings page" → Dev knows → Config → `Page.constrained`
+
+Just describe WHAT the page is, and devs will know which layout pattern to use.
+
+## TECHNICAL IMPLEMENTATION
+
+Both variants are first-class VR components:
+- `Page.full` - Full available width (between sidebars)
+- `Page.constrained` - Max-width 1320px, horizontally centered
+
+No props, no configuration, just semantic clarity.
+
+---
+
+# 📑 FEATURE TABS PATTERN: THE _TABS ARCHITECTURE
+
+## THE PHILOSOPHY
+
+When a feature needs multiple tab views, use the **_tabs subdirectory pattern**.
+
+This is the TTT-compliant way to organize tab components - simpler, clearer, less indirection than folder-based patterns.
+
+## THE PATTERN
+
+```
+feature-name/
+├── index.tsx              ← Feature component (imports Tabs.panels VR)
+├── feature-name.css       ← Shared styles for entire feature
+└── _tabs/
+    ├── TabOne.tsx         ← Tab component (exported function)
+    ├── TabTwo.tsx
+    ├── TabThree.tsx
+    └── tab-specific.css   ← Optional: tab-specific styles
+```
+
+## WHY _TABS WINS (TTT Compliance)
+
+**Simpler than folder pattern:**
+- ❌ Folder pattern: Feature → Domain tab wrapper → Feature tab → Component (3 layers!)
+- ✅ _tabs pattern: Feature → Tab component (1 layer!)
+
+**Better TTT scores:**
+- **Clarity**: Tab files live next to the feature that uses them
+- **Simplicity**: No indirection through domain layer
+- **Consistency**: Same pattern as user-drawer, showcase-page, etc.
+- **Architecture**: Feature owns its tabs, not scattered across domain
+
+## REAL EXAMPLE: users-page
+
+**Structure:**
+```
+src/features/admin/users-page/
+├── index.tsx                    ← Renders Tabs.panels
+└── _tabs/
+    ├── ActiveUsersTab.tsx       ← Active users table
+    ├── DeletedUsersTab.tsx      ← Deletion logs table
+    ├── InvitesTab.tsx          ← Invite management
+    ├── StatusTab.tsx           ← Status monitoring
+    └── invites-tab.css         ← Invites-specific styles
+```
+
+**Feature index.tsx:**
+```tsx
+import { Tabs, Stack } from '@/vr';
+import { ActiveUsersFeature } from './_tabs/ActiveUsersTab';
+import { DeletedUsersFeature } from './_tabs/DeletedUsersTab';
+import { InvitesFeature } from './_tabs/InvitesTab';
+import { StatusTabFeature } from './_tabs/StatusTab';
+
+export function UsersPageFeature() {
+  return (
+    <Stack>
+      <Tabs.panels
+        tabs={[
+          { id: 'active', label: 'Active Users', content: <ActiveUsersFeature /> },
+          { id: 'deleted', label: 'Deleted Users', content: <DeletedUsersFeature /> },
+          { id: 'invite', label: 'Invite Users', content: <InvitesFeature /> },
+          { id: 'status', label: 'Status', content: <StatusTabFeature /> }
+        ]}
+      />
+    </Stack>
+  );
+}
+```
+
+**Tab component (_tabs/ActiveUsersTab.tsx):**
+```tsx
+'use client';
+
+import { Table, Search, Stack } from '@/vr';
+import { useAdminData } from '@/hooks/useAdminData';
+
+export function ActiveUsersFeature() {
+  const { data } = useAdminData();
+
+  return (
+    <Stack>
+      <Search.bar />
+      <Table.sortable columns={columns} data={data.users} />
+    </Stack>
+  );
+}
+```
+
+## THE ALTERNATIVE (DON'T DO THIS)
+
+**Folder pattern** (more complex, more files, more indirection):
+```
+src/features/admin/users-page/
+├── index.tsx
+├── active-users-tab/
+│   └── index.tsx                    ← Tab feature
+├── deleted-users-tab/
+│   └── index.tsx                    ← Tab feature
+└── invites-tab/
+    ├── index.tsx                    ← Tab feature
+    └── invites-tab.css
+
+src/app/domains/admin/users/_tabs/
+├── ActiveUsers.tsx                  ← Domain wrapper (just imports feature!)
+├── DeletedUsers.tsx                 ← Domain wrapper
+└── Invites.tsx                      ← Domain wrapper
+
+// Domain wrapper just imports feature (unnecessary indirection!)
+import { ActiveUsersFeature } from '@/features/admin/users-page/active-users-tab';
+
+export default function ActiveUsers() {
+  return <ActiveUsersFeature />;  // Why does this file exist?!
+}
+```
+
+**Problems:**
+- 3 layers instead of 1 (Feature → Domain tab → Feature tab)
+- Domain tab files exist just to import (pointless indirection)
+- Harder to navigate (jump between domain and features directories)
+- More files to maintain
+
+## WHEN TO USE _TABS
+
+**Use this pattern when:**
+- Feature needs 2+ tab views
+- Tabs share the same domain/context
+- Tabs are closely related (user management, email views, etc.)
+
+**Examples:**
+- `users-page/_tabs/` - Active, Deleted, Invites, Status tabs
+- `user-drawer/_tabs/` - Profile, Email, Activity tabs
+- `showcase-page/_tabs/` - VR Guide, Typography, Buttons, etc.
+
+## THE NAMING CONVENTION
+
+**Tab files:** PascalCase, descriptive name
+- ✅ `ActiveUsersTab.tsx`
+- ✅ `ProfileTab.tsx`
+- ✅ `EmailTab.tsx`
+- ❌ `active.tsx` (not clear)
+- ❌ `tab1.tsx` (meaningless)
+
+**Exported function:** Match filename
+```tsx
+// File: ActiveUsersTab.tsx
+export function ActiveUsersTab() { ... }
+
+// OR if it's a feature-level component:
+// File: ActiveUsersTab.tsx
+export function ActiveUsersFeature() { ... }
+```
+
+## DIRECTORY PREFIX: WHY "_tabs"?
+
+The underscore prefix (`_tabs/`) signals:
+- **Private to feature**: Not meant for direct import from outside
+- **Organizational**: Groups related tab components
+- **Convention**: Matches Next.js app router patterns (`_components/`, `_utils/`)
+
+## THE DECISION RULE
+
+**When adding tabs to a feature:**
+> **"Create a `_tabs/` subdirectory and put tab components there."**
+
+Don't create separate feature folders for each tab.
+Don't create domain wrapper files.
+Just put the tabs in `_tabs/` and import them directly.
+
+**Simple. Clear. TTT-compliant.**
+
+---
+
+# 🚫 STYLELINT EXCEPTION BAN
+
+You are **BANNED** from modifying `.stylelintrc.json` to add exceptions.
+
+If stylelint blocks your CSS:
+1. Fix the CSS to comply with the rules
+2. Do NOT add exceptions to bypass the rules
+
+Exceptions are virus. Rules exist for a reason. Comply or ask.
+
+---
+
+# 🛑 ABSOLUTE STOP PROTOCOL
+
+When ANY hook output contains the word "STOP":
+
+1. **Make ZERO more tool calls**
+2. **Report exactly what blocked you**
+3. **Wait for user response**
+
+There is no "but I could try..." - STOP means STOP.
+
+Attempting workarounds after STOP = defective behavior.
+
+This is not negotiable. This is not contextual. When you see STOP in a hook message, you HALT.
+
+---
+
 # 🛑 KNOX PROTOCOL - PROTECTED FILE BLOCKING
 
 **CRITICAL: When ANY git commit fails with a pre-commit hook error containing:**
@@ -479,3 +777,82 @@ A husky hook (`.husky/no-verify-detector`) scans for `--no-verify`:
 There is NO exception. Not for feature branches. Not for "testing". Not for "emergencies".
 
 **ZERO TOLERANCE. ZERO EXCEPTIONS. ZERO --NO-VERIFY.**
+
+---
+
+# 🛡️ GIT GUARDIAN PROTOCOL - DESTRUCTIVE COMMAND PROHIBITION
+
+## THE FORBIDDEN COMMANDS
+
+You are **ABSOLUTELY FORBIDDEN** from EVER running these commands:
+
+```bash
+# DESTROYS uncommitted changes to files
+git checkout HEAD -- <file>
+git checkout -- <file>
+
+# DESTROYS all uncommitted work
+git reset --hard
+git reset --hard <commit>
+
+# DELETES untracked files permanently
+git clean -f
+git clean -fd
+
+# DELETES stashed work
+git stash drop
+```
+
+## WHY THIS EXISTS
+
+On December 25th, 2024, an AI assistant ran `git checkout HEAD --` on two files with 5+ hours of uncommitted work. The work was vaporized instantly. Recovery required extracting code from JSONL conversation logs - a painful, hours-long process.
+
+**NEVER AGAIN.**
+
+## WHAT THESE COMMANDS DO
+
+| Command | Destruction |
+|---------|-------------|
+| `checkout HEAD -- file` | Wipes uncommitted changes to that file |
+| `checkout -- file` | Same - wipes uncommitted changes |
+| `reset --hard` | Wipes ALL uncommitted changes in repo |
+| `clean -fd` | Deletes ALL untracked files permanently |
+| `stash drop` | Deletes a stash permanently |
+
+## THE SACRED OATH
+
+> "I will NEVER run git checkout HEAD -- or git checkout -- on files.
+> I will NEVER run git reset --hard.
+> I will NEVER run git clean -f.
+> I will NEVER destroy uncommitted work.
+> If I need to discard changes, I will ASK THE USER FIRST.
+> I will assume uncommitted work is precious and irreplaceable."
+
+## SAFE ALTERNATIVES
+
+**To view old commits (SAFE):**
+```bash
+git checkout <commit-hash>    # Detach HEAD, look around
+git show <commit-hash>        # View commit contents
+git diff <commit-hash>        # Compare with commit
+```
+
+**To discard changes (ASK USER FIRST):**
+```bash
+# STOP. ASK THE USER.
+# "Do you want me to discard uncommitted changes to [file]?"
+# WAIT for explicit "yes" before proceeding.
+```
+
+## IF YOU NEED TO DISCARD CHANGES
+
+1. **STOP** - Do not run the command
+2. **ASK** - "You have uncommitted changes to X. Should I discard them?"
+3. **WAIT** - Get explicit user confirmation
+4. **ONLY THEN** - If user says "yes", proceed
+
+## THE ONLY EXCEPTION
+
+There is NO exception. Not for "cleaning up". Not for "resetting state". Not for "starting fresh".
+
+**Uncommitted work is sacred. Ask before destroying.**

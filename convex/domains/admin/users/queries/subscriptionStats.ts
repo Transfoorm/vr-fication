@@ -1,14 +1,14 @@
-/**──────────────────────────────────────────────────────────────────────┐
-│  📊 SUBSCRIPTION STATS QUERY - Admiral Dashboard                       │
-│  /convex/domains/admin/users/queries/subscriptionStats.ts              │
-│                                                                        │
-│  🛡️ S.I.D. COMPLIANT - Phase 10                                       │
-│  - All queries accept callerUserId: v.id("admin_users")                │
-│  - No ctx.auth.getUserIdentity() usage                                 │
-│                                                                        │
-│  Provides subscription and rank statistics for the Admiral Rank        │
-│  Management tab. Shows counts, breakdowns, and metrics.                │
-└────────────────────────────────────────────────────────────────────────┘ */
+/**─────────────────────────────────────────────────────────────────────────┐
+│  📊 SUBSCRIPTION STATS QUERY - Admiral Dashboard                          │
+│  /convex/domains/admin/users/queries/subscriptionStats.ts                 │
+│                                                                           │
+│  🛡️ S.I.D. COMPLIANT - Phase 10                                           │
+│  - All queries accept callerUserId: v.id("admin_users")                   │
+│  - No ctx.auth.getUserIdentity() usage                                    │
+│                                                                           │
+│  Provides subscription and rank statistics for the Admiral Rank           │
+│  Management tab. Shows counts, breakdowns, and metrics.                   │
+└───────────────────────────────────────────────────────────────────────────┘ */
 
 import { query } from "@/convex/_generated/server";
 import { requireAdmiralRank } from "@/convex/system/utils/rankAuth";

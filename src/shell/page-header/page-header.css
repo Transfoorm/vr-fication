@@ -5,7 +5,7 @@
 
 /* Main Container */
 .ly-page-header-container {
-  display: flex;
+  display: var(--page-header-display, flex);         /* 🟨 none = hidden, flex = visible */
   justify-content: space-between;
   gap: var(--space-lg);                              /* 🟨 */
   margin-top: var(--page-header-margin-top);         /* 🟨 */

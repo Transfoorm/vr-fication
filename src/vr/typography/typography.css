@@ -37,6 +37,18 @@
 }
 
 /* Weight variants */
+.vr-typography-body--micro {
+  font-weight: var(--font-weight-micro);
+}
+
+.vr-typography-body--ultra {
+  font-weight: var(--font-weight-ultra);
+}
+
+.vr-typography-body--thin {
+  font-weight: var(--font-weight-thin);
+}
+
 .vr-typography-body--normal {
   font-weight: var(--font-weight-normal);
 }
@@ -47,6 +59,18 @@
 
 .vr-typography-body--semibold {
   font-weight: var(--font-weight-semibold);
+}
+
+.vr-typography-body--bold {
+  font-weight: var(--font-weight-bold);
+}
+
+.vr-typography-body--black {
+  font-weight: var(--font-weight-black);
+}
+
+.vr-typography-body--boss {
+  font-weight: var(--font-weight-boss);
 }
 
 /* Color variants */
@@ -72,6 +96,23 @@
 
 .vr-typography-body--warning {
   color: var(--warning-600);
+}
+
+/* Alignment variants */
+.vr-typography-body--left {
+  text-align: left;
+}
+
+.vr-typography-body--center {
+  text-align: center;
+}
+
+.vr-typography-body--right {
+  text-align: right;
+}
+
+.vr-typography-body--justify {
+  text-align: justify;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -122,6 +163,23 @@
 /* Style variants */
 .vr-typography-caption--italic {
   font-style: italic;
+}
+
+/* Alignment variants */
+.vr-typography-caption--left {
+  text-align: left;
+}
+
+.vr-typography-caption--center {
+  text-align: center;
+}
+
+.vr-typography-caption--right {
+  text-align: right;
+}
+
+.vr-typography-caption--justify {
+  text-align: justify;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -238,6 +296,10 @@
 
 .vr-typography-title--right {
   text-align: right;
+}
+
+.vr-typography-title--justify {
+  text-align: justify;
 }
 
 /* ═══════════════════════════════════════════════════════════════════

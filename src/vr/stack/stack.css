@@ -1,27 +1,109 @@
-/* ═══════════════════════════════════════════════════════════════════
-   🤖 STACK COMPONENT - Vertical Layout Utilities
-   ═══════════════════════════════════════════════════════════════════ */
+/* +----------------------------------------------------------------------+
+ * |  🤖 VARIANT ROBOT - Stack CSS                                        |
+ * |  src/vr/stack/stack.css                                              |
+ * |                                                                      |
+ * |  THE sitewide modular spacing system.                                |
+ * |  All gaps use design tokens. No magic numbers.                       |
+ * +----------------------------------------------------------------------+ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   VERTICAL STACK VARIANTS (smallest → largest)
+
+   xs      →  4px   Micro (label + input)
+   sm      →  8px   Tight (related items)
+   md      → 16px   Standard (default)
+   lg      → 24px   Generous (cards)
+   xl      → 32px   Loose (sections)
+   section → 48px   Major divisions
+   ───────────────────────────────────────────────────────────────────── */
+
+.vr-stack-xs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap-xs);
+}
+
+.vr-stack-sm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap-sm);
+}
+
+.vr-stack-md {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap-md);
+}
+
+.vr-stack-lg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap-lg);
+}
+
+.vr-stack-xl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap-xl);
+}
+
+.vr-stack-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap-2xl);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   HORIZONTAL ROW VARIANTS
+   ───────────────────────────────────────────────────────────────────── */
+
+.vr-stack-row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--stack-gap-md);
+}
+
+.vr-stack-row-equal {
+  display: flex;
+  flex-direction: row;
+  gap: var(--stack-gap-lg);
+  align-items: flex-start;
+}
+
+.vr-stack-row-equal > * {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   LEGACY COMPATIBILITY
+
+   Old class names map to new system:
+   - .vr-stack       → .vr-stack-lg (was 24px, stays 24px)
+   - .vr-stack-tight → .vr-stack-sm (fixed: was 32px, now 8px)
+   - .vr-stack-loose → .vr-stack-xl (fixed: was 50px, now 32px)
+   ───────────────────────────────────────────────────────────────────── */
 
 .vr-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--stack-gap-lg);
 }
 
 .vr-stack-tight {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: var(--stack-gap-sm);
 }
 
 .vr-stack-loose {
   display: flex;
   flex-direction: column;
-  gap: 50px;
+  gap: var(--stack-gap-xl);
 }
 
 .vr-stack-horizontal {
   display: flex;
   flex-direction: row;
-  gap: var(--space-md);
+  gap: var(--stack-gap-md);
 }
