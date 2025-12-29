@@ -168,6 +168,61 @@ button.ft-profiletab-country-button {
   box-shadow: 0 4px 12px rgb(59 130 246 / 30%);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   DISCONNECT BUTTON - Red/danger variant of action pill
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-emailtab-disconnect-pill {
+  padding: 6px 12px;
+  min-width: 110px;
+  height: 28px;
+  color: var(--text-secondary);
+  background-color: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* T.caption inside pill must inherit button's color */
+.ft-emailtab-disconnect-pill .vr-typography-caption {
+  color: inherit;
+  line-height: 1;
+}
+
+.ft-emailtab-disconnect-pill:hover:not(.ft-emailtab-disconnect-pill--active, .ft-emailtab-disconnect-pill--confirm) {
+  background-color: var(--error-100);
+  color: var(--error-600);
+}
+
+.ft-emailtab-disconnect-pill:disabled:not(.ft-emailtab-disconnect-pill--confirm, .ft-emailtab-disconnect-pill--active) {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Confirmation state - red/danger with subtle shake */
+.ft-emailtab-disconnect-pill--confirm {
+  background-color: var(--error-500);
+  color: #fff;
+  animation: ft-emailtab-nudge 0.3s ease;
+}
+
+.ft-emailtab-disconnect-pill--confirm:hover {
+  background-color: var(--error-600);
+  color: #fff;
+}
+
+/* Active operation (disconnecting) - yellow with typing animation */
+.ft-emailtab-disconnect-pill--active {
+  background-color: var(--editing-bg);
+  color: var(--editing-text);
+}
+
 /* ──────────────────────────────────────────────────────────────────────┐
 │  🔱 PASSWORD CHANGE CEREMONY - Styles                                 │
 │  /src/features/VerifyPassword/password-ceremony.css                   │

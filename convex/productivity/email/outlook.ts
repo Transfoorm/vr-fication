@@ -465,7 +465,7 @@ export const syncOutlookMessages = action({
       // ═══════════════════════════════════════════════════════════════════════
       // STEP 1: Fetch folder list and store hierarchy
       // ═══════════════════════════════════════════════════════════════════════
-      const folderMap: Record<string, { wellKnownName?: string; displayName: string }> = {};
+      const folderMap: Record<string, { displayName: string }> = {};
       const foldersToStore: Array<{
         externalFolderId: string;
         displayName: string;
@@ -474,10 +474,10 @@ export const syncOutlookMessages = action({
         childFolderCount: number;
       }> = [];
 
-      // Fetch top-level folders (including wellKnownName for language-independent mapping)
+      // Fetch top-level folders
       console.log('📁 Fetching Outlook folder list...');
       const foldersResponse = await fetch(
-        'https://graph.microsoft.com/v1.0/me/mailFolders?$select=id,displayName,wellKnownName,childFolderCount&$top=100',
+        'https://graph.microsoft.com/v1.0/me/mailFolders?$select=id,displayName,childFolderCount&$top=100',
         {
           headers: {
             Authorization: `Bearer ${tokens.accessToken}`,
@@ -488,7 +488,7 @@ export const syncOutlookMessages = action({
 
       if (foldersResponse.ok) {
         const foldersData = (await foldersResponse.json()) as {
-          value: Array<{ id: string; displayName: string; wellKnownName?: string; childFolderCount: number }>;
+          value: Array<{ id: string; displayName: string; childFolderCount: number }>;
         };
 
         console.log(`📁 Found ${foldersData.value.length} top-level folders`);
@@ -771,7 +771,6 @@ export const storeOutlookMessages = mutation({
     messages: v.array(v.any()), // OutlookMessage[] (typed on client)
     bodyStorageMap: v.optional(v.record(v.string(), v.string())), // externalMessageId → storageId
     folderMap: v.optional(v.record(v.string(), v.object({
-      wellKnownName: v.optional(v.string()),
       displayName: v.string(),
     }))), // folderId → folder info
   },
@@ -1103,8 +1102,10 @@ export const disconnectOutlookAccount = mutation({
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // CASCADE DELETE: Body cache (doctrine requirement)
+    // CASCADE DELETE: Full cleanup of all email data for this account
     // ─────────────────────────────────────────────────────────────────────────
+
+    // 1. Delete body cache entries (with storage blobs)
     const cacheEntries = await ctx.db
       .query('productivity_email_BodyCache')
       .withIndex('by_account', (q) => q.eq('accountId', args.accountId))
@@ -1117,20 +1118,49 @@ export const disconnectOutlookAccount = mutation({
       cacheBodiesDeleted++;
     }
 
-    if (cacheBodiesDeleted > 0) {
-      console.log(`🗑️ Cascade deleted ${cacheBodiesDeleted} cached bodies`);
+    // 2. Delete all messages for this account
+    const messages = await ctx.db
+      .query('productivity_email_Index')
+      .withIndex('by_account', (q) => q.eq('accountId', args.accountId))
+      .collect();
+
+    let messagesDeleted = 0;
+    for (const msg of messages) {
+      await ctx.db.delete(msg._id);
+      messagesDeleted++;
     }
 
-    // Mark account as disconnected and clear tokens
-    await ctx.db.patch(args.accountId, {
-      status: 'disconnected',
-      accessToken: undefined,
-      refreshToken: undefined,
-      disconnectedAt: Date.now(),
-    });
+    // 3. Delete all folders for this account
+    const folders = await ctx.db
+      .query('productivity_email_Folders')
+      .withIndex('by_account', (q) => q.eq('accountId', args.accountId))
+      .collect();
 
-    console.log(`✅ Disconnected Outlook account ${account.emailAddress}`);
-    return { success: true, cacheBodiesDeleted };
+    let foldersDeleted = 0;
+    for (const folder of folders) {
+      await ctx.db.delete(folder._id);
+      foldersDeleted++;
+    }
+
+    // 4. Delete webhook subscriptions for this account
+    const webhooks = await ctx.db
+      .query('productivity_email_WebhookSubscriptions')
+      .withIndex('by_account', (q) => q.eq('accountId', args.accountId))
+      .collect();
+
+    let webhooksDeleted = 0;
+    for (const webhook of webhooks) {
+      await ctx.db.delete(webhook._id);
+      webhooksDeleted++;
+    }
+
+    console.log(`🗑️ Cascade deleted: ${messagesDeleted} messages, ${foldersDeleted} folders, ${cacheBodiesDeleted} cache entries, ${webhooksDeleted} webhooks`);
+
+    // 5. Delete the account itself (not just disconnect)
+    await ctx.db.delete(args.accountId);
+
+    console.log(`✅ Fully disconnected and cleaned up Outlook account ${account.emailAddress}`);
+    return { success: true, messagesDeleted, foldersDeleted, cacheBodiesDeleted, webhooksDeleted };
   },
 });
 
