@@ -515,16 +515,27 @@
   padding-left: var(--prod-space-3xl);
 }
 
+.ft-email__subfolders--nested {
+  padding-left: var(--prod-space-xl);
+}
+
+.ft-email__subfolder-group {
+  display: flex;
+  flex-direction: column;
+}
+
 .ft-email__subfolder {
   display: flex;
   align-items: center;
   gap: var(--prod-space-md);
   padding: var(--prod-space-sm) var(--prod-space-lg);
+  padding-left: var(--prod-space-3xl); /* Room for chevron */
   border-radius: var(--prod-radius-sm);
   cursor: pointer;
   font-size: var(--prod-text-caption);
   color: var(--prod-text-muted);
   transition: background var(--prod-transition-fast), color var(--prod-transition-fast);
+  position: relative; /* Required for absolutely positioned chevron */
 }
 
 .ft-email__subfolder:hover {

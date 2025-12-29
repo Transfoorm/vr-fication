@@ -21,17 +21,21 @@ import type { Id } from '@/convex/_generated/dataModel';
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function GET() {
-  // 🛡️ SID-9.1: Identity from FUSE session cookie
-  const session = await readSessionCookie();
-
-  if (!session || !session._id) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-
-  // 🛡️ SID-5.3: Sovereign userId for Convex queries
-  const callerUserId = session._id as Id<"admin_users">;
-
   try {
+    // 🛡️ SID-9.1: Identity from FUSE session cookie
+    const session = await readSessionCookie();
+
+    if (!session || !session._id) {
+      return Response.json({
+        email: { threads: [], messages: [] },
+        calendar: [],
+        bookings: [],
+        meetings: [],
+      });
+    }
+
+    // 🛡️ SID-5.3: Sovereign userId for Convex queries
+    const callerUserId = session._id as Id<"admin_users">;
     // ⚡ Fetch productivity data using sovereign queries (rank-scoped in Convex)
     const [emailThreads, emailMessages, calendar, bookings, meetings] = await Promise.all([
       convex.query(api.domains.productivity.queries.listThreads, { callerUserId }), // Fetch thread metadata

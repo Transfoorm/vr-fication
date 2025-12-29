@@ -173,6 +173,12 @@ async function fetchBodyFromMicrosoft(
   if (!response.ok) {
     const errorText = await response.text();
     console.error(`Microsoft Graph error: ${response.status}`, errorText);
+    // 404 = message no longer exists (deleted, moved, or stale reference)
+    // Return empty string instead of throwing - UI will show "unavailable"
+    if (response.status === 404) {
+      console.log(`⚠️ Message not found in Microsoft Graph (404) - may have been deleted`);
+      return '';
+    }
     throw new Error(`Microsoft Graph error: ${response.status}`);
   }
 

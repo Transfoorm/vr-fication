@@ -21,17 +21,19 @@ import type { Id } from '@/convex/_generated/dataModel';
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function GET() {
-  // 🛡️ SID-9.1: Identity from FUSE session cookie
-  const session = await readSessionCookie();
-
-  if (!session || !session._id) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-
-  // 🛡️ SID-5.3: Sovereign userId for Convex queries
-  const callerUserId = session._id as Id<"admin_users">;
-
   try {
+    // 🛡️ SID-9.1: Identity from FUSE session cookie
+    const session = await readSessionCookie();
+
+    if (!session || !session._id) {
+      return Response.json({
+        users: [],
+        deletionLogs: []
+      });
+    }
+
+    // 🛡️ SID-5.3: Sovereign userId for Convex queries
+    const callerUserId = session._id as Id<"admin_users">;
     // ⚡ Fetch admin data using sovereign queries (Admiral-only enforced in Convex)
     const [users, deletionLogs] = await Promise.all([
       convex.query(api.domains.admin.users.api.getAllUsers, { callerUserId }),

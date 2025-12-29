@@ -657,6 +657,17 @@ export default defineSchema({
     isSyncing: v.optional(v.boolean()),
     /** Last sync error (if any) */
     lastSyncError: v.optional(v.string()),
+    /**
+     * Whether initial historical sync is complete.
+     *
+     * TWO-PHASE SYNC DOCTRINE:
+     * - Phase A (initialSyncComplete=false): Full history via /messages API
+     * - Phase B (initialSyncComplete=true): Incremental via /messages/delta API
+     *
+     * Delta API only returns recent activity, NOT full history.
+     * Initial sync MUST use standard /messages endpoint.
+     */
+    initialSyncComplete: v.optional(v.boolean()),
 
     // Sync lock (prevents parallel syncs)
     /** When current sync started (null = not syncing) */

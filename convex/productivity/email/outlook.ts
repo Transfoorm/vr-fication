@@ -63,13 +63,15 @@ const OUTLOOK_FOLDER_MAP: Record<string, CanonicalFolderType> = {
   junk: CanonicalFolder.SPAM,
   spam: CanonicalFolder.SPAM,
   scheduled: CanonicalFolder.SCHEDULED,
-  // System folders
-  'conversation history': CanonicalFolder.SYSTEM,
+  // Conditional folders - sync them (map to INBOX so they're not excluded)
+  // UI shows them only when they have messages
+  'conversation history': CanonicalFolder.INBOX,
+  clutter: CanonicalFolder.INBOX,
+  // True system folders - never sync
   'sync issues': CanonicalFolder.SYSTEM,
   conflicts: CanonicalFolder.SYSTEM,
   'local failures': CanonicalFolder.SYSTEM,
   'server failures': CanonicalFolder.SYSTEM,
-  clutter: CanonicalFolder.SYSTEM,
 };
 
 /**
@@ -362,6 +364,30 @@ export const triggerOutlookSync = mutation({
  * - Broken images expected (asset rewriting is Phase 2)
  *
  * This is an action (not mutation) so it can make external HTTP requests
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔒 SYNC INTEGRITY DOCTRINE (non-negotiable)
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * A sync that does not complete fully MUST NOT persist progress markers.
+ *
+ * This applies to:
+ *   - Delta tokens (pagination resume points)
+ *   - "Last synced at" timestamps
+ *   - Any cursor or offset that implies "everything before this is done"
+ *
+ * Rationale:
+ *   Partial sync + saved progress marker = permanently truncated dataset.
+ *   The system will resume from the marker and never recover missing history.
+ *
+ * Implementation:
+ *   - On ANY page fetch failure: THROW (do not break/continue)
+ *   - Delta tokens are saved ONLY after successful folder completion
+ *   - Lock is released with success=false on any error
+ *
+ * This doctrine exists because silent partial success caused data loss.
+ * Do not weaken this invariant for "convenience" or "retry later" logic.
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 export const syncOutlookMessages = action({
   args: {
@@ -477,10 +503,10 @@ export const syncOutlookMessages = action({
         childFolderCount: number;
       }> = [];
 
-      // Fetch top-level folders
-      console.log('📁 Fetching Outlook folder list...');
+      // Fetch top-level folders (includeHiddenFolders=true catches Clutter which is hidden)
+      console.log('📁 Fetching Outlook folder list (including hidden)...');
       const foldersResponse = await fetch(
-        'https://graph.microsoft.com/v1.0/me/mailFolders?$select=id,displayName,childFolderCount&$top=100',
+        'https://graph.microsoft.com/v1.0/me/mailFolders?$select=id,displayName,childFolderCount&$top=100&includeHiddenFolders=true',
         {
           headers: {
             Authorization: `Bearer ${tokens.accessToken}`,
@@ -513,59 +539,129 @@ export const syncOutlookMessages = action({
           console.log(`📁 ${folder.displayName} → ${canonicalFolder}`);
         }
 
-        // Fetch child folders for folders that have children (e.g., Inbox subfolders)
+        // Fetch child folders RECURSIVELY (handles grandchildren like Inbox → Fyxer AI → 1: To respond)
+        // ═══════════════════════════════════════════════════════════════════════════
+        // RECURSIVE SUBFOLDER FETCH
+        // ═══════════════════════════════════════════════════════════════════════════
+        // Some Outlook add-ons (like Fyxer AI) create nested folder hierarchies:
+        //   Inbox → Fyxer AI → 1: To respond, 2: FYI, etc.
+        // We must recurse to catch all levels, not just direct children.
+        // ═══════════════════════════════════════════════════════════════════════════
+
+        async function fetchChildFoldersRecursive(
+          parentId: string,
+          parentDisplayName: string,
+          parentCanonical: string,
+          depth: number
+        ): Promise<void> {
+          console.log(`🔍 RECURSE depth=${depth}: Fetching children of "${parentDisplayName}"`);
+
+          // Practical ceiling (1M) - accommodates anything Microsoft allows
+          if (depth > 1000000) {
+            console.log(`⚠️ Max folder depth reached for ${parentDisplayName}`);
+            return;
+          }
+
+          // Guard for TypeScript - tokens was validated at function entry
+          if (!tokens) return;
+
+          const childUrl = `https://graph.microsoft.com/v1.0/me/mailFolders/${parentId}/childFolders?$select=id,displayName,childFolderCount&$top=100`;
+          console.log(`🔍 Fetching: ${childUrl.substring(0, 80)}...`);
+
+          const childResponse = await fetch(childUrl, {
+            headers: {
+              Authorization: `Bearer ${tokens.accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!childResponse.ok) {
+            const errorText = await childResponse.text();
+            console.warn(`⚠️ Failed to fetch children for ${parentDisplayName}: ${childResponse.status} - ${errorText.substring(0, 100)}`);
+            return;
+          }
+
+          const childData = (await childResponse.json()) as {
+            value: Array<{ id: string; displayName: string; childFolderCount: number }>;
+          };
+
+          console.log(`🔍 "${parentDisplayName}" has ${childData.value.length} children`);
+
+          if (childData.value.length === 0) return;
+
+          // Log EVERY child with its childFolderCount
+          for (const child of childData.value) {
+            console.log(`📁 ${'  '.repeat(depth)}├─ ${child.displayName} (hasChildren: ${child.childFolderCount > 0}, count: ${child.childFolderCount})`);
+          }
+
+          // Add child folders - inherit ancestor's canonical mapping
+          for (const child of childData.value) {
+            folderMap[child.id] = {
+              displayName: parentDisplayName, // Use ancestor's name for canonical mapping
+            };
+            foldersToStore.push({
+              externalFolderId: child.id,
+              displayName: child.displayName,
+              canonicalFolder: parentCanonical, // Inherit from ancestor
+              parentFolderId: parentId,
+              childFolderCount: child.childFolderCount || 0,
+            });
+
+            // RECURSE if this child has children
+            if (child.childFolderCount > 0) {
+              console.log(`🔍 "${child.displayName}" has ${child.childFolderCount} children - RECURSING...`);
+              await fetchChildFoldersRecursive(
+                child.id,
+                child.displayName,
+                parentCanonical, // Pass down the ancestor's canonical
+                depth + 1
+              );
+            }
+          }
+        }
+
+        // Start recursive fetch for all top-level folders with children
         const foldersWithChildren = foldersData.value.filter(f => f.childFolderCount > 0);
         console.log(`📁 ${foldersWithChildren.length} folders have children: ${foldersWithChildren.map(f => `${f.displayName}(${f.childFolderCount})`).join(', ')}`);
 
         for (const parentFolder of foldersWithChildren) {
-          const childResponse = await fetch(
-            `https://graph.microsoft.com/v1.0/me/mailFolders/${parentFolder.id}/childFolders?$select=id,displayName,childFolderCount&$top=100`,
-            {
-              headers: {
-                Authorization: `Bearer ${tokens.accessToken}`,
-                'Content-Type': 'application/json',
-              },
-            }
+          const parentCanonical = OUTLOOK_FOLDER_MAP[parentFolder.displayName.toLowerCase().trim()] || CanonicalFolder.INBOX;
+          await fetchChildFoldersRecursive(
+            parentFolder.id,
+            parentFolder.displayName,
+            parentCanonical,
+            1 // depth starts at 1
           );
-
-          if (childResponse.ok) {
-            const childData = (await childResponse.json()) as {
-              value: Array<{ id: string; displayName: string; childFolderCount: number }>;
-            };
-
-            console.log(`📁 ${parentFolder.displayName} subfolders: ${childData.value.map(c => c.displayName).join(', ')}`);
-
-            // Parent's canonical folder (for inheritance)
-            const parentCanonical = OUTLOOK_FOLDER_MAP[parentFolder.displayName.toLowerCase().trim()] || CanonicalFolder.INBOX;
-
-            // Add child folders - inherit parent's canonical mapping (subfolders of Inbox are still "inbox")
-            for (const child of childData.value) {
-              folderMap[child.id] = {
-                displayName: parentFolder.displayName, // Use parent's name for canonical mapping
-              };
-              foldersToStore.push({
-                externalFolderId: child.id,
-                displayName: child.displayName,
-                canonicalFolder: parentCanonical, // Inherit from parent
-                parentFolderId: parentFolder.id,
-                childFolderCount: child.childFolderCount || 0,
-              });
-            }
-          } else {
-            console.warn(`⚠️ Failed to fetch children for ${parentFolder.displayName}: ${childResponse.status}`);
-          }
         }
 
         console.log(`📁 Total folders loaded: ${Object.keys(folderMap).length} (including subfolders)`);
-        console.log(`📁 Folders to store: ${foldersToStore.length}`);
+        console.log(`📁 Folders to store (before dedup): ${foldersToStore.length}`);
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // DEDUPE: Keep first occurrence (top-level) if folder appears multiple times
+        // ═══════════════════════════════════════════════════════════════════════════
+        // A folder might be returned both at top-level AND as a child via recursion.
+        // We keep the FIRST entry (top-level with parentFolderId=undefined) so it
+        // appears in the custom section, not hidden under Inbox.
+        // ═══════════════════════════════════════════════════════════════════════════
+        const seenFolderIds = new Set<string>();
+        const dedupedFolders = foldersToStore.filter(f => {
+          if (seenFolderIds.has(f.externalFolderId)) {
+            console.log(`📁 Dedup: Skipping duplicate ${f.displayName} (keeping first entry)`);
+            return false;
+          }
+          seenFolderIds.add(f.externalFolderId);
+          return true;
+        });
+        console.log(`📁 Folders to store (after dedup): ${dedupedFolders.length}`);
 
         // Store folders in database
-        if (foldersToStore.length > 0) {
+        if (dedupedFolders.length > 0) {
           console.log('📁 Calling storeOutlookFolders mutation...');
           try {
             await ctx.runMutation(api.productivity.email.outlook.storeOutlookFolders, {
               userId: args.userId,
-              folders: foldersToStore,
+              folders: dedupedFolders,
             });
             console.log('📁 storeOutlookFolders completed successfully');
           } catch (mutationError) {
@@ -579,7 +675,14 @@ export const syncOutlookMessages = action({
       }
 
       // ═══════════════════════════════════════════════════════════════════════
-      // STEP 2: Per-folder delta sync (incremental updates)
+      // STEP 2: TWO-PHASE SYNC
+      // ═══════════════════════════════════════════════════════════════════════
+      //
+      // Phase A (initialSyncComplete=false): Full history via /messages API
+      // Phase B (initialSyncComplete=true): Incremental via /messages/delta API
+      //
+      // Delta API only returns recent activity (~50 messages per folder).
+      // Initial sync MUST use standard /messages endpoint for full history.
       // ═══════════════════════════════════════════════════════════════════════
 
       // Get syncable folders
@@ -588,15 +691,8 @@ export const syncOutlookMessages = action({
         { userId: args.userId }
       );
 
-      // SURGICAL TEST #3 — count folders that qualify for sync
-      console.log('📁 FOLDERS ELIGIBLE FOR SYNC', JSON.stringify({
-        syncableFolders: syncableFolders.length,
-        folderNames: syncableFolders.map(f => f.displayName),
-      }));
-
       if (syncableFolders.length === 0) {
         console.log('⚠️ No syncable folders found - folders may not have been created yet');
-        // Release lock and return early
         await ctx.runMutation(api.productivity.email.outlook.releaseSyncLock, {
           userId: args.userId,
           success: false,
@@ -605,11 +701,18 @@ export const syncOutlookMessages = action({
         return { success: false, error: 'No syncable folders found' };
       }
 
-      console.log(`📁 Syncing ${syncableFolders.length} folders: ${syncableFolders.map(f => f.displayName).join(', ')}`);
+      // Check if initial sync is complete
+      const syncStatus = await ctx.runQuery(
+        api.productivity.email.outlook.getAccountInitialSyncStatus,
+        { userId: args.userId }
+      );
+
+      const initialSyncComplete = syncStatus?.initialSyncComplete ?? false;
+
+      console.log(`📁 Syncing ${syncableFolders.length} folders (initialSyncComplete: ${initialSyncComplete})`);
+      console.log(`📁 Folders: ${syncableFolders.map(f => f.displayName).join(', ')}`);
 
       // Microsoft Graph message fields to request
-      // NOTE: 'body' excluded - bodies fetched on-demand via bodyCache.getEmailBody
-      // This prevents 1 storage blob per message during sync
       const MESSAGE_FIELDS = [
         'id',
         'conversationId',
@@ -624,150 +727,235 @@ export const syncOutlookMessages = action({
         'isRead',
         'isDraft',
         'webLink',
-        'bodyPreview', // Used for snippet display in list view
+        'bodyPreview',
         'inferenceClassification',
         'flag',
         'parentFolderId',
         'categories',
       ].join(',');
 
-      // SURGICAL TEST #1 — confirm message sync loop is entered
-      console.log('🟢 ABOUT TO SYNC MESSAGES', JSON.stringify({
-        foldersToSync: syncableFolders.map(f => ({
-          name: f.displayName,
-          id: f.externalFolderId,
-          canonical: f.canonicalFolder,
-          hasDelta: Boolean(f.deltaToken && f.deltaToken.length > 0),
-        })),
-      }));
+      if (!initialSyncComplete) {
+        // ═══════════════════════════════════════════════════════════════════
+        // PHASE A: INITIAL HISTORICAL SYNC
+        // Uses /messages endpoint (NOT delta) to fetch ALL messages
+        // ═══════════════════════════════════════════════════════════════════
+        console.log('🅰️ PHASE A: Initial historical sync starting...');
 
-      // Sync each folder using delta
-      for (const folder of syncableFolders) {
-        // SURGICAL TEST #2 — confirm delta state for this folder
-        const hasDelta = Boolean(folder.deltaToken && folder.deltaToken.length > 0);
-        console.log('🔍 DELTA STATE', JSON.stringify({
-          folder: folder.displayName,
-          deltaToken: folder.deltaToken ? `${folder.deltaToken.substring(0, 50)}...` : null,
-          hasDelta,
-        }));
-        let folderMessages = 0;
-        let folderPages = 0;
+        for (const folder of syncableFolders) {
+          let folderMessages = 0;
+          let folderPages = 0;
 
-        // DIAGNOSTIC: Get folder message count from Microsoft
-        const countResponse = await fetch(
-          `https://graph.microsoft.com/v1.0/me/mailFolders/${folder.externalFolderId}?$select=totalItemCount`,
-          {
-            headers: {
-              Authorization: `Bearer ${tokens.accessToken}`,
-              'Content-Type': 'application/json',
-            },
+          // Get folder message count from Microsoft
+          const countResponse = await fetch(
+            `https://graph.microsoft.com/v1.0/me/mailFolders/${folder.externalFolderId}?$select=totalItemCount`,
+            {
+              headers: {
+                Authorization: `Bearer ${tokens.accessToken}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          let expectedCount = 0;
+          if (countResponse.ok) {
+            const countData = await countResponse.json() as { totalItemCount?: number };
+            expectedCount = countData.totalItemCount ?? 0;
+            console.log(`📊 ${folder.displayName}: Microsoft says ${expectedCount} items`);
           }
-        );
-        if (countResponse.ok) {
-          const countData = await countResponse.json() as { totalItemCount?: number };
-          console.log(`📊 ${folder.displayName}: Microsoft says ${countData.totalItemCount ?? 'unknown'} items`);
-        }
 
-        // Determine starting URL based on whether we have a delta token
-        let nextUrl: string | null;
-
-        // CRITICAL: Only treat as delta if token exists AND is non-empty
-        const validDeltaToken = folder.deltaToken && folder.deltaToken.length > 0;
-
-        if (validDeltaToken) {
-          // Incremental sync: use existing delta token
-          console.log(`🔄 Delta sync for ${folder.displayName} (using stored deltaLink)`);
-          // We've validated validDeltaToken is truthy, so deltaToken exists and is non-empty
-          nextUrl = folder.deltaToken as string;
-        } else {
-          // Initial sync: start fresh delta query for this folder
-          console.log(`📥 Initial delta sync for ${folder.displayName}`);
-          nextUrl =
-            `https://graph.microsoft.com/v1.0/me/mailFolders/${folder.externalFolderId}/messages/delta?` +
+          // Phase A: Use standard /messages endpoint with ordering
+          // This returns ALL messages, not just recent changes
+          let nextUrl: string | null =
+            `https://graph.microsoft.com/v1.0/me/mailFolders/${folder.externalFolderId}/messages?` +
             new URLSearchParams({
               $select: MESSAGE_FIELDS,
+              $orderby: 'receivedDateTime desc',
               $top: String(BATCH_SIZE),
             });
-        }
 
-        // Paginate through delta results
-        while (nextUrl) {
-          const response: Response = await fetch(nextUrl, {
-            headers: {
-              Authorization: `Bearer ${tokens.accessToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
+          console.log(`📥 Phase A: Full history sync for ${folder.displayName}`);
 
-          if (!response.ok) {
-            const errorText: string = await response.text();
-            console.error(`❌ Delta sync error for ${folder.displayName}:`, errorText);
+          // Track all message IDs we receive from Microsoft for stale cleanup
+          const validMessageIds: string[] = [];
 
-            // If delta token is invalid/expired, clear it and retry with full sync
-            if (response.status === 410 || errorText.includes('SyncStateNotFound')) {
-              console.log(`🔄 Delta token expired for ${folder.displayName}, clearing...`);
-              await ctx.runMutation(api.productivity.email.outlook.saveFolderDeltaToken, {
-                folderId: folder.externalFolderId,
-                deltaToken: '', // Clear the token
-              });
+          // Paginate through ALL messages
+          while (nextUrl) {
+            const response: Response = await fetch(nextUrl, {
+              headers: {
+                Authorization: `Bearer ${tokens.accessToken}`,
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (!response.ok) {
+              const errorText: string = await response.text();
+              console.error(`❌ Phase A sync error for ${folder.displayName}:`, errorText);
+              throw new Error(`Phase A page fetch failed for ${folder.displayName}: ${response.status} - ${errorText.substring(0, 200)}`);
             }
 
-            // Skip this folder but continue with others
-            break;
+            const data = (await response.json()) as {
+              value: Array<{ id: string }>;
+              '@odata.nextLink'?: string;
+            };
+
+            const messages = data.value;
+            folderPages++;
+            pagesProcessed++;
+
+            // Collect message IDs for stale cleanup
+            for (const msg of messages) {
+              if (msg.id) validMessageIds.push(msg.id);
+            }
+
+            console.log(`📨 ${folder.displayName} page ${folderPages}: ${messages.length} messages (total so far: ${folderMessages + messages.length})`);
+
+            if (messages.length > 0) {
+              await ctx.runMutation(api.productivity.email.outlook.storeOutlookMessages, {
+                userId: args.userId,
+                messages,
+                bodyStorageMap: {},
+                folderMap,
+              });
+
+              folderMessages += messages.length;
+              totalMessages += messages.length;
+            }
+
+            // Follow pagination
+            if (data['@odata.nextLink']) {
+              nextUrl = data['@odata.nextLink'];
+            } else {
+              nextUrl = null; // Done with this folder
+            }
+
+            // Safety valve: prevent infinite loops (500 pages = ~25,000 messages per folder)
+            if (folderPages >= 500) {
+              console.log(`⚠️ Reached 500 pages limit for ${folder.displayName}`);
+              break;
+            }
           }
 
-          const data = (await response.json()) as {
-            value: unknown[];
-            '@odata.nextLink'?: string;
-            '@odata.deltaLink'?: string;
-          };
+          // Remove stale messages that are in our DB but not in Microsoft anymore
+          await ctx.runMutation(api.productivity.email.outlook.removeStaleMessages, {
+            userId: args.userId,
+            folderId: folder.externalFolderId,
+            validMessageIds,
+          });
 
-          const messages: unknown[] = data.value;
-          folderPages++;
-          pagesProcessed++;
-
-          console.log(`📨 ${folder.displayName} page ${folderPages}: ${messages.length} messages`);
-
-          if (messages.length > 0) {
-            // Store messages (bodies fetched on-demand via bodyCache.getEmailBody)
-            await ctx.runMutation(api.productivity.email.outlook.storeOutlookMessages, {
-              userId: args.userId,
-              messages,
-              bodyStorageMap: {}, // No bodies stored during sync - fetched on-demand
-              folderMap,
-            });
-
-            folderMessages += messages.length;
-            totalMessages += messages.length;
-          }
-
-          // Check for next page or delta link
-          if (data['@odata.nextLink']) {
-            // More pages to fetch
-            nextUrl = data['@odata.nextLink'];
-          } else if (data['@odata.deltaLink']) {
-            // Got deltaLink - save it for next sync
-            console.log(`💾 Storing deltaLink for ${folder.displayName}`);
-            await ctx.runMutation(api.productivity.email.outlook.saveFolderDeltaToken, {
-              folderId: folder.externalFolderId,
-              deltaToken: data['@odata.deltaLink'],
-            });
-            nextUrl = null; // Done with this folder
-          } else {
-            nextUrl = null;
-          }
-
-          // Safety valve per folder (prevent infinite loops)
-          if (folderPages >= 50) {
-            console.log(`⚠️ Reached 50 pages limit for ${folder.displayName}`);
-            break;
-          }
+          console.log(`✅ ${folder.displayName}: Phase A SYNCED ${folderMessages}/${expectedCount} messages across ${folderPages} pages`);
         }
 
-        console.log(`✅ ${folder.displayName}: SYNCED ${folderMessages} messages across ${folderPages} pages`);
-      }
+        // All folders synced successfully - mark initial sync complete
+        await ctx.runMutation(api.productivity.email.outlook.markInitialSyncComplete, {
+          userId: args.userId,
+        });
 
-      console.log(`✅ Delta sync complete: ${totalMessages} messages across ${pagesProcessed} pages`);
+        console.log(`✅ PHASE A COMPLETE: ${totalMessages} messages across ${pagesProcessed} pages`);
+        console.log(`🎉 Initial sync complete - future syncs will use delta API`);
+
+      } else {
+        // ═══════════════════════════════════════════════════════════════════
+        // PHASE B: INCREMENTAL DELTA SYNC
+        // Uses /messages/delta endpoint to fetch only changes since last sync
+        // ═══════════════════════════════════════════════════════════════════
+        console.log('🅱️ PHASE B: Incremental delta sync starting...');
+
+        for (const folder of syncableFolders) {
+          const hasDelta = Boolean(folder.deltaToken && folder.deltaToken.length > 0);
+          let folderMessages = 0;
+          let folderPages = 0;
+
+          // Determine starting URL
+          let nextUrl: string | null;
+
+          if (hasDelta) {
+            // Use existing delta token
+            console.log(`🔄 Delta sync for ${folder.displayName} (using stored deltaLink)`);
+            nextUrl = folder.deltaToken as string;
+          } else {
+            // First delta sync for this folder - start fresh
+            console.log(`📥 Initial delta for ${folder.displayName}`);
+            nextUrl =
+              `https://graph.microsoft.com/v1.0/me/mailFolders/${folder.externalFolderId}/messages/delta?` +
+              new URLSearchParams({
+                $select: MESSAGE_FIELDS,
+                $top: String(BATCH_SIZE),
+              });
+          }
+
+          // Paginate through delta results
+          while (nextUrl) {
+            const response: Response = await fetch(nextUrl, {
+              headers: {
+                Authorization: `Bearer ${tokens.accessToken}`,
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (!response.ok) {
+              const errorText: string = await response.text();
+              console.error(`❌ Delta sync error for ${folder.displayName}:`, errorText);
+
+              if (response.status === 410 || errorText.includes('SyncStateNotFound')) {
+                console.log(`🔄 Delta token expired for ${folder.displayName}, clearing...`);
+                await ctx.runMutation(api.productivity.email.outlook.saveFolderDeltaToken, {
+                  folderId: folder.externalFolderId,
+                  deltaToken: '',
+                });
+              }
+
+              throw new Error(`Delta page fetch failed for ${folder.displayName}: ${response.status} - ${errorText.substring(0, 200)}`);
+            }
+
+            const data = (await response.json()) as {
+              value: unknown[];
+              '@odata.nextLink'?: string;
+              '@odata.deltaLink'?: string;
+            };
+
+            const messages: unknown[] = data.value;
+            folderPages++;
+            pagesProcessed++;
+
+            console.log(`📨 ${folder.displayName} delta page ${folderPages}: ${messages.length} messages`);
+
+            if (messages.length > 0) {
+              await ctx.runMutation(api.productivity.email.outlook.storeOutlookMessages, {
+                userId: args.userId,
+                messages,
+                bodyStorageMap: {},
+                folderMap,
+              });
+
+              folderMessages += messages.length;
+              totalMessages += messages.length;
+            }
+
+            // Check for next page or delta link
+            if (data['@odata.nextLink']) {
+              nextUrl = data['@odata.nextLink'];
+            } else if (data['@odata.deltaLink']) {
+              console.log(`💾 Storing deltaLink for ${folder.displayName}`);
+              await ctx.runMutation(api.productivity.email.outlook.saveFolderDeltaToken, {
+                folderId: folder.externalFolderId,
+                deltaToken: data['@odata.deltaLink'],
+              });
+              nextUrl = null;
+            } else {
+              nextUrl = null;
+            }
+
+            // Safety valve
+            if (folderPages >= 50) {
+              console.log(`⚠️ Reached 50 pages limit for ${folder.displayName}`);
+              break;
+            }
+          }
+
+          console.log(`✅ ${folder.displayName}: Delta synced ${folderMessages} new messages across ${folderPages} pages`);
+        }
+
+        console.log(`✅ PHASE B COMPLETE: ${totalMessages} new messages across ${pagesProcessed} pages`);
+      }
 
       // Release lock on success
       await ctx.runMutation(api.productivity.email.outlook.releaseSyncLock, {
@@ -824,6 +1012,7 @@ export const storeOutlookMessages = mutation({
     if (!account) throw new Error('Outlook account not found');
 
     let messagesStored = 0;
+    let messagesDeleted = 0;
     let foldersMigrated = 0;
     const folderDistribution: Record<string, number> = {};
     const now = Date.now();
@@ -832,6 +1021,37 @@ export const storeOutlookMessages = mutation({
     console.log(`📧 Processing ${args.messages.length} messages for account ${account._id}`);
 
     for (const message of args.messages) {
+      // ═══════════════════════════════════════════════════════════════════════
+      // HANDLE DELETIONS: Microsoft delta API sends @removed for deleted items
+      // ═══════════════════════════════════════════════════════════════════════
+      if (message['@removed']) {
+        const existing = await ctx.db
+          .query('productivity_email_Index')
+          .withIndex('by_external_message_id', (q) =>
+            q.eq('externalMessageId', message.id)
+          )
+          .filter((q) => q.eq(q.field('accountId'), account._id))
+          .first();
+
+        if (existing) {
+          // Delete associated body cache
+          const cacheEntry = await ctx.db
+            .query('productivity_email_BodyCache')
+            .withIndex('by_message', (q) => q.eq('messageId', message.id))
+            .first();
+          if (cacheEntry) {
+            await ctx.storage.delete(cacheEntry.storageId);
+            await ctx.db.delete(cacheEntry._id);
+          }
+
+          // Delete the message
+          await ctx.db.delete(existing._id);
+          messagesDeleted++;
+          console.log(`🗑️ Deleted message ${message.id?.substring(0, 30)}... (removed from Outlook)`);
+        }
+        continue;
+      }
+
       // Check if message already exists FOR THIS ACCOUNT
       // CRITICAL: Must filter by accountId to avoid cross-account collision
       const existing = await ctx.db
@@ -1037,16 +1257,81 @@ export const storeOutlookMessages = mutation({
     if (foldersMigrated > 0) {
       console.log(`🔄 Migrated ${foldersMigrated} existing messages to correct folders`);
     }
+    if (messagesDeleted > 0) {
+      console.log(`🗑️ Removed ${messagesDeleted} deleted messages from our DB`);
+    }
     if (messagesStored > 0) {
       const distribution = Object.entries(folderDistribution)
         .map(([folder, count]) => `${folder}:${count}`)
         .join(', ');
       console.log(`✅ Stored ${messagesStored} messages (${distribution})`);
-    } else {
+    } else if (messagesDeleted === 0) {
       console.log(`✅ No new messages to store`);
     }
 
-    return { messagesStored, foldersMigrated };
+    return { messagesStored, messagesDeleted, foldersMigrated };
+  },
+});
+
+/**
+ * Remove stale messages that no longer exist in Microsoft
+ *
+ * Called after Phase A sync completes for a folder.
+ * Compares our DB messages with the IDs we received from Microsoft,
+ * and deletes any messages we have that weren't in the sync.
+ */
+export const removeStaleMessages = mutation({
+  args: {
+    userId: v.id('admin_users'),
+    folderId: v.string(), // External folder ID
+    validMessageIds: v.array(v.string()), // All message IDs we received from Microsoft
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error('User not found');
+
+    const account = await ctx.db
+      .query('productivity_email_Accounts')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .filter((q) => q.eq(q.field('provider'), 'outlook'))
+      .first();
+
+    if (!account) throw new Error('Outlook account not found');
+
+    // Get all messages we have for this folder
+    const ourMessages = await ctx.db
+      .query('productivity_email_Index')
+      .withIndex('by_account', (q) => q.eq('accountId', account._id))
+      .filter((q) => q.eq(q.field('providerFolderId'), args.folderId))
+      .collect();
+
+    // Create set for O(1) lookup
+    const validSet = new Set(args.validMessageIds);
+    let deleted = 0;
+
+    for (const message of ourMessages) {
+      if (!validSet.has(message.externalMessageId)) {
+        // This message is in our DB but not in Microsoft - it was deleted
+        // Delete associated body cache first
+        const cacheEntry = await ctx.db
+          .query('productivity_email_BodyCache')
+          .withIndex('by_message', (q) => q.eq('messageId', message.externalMessageId))
+          .first();
+        if (cacheEntry) {
+          await ctx.storage.delete(cacheEntry.storageId);
+          await ctx.db.delete(cacheEntry._id);
+        }
+
+        await ctx.db.delete(message._id);
+        deleted++;
+      }
+    }
+
+    if (deleted > 0) {
+      console.log(`🗑️ Removed ${deleted} stale messages from folder ${args.folderId.substring(0, 20)}...`);
+    }
+
+    return { deleted };
   },
 });
 
@@ -1690,5 +1975,274 @@ export const resetSyncState = mutation({
 
     console.log(`🔄 Reset sync state: cleared ${cleared} delta tokens for ${account.emailAddress}`);
     return { success: true, tokensCleared: cleared };
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TWO-PHASE SYNC HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Get account's initial sync status
+ *
+ * Used to route between Phase A (full history) and Phase B (delta incremental)
+ */
+export const getAccountInitialSyncStatus = query({
+  args: {
+    userId: v.id('admin_users'),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return null;
+
+    const account = await ctx.db
+      .query('productivity_email_Accounts')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .filter((q) => q.eq(q.field('provider'), 'outlook'))
+      .first();
+
+    if (!account) return null;
+
+    return {
+      accountId: account._id,
+      initialSyncComplete: account.initialSyncComplete ?? false,
+    };
+  },
+});
+
+/**
+ * Reset initial sync flag to force Phase A (full history) to run again
+ *
+ * Use when:
+ * - Initial sync missed some folders (e.g., deeply nested subfolders)
+ * - Need to re-sync all messages from scratch
+ * - Testing changes to Phase A sync logic
+ */
+export const resetInitialSyncFlag = mutation({
+  args: {
+    userId: v.id('admin_users'),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error('User not found');
+
+    const account = await ctx.db
+      .query('productivity_email_Accounts')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .filter((q) => q.eq(q.field('provider'), 'outlook'))
+      .first();
+
+    if (!account) throw new Error('Outlook account not found');
+
+    // Reset the flag - next sync will run Phase A again
+    await ctx.db.patch(account._id, {
+      initialSyncComplete: false,
+      updatedAt: Date.now(),
+    });
+
+    // Also clear all folder delta tokens so Phase A starts fresh
+    const folders = await ctx.db
+      .query('productivity_email_Folders')
+      .withIndex('by_account', (q) => q.eq('accountId', account._id))
+      .collect();
+
+    for (const folder of folders) {
+      if (folder.deltaToken) {
+        await ctx.db.patch(folder._id, {
+          deltaToken: undefined,
+          deltaTokenUpdatedAt: undefined,
+        });
+      }
+    }
+
+    console.log(`🔄 Reset initialSyncComplete for ${account.emailAddress} - next sync will run Phase A`);
+    return { success: true, foldersCleared: folders.length };
+  },
+});
+
+/**
+ * DIAGNOSTIC: List all folders and their sync state
+ *
+ * Returns every folder with its canonical mapping and sync readiness.
+ * Use this to debug why certain folders aren't being synced.
+ */
+export const debugListAllFolders = query({
+  args: {
+    userId: v.id('admin_users'),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return { error: 'User not found' };
+
+    const account = await ctx.db
+      .query('productivity_email_Accounts')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .filter((q) => q.eq(q.field('provider'), 'outlook'))
+      .first();
+
+    if (!account) return { error: 'No Outlook account found' };
+
+    // Get ALL folders
+    const allFolders = await ctx.db
+      .query('productivity_email_Folders')
+      .withIndex('by_account', (q) => q.eq('accountId', account._id))
+      .collect();
+
+    // Excluded canonical folders
+    const EXCLUDED_CANONICAL = ['system'];
+
+    return {
+      accountId: account._id,
+      initialSyncComplete: account.initialSyncComplete ?? false,
+      totalFolders: allFolders.length,
+      folders: allFolders.map((f) => ({
+        displayName: f.displayName,
+        externalFolderId: f.externalFolderId.substring(0, 40) + '...',
+        canonicalFolder: f.canonicalFolder,
+        parentFolderId: f.parentFolderId ? f.parentFolderId.substring(0, 20) + '...' : null,
+        wouldBeSynced: !EXCLUDED_CANONICAL.includes(f.canonicalFolder),
+        hasDeltaToken: !!f.deltaToken,
+      })),
+    };
+  },
+});
+
+/**
+ * One-time fix: Update Clutter/Conversation History folders from SYSTEM to INBOX canonical
+ * This allows them to sync messages.
+ */
+export const fixConditionalFolderCanonicals = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const foldersToFix = ['clutter', 'conversation history'];
+    let fixed = 0;
+
+    const allFolders = await ctx.db.query('productivity_email_Folders').collect();
+
+    for (const folder of allFolders) {
+      const displayNameLower = folder.displayName.toLowerCase().trim();
+      if (foldersToFix.includes(displayNameLower) && folder.canonicalFolder === 'system') {
+        await ctx.db.patch(folder._id, { canonicalFolder: 'inbox' });
+        console.log(`✅ Fixed ${folder.displayName}: system → inbox`);
+        fixed++;
+      }
+    }
+
+    return { fixed, message: `Fixed ${fixed} folder(s)` };
+  },
+});
+
+/**
+ * Emergency: Reset stuck isSyncing flag on all accounts
+ */
+export const resetStuckSync = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const accounts = await ctx.db.query('productivity_email_Accounts').collect();
+    let reset = 0;
+
+    for (const account of accounts) {
+      if (account.isSyncing) {
+        await ctx.db.patch(account._id, { isSyncing: false });
+        console.log(`✅ Reset isSyncing for ${account.emailAddress}`);
+        reset++;
+      }
+    }
+
+    return { reset, message: `Reset ${reset} account(s)` };
+  },
+});
+
+/**
+ * Admin: Force full refetch - deletes folders, messages, and body cache
+ * Use this to fix stale data or when folder fetching parameters change.
+ */
+export const adminRefetchAllFolders = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const accounts = await ctx.db.query('productivity_email_Accounts').collect();
+    let accountsReset = 0;
+    let foldersDeleted = 0;
+    let messagesDeleted = 0;
+    let cacheDeleted = 0;
+
+    for (const account of accounts) {
+      // Reset initial sync flag so folders get refetched
+      await ctx.db.patch(account._id, { initialSyncComplete: false });
+      accountsReset++;
+
+      // Delete all messages for this account (table is productivity_email_Index)
+      const messages = await ctx.db
+        .query('productivity_email_Index')
+        .withIndex('by_account', (q) => q.eq('accountId', account._id))
+        .collect();
+
+      for (const message of messages) {
+        await ctx.db.delete(message._id);
+        messagesDeleted++;
+      }
+
+      // Delete all folders for this account
+      const folders = await ctx.db
+        .query('productivity_email_Folders')
+        .withIndex('by_account', (q) => q.eq('accountId', account._id))
+        .collect();
+
+      for (const folder of folders) {
+        await ctx.db.delete(folder._id);
+        foldersDeleted++;
+      }
+
+      console.log(`✅ Reset ${account.emailAddress}: ${folders.length} folders, ${messages.length} messages`);
+    }
+
+    // Delete all body cache entries (they reference old message IDs)
+    const cacheEntries = await ctx.db.query('productivity_email_BodyCache').collect();
+    for (const entry of cacheEntries) {
+      await ctx.db.delete(entry._id);
+      cacheDeleted++;
+    }
+
+    return {
+      accountsReset,
+      foldersDeleted,
+      messagesDeleted,
+      cacheDeleted,
+      message: `Full reset: ${accountsReset} accounts, ${foldersDeleted} folders, ${messagesDeleted} messages, ${cacheDeleted} cache entries`,
+    };
+  },
+});
+
+/**
+ * Mark initial historical sync as complete
+ *
+ * Called ONLY after Phase A (full /messages sync) completes successfully.
+ * After this, all subsequent syncs use Phase B (delta API).
+ *
+ * DOCTRINE: This flag must NEVER be set until all folders are fully synced.
+ */
+export const markInitialSyncComplete = mutation({
+  args: {
+    userId: v.id('admin_users'),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error('User not found');
+
+    const account = await ctx.db
+      .query('productivity_email_Accounts')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .filter((q) => q.eq(q.field('provider'), 'outlook'))
+      .first();
+
+    if (!account) throw new Error('Outlook account not found');
+
+    await ctx.db.patch(account._id, {
+      initialSyncComplete: true,
+      updatedAt: Date.now(),
+    });
+
+    console.log(`✅ Initial sync marked complete for ${account.emailAddress}`);
+    return { success: true };
   },
 });

@@ -33,6 +33,83 @@ import './email-normalize.css'; // Gmail/Outlook-style email body normalization
 // Standard canonical folder types (defined outside component - static)
 const STANDARD_FOLDERS = ['inbox', 'drafts', 'sent', 'archive', 'spam', 'trash'];
 
+// Types for folder rendering
+type FolderItem = {
+  _id: string;
+  externalFolderId: string;
+  displayName: string;
+  canonicalFolder: string;
+  parentFolderId?: string;
+  childFolderCount: number;
+  provider: 'outlook' | 'gmail';
+};
+
+// Recursive Subfolder Component
+function SubfolderTree({
+  folders,
+  getChildFolders,
+  selectedSubfolderId,
+  expandedFolders,
+  toggleFolderExpand,
+  onSelect,
+  depth = 0,
+}: {
+  folders: FolderItem[];
+  getChildFolders: (parentId: string) => FolderItem[];
+  selectedSubfolderId: string | null;
+  expandedFolders: Set<string>;
+  toggleFolderExpand: (key: string) => void;
+  onSelect: (folder: FolderItem) => void;
+  depth?: number;
+}) {
+  // Practical ceiling (1M) - accommodates anything Microsoft allows
+  if (depth > 1000000) return null;
+
+  return (
+    <div className="ft-email__subfolders" style={{ paddingLeft: depth > 0 ? 'var(--prod-space-xl)' : undefined }}>
+      {folders.map((folder) => {
+        const children = getChildFolders(folder.externalFolderId);
+        const hasChildren = children.length > 0;
+        const expandKey = `sub:${folder.externalFolderId}`;
+        const isExpanded = expandedFolders.has(expandKey);
+
+        return (
+          <div key={folder._id} className="ft-email__subfolder-group">
+            <div
+              className={`ft-email__subfolder ${selectedSubfolderId === folder.externalFolderId ? 'ft-email__subfolder--selected' : ''}`}
+              title={folder.displayName}
+              onClick={() => onSelect(folder)}
+            >
+              {hasChildren && (
+                <span
+                  className={`ft-email__folder-chevron ${isExpanded ? 'ft-email__folder-chevron--expanded' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); toggleFolderExpand(expandKey); }}
+                >
+                  ›
+                </span>
+              )}
+              <span className="ft-email__subfolder-icon">📁</span>
+              <span className="ft-email__subfolder-label">{folder.displayName}</span>
+            </div>
+            {/* Recursive children */}
+            {hasChildren && isExpanded && (
+              <SubfolderTree
+                folders={children}
+                getChildFolders={getChildFolders}
+                selectedSubfolderId={selectedSubfolderId}
+                expandedFolders={expandedFolders}
+                toggleFolderExpand={toggleFolderExpand}
+                onSelect={onSelect}
+                depth={depth + 1}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /** Get time bucket for grouping */
 function getTimeBucket(timestamp: number): string {
   const date = new Date(timestamp);
@@ -376,7 +453,8 @@ export function EmailConsole() {
 
   // Build folder tree: group subfolders by their parent's canonical type
   // Also capture custom root-level folders (like Fyxer AI folders)
-  const folderTree = useMemo(() => {
+  // Build folder hierarchy with parent-child relationships
+  const { folderTree, getChildFolders } = useMemo(() => {
     const tree: Record<string, typeof allFolders> = {
       inbox: [],
       drafts: [],
@@ -384,23 +462,82 @@ export function EmailConsole() {
       archive: [],
       spam: [],
       trash: [],
-      custom: [], // Root-level custom folders (e.g., Fyxer AI)
+      custom: [],
     };
 
+    // Conditional folders - only show when they have emails (like Outbox in Outlook)
+    const CONDITIONAL_FOLDERS = ['clutter', 'conversation history', 'outbox'];
+
+    // Fyxer AI numbered folder pattern: "N: name" (e.g., "1: to respond", "8: marketing")
+    const FYXER_PATTERN = /^\d+:\s/;
+
+    // Step 1: Count messages per folder (by externalFolderId)
+    const folderMessageCounts = new Map<string, number>();
+    for (const message of allMessages) {
+      if (message.providerFolderId) {
+        const count = folderMessageCounts.get(message.providerFolderId) || 0;
+        folderMessageCounts.set(message.providerFolderId, count + 1);
+      }
+    }
+
+    // Step 2: Find ROOT canonical folders (no parentFolderId)
+    const rootFolderIds: Record<string, string> = {};
+    for (const folder of allFolders) {
+      if (!folder.parentFolderId && STANDARD_FOLDERS.includes(folder.canonicalFolder || '')) {
+        rootFolderIds[folder.canonicalFolder!] = folder.externalFolderId;
+      }
+    }
+
+    // Step 3: Build parent → children lookup
+    const childrenMap = new Map<string, typeof allFolders>();
     for (const folder of allFolders) {
       if (folder.parentFolderId) {
-        // This is a subfolder - add to its canonical folder's children
+        const siblings = childrenMap.get(folder.parentFolderId) || [];
+        siblings.push(folder);
+        childrenMap.set(folder.parentFolderId, siblings);
+      }
+    }
+
+    // Helper: get children of a folder by its externalFolderId
+    const getChildFolders = (parentExternalId: string): typeof allFolders => {
+      return childrenMap.get(parentExternalId) || [];
+    };
+
+    // Step 4: Categorize folders
+    for (const folder of allFolders) {
+      const displayNameLower = folder.displayName.toLowerCase().trim();
+      const isFyxerFolder = FYXER_PATTERN.test(folder.displayName);
+      const isConditional = CONDITIONAL_FOLDERS.includes(displayNameLower);
+      const messageCount = folderMessageCounts.get(folder.externalFolderId) || 0;
+
+      // Conditional folders: only show if they have emails
+      if (isConditional && messageCount === 0) continue;
+
+      // Conditional folders with emails go to custom section (below divider)
+      if (isConditional && messageCount > 0) {
+        tree.custom.push(folder);
+        continue;
+      }
+
+      // Fyxer folders ALWAYS go to custom section
+      if (isFyxerFolder) {
+        tree.custom.push(folder);
+        continue;
+      }
+
+      if (folder.parentFolderId) {
+        // This is a subfolder - only add DIRECT children of canonical roots
         const canonical = folder.canonicalFolder || 'system';
-        if (canonical in tree) {
+        const rootId = rootFolderIds[canonical];
+
+        // Only add if this folder's parent IS the root canonical folder
+        if (rootId && folder.parentFolderId === rootId && canonical in tree) {
           tree[canonical].push(folder);
         }
+        // Grandchildren (like Content → TEST) are accessed via getChildFolders()
       } else {
-        // Root-level folder - check if it's a custom/other folder
+        // Root-level folder - check if it's a custom folder
         const canonical = folder.canonicalFolder || '';
-
-        // Include any folder that's not a standard canonical folder
-        // This includes: Fyxer folders, Outlook system folders (Clutter, etc.)
-        // Better to show everything than risk orphaning emails
         if (!STANDARD_FOLDERS.includes(canonical)) {
           tree.custom.push(folder);
         }
@@ -410,8 +547,8 @@ export function EmailConsole() {
     // Sort custom folders by display name (preserves Fyxer's numbered order)
     tree.custom.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-    return tree;
-  }, [allFolders]);
+    return { folderTree: tree, getChildFolders };
+  }, [allFolders, allMessages]);
 
   // Compute folder unread counts (count unread messages)
   const folderCounts = useMemo(() => {
@@ -599,19 +736,14 @@ export function EmailConsole() {
               )}
             </div>
             {expandedFolders.has('inbox') && folderTree.inbox.length > 0 && (
-              <div className="ft-email__subfolders">
-                {folderTree.inbox.map((subfolder) => (
-                  <div
-                    key={subfolder._id}
-                    className={`ft-email__subfolder ${selectedSubfolderId === subfolder.externalFolderId ? 'ft-email__subfolder--selected' : ''}`}
-                    title={subfolder.displayName}
-                    onClick={() => handleSubfolderSelect(subfolder)}
-                  >
-                    <span className="ft-email__subfolder-icon">📁</span>
-                    <span className="ft-email__subfolder-label">{subfolder.displayName}</span>
-                  </div>
-                ))}
-              </div>
+              <SubfolderTree
+                folders={folderTree.inbox}
+                getChildFolders={getChildFolders}
+                selectedSubfolderId={selectedSubfolderId}
+                expandedFolders={expandedFolders}
+                toggleFolderExpand={toggleFolderExpand}
+                onSelect={handleSubfolderSelect}
+              />
             )}
           </div>
 
@@ -660,19 +792,14 @@ export function EmailConsole() {
               )}
             </div>
             {expandedFolders.has('archive') && folderTree.archive.length > 0 && (
-              <div className="ft-email__subfolders">
-                {folderTree.archive.map((subfolder) => (
-                  <div
-                    key={subfolder._id}
-                    className={`ft-email__subfolder ${selectedSubfolderId === subfolder.externalFolderId ? 'ft-email__subfolder--selected' : ''}`}
-                    title={subfolder.displayName}
-                    onClick={() => handleSubfolderSelect(subfolder)}
-                  >
-                    <span className="ft-email__subfolder-icon">📁</span>
-                    <span className="ft-email__subfolder-label">{subfolder.displayName}</span>
-                  </div>
-                ))}
-              </div>
+              <SubfolderTree
+                folders={folderTree.archive}
+                getChildFolders={getChildFolders}
+                selectedSubfolderId={selectedSubfolderId}
+                expandedFolders={expandedFolders}
+                toggleFolderExpand={toggleFolderExpand}
+                onSelect={handleSubfolderSelect}
+              />
             )}
           </div>
 

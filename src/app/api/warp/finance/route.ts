@@ -17,14 +17,29 @@
 import { readSessionCookie } from '@/fuse/hydration/session/cookie';
 
 export async function GET() {
-  // 🛡️ SID-9.1: Identity from FUSE session cookie
-  const session = await readSessionCookie();
-
-  if (!session || !session._id) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-
   try {
+    // 🛡️ SID-9.1: Identity from FUSE session cookie
+    const session = await readSessionCookie();
+
+    if (!session || !session._id) {
+      return Response.json({
+        businessProfile: null,
+        categories: [],
+        accounts: [],
+        transactions: [],
+        patterns: [],
+        customers: [],
+        quotes: [],
+        invoices: [],
+        suppliers: [],
+        purchases: [],
+        bills: [],
+        chartOfAccounts: [],
+        fixedAssets: [],
+        employees: [],
+        payrollRuns: []
+      });
+    }
     // 🔮 FUTURE: Add Convex queries when Finance domain has data
     // Use ConvexHttpClient with session._id for sovereign queries
 
@@ -49,6 +64,23 @@ export async function GET() {
     });
   } catch (error) {
     console.error('❌ WARP API: Failed to fetch finance data:', error);
-    return new Response('Internal Server Error', { status: 500 });
+    // Return empty data - WARP preloads should fail silently
+    return Response.json({
+      businessProfile: null,
+      categories: [],
+      accounts: [],
+      transactions: [],
+      patterns: [],
+      customers: [],
+      quotes: [],
+      invoices: [],
+      suppliers: [],
+      purchases: [],
+      bills: [],
+      chartOfAccounts: [],
+      fixedAssets: [],
+      employees: [],
+      payrollRuns: []
+    });
   }
 }

@@ -224,11 +224,21 @@ export const requestImmediateSync = mutation({
     let syncTriggered = 0;
     let skippedCooldown = 0;
 
+    // Manual refresh bypasses cooldown (explicit user action)
+    // Other intents (focus, reconnect) respect cooldown to prevent spam
+    const bypassCooldown = args.intent === 'manual';
+
     for (const account of accounts) {
-      // Check cooldown (prevent sync spam)
+      // Check cooldown (prevent sync spam) - manual bypasses this
       const lastSync = account.lastSyncAt || 0;
-      if (now - lastSync < MIN_SYNC_COOLDOWN) {
+      if (!bypassCooldown && now - lastSync < MIN_SYNC_COOLDOWN) {
         skippedCooldown++;
+        continue;
+      }
+
+      // For manual: don't trigger if already syncing (user will see spinner)
+      if (args.intent === 'manual' && account.isSyncing) {
+        console.log(`📧 Manual sync skipped - already syncing ${account.emailAddress}`);
         continue;
       }
 
