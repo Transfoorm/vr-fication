@@ -1,0 +1,20 @@
+/** ──────────────────────────────────────────────────────────────────────────────
+│  EMAIL BODY - Zero Interference Container                                    │
+│  /src/features/productivity/email-console/email-normalize.css                │
+│                                                                               │
+│  PHILOSOPHY: Render emails EXACTLY as the sender intended.                   │
+│  No overrides. No "normalization". No theme leakage.                         │
+│                                                                               │
+│  The container uses `all: initial` to create a complete isolation            │
+│  boundary between our app's styles and the email's HTML.                     │
+└────────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__message-body {
+  /* Reset ALL inherited styles - complete isolation from app theme */
+  all: initial;
+
+  /* Restore only structural properties needed for container */
+  display: block;
+  overflow-x: auto;
+  box-sizing: border-box;
+}

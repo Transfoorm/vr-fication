@@ -15,6 +15,48 @@ import { v } from "convex/values";
 import { internal } from "@/convex/_generated/api";
 
 /**
+ * Strip wrapper divs that were added by the old HTML normalizer.
+ * Old emails may have been stored with constraining wrapper elements.
+ * This cleans them up at read time.
+ *
+ * Detection: If the email starts with <div (not a table or doctype),
+ * and ends with </div>, and the inner content starts with a table/doctype,
+ * then it was likely wrapped.
+ */
+function stripLegacyWrappers(html: string): string {
+  const trimmed = html.trim();
+
+  // Most emails start with <!DOCTYPE, <html, or <table
+  // If it starts with <div and wraps everything, it's likely our wrapper
+  if (!trimmed.toLowerCase().startsWith('<div')) {
+    return html; // Not wrapped
+  }
+
+  // Check if this is a single wrapper div around the whole email
+  // Pattern: <div...>CONTENT</div> where CONTENT contains the real email
+  const wrapperPattern = /^<div[^>]*>([\s\S]*)<\/div>$/i;
+  const match = trimmed.match(wrapperPattern);
+
+  if (!match) {
+    return html; // Not a simple wrapper
+  }
+
+  const innerContent = match[1].trim();
+
+  // Verify the inner content looks like real email HTML
+  // (starts with doctype, html, head, body, table, or another structural element)
+  const looksLikeEmail = /^(<!DOCTYPE|<html|<head|<body|<table|<center)/i.test(innerContent);
+
+  if (looksLikeEmail) {
+    console.log('[Email] Stripped legacy wrapper div');
+    return innerContent;
+  }
+
+  // Inner content doesn't look like a full email, might be legit div structure
+  return html;
+}
+
+/**
  * 📄 GET EMAIL BODY (HTML Content)
  *
  * Reads email body HTML from Convex Storage server-side.
@@ -52,8 +94,11 @@ export const getEmailBody = action({
       return { htmlContent: null, contentType: "text/plain" };
     }
 
-    // Convert blob to text and return HTML content
-    const htmlContent = await blob.text();
+    // Convert blob to text
+    const rawHtml = await blob.text();
+
+    // Strip legacy wrappers that may have been added by old normalizer
+    const htmlContent = stripLegacyWrappers(rawHtml);
 
     return {
       htmlContent,

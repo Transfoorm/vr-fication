@@ -8,7 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { api } from '@/convex/_generated/api';
-import { fetchMutation } from 'convex/nextjs';
+import { fetchMutation, fetchQuery, fetchAction } from 'convex/nextjs';
 import type { Id } from '@/convex/_generated/dataModel';
 
 /**
@@ -115,6 +115,28 @@ export async function GET(request: NextRequest) {
     await fetchMutation(api.productivity.email.outlook.triggerOutlookSync, {
       userId, // Pass userId to sync function
     });
+
+    // Create webhook subscription for real-time notifications
+    // This happens in the background - don't block redirect on it
+    try {
+      const account = await fetchQuery(api.productivity.email.webhooks.getEmailAccountByUser, {
+        userId,
+      });
+
+      if (account) {
+        // Fire and forget - webhook creation is async and can fail gracefully
+        fetchAction(api.productivity.email.webhooks.createOutlookWebhookSubscription, {
+          accountId: account._id,
+          userId,
+        }).catch((err) => {
+          console.error('Failed to create webhook subscription:', err);
+          // Don't throw - user can still use polling fallback
+        });
+      }
+    } catch (webhookError) {
+      console.error('Error setting up webhook:', webhookError);
+      // Continue anyway - polling will still work
+    }
 
     // Redirect back to email console with success indicator
     return NextResponse.redirect(

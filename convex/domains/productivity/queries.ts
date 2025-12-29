@@ -201,6 +201,19 @@ export const listThreads = query({
         v.literal("none")
       )
     ),
+    folderFilter: v.optional(
+      v.union(
+        v.literal("inbox"),
+        v.literal("sent"),
+        v.literal("drafts"),
+        v.literal("archive"),
+        v.literal("spam"),
+        v.literal("trash"),
+        v.literal("outbox"),
+        v.literal("scheduled"),
+        v.literal("system")
+      )
+    ),
     limit: v.optional(v.number()), // Optional limit (default: all)
   },
   handler: async (ctx, args) => {
@@ -208,21 +221,39 @@ export const listThreads = query({
     const rank = user.rank || "crew";
     const currentUserEmail = user.email;
 
-    // Fetch all email index messages with rank-based scoping
+    // Fetch email messages with rank-based scoping and optional folder filter
     let allMessages;
     if (rank === "admiral") {
-      allMessages = await ctx.db
-        .query("productivity_email_Index")
-        .order("desc") // Most recent first
-        .collect();
+      if (args.folderFilter) {
+        allMessages = await ctx.db
+          .query("productivity_email_Index")
+          .withIndex("by_canonical_folder", (q) => q.eq("canonicalFolder", args.folderFilter))
+          .order("desc")
+          .collect();
+      } else {
+        allMessages = await ctx.db
+          .query("productivity_email_Index")
+          .order("desc")
+          .collect();
+      }
     } else {
       // 🛡️ SID-ORG: Use userId directly until orgs domain is implemented
       const orgId = user._id as string;
-      allMessages = await ctx.db
-        .query("productivity_email_Index")
-        .withIndex("by_org", (q) => q.eq("orgId", orgId))
-        .order("desc")
-        .collect();
+      if (args.folderFilter) {
+        // Filter by both org and folder
+        allMessages = await ctx.db
+          .query("productivity_email_Index")
+          .withIndex("by_canonical_folder", (q) => q.eq("canonicalFolder", args.folderFilter))
+          .filter((q) => q.eq(q.field("orgId"), orgId))
+          .order("desc")
+          .collect();
+      } else {
+        allMessages = await ctx.db
+          .query("productivity_email_Index")
+          .withIndex("by_org", (q) => q.eq("orgId", orgId))
+          .order("desc")
+          .collect();
+      }
     }
 
     // Group messages by thread
@@ -360,5 +391,112 @@ export const listEmailAccounts = query({
         .withIndex("by_user", (q) => q.eq("userId", user._id))
         .collect();
     }
+  },
+});
+
+/**
+ * 📊 GET EMAIL FOLDER COUNTS
+ *
+ * Returns thread counts per canonical folder.
+ * Used by email console sidebar to show folder badges.
+ *
+ * @returns Record of folder → thread count
+ */
+export const getEmailFolderCounts = query({
+  args: { callerUserId: v.id("admin_users") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+    const rank = user.rank || "crew";
+
+    // Fetch all messages
+    let allMessages;
+    if (rank === "admiral") {
+      allMessages = await ctx.db
+        .query("productivity_email_Index")
+        .collect();
+    } else {
+      const orgId = user._id as string;
+      allMessages = await ctx.db
+        .query("productivity_email_Index")
+        .withIndex("by_org", (q) => q.eq("orgId", orgId))
+        .collect();
+    }
+
+    // Group by thread and get latest message per thread
+    const threadMap = groupMessagesByThread(allMessages);
+
+    // Count threads per folder (based on latest message's folder)
+    const counts: Record<string, number> = {
+      inbox: 0,
+      sent: 0,
+      drafts: 0,
+      archive: 0,
+      spam: 0,
+      trash: 0,
+      outbox: 0,
+      scheduled: 0,
+      system: 0,
+    };
+
+    for (const [, messages] of threadMap) {
+      // Get latest message
+      const sorted = [...messages].sort((a, b) => a.receivedAt - b.receivedAt);
+      const latest = sorted[sorted.length - 1];
+      const folder = latest.canonicalFolder || 'inbox';
+
+      if (folder in counts) {
+        counts[folder]++;
+      } else {
+        counts.system++; // Unknown folders go to system
+      }
+    }
+
+    return counts;
+  },
+});
+
+/**
+ * 📁 LIST EMAIL FOLDERS (Folder Hierarchy)
+ *
+ * Returns all email folders for current user's accounts.
+ * Used to display expandable folder tree in sidebar.
+ *
+ * @returns Array of folders with hierarchy info
+ */
+export const listEmailFolders = query({
+  args: { callerUserId: v.id("admin_users") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserWithRank(ctx, args.callerUserId);
+
+    // Get user's email accounts
+    const accounts = await ctx.db
+      .query("productivity_email_Accounts")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    if (accounts.length === 0) {
+      return [];
+    }
+
+    // Get folders for all accounts
+    const allFolders = [];
+    for (const account of accounts) {
+      const folders = await ctx.db
+        .query("productivity_email_Folders")
+        .withIndex("by_account", (q) => q.eq("accountId", account._id))
+        .collect();
+      allFolders.push(...folders);
+    }
+
+    // Return folders with hierarchy info
+    return allFolders.map((f) => ({
+      _id: f._id,
+      externalFolderId: f.externalFolderId,
+      displayName: f.displayName,
+      canonicalFolder: f.canonicalFolder,
+      parentFolderId: f.parentFolderId,
+      childFolderCount: f.childFolderCount,
+      provider: f.provider,
+    }));
   },
 });

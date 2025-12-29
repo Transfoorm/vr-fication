@@ -654,6 +654,12 @@ export default defineSchema({
     /** Last sync error (if any) */
     lastSyncError: v.optional(v.string()),
 
+    // Sync lock (prevents parallel syncs)
+    /** When current sync started (null = not syncing) */
+    syncStartedAt: v.optional(v.number()),
+    /** Sync lock TTL in ms - auto-release after this (default: 5 minutes) */
+    syncLockTTL: v.optional(v.number()),
+
     // Provider-specific metadata (optional)
     /** Gmail: historyId for incremental sync */
     gmailHistoryId: v.optional(v.string()),
@@ -684,6 +690,51 @@ export default defineSchema({
     .index("by_email", ["emailAddress"])
     .index("by_status", ["status"])
     .index("by_next_sync", ["nextSyncAt"]),
+
+  /**
+   * 📁 EMAIL FOLDERS
+   *
+   * Stores folder hierarchy from email providers (Outlook, Gmail).
+   * Used to display expandable folder tree in sidebar.
+   *
+   * DOCTRINE:
+   * - Folders are synced from provider during email sync
+   * - Child folders inherit parent's canonical type for message routing
+   * - UI displays full hierarchy with expand/collapse
+   */
+  productivity_email_Folders: defineTable({
+    // Folder identity (required)
+    /** External folder ID from provider (GUID for Outlook) */
+    externalFolderId: v.string(),
+    /** User-visible folder name */
+    displayName: v.string(),
+    /** Canonical folder type (inbox, sent, drafts, etc.) */
+    canonicalFolder: v.string(),
+
+    // Hierarchy (optional - null for top-level folders)
+    /** Parent folder's external ID (null for top-level) */
+    parentFolderId: v.optional(v.string()),
+    /** Number of child folders */
+    childFolderCount: v.number(),
+
+    // Ownership (required)
+    /** Which email account this folder belongs to */
+    accountId: v.id("productivity_email_Accounts"),
+    /** Provider type (for provider-specific handling) */
+    provider: v.union(v.literal("gmail"), v.literal("outlook")),
+
+    // Delta sync (for incremental updates)
+    /** Microsoft Graph deltaLink for this folder */
+    deltaToken: v.optional(v.string()),
+    /** When delta token was last updated */
+    deltaTokenUpdatedAt: v.optional(v.number()),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_account", ["accountId"])
+    .index("by_external_id", ["externalFolderId"])
+    .index("by_parent", ["accountId", "parentFolderId"]),
 
   /**
    * 🧠 EMAIL SENDER CACHE
@@ -889,4 +940,55 @@ export default defineSchema({
     createdBy: v.id("admin_users"),
   }).index("by_org", ["orgId"])
     .index("by_scheduled_time", ["scheduledTime"]),
+
+  /**
+   * 🔔 WEBHOOK SUBSCRIPTIONS
+   *
+   * Stores Microsoft Graph webhook subscriptions for push notifications.
+   * When email arrives, Microsoft calls our endpoint instead of us polling.
+   *
+   * DOCTRINE:
+   * - Subscriptions expire after ~3 days (Microsoft limit)
+   * - Must renew before expiration via scheduled job
+   * - One subscription per email account
+   * - clientState used to verify notifications are from Microsoft
+   */
+  productivity_email_WebhookSubscriptions: defineTable({
+    // Subscription identity (required)
+    /** Microsoft Graph subscription ID (GUID) */
+    subscriptionId: v.string(),
+    /** Which email account this subscription monitors */
+    accountId: v.id("productivity_email_Accounts"),
+    /** Which user owns this account */
+    userId: v.id("admin_users"),
+
+    // Subscription config (required)
+    /** Resource being monitored (e.g., "me/messages") */
+    resource: v.string(),
+    /** Change types: created, updated, deleted */
+    changeTypes: v.array(v.string()),
+    /** Secret for verifying notifications */
+    clientState: v.string(),
+
+    // Lifecycle (required)
+    /** When subscription expires (must renew before this) */
+    expirationDateTime: v.number(),
+    /** Status of subscription */
+    status: v.union(
+      v.literal("active"),
+      v.literal("expired"),
+      v.literal("error")
+    ),
+    /** Last error message if status is error */
+    lastError: v.optional(v.string()),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    /** Last time we received a notification */
+    lastNotificationAt: v.optional(v.number()),
+  }).index("by_account", ["accountId"])
+    .index("by_subscription_id", ["subscriptionId"])
+    .index("by_expiration", ["expirationDateTime"])
+    .index("by_status", ["status"]),
 });

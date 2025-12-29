@@ -47,6 +47,12 @@ const EXCEPTION_FILES = new Set([
   'src/features/shell/UserButton/index.tsx',
   'src/features/shell/user-button/index.tsx',  // react-easy-crop requires style prop
 
+  // Email console (Dynamic Law - desktop-grade productivity surface)
+  // - Virtual list: @tanstack/react-virtual requires absolute positioning
+  // - Resizable grid: computed column widths from drag handles
+  // - Context menu: pointer-based coordinates for positioning
+  'src/features/productivity/email-console/index.tsx',
+
   // MirorAI star toggle (SVG particle circles need inline opacity:0 - CSS alone failed)
   'src/features/preferences/MirorAiTab/index.tsx',
   'src/features/preferences/miror-ai-tab/index.tsx',

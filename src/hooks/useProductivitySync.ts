@@ -21,6 +21,7 @@ import type {
   EmailAccount,
   EmailThread,
   EmailMessage,
+  EmailFolder,
   Participant,
 } from '@/features/productivity/email-console/types';
 
@@ -67,14 +68,20 @@ export function useProductivitySync(): void {
     callerUserId ? { callerUserId } : 'skip'
   );
 
+  // Email folders (hierarchical folder structure for sidebar)
+  const liveFolders = useQuery(
+    api.domains.productivity.queries.listEmailFolders,
+    callerUserId ? { callerUserId } : 'skip'
+  );
+
   // ═══════════════════════════════════════════════════════════════════════
   // 🔄 HYDRATION: Transform and sync to FUSE
   // ═══════════════════════════════════════════════════════════════════════
 
   useEffect(() => {
-    // Only hydrate when we have data from all three sources
+    // Only hydrate when we have data from all sources
     // This prevents partial hydration and race conditions
-    if (liveEmailAccounts && liveThreads && liveMessages) {
+    if (liveEmailAccounts && liveThreads && liveMessages && liveFolders) {
 
       // Transform accounts to FUSE format
       const accounts: EmailAccount[] = liveEmailAccounts.map((account) => ({
@@ -104,12 +111,14 @@ export function useProductivitySync(): void {
         // Additional fields from ThreadMetadata for display
         snippet: thread.snippet,
         latestFrom: thread.latestFrom,
+        canonicalFolder: thread.canonicalFolder,
       }));
 
       // Transform messages to FUSE format (Doc<productivity_email_Index> → EmailMessage)
       const messages: EmailMessage[] = liveMessages.map((msg) => ({
         _id: msg._id,
         externalThreadId: msg.externalThreadId,
+        subject: msg.subject,
         from: {
           name: msg.from.name,
           email: msg.from.email,
@@ -129,12 +138,26 @@ export function useProductivitySync(): void {
           explanation: msg.aiClassification.explanation,
           confidence: msg.aiClassification.confidence,
         } : undefined,
+        providerFolderId: msg.providerFolderId,
+        canonicalFolder: msg.canonicalFolder,
+        isRead: msg.isRead,
+      }));
+
+      // Transform folders to FUSE format
+      const folders: EmailFolder[] = liveFolders.map((folder) => ({
+        _id: folder._id,
+        externalFolderId: folder.externalFolderId,
+        displayName: folder.displayName,
+        canonicalFolder: folder.canonicalFolder,
+        parentFolderId: folder.parentFolderId,
+        childFolderCount: folder.childFolderCount,
+        provider: folder.provider as 'outlook' | 'gmail',
       }));
 
       // Hydrate FUSE with complete email data
       hydrateProductivity({
-        email: { accounts, threads, messages },
+        email: { accounts, threads, messages, folders },
       }, 'CONVEX_LIVE');
     }
-  }, [liveEmailAccounts, liveThreads, liveMessages, hydrateProductivity]);
+  }, [liveEmailAccounts, liveThreads, liveMessages, liveFolders, hydrateProductivity]);
 }

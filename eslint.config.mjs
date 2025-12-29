@@ -417,6 +417,7 @@ const eslintConfig = [
       "src/vr/form/Inline.tsx",      // Runtime layout
       "src/appshell/PageHeader.tsx",              // Runtime values
       "src/features/setup/flying-button/index.tsx", // CSS custom properties for dynamic positioning
+      "src/features/productivity/email-console/index.tsx", // Context menu dynamic positioning
     ],
     rules: {
       "react/forbid-dom-props": "off", // Allow inline styles in these exception files

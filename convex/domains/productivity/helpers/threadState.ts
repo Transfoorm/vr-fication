@@ -140,6 +140,8 @@ export interface ThreadMetadata {
   latestFrom: { name: string; email: string };
   participants: Array<{ name: string; email: string }>;
   hasUnread: boolean;
+  /** Canonical folder of latest message (inbox, sent, drafts, trash, spam, etc.) */
+  canonicalFolder: string;
 }
 
 export function computeThreadMetadata(
@@ -204,5 +206,6 @@ export function computeThreadMetadata(
     latestFrom: { name: latest.from.name, email: latest.from.email },
     participants: Array.from(participantMap.values()),
     hasUnread,
+    canonicalFolder: latest.canonicalFolder || 'inbox', // Default to inbox for legacy data
   };
 }

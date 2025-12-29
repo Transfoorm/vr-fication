@@ -102,7 +102,7 @@
 
 .ft-company-button-chevron {
   position: absolute;
-  bottom: 8px;
+  bottom: 11px;    /* 🟨 CHEVRON UP OR DOWN */
   right: 17px;
   width: var(--company-button-chevron-size);
   height: var(--company-button-chevron-size);

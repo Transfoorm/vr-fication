@@ -39,4 +39,26 @@ crons.interval(
   internal.productivity.email.sync.processEmailSyncQueue
 );
 
+// ═══════════════════════════════════════════════════════════════════════════
+// WEBHOOK RENEWAL CRON
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Renew expiring webhook subscriptions every hour
+ *
+ * Microsoft Graph webhooks expire after ~3 days (max 4230 minutes).
+ * This job checks for subscriptions expiring in the next 2 hours
+ * and renews them proactively.
+ *
+ * Why 1 hour:
+ * - Gives buffer before expiration
+ * - Handles any temporary API failures gracefully
+ * - Low overhead (only queries, no heavy processing)
+ */
+crons.interval(
+  'webhook-renewal-queue',
+  { hours: 1 },
+  internal.productivity.email.webhooks.processWebhookRenewalQueue
+);
+
 export default crons;

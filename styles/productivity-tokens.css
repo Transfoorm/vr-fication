@@ -109,8 +109,8 @@
   /* Background colors */
   --prod-bg-surface: #fff;                         /* Card/panel backgrounds */
   --prod-bg-hover: #f5f5f5;                        /* Hover states */
-  --prod-bg-selected: #e3f2fd;                     /* Selected items */
-  --prod-bg-selected-hover: #bbdefb;               /* Selected + hover */
+  --prod-bg-selected: #fef6f0;                     /* Selected items (warm cream) */
+  --prod-bg-selected-hover: #fdeee3;               /* Selected + hover (slightly warmer) */
   --prod-bg-section: #fafafa;                      /* Section headers */
   --prod-bg-section-hover: #f0f0f0;                /* Section header hover */
   --prod-bg-badge: #eee;                           /* Unselected badge background */
@@ -120,10 +120,11 @@
   --prod-border-normal: #ccc;                      /* Panel borders */
   --prod-border-hover: #aaa;                       /* Scrollbar thumb hover */
 
-  /* Selected state colors */
-  --prod-selected-text: #1976d2;                   /* Selected folder text */
-  --prod-selected-bg: #1976d2;                     /* Selected badge background */
+  /* Selected state colors (orange brand) */
+  --prod-selected-text: #e85d35;                   /* Selected folder text */
+  --prod-selected-bg: #f97550;                     /* Selected badge background (matches sidebar bracket) */
   --prod-selected-contrast: #fff;                  /* Text on selected background */
+  --prod-selected-indicator: #f97550;              /* Left bracket indicator */
 
 
   /* ─────────────────────────────────────────────────────────────────────────
