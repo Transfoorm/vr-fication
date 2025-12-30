@@ -266,7 +266,7 @@ export const handleOutlookNotification = internalAction({
 
     // Store the message using the existing sync infrastructure
     // We reuse storeOutlookMessages mutation but with a single message
-    await ctx.runMutation(api.productivity.email.outlook.storeOutlookMessages, {
+    await ctx.runMutation(api.productivity.email.outlookStore.storeOutlookMessages, {
       userId: subscription.userId,
       messages: [message],
       folderMap: {}, // Will be resolved from existing folders

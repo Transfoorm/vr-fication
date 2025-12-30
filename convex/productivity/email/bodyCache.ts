@@ -410,6 +410,31 @@ export const cleanupExpiredCache = internalMutation({
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * PURGE ALL BODY CACHE
+ *
+ * Emergency cleanup - deletes ALL body cache entries and blobs.
+ * Use when cache is disabled and orphaned blobs need cleanup.
+ */
+export const purgeAllBodyCache = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const entries = await ctx.db
+      .query('productivity_email_BodyCache')
+      .collect();
+
+    let deleted = 0;
+    for (const entry of entries) {
+      await ctx.storage.delete(entry.storageId);
+      await ctx.db.delete(entry._id);
+      deleted++;
+    }
+
+    console.log(`🗑️ Purged ALL body cache: ${deleted} entries deleted`);
+    return { deleted };
+  },
+});
+
+/**
  * GET CACHE STATS
  *
  * Returns cache statistics for a user's account.

@@ -187,8 +187,8 @@ export function EmailConsole() {
   const userId = user?.convexId as Id<'admin_users'> | undefined;
 
   // Email actions
-  const deleteMessage = useAction(api.productivity.email.outlook.deleteOutlookMessage);
-  const archiveMessage = useAction(api.productivity.email.outlook.archiveOutlookMessage);
+  const deleteMessage = useAction(api.productivity.email.outlookActions.deleteOutlookMessage);
+  const archiveMessage = useAction(api.productivity.email.outlookActions.archiveOutlookMessage);
 
   // Intent-based sync (triggers on focus, network, manual refresh)
   const { triggerManualSync, isSyncing } = useEmailSyncIntent();

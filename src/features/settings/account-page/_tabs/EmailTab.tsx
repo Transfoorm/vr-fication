@@ -54,7 +54,7 @@ export function EmailFields() {
   // Convex Mutations
   // ─────────────────────────────────────────────────────────────────────
   const updateUserSettings = useMutation(api.domains.settings.mutations.updateUserSettings);
-  const disconnectOutlook = useMutation(api.productivity.email.outlook.disconnectOutlookAccount);
+  const disconnectOutlook = useMutation(api.productivity.email.outlookDiagnostics.disconnectOutlookAccount);
 
   // ─────────────────────────────────────────────────────────────────────
   // Modal State (for email verification)

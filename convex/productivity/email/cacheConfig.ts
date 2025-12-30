@@ -28,7 +28,7 @@ export const CACHE_CONFIG = {
    * Dial up based on user feedback.
    * Prefetch still works at 0 (populates memory, not storage).
    */
-  maxBodiesPerAccount: 20,
+  maxBodiesPerAccount: 0, // DISABLED: Prefetch architecture needs redesign (fetch on click → prefetch during sync)
 
   /**
    * Maximum age before body is evicted (days).
