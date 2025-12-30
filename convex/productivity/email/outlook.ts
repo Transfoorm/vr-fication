@@ -864,9 +864,6 @@ export const syncOutlookMessages = action({
           let folderMessages = 0;
           let folderPages = 0;
 
-          // Track valid message IDs for stale cleanup (only for fresh delta)
-          const validMessageIds: string[] = [];
-
           // Determine starting URL
           let nextUrl: string | null;
 
@@ -921,16 +918,6 @@ export const syncOutlookMessages = action({
 
             console.log(`📨 ${folder.displayName} delta page ${folderPages}: ${messages.length} messages`);
 
-            // Collect message IDs for stale cleanup (only for fresh delta)
-            if (!hasDelta) {
-              for (const msg of messages) {
-                const m = msg as { id?: string; '@removed'?: unknown };
-                if (m.id && !m['@removed']) {
-                  validMessageIds.push(m.id);
-                }
-              }
-            }
-
             if (messages.length > 0) {
               await ctx.runMutation(api.productivity.email.outlook.storeOutlookMessages, {
                 userId: args.userId,
@@ -962,16 +949,6 @@ export const syncOutlookMessages = action({
               console.log(`⚠️ Reached 50 pages limit for ${folder.displayName}`);
               break;
             }
-          }
-
-          // For fresh delta (no existing token), clean up stale messages
-          // This handles folders added after initial sync completed
-          if (!hasDelta) {
-            await ctx.runMutation(api.productivity.email.outlook.removeStaleMessages, {
-              userId: args.userId,
-              folderId: folder.externalFolderId,
-              validMessageIds,
-            });
           }
 
           console.log(`✅ ${folder.displayName}: Delta synced ${folderMessages} new messages across ${folderPages} pages`);
