@@ -243,8 +243,12 @@ export const requestImmediateSync = mutation({
       }
 
       // Schedule immediate sync
+      // Manual refresh = full sync (all folders)
+      // Other intents (focus, reconnect, inbox_open) = inbox-only (fast background poll)
+      const syncMode = args.intent === 'manual' ? 'full' : 'inbox-only';
       await ctx.scheduler.runAfter(0, api.productivity.email.outlook.syncOutlookMessages, {
         userId: user._id,
+        syncMode,
       });
 
       // Update nextSyncAt to prevent duplicate triggers
@@ -346,9 +350,11 @@ export const processEmailSyncQueue = internalMutation({
       });
 
       // Trigger provider-specific sync action
+      // PHASE 1: Background cron uses inbox-only mode (fast, <2 seconds)
       if (account.provider === 'outlook') {
         await ctx.scheduler.runAfter(0, api.productivity.email.outlook.syncOutlookMessages, {
           userId: account.userId,
+          syncMode: 'inbox-only', // Background polling = inbox only
         });
         triggered++;
       } else if (account.provider === 'gmail') {

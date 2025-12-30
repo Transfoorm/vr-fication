@@ -653,8 +653,12 @@ export default defineSchema({
     syncFrequency: v.number(),
     /** Whether background sync is enabled */
     syncEnabled: v.boolean(),
-    /** Whether a sync is currently in progress (for UI spinner) */
+    /** Whether a USER-INITIATED sync is in progress (shows spinner) */
     isSyncing: v.optional(v.boolean()),
+    /** Whether BACKGROUND polling is in progress (invisible to UI) */
+    isBackgroundPolling: v.optional(v.boolean()),
+    /** When folder structure was last fetched (for caching) */
+    foldersCachedAt: v.optional(v.number()),
     /** Last sync error (if any) */
     lastSyncError: v.optional(v.string()),
     /**

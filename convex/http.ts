@@ -40,13 +40,15 @@ http.route({
     const validationToken = url.searchParams.get("validationToken");
 
     if (validationToken) {
-      console.log("🔔 Microsoft Graph webhook validation request received");
+      // URL decode the token (Microsoft sends URL-encoded tokens)
+      const decodedToken = decodeURIComponent(validationToken);
+      console.log(`🔔 Microsoft Graph webhook validation: received token (${validationToken.length} chars)`);
 
-      // Echo back the validation token as plain text
-      return new Response(validationToken, {
+      // Echo back the validation token as plain text (must match exactly what Microsoft sent)
+      return new Response(decodedToken, {
         status: 200,
         headers: {
-          "Content-Type": "text/plain",
+          "Content-Type": "text/plain; charset=utf-8",
         },
       });
     }

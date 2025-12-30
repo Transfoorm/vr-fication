@@ -53,6 +53,50 @@ export const createOutlookWebhookSubscription = action({
       throw new Error("No access token for email account");
     }
 
+    // ─────────────────────────────────────────────────────────────────────
+    // TOKEN REFRESH: Check if token is expired or expiring soon
+    // ─────────────────────────────────────────────────────────────────────
+    let accessToken = account.accessToken;
+    const now = Date.now();
+    const tokenExpiresSoon = (account.tokenExpiresAt || 0) < now + 5 * 60 * 1000;
+
+    if (tokenExpiresSoon && account.refreshToken) {
+      console.log(`🔔 Token expired/expiring, refreshing...`);
+      try {
+        const refreshResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            client_id: process.env.OUTLOOK_CLIENT_ID || '',
+            client_secret: process.env.OUTLOOK_CLIENT_SECRET || '',
+            refresh_token: account.refreshToken,
+            grant_type: 'refresh_token',
+            scope: 'https://graph.microsoft.com/.default offline_access',
+          }),
+        });
+
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          accessToken = refreshData.access_token;
+
+          // Update account with new tokens
+          await ctx.runMutation(internal.productivity.email.webhooks.updateAccountTokens, {
+            accountId: args.accountId,
+            accessToken: refreshData.access_token,
+            refreshToken: refreshData.refresh_token || account.refreshToken,
+            expiresAt: Date.now() + (refreshData.expires_in || 3600) * 1000,
+          });
+          console.log(`🔔 Token refreshed successfully`);
+        } else {
+          console.error(`🔔 Token refresh failed: ${refreshResponse.status}`);
+          throw new Error("Token refresh failed - user may need to reconnect Outlook");
+        }
+      } catch (refreshError) {
+        console.error(`🔔 Token refresh error:`, refreshError);
+        throw new Error("Token refresh failed - user may need to reconnect Outlook");
+      }
+    }
+
     // Check if subscription already exists
     const existingSubscription = await ctx.runQuery(
       api.productivity.email.webhooks.getSubscriptionByAccount,
@@ -95,7 +139,7 @@ export const createOutlookWebhookSubscription = action({
     const response = await fetch(`${GRAPH_API_BASE}/subscriptions`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${account.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(subscriptionPayload),
@@ -407,6 +451,31 @@ export const getSubscriptionByAccount = query({
   },
 });
 
+/**
+ * Debug: List all webhook subscriptions
+ */
+export const debugListAllSubscriptions = query({
+  args: {},
+  handler: async (ctx) => {
+    const subscriptions = await ctx.db
+      .query("productivity_email_WebhookSubscriptions")
+      .collect();
+
+    return {
+      count: subscriptions.length,
+      subscriptions: subscriptions.map((s) => ({
+        subscriptionId: s.subscriptionId?.substring(0, 20) + "...",
+        status: s.status,
+        expirationDateTime: new Date(s.expirationDateTime).toISOString(),
+        lastNotificationAt: s.lastNotificationAt
+          ? new Date(s.lastNotificationAt).toISOString()
+          : null,
+        createdAt: new Date(s.createdAt).toISOString(),
+      })),
+    };
+  },
+});
+
 export const getSubscriptionById = query({
   args: {
     subscriptionId: v.string(),
@@ -436,6 +505,26 @@ export const getExpiringSubscriptions = query({
 // ═══════════════════════════════════════════════════════════════════════════
 // INTERNAL MUTATIONS (for storing subscription data)
 // ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Update account tokens after refresh
+ */
+export const updateAccountTokens = internalMutation({
+  args: {
+    accountId: v.id("productivity_email_Accounts"),
+    accessToken: v.string(),
+    refreshToken: v.string(),
+    expiresAt: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.accountId, {
+      accessToken: args.accessToken,
+      refreshToken: args.refreshToken,
+      tokenExpiresAt: args.expiresAt,
+      updatedAt: Date.now(),
+    });
+  },
+});
 
 export const storeWebhookSubscription = internalMutation({
   args: {

@@ -454,7 +454,7 @@ export function EmailConsole() {
   // Build folder tree: group subfolders by their parent's canonical type
   // Also capture custom root-level folders (like Fyxer AI folders)
   // Build folder hierarchy with parent-child relationships
-  const { folderTree, getChildFolders } = useMemo(() => {
+  const { folderTree, getChildFolders, rootFolderIds } = useMemo(() => {
     const tree: Record<string, typeof allFolders> = {
       inbox: [],
       drafts: [],
@@ -547,10 +547,11 @@ export function EmailConsole() {
     // Sort custom folders by display name (preserves Fyxer's numbered order)
     tree.custom.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-    return { folderTree: tree, getChildFolders };
+    return { folderTree: tree, getChildFolders, rootFolderIds };
   }, [allFolders, allMessages]);
 
-  // Compute folder unread counts (count unread messages)
+  // Compute folder unread counts (count unread messages in ROOT folders only)
+  // This matches Microsoft's behavior: subfolder unreads don't count toward parent badge
   const folderCounts = useMemo(() => {
     const counts: Record<string, number> = {
       inbox: 0,
@@ -563,17 +564,26 @@ export function EmailConsole() {
 
     for (const message of allMessages) {
       if (message.isRead) continue; // Only count unread messages
-      const folder = message.canonicalFolder || 'inbox';
-      if (folder in counts) {
-        counts[folder]++;
+
+      // Count by providerFolderId to match root folder exactly
+      // This prevents subfolder emails from inflating parent folder badges
+      const folderId = message.providerFolderId;
+
+      // Check each canonical folder's root ID
+      for (const [canonical, rootId] of Object.entries(rootFolderIds)) {
+        if (folderId === rootId && canonical in counts) {
+          counts[canonical]++;
+          break;
+        }
       }
     }
 
     return counts;
-  }, [allMessages]);
+  }, [allMessages, rootFolderIds]);
 
   // Filter messages by selected folder (and subfolder if selected)
   // Sort by receivedAt descending (newest first)
+  // MATCHES MICROSOFT: Root folder click shows only root folder emails, not subfolders
   const messages = useMemo(() => {
     if (!allMessages.length) return allMessages;
 
@@ -582,19 +592,24 @@ export function EmailConsole() {
     if (selectedFolder === 'custom' && selectedSubfolderId) {
       // Custom folder - filter by providerFolderId
       filtered = allMessages.filter(m => m.providerFolderId === selectedSubfolderId);
+    } else if (selectedSubfolderId) {
+      // Subfolder selected - filter by specific providerFolderId
+      filtered = allMessages.filter(m => m.providerFolderId === selectedSubfolderId);
     } else {
-      // Standard folder - filter by canonical folder
-      filtered = allMessages.filter(m => (m.canonicalFolder || 'inbox') === selectedFolder);
-
-      // If a subfolder is selected, further filter by providerFolderId
-      if (selectedSubfolderId) {
-        filtered = filtered.filter(m => m.providerFolderId === selectedSubfolderId);
+      // Root canonical folder selected (no subfolder) - show only ROOT folder emails
+      // This matches Microsoft behavior: clicking Inbox shows only root Inbox, not subfolders
+      const rootFolderId = rootFolderIds[selectedFolder];
+      if (rootFolderId) {
+        filtered = allMessages.filter(m => m.providerFolderId === rootFolderId);
+      } else {
+        // Fallback to canonical folder if no root folder found
+        filtered = allMessages.filter(m => (m.canonicalFolder || 'inbox') === selectedFolder);
       }
     }
 
     // Sort by receivedAt descending (newest first)
     return filtered.sort((a, b) => b.receivedAt - a.receivedAt);
-  }, [allMessages, selectedFolder, selectedSubfolderId]);
+  }, [allMessages, selectedFolder, selectedSubfolderId, rootFolderIds]);
 
   // Build flat list of virtual items (headers + messages) for virtualization
   type VirtualItem =

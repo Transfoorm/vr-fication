@@ -205,7 +205,10 @@ export const storeOutlookTokens = mutation({
  * Returns true if lock acquired, false if another sync is running
  */
 export const acquireSyncLock = mutation({
-  args: { userId: v.id('admin_users') },
+  args: {
+    userId: v.id('admin_users'),
+    syncMode: v.optional(v.union(v.literal('full'), v.literal('inbox-only'))),
+  },
   handler: async (ctx, args): Promise<{ acquired: boolean; reason?: string }> => {
     const user = await ctx.db.get(args.userId);
     if (!user) return { acquired: false, reason: 'User not found' };
@@ -233,14 +236,19 @@ export const acquireSyncLock = mutation({
       console.log(`🔓 Stale lock released (${Math.round(lockAge / 1000)}s old)`);
     }
 
-    // Acquire lock and set isSyncing for UI
+    // PHASE 1: Separate UI flags for user-initiated vs background
+    // - isSyncing: User clicked refresh → show spinner, disable button
+    // - isBackgroundPolling: Cron/background → invisible, no UI blocking
+    const isUserInitiated = args.syncMode === 'full' || !args.syncMode;
+
     await ctx.db.patch(account._id, {
       syncStartedAt: now,
       syncLockTTL: LOCK_TTL,
-      isSyncing: true,
+      isSyncing: isUserInitiated ? true : undefined,
+      isBackgroundPolling: !isUserInitiated ? true : undefined,
     });
 
-    console.log('🔒 Sync lock acquired, isSyncing=true');
+    console.log(`🔒 Sync lock acquired (${isUserInitiated ? 'isSyncing' : 'isBackgroundPolling'}=true)`);
     return { acquired: true };
   },
 });
@@ -268,14 +276,15 @@ export const releaseSyncLock = mutation({
 
     const now = Date.now();
     await ctx.db.patch(account._id, {
-      syncStartedAt: undefined, // Release lock
-      isSyncing: false,         // UI spinner off
+      syncStartedAt: undefined,       // Release lock
+      isSyncing: false,               // User-initiated spinner off
+      isBackgroundPolling: false,     // Background flag off
       lastSyncAt: args.success ? now : account.lastSyncAt,
       lastSyncError: args.error,
       updatedAt: now,
     });
 
-    console.log(`🔓 Sync lock released, isSyncing=false (success: ${args.success})`);
+    console.log(`🔓 Sync lock released (success: ${args.success})`);
   },
 });
 
@@ -392,13 +401,16 @@ export const triggerOutlookSync = mutation({
 export const syncOutlookMessages = action({
   args: {
     userId: v.id('admin_users'), // User ID to sync for
+    syncMode: v.optional(v.union(v.literal('full'), v.literal('inbox-only'))), // Background = inbox-only, Manual = full
   },
   handler: async (ctx, args): Promise<{ success: boolean; messageCount?: number; pagesProcessed?: number; error?: string; skipped?: boolean }> => {
     // ═══════════════════════════════════════════════════════════════════════
     // STEP 0: Acquire sync lock (prevents parallel syncs)
     // ═══════════════════════════════════════════════════════════════════════
+    const syncMode = args.syncMode || 'full';
     const lockResult = await ctx.runMutation(api.productivity.email.outlook.acquireSyncLock, {
       userId: args.userId,
+      syncMode,
     });
 
     if (!lockResult.acquired) {
@@ -492,7 +504,22 @@ export const syncOutlookMessages = action({
       const BATCH_SIZE = 50; // Smaller batches to avoid Convex mutation size limits
 
       // ═══════════════════════════════════════════════════════════════════════
-      // STEP 1: Fetch folder list and store hierarchy
+      // PHASE 1 OPTIMIZATION: Skip folder fetch if cached and background polling
+      // ═══════════════════════════════════════════════════════════════════════
+      const FOLDER_CACHE_TTL = 60 * 60 * 1000; // 1 hour
+      const accountInfo = await ctx.runQuery(api.productivity.email.outlook.getAccountFolderCacheStatus, {
+        userId: args.userId,
+      });
+      const foldersCachedAt = accountInfo?.foldersCachedAt ?? 0;
+      const folderCacheAge = Date.now() - foldersCachedAt;
+      const shouldSkipFolderFetch = syncMode === 'inbox-only' && folderCacheAge < FOLDER_CACHE_TTL;
+
+      if (shouldSkipFolderFetch) {
+        console.log(`📁 Skipping folder fetch (cached ${Math.round(folderCacheAge / 1000)}s ago, mode=${syncMode})`);
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // STEP 1: Fetch folder list and store hierarchy (skip if cached)
       // ═══════════════════════════════════════════════════════════════════════
       const folderMap: Record<string, { displayName: string }> = {};
       const foldersToStore: Array<{
@@ -503,6 +530,8 @@ export const syncOutlookMessages = action({
         childFolderCount: number;
       }> = [];
 
+      // PHASE 1: Skip folder fetch if cached (for background polling)
+      if (!shouldSkipFolderFetch) {
       // Fetch top-level folders (includeHiddenFolders=true catches Clutter which is hidden)
       console.log('📁 Fetching Outlook folder list (including hidden)...');
       const foldersResponse = await fetch(
@@ -664,6 +693,11 @@ export const syncOutlookMessages = action({
               folders: dedupedFolders,
             });
             console.log('📁 storeOutlookFolders completed successfully');
+
+            // PHASE 1: Update folder cache timestamp
+            await ctx.runMutation(api.productivity.email.outlook.updateFolderCacheTimestamp, {
+              userId: args.userId,
+            });
           } catch (mutationError) {
             console.error('❌ storeOutlookFolders FAILED:', mutationError);
             throw mutationError;
@@ -673,6 +707,7 @@ export const syncOutlookMessages = action({
         const errorText = await foldersResponse.text();
         console.warn(`⚠️ Could not fetch folders (${foldersResponse.status}): ${errorText}`);
       }
+      } // End of !shouldSkipFolderFetch block
 
       // ═══════════════════════════════════════════════════════════════════════
       // STEP 2: TWO-PHASE SYNC
@@ -685,10 +720,11 @@ export const syncOutlookMessages = action({
       // Initial sync MUST use standard /messages endpoint for full history.
       // ═══════════════════════════════════════════════════════════════════════
 
-      // Get syncable folders
+      // Get syncable folders (inbox-only for background, full for manual)
+      // syncMode already defined at function entry (line 410)
       const syncableFolders = await ctx.runQuery(
         api.productivity.email.outlook.getSyncableFolders,
-        { userId: args.userId }
+        { userId: args.userId, syncMode }
       );
 
       if (syncableFolders.length === 0) {
@@ -856,8 +892,10 @@ export const syncOutlookMessages = action({
         // ═══════════════════════════════════════════════════════════════════
         // PHASE B: INCREMENTAL DELTA SYNC
         // Uses /messages/delta endpoint to fetch only changes since last sync
+        // PHASE 1 OPTIMIZATION: inbox-only mode means 1 folder, fast completion
         // ═══════════════════════════════════════════════════════════════════
-        console.log('🅱️ PHASE B: Incremental delta sync starting...');
+        const startTime = Date.now();
+        console.log(`🅱️ PHASE B: Incremental delta sync (${syncMode} mode, ${syncableFolders.length} folder(s))...`);
 
         for (const folder of syncableFolders) {
           const hasDelta = Boolean(folder.deltaToken && folder.deltaToken.length > 0);
@@ -954,7 +992,9 @@ export const syncOutlookMessages = action({
           console.log(`✅ ${folder.displayName}: Delta synced ${folderMessages} new messages across ${folderPages} pages`);
         }
 
-        console.log(`✅ PHASE B COMPLETE: ${totalMessages} new messages across ${pagesProcessed} pages`);
+        const elapsedMs = Date.now() - startTime;
+        const statusEmoji = totalMessages === 0 ? '⚡' : '✅';
+        console.log(`${statusEmoji} PHASE B COMPLETE: ${totalMessages} messages, ${pagesProcessed} pages, ${elapsedMs}ms (${syncMode})`);
       }
 
       // Release lock on success
@@ -1072,6 +1112,19 @@ export const storeOutlookMessages = mutation({
         const orphanedStorageId = args.bodyStorageMap?.[message.id];
         if (orphanedStorageId) {
           await ctx.storage.delete(orphanedStorageId as Id<'_storage'>);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // SYNC READ/UNREAD STATE FROM MICROSOFT
+        // Critical for unread counts to match Outlook
+        // ─────────────────────────────────────────────────────────────────────
+        const newIsRead = message.isRead ?? false;
+        if (existing.isRead !== newIsRead) {
+          await ctx.db.patch(existing._id, {
+            isRead: newIsRead,
+            updatedAt: now,
+          });
+          console.log(`📖 Updated isRead: ${existing.externalMessageId?.substring(0, 20)}... → ${newIsRead}`);
         }
 
         // Update folder info for existing messages (migration path)
@@ -1867,10 +1920,15 @@ export const saveFolderDeltaToken = mutation({
 
 /**
  * Get folders that need delta sync (canonical folders we care about)
+ *
+ * syncMode:
+ * - 'full': All folders (manual refresh, initial sync)
+ * - 'inbox-only': Just inbox (background polling) - FAST, <2 seconds
  */
 export const getSyncableFolders = query({
   args: {
     userId: v.id('admin_users'),
+    syncMode: v.optional(v.union(v.literal('full'), v.literal('inbox-only'))),
   },
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
@@ -1894,14 +1952,78 @@ export const getSyncableFolders = query({
     // Sync ALL user folders, skip only system folders (Sync Issues, Conflicts, etc)
     const EXCLUDED_CANONICAL = ['system'];
 
-    return folders
-      .filter((f) => !EXCLUDED_CANONICAL.includes(f.canonicalFolder))
-      .map((f) => ({
-        externalFolderId: f.externalFolderId,
-        displayName: f.displayName,
-        canonicalFolder: f.canonicalFolder,
-        deltaToken: f.deltaToken,
-      }));
+    let filteredFolders = folders.filter((f) => !EXCLUDED_CANONICAL.includes(f.canonicalFolder));
+
+    // PHASE 1 OPTIMIZATION: inbox-only mode for background polling
+    // Background polls only sync inbox - full sync on manual refresh
+    if (args.syncMode === 'inbox-only') {
+      // Find the ROOT inbox folder (not subfolders mapped to inbox)
+      // Root inbox has parentFolderId === null
+      filteredFolders = filteredFolders.filter(
+        (f) => f.canonicalFolder === 'inbox' && !f.parentFolderId
+      );
+      console.log(`📁 inbox-only mode: syncing ${filteredFolders.length} folder(s)`);
+    }
+
+    return filteredFolders.map((f) => ({
+      externalFolderId: f.externalFolderId,
+      displayName: f.displayName,
+      canonicalFolder: f.canonicalFolder,
+      deltaToken: f.deltaToken,
+    }));
+  },
+});
+
+/**
+ * PHASE 1: Get folder cache status for an account
+ * Used to skip folder fetching during background polling
+ */
+export const getAccountFolderCacheStatus = query({
+  args: {
+    userId: v.id('admin_users'),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return null;
+
+    const account = await ctx.db
+      .query('productivity_email_Accounts')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .filter((q) => q.eq(q.field('provider'), 'outlook'))
+      .first();
+
+    if (!account) return null;
+
+    return {
+      foldersCachedAt: account.foldersCachedAt,
+    };
+  },
+});
+
+/**
+ * PHASE 1: Update folder cache timestamp after successful folder fetch
+ */
+export const updateFolderCacheTimestamp = mutation({
+  args: {
+    userId: v.id('admin_users'),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return;
+
+    const account = await ctx.db
+      .query('productivity_email_Accounts')
+      .withIndex('by_user', (q) => q.eq('userId', user._id))
+      .filter((q) => q.eq(q.field('provider'), 'outlook'))
+      .first();
+
+    if (!account) return;
+
+    await ctx.db.patch(account._id, {
+      foldersCachedAt: Date.now(),
+    });
+
+    console.log(`📁 Folder cache timestamp updated for ${account.emailAddress}`);
   },
 });
 
@@ -2102,6 +2224,85 @@ export const debugListAllFolders = query({
         wouldBeSynced: !EXCLUDED_CANONICAL.includes(f.canonicalFolder),
         hasDeltaToken: !!f.deltaToken,
       })),
+    };
+  },
+});
+
+/**
+ * Debug: Get message counts per folder to diagnose sync discrepancies
+ */
+export const debugFolderMessageCounts = query({
+  args: {},
+  handler: async (ctx) => {
+    // Get first Outlook account (for debugging)
+    const account = await ctx.db
+      .query('productivity_email_Accounts')
+      .filter((q) => q.eq(q.field('provider'), 'outlook'))
+      .first();
+
+    if (!account) return { error: 'No Outlook account found' };
+
+    // Get all folders
+    const allFolders = await ctx.db
+      .query('productivity_email_Folders')
+      .withIndex('by_account', (q) => q.eq('accountId', account._id))
+      .collect();
+
+    // Get all messages
+    const allMessages = await ctx.db
+      .query('productivity_email_Index')
+      .withIndex('by_account', (q) => q.eq('accountId', account._id))
+      .collect();
+
+    // Count messages per providerFolderId
+    const folderCounts = new Map<string, { total: number; unread: number }>();
+    const canonicalCounts = new Map<string, { total: number; unread: number }>();
+
+    for (const msg of allMessages) {
+      const folderId = msg.providerFolderId || 'unknown';
+      const canonical = msg.canonicalFolder || 'inbox';
+
+      // By providerFolderId
+      const folderStats = folderCounts.get(folderId) || { total: 0, unread: 0 };
+      folderStats.total++;
+      if (!msg.isRead) folderStats.unread++;
+      folderCounts.set(folderId, folderStats);
+
+      // By canonical folder
+      const canonStats = canonicalCounts.get(canonical) || { total: 0, unread: 0 };
+      canonStats.total++;
+      if (!msg.isRead) canonStats.unread++;
+      canonicalCounts.set(canonical, canonStats);
+    }
+
+    // Map folder IDs to names
+    const folderIdToName = new Map<string, string>();
+    for (const f of allFolders) {
+      folderIdToName.set(f.externalFolderId, f.displayName);
+    }
+
+    // Build results
+    const byFolder = Array.from(folderCounts.entries())
+      .map(([folderId, stats]) => ({
+        folderName: folderIdToName.get(folderId) || `Unknown (${folderId.substring(0, 20)}...)`,
+        ...stats,
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    const byCanonical = Array.from(canonicalCounts.entries())
+      .map(([canonical, stats]) => ({
+        canonical,
+        ...stats,
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    return {
+      accountId: account._id,
+      userId: account.userId,
+      totalMessages: allMessages.length,
+      totalFolders: allFolders.length,
+      byFolder,
+      byCanonical,
     };
   },
 });
