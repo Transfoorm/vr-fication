@@ -85,7 +85,7 @@ fi
 # ═══════════════════════════════════════════════════════════════════
 # 📏 GLOBAL FILE SIZE GATE - Prevent code bloat (400 lines default)
 # ═══════════════════════════════════════════════════════════════════
-# See: Code-Size-&-File-Length-Policy.MD
+# See: .husky/CODE-SIZE-POLICY.md
 # Default: 400 lines | Exceptions require in-file justification
 DEFAULT_LIMIT=400
 
@@ -151,7 +151,7 @@ for file in $(git diff --cached --name-only | grep -E '\.(ts|tsx)$'); do
         echo "     1. Split into smaller, focused modules"
         echo "     2. Request exception (requires in-file justification)"
         echo ""
-        echo "   See: Code-Size-&-File-Length-Policy.MD"
+        echo "   See: .husky/CODE-SIZE-POLICY.md"
       else
         echo "   This file exceeds its exception limit."
         echo "   The exception exists for a reason - don't exceed it."
