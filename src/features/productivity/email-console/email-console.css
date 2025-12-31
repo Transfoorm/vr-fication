@@ -166,14 +166,14 @@
 }
 
 .ft-email__folder--selected {
-  background: var(--prod-bg-selected);
-  color: var(--prod-selected-text);
-  font-weight: var(--prod-weight-medium);
+  background: var(--prod-bg-section-hover);
+  color: var(--prod-text-primary);
+  text-shadow: 0.4px 0 0 currentcolor;
   box-shadow: inset 4px 0 0 var(--prod-selected-indicator);
 }
 
 .ft-email__folder--selected:hover {
-  background: var(--prod-bg-selected-hover);
+  background: var(--prod-bg-section-hover);
 }
 
 .ft-email__folder-icon {
@@ -514,9 +514,18 @@
   transform: rotate(90deg);
 }
 
+/* Subfolder chevrons flow with content (not fixed to left edge) */
+.ft-email__subfolder .ft-email__folder-chevron {
+  position: static;
+  width: auto;
+  margin-left: calc(-1 * var(--prod-space-md)); /* Tuck closer to left edge */
+}
+
 .ft-email__subfolders {
   display: flex;
   flex-direction: column;
+  gap: var(--prod-space-xxs);
+  margin-top: var(--prod-space-xxs);
 }
 
 .ft-email__subfolders--nested {
@@ -532,15 +541,14 @@
   display: flex;
   align-items: center;
   gap: var(--prod-space-md);
-  padding: var(--prod-space-sm) var(--prod-space-2xl); /* Right padding matches parent folders for badge alignment */
-  padding-left: calc(var(--prod-space-3xl) + var(--prod-space-3xl)); /* Chevron space + indent from parent */
+  padding: var(--prod-space-sm) var(--prod-space-lg);
+  padding-left: var(--prod-space-3xl); /* Room for chevron */
   border-radius: var(--prod-radius-sm);
   cursor: pointer;
   font-size: var(--prod-text-caption);
-  color: var(--prod-text-muted);
+  color: var(--prod-text-secondary);
   transition: background var(--prod-transition-fast), color var(--prod-transition-fast);
   position: relative; /* Required for absolutely positioned chevron */
-  min-width: 0; /* Required for child truncation in flex containers */
 }
 
 .ft-email__subfolder:hover {
@@ -549,12 +557,13 @@
 }
 
 .ft-email__subfolder--selected {
-  background: var(--prod-bg-selected);
-  color: var(--prod-selected-text);
+  background: var(--prod-bg-section-hover);
+  color: var(--prod-text-primary);
+  text-shadow: 0.4px 0 0 currentcolor;
 }
 
 .ft-email__subfolder--selected:hover {
-  background: var(--prod-bg-selected-hover);
+  background: var(--prod-bg-section-hover);
 }
 
 /* Context menu active - maintain hover appearance while menu is open */
@@ -564,7 +573,7 @@
 }
 
 .ft-email__subfolder--context-active.ft-email__subfolder--selected {
-  background: var(--prod-bg-selected-hover);
+  background: var(--prod-bg-section-hover);
 }
 
 .ft-email__subfolder-icon {

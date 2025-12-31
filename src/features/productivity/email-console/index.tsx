@@ -89,7 +89,7 @@ function SubfolderTree({
           <div key={folder._id} className="ft-email__subfolder-group">
             <div
               className={`ft-email__subfolder ${selectedSubfolderId === folder.externalFolderId ? 'ft-email__subfolder--selected' : ''} ${isContextActive ? 'ft-email__subfolder--context-active' : ''}`}
-              style={depthPadding ? { paddingLeft: `calc(var(--prod-space-3xl) + var(--prod-space-3xl) + ${depthPadding})` } : undefined}
+              style={depthPadding ? { paddingLeft: `calc(var(--prod-space-3xl) + ${depthPadding})` } : undefined}
               title={folder.displayName}
               onClick={() => onSelect(folder)}
               onContextMenu={onContextMenu ? (e) => onContextMenu(folder._id, e) : undefined}
