@@ -37,17 +37,21 @@ export async function GET() {
     // 🛡️ SID-5.3: Sovereign userId for Convex queries
     const callerUserId = session._id as Id<"admin_users">;
     // ⚡ Fetch productivity data using sovereign queries (rank-scoped in Convex)
-    const [emailThreads, emailMessages, calendar, bookings, meetings] = await Promise.all([
-      convex.query(api.domains.productivity.queries.listThreads, { callerUserId }), // Fetch thread metadata
-      convex.query(api.domains.productivity.queries.listMessages, { callerUserId }), // Fetch all messages
+    const [emailAccounts, emailThreads, emailMessages, emailFolders, calendar, bookings, meetings] = await Promise.all([
+      convex.query(api.domains.productivity.queries.listEmailAccounts, { callerUserId }), // Email accounts
+      convex.query(api.domains.productivity.queries.listThreads, { callerUserId }), // Thread metadata
+      convex.query(api.domains.productivity.queries.listMessages, { callerUserId }), // All messages
+      convex.query(api.domains.productivity.queries.listEmailFolders, { callerUserId }), // Folder structure
       convex.query(api.domains.productivity.queries.listCalendarEvents, { callerUserId }),
       convex.query(api.domains.productivity.queries.listBookings, { callerUserId }),
       convex.query(api.domains.productivity.queries.listMeetings, { callerUserId }),
     ]);
 
     console.log('🚀 WARP API: Productivity data fetched', {
+      accounts: emailAccounts?.length || 0,
       threads: emailThreads?.length || 0,
       messages: emailMessages?.length || 0,
+      folders: emailFolders?.length || 0,
       calendar: calendar?.length || 0,
       bookings: bookings?.length || 0,
       meetings: meetings?.length || 0,
@@ -55,8 +59,10 @@ export async function GET() {
 
     return Response.json({
       email: {
+        accounts: emailAccounts || [],
         threads: emailThreads || [],
         messages: emailMessages || [],
+        folders: emailFolders || [],
       },
       calendar: calendar || [],
       bookings: bookings || [],

@@ -152,39 +152,53 @@ export const storeOutlookTokens = mutation({
     expiresAt: v.number(),
     scope: v.string(),
     emailAddress: v.optional(v.string()), // User's email from Graph API
+    providerVariant: v.optional(v.union(
+      v.literal('outlook_personal'),
+      v.literal('outlook_enterprise')
+    )), // Personal vs Enterprise distinction
   },
   handler: async (ctx, args) => {
     // Get user from provided userId
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error('User not found');
 
-    // Check if Outlook account already exists for this user
+    const microsoftEmail = args.emailAddress || user.email || 'unknown@outlook.com';
+
+    // Check if Outlook account with THIS EMAIL already exists for this user
+    // This allows multiple Outlook accounts per user (work + personal)
     const existingAccount = await ctx.db
       .query('productivity_email_Accounts')
       .withIndex('by_user', (q) => q.eq('userId', user._id))
-      .filter((q) => q.eq(q.field('provider'), 'outlook'))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('provider'), 'outlook'),
+          q.eq(q.field('emailAddress'), microsoftEmail)
+        )
+      )
       .first();
 
     const now = Date.now();
 
     if (existingAccount) {
-      // Update existing account
+      // Update existing account (same email = reconnecting same account)
       await ctx.db.patch(existingAccount._id, {
         accessToken: args.accessToken,
         refreshToken: args.refreshToken,
         tokenExpiresAt: args.expiresAt,
+        providerVariant: args.providerVariant, // Update variant (may have changed if account type changed)
         status: 'active',
         lastSyncError: undefined,
         updatedAt: now,
       });
-      console.log(`✅ Updated Outlook account ${existingAccount._id}`);
+      console.log(`✅ Updated Outlook account ${existingAccount._id} (${microsoftEmail}) [${args.providerVariant}]`);
     } else {
-      // Create new account
+      // Create new account (different email = new account)
       await ctx.db.insert('productivity_email_Accounts', {
         label: 'Outlook',
-        emailAddress: args.emailAddress || user.email || 'unknown@outlook.com',
+        emailAddress: microsoftEmail,
         ownerEmail: user.email, // For dashboard identification
         provider: 'outlook',
+        providerVariant: args.providerVariant, // Personal vs Enterprise distinction
         accessToken: args.accessToken,
         refreshToken: args.refreshToken,
         tokenExpiresAt: args.expiresAt,
@@ -197,7 +211,7 @@ export const storeOutlookTokens = mutation({
         updatedAt: now,
         connectedAt: now,
       });
-      console.log(`✅ Created Outlook account for user ${user._id}`);
+      console.log(`✅ Created new Outlook account for user ${user._id} (${microsoftEmail}) [${args.providerVariant}]`);
     }
   },
 });
@@ -210,6 +224,7 @@ export const acquireSyncLock = mutation({
   args: {
     userId: v.id('admin_users'),
     syncMode: v.optional(v.union(v.literal('full'), v.literal('inbox-only'))),
+    isBackground: v.optional(v.boolean()), // true = invisible, false = show spinner
   },
   handler: async (ctx, args): Promise<{ acquired: boolean; reason?: string }> => {
     const user = await ctx.db.get(args.userId);
@@ -241,17 +256,17 @@ export const acquireSyncLock = mutation({
     // PHASE 1: Separate UI flags for user-initiated vs background
     // - isSyncing: User clicked refresh → show spinner, disable button
     // - isBackgroundPolling: Cron/background → invisible, no UI blocking
-    const isUserInitiated = args.syncMode === 'full' || !args.syncMode;
+    const isBackground = args.isBackground ?? false;
 
     await ctx.db.patch(account._id, {
       syncStartedAt: now,
       syncLockTTL: LOCK_TTL,
       // MUST explicitly set false, not undefined (undefined leaves previous value)
-      isSyncing: isUserInitiated,
-      isBackgroundPolling: !isUserInitiated,
+      isSyncing: !isBackground,
+      isBackgroundPolling: isBackground,
     });
 
-    console.log(`🔒 Sync lock acquired (${isUserInitiated ? 'isSyncing' : 'isBackgroundPolling'}=true)`);
+    console.log(`🔒 Sync lock acquired (${isBackground ? 'isBackgroundPolling' : 'isSyncing'}=true)`);
     return { acquired: true };
   },
 });
@@ -404,13 +419,16 @@ export const triggerOutlookSync = mutation({
 export const syncOutlookMessages = action({
   args: {
     userId: v.id('admin_users'), // User ID to sync for
-    syncMode: v.optional(v.union(v.literal('full'), v.literal('inbox-only'))), // Background = inbox-only, Manual = full
+    syncMode: v.optional(v.union(v.literal('full'), v.literal('inbox-only'))), // What folders to sync
+    isBackground: v.optional(v.boolean()), // true = invisible (cron), false = show spinner (manual)
   },
   handler: async (ctx, args): Promise<{ success: boolean; messageCount?: number; pagesProcessed?: number; error?: string; skipped?: boolean }> => {
     const syncMode = args.syncMode || 'full';
+    const isBackground = args.isBackground ?? false;
     const lockResult = await ctx.runMutation(api.productivity.email.outlook.acquireSyncLock, {
       userId: args.userId,
       syncMode,
+      isBackground,
     });
 
     if (!lockResult.acquired) {

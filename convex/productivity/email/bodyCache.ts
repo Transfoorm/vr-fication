@@ -150,13 +150,54 @@ async function fetchBodyFromMicrosoft(
   messageId: string
 ): Promise<string> {
   // Get OAuth tokens
-  const tokens = await ctx.runQuery(
+  let tokens = await ctx.runQuery(
     api.productivity.email.outlook.getOutlookTokens,
     { userId }
-  ) as { accessToken?: string } | null;
+  ) as { accessToken?: string; refreshToken: string; expiresAt?: number } | null;
 
   if (!tokens?.accessToken) {
     throw new Error('No valid OAuth token — user must reconnect Outlook');
+  }
+
+  // Check if token needs refresh (expires within 5 minutes)
+  const now = Date.now();
+  if (tokens.expiresAt && tokens.expiresAt < now + 5 * 60 * 1000) {
+    console.log('🔄 Body fetch: Token expired, refreshing...');
+    try {
+      const refreshResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: process.env.MICROSOFT_CLIENT_ID || '',
+          client_secret: process.env.MICROSOFT_CLIENT_SECRET || '',
+          refresh_token: tokens.refreshToken,
+          grant_type: 'refresh_token',
+          scope: 'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access',
+        }),
+      });
+
+      if (refreshResponse.ok) {
+        const refreshData = await refreshResponse.json() as {
+          access_token: string;
+          refresh_token?: string;
+          expires_in: number;
+        };
+
+        // Store new tokens
+        await ctx.runMutation(api.productivity.email.outlook.storeOutlookTokens, {
+          userId,
+          accessToken: refreshData.access_token,
+          refreshToken: refreshData.refresh_token || tokens.refreshToken,
+          expiresAt: now + refreshData.expires_in * 1000,
+          scope: 'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access',
+        });
+
+        tokens = { ...tokens, accessToken: refreshData.access_token };
+        console.log('✅ Body fetch: Token refreshed');
+      }
+    } catch {
+      console.error('Token refresh failed in body fetch');
+    }
   }
 
   // Fetch from Microsoft Graph

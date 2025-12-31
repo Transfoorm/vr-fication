@@ -24,7 +24,7 @@ import { api } from '@/convex/_generated/api';
 import { useProductivityData } from '@/hooks/useProductivityData';
 import { useEmailSyncIntent } from '@/hooks/useEmailSyncIntent';
 import { useFuse } from '@/store/fuse';
-import { T } from '@/vr';
+import { T, Icon } from '@/vr';
 import { MessageBody } from './MessageBody';
 import type { Id } from '@/convex/_generated/dataModel';
 import './email-console.css';
@@ -52,6 +52,9 @@ function SubfolderTree({
   expandedFolders,
   toggleFolderExpand,
   onSelect,
+  onContextMenu,
+  contextMenuFolderId,
+  unreadCounts,
   depth = 0,
 }: {
   folders: FolderItem[];
@@ -60,25 +63,36 @@ function SubfolderTree({
   expandedFolders: Set<string>;
   toggleFolderExpand: (key: string) => void;
   onSelect: (folder: FolderItem) => void;
+  onContextMenu?: (folderId: string, event: React.MouseEvent) => void;
+  contextMenuFolderId?: string | null;
+  unreadCounts?: Record<string, number>;
   depth?: number;
 }) {
   // Practical ceiling (1M) - accommodates anything Microsoft allows
   if (depth > 1000000) return null;
 
   return (
-    <div className="ft-email__subfolders" style={{ paddingLeft: depth > 0 ? 'var(--prod-space-xl)' : undefined }}>
+    <div className="ft-email__subfolders">
       {folders.map((folder) => {
         const children = getChildFolders(folder.externalFolderId);
         const hasChildren = children.length > 0;
         const expandKey = `sub:${folder.externalFolderId}`;
         const isExpanded = expandedFolders.has(expandKey);
 
+        const isContextActive = contextMenuFolderId === folder._id;
+        const unreadCount = unreadCounts?.[folder.externalFolderId] || 0;
+
+        // Additional left padding for nested depth (keeps badges aligned to right edge)
+        const depthPadding = depth > 0 ? `calc(var(--prod-space-xl) * ${depth})` : undefined;
+
         return (
           <div key={folder._id} className="ft-email__subfolder-group">
             <div
-              className={`ft-email__subfolder ${selectedSubfolderId === folder.externalFolderId ? 'ft-email__subfolder--selected' : ''}`}
+              className={`ft-email__subfolder ${selectedSubfolderId === folder.externalFolderId ? 'ft-email__subfolder--selected' : ''} ${isContextActive ? 'ft-email__subfolder--context-active' : ''}`}
+              style={depthPadding ? { paddingLeft: `calc(var(--prod-space-3xl) + var(--prod-space-3xl) + ${depthPadding})` } : undefined}
               title={folder.displayName}
               onClick={() => onSelect(folder)}
+              onContextMenu={onContextMenu ? (e) => onContextMenu(folder._id, e) : undefined}
             >
               {hasChildren && (
                 <span
@@ -90,6 +104,9 @@ function SubfolderTree({
               )}
               <span className="ft-email__subfolder-icon">📁</span>
               <span className="ft-email__subfolder-label">{folder.displayName}</span>
+              {unreadCount > 0 && (
+                <span className="ft-email__subfolder-count">{unreadCount}</span>
+              )}
             </div>
             {/* Recursive children */}
             {hasChildren && isExpanded && (
@@ -100,6 +117,9 @@ function SubfolderTree({
                 expandedFolders={expandedFolders}
                 toggleFolderExpand={toggleFolderExpand}
                 onSelect={onSelect}
+                onContextMenu={onContextMenu}
+                contextMenuFolderId={contextMenuFolderId}
+                unreadCounts={unreadCounts}
                 depth={depth + 1}
               />
             )}
@@ -189,6 +209,7 @@ export function EmailConsole() {
   // Email actions
   const deleteMessage = useAction(api.productivity.email.outlookActions.deleteOutlookMessage);
   const archiveMessage = useAction(api.productivity.email.outlookActions.archiveOutlookMessage);
+  const deleteFolder = useAction(api.productivity.email.outlookActions.deleteOutlookFolder);
 
   // Intent-based sync (triggers on focus, network, manual refresh)
   const { triggerManualSync, isSyncing } = useEmailSyncIntent();
@@ -222,8 +243,9 @@ export function EmailConsole() {
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
-    area: 'mailbox' | 'list' | 'reading';
+    area: 'mailbox' | 'list' | 'reading' | 'folder';
     messageId: string | null;
+    folderId: string | null; // For folder context menu
   } | null>(null);
 
   // Collapsed sections state (for thread time buckets)
@@ -329,6 +351,7 @@ export function EmailConsole() {
       y: event.clientY,
       area: 'list',
       messageId,
+      folderId: null,
     });
   };
 
@@ -342,6 +365,21 @@ export function EmailConsole() {
       y: event.clientY,
       area: 'mailbox',
       messageId: null,
+      folderId: null,
+    });
+  };
+
+  // Handle right-click on a folder in the sidebar
+  const handleFolderContextMenu = (folderId: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      area: 'folder',
+      messageId: null,
+      folderId,
     });
   };
 
@@ -355,6 +393,7 @@ export function EmailConsole() {
       y: event.clientY,
       area: 'list',
       messageId: null,
+      folderId: null,
     });
   };
 
@@ -368,15 +407,53 @@ export function EmailConsole() {
       y: event.clientY,
       area: 'reading',
       messageId: null,
+      folderId: null,
     });
   };
 
   // Handle context menu actions
   const handleContextAction = async (action: string) => {
+    const currentContextMenu = contextMenu; // Capture before clearing
     setContextMenu(null);
 
     if (action === 'refresh') {
       triggerManualSync();
+      return;
+    }
+
+    if (action === 'deleteFolder') {
+      if (!userId) {
+        console.error('❌ Cannot delete folder: No user ID');
+        return;
+      }
+      if (!currentContextMenu?.folderId) {
+        console.error('❌ Cannot delete folder: No folder ID');
+        return;
+      }
+
+      console.log(`🗑️ Deleting folder...`);
+
+      try {
+        const result = await deleteFolder({
+          userId,
+          folderId: currentContextMenu.folderId as Id<'productivity_email_Folders'>,
+        });
+
+        if (result.success) {
+          console.log(`✅ Folder deleted`);
+          // Clear selection if we deleted the selected folder
+          if (selectedSubfolderId) {
+            setSelectedSubfolderId(null);
+            setSelectedFolder('inbox');
+          }
+        } else {
+          console.error(`❌ Failed to delete folder:`, result.error);
+          alert(`Failed to delete folder: ${result.error}`);
+        }
+      } catch (error) {
+        console.error(`❌ Error deleting folder:`, error);
+        alert(`Error deleting folder: ${error}`);
+      }
       return;
     }
 
@@ -480,11 +557,29 @@ export function EmailConsole() {
       }
     }
 
-    // Step 2: Find ROOT canonical folders (no parentFolderId)
+    // Step 2: Find ROOT canonical folders by display name
+    // The actual root folder has a recognizable display name (Inbox, Sent Items, etc.)
+    // Subfolders inherit canonicalFolder from parent but have different display names
+    const ROOT_DISPLAY_NAMES: Record<string, string[]> = {
+      inbox: ['inbox'],
+      sent: ['sent items', 'sent'],
+      drafts: ['drafts'],
+      archive: ['archive'],
+      spam: ['junk email', 'junk', 'spam'],
+      trash: ['deleted items', 'deleted', 'trash'],
+    };
+
     const rootFolderIds: Record<string, string> = {};
     for (const folder of allFolders) {
-      if (!folder.parentFolderId && STANDARD_FOLDERS.includes(folder.canonicalFolder || '')) {
-        rootFolderIds[folder.canonicalFolder!] = folder.externalFolderId;
+      const canonical = folder.canonicalFolder || '';
+      const displayLower = folder.displayName.toLowerCase().trim();
+
+      // Only set as root if display name matches expected root names
+      if (STANDARD_FOLDERS.includes(canonical) && !rootFolderIds[canonical]) {
+        const expectedNames = ROOT_DISPLAY_NAMES[canonical] || [];
+        if (expectedNames.includes(displayLower)) {
+          rootFolderIds[canonical] = folder.externalFolderId;
+        }
       }
     }
 
@@ -525,20 +620,27 @@ export function EmailConsole() {
         continue;
       }
 
-      if (folder.parentFolderId) {
-        // This is a subfolder - only add DIRECT children of canonical roots
-        const canonical = folder.canonicalFolder || 'system';
-        const rootId = rootFolderIds[canonical];
+      const canonical = folder.canonicalFolder || 'system';
 
-        // Only add if this folder's parent IS the root canonical folder
-        if (rootId && folder.parentFolderId === rootId && canonical in tree) {
-          tree[canonical].push(folder);
+      if (folder.parentFolderId) {
+        // Subfolder - add to parent's tree if parent is a standard ROOT folder
+        // Check ALL standard folders to see if this folder's parent matches any root
+        for (const [standardCanonical, rootId] of Object.entries(rootFolderIds)) {
+          if (folder.parentFolderId === rootId && standardCanonical in tree) {
+            tree[standardCanonical].push(folder);
+            break;
+          }
         }
-        // Grandchildren (like Content → TEST) are accessed via getChildFolders()
-      } else {
-        // Root-level folder - check if it's a custom folder
-        const canonical = folder.canonicalFolder || '';
-        if (!STANDARD_FOLDERS.includes(canonical)) {
+      }
+
+      // Custom folders: anything not standard that isn't a child of another shown custom folder
+      if (!STANDARD_FOLDERS.includes(canonical)) {
+        // Find if parent is in our custom list (to avoid duplicating nested folders)
+        const parentFolder = allFolders.find(f => f.externalFolderId === folder.parentFolderId);
+        const parentIsShownCustom = parentFolder && !STANDARD_FOLDERS.includes(parentFolder.canonicalFolder || 'system');
+
+        // Show if: no parent, OR parent is a standard folder, OR parent isn't in our folder list
+        if (!parentIsShownCustom) {
           tree.custom.push(folder);
         }
       }
@@ -550,9 +652,10 @@ export function EmailConsole() {
     return { folderTree: tree, getChildFolders, rootFolderIds };
   }, [allFolders, allMessages]);
 
-  // Compute folder unread counts (count unread messages in ROOT folders only)
-  // This matches Microsoft's behavior: subfolder unreads don't count toward parent badge
-  const folderCounts = useMemo(() => {
+  // Compute folder unread counts:
+  // - Root folder badges: only count messages DIRECTLY in that folder (not subfolders)
+  // - Subfolder badges: count by providerFolderId
+  const { folderCounts, subfolderCounts } = useMemo(() => {
     const counts: Record<string, number> = {
       inbox: 0,
       sent: 0,
@@ -561,24 +664,29 @@ export function EmailConsole() {
       spam: 0,
       trash: 0,
     };
+    const subCounts: Record<string, number> = {};
 
     for (const message of allMessages) {
       if (message.isRead) continue; // Only count unread messages
 
-      // Count by providerFolderId to match root folder exactly
-      // This prevents subfolder emails from inflating parent folder badges
-      const folderId = message.providerFolderId;
+      // Count by providerFolderId for ALL folder badges
+      if (message.providerFolderId) {
+        subCounts[message.providerFolderId] = (subCounts[message.providerFolderId] || 0) + 1;
+      }
 
-      // Check each canonical folder's root ID
-      for (const [canonical, rootId] of Object.entries(rootFolderIds)) {
-        if (folderId === rootId && canonical in counts) {
+      // For root folder badges, only count if message is DIRECTLY in that root folder
+      // (not in a subfolder that inherits the same canonicalFolder)
+      const canonical = message.canonicalFolder || 'inbox';
+      if (canonical in counts && message.providerFolderId) {
+        // Only count if this message's folder IS the root folder for this canonical type
+        const rootFolderId = rootFolderIds[canonical];
+        if (message.providerFolderId === rootFolderId) {
           counts[canonical]++;
-          break;
         }
       }
     }
 
-    return counts;
+    return { folderCounts: counts, subfolderCounts: subCounts };
   }, [allMessages, rootFolderIds]);
 
   // Filter messages by selected folder (and subfolder if selected)
@@ -596,13 +704,13 @@ export function EmailConsole() {
       // Subfolder selected - filter by specific providerFolderId
       filtered = allMessages.filter(m => m.providerFolderId === selectedSubfolderId);
     } else {
-      // Root canonical folder selected (no subfolder) - show only ROOT folder emails
-      // This matches Microsoft behavior: clicking Inbox shows only root Inbox, not subfolders
+      // Root canonical folder selected - filter by the root folder's providerFolderId
+      // This ensures we only show direct messages, not subfolder messages
       const rootFolderId = rootFolderIds[selectedFolder];
       if (rootFolderId) {
         filtered = allMessages.filter(m => m.providerFolderId === rootFolderId);
       } else {
-        // Fallback to canonical folder if no root folder found
+        // Fallback: no root folder found, use canonicalFolder
         filtered = allMessages.filter(m => (m.canonicalFolder || 'inbox') === selectedFolder);
       }
     }
@@ -758,6 +866,9 @@ export function EmailConsole() {
                 expandedFolders={expandedFolders}
                 toggleFolderExpand={toggleFolderExpand}
                 onSelect={handleSubfolderSelect}
+                onContextMenu={handleFolderContextMenu}
+                contextMenuFolderId={contextMenu?.folderId}
+                unreadCounts={subfolderCounts}
               />
             )}
           </div>
@@ -814,19 +925,45 @@ export function EmailConsole() {
                 expandedFolders={expandedFolders}
                 toggleFolderExpand={toggleFolderExpand}
                 onSelect={handleSubfolderSelect}
+                onContextMenu={handleFolderContextMenu}
+                contextMenuFolderId={contextMenu?.folderId}
+                unreadCounts={subfolderCounts}
               />
             )}
           </div>
 
-          {/* Deleted */}
-          <div
-            className={`ft-email__folder ${selectedFolder === 'trash' ? 'ft-email__folder--selected' : ''}`}
-            onClick={() => handleFolderSelect('trash')}
-          >
-            <span className="ft-email__folder-icon">🗑️</span>
-            <span className="ft-email__folder-label">Deleted</span>
-            {folderCounts.trash > 0 && (
-              <span className="ft-email__folder-count">{folderCounts.trash}</span>
+          {/* Deleted with expandable subfolders */}
+          <div className="ft-email__folder-group">
+            <div
+              className={`ft-email__folder ${selectedFolder === 'trash' && !selectedSubfolderId ? 'ft-email__folder--selected' : ''}`}
+              onClick={() => handleFolderSelect('trash')}
+            >
+              {folderTree.trash.length > 0 && (
+                <span
+                  className={`ft-email__folder-chevron ${expandedFolders.has('trash') ? 'ft-email__folder-chevron--expanded' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); toggleFolderExpand('trash'); }}
+                >
+                  ›
+                </span>
+              )}
+              <span className="ft-email__folder-icon">🗑️</span>
+              <span className="ft-email__folder-label">Deleted</span>
+              {folderCounts.trash > 0 && (
+                <span className="ft-email__folder-count">{folderCounts.trash}</span>
+              )}
+            </div>
+            {expandedFolders.has('trash') && folderTree.trash.length > 0 && (
+              <SubfolderTree
+                folders={folderTree.trash}
+                getChildFolders={getChildFolders}
+                selectedSubfolderId={selectedSubfolderId}
+                expandedFolders={expandedFolders}
+                toggleFolderExpand={toggleFolderExpand}
+                onSelect={handleSubfolderSelect}
+                onContextMenu={handleFolderContextMenu}
+                contextMenuFolderId={contextMenu?.folderId}
+                unreadCounts={subfolderCounts}
+              />
             )}
           </div>
 
@@ -835,7 +972,7 @@ export function EmailConsole() {
             className={`ft-email__folder ${selectedFolder === 'spam' ? 'ft-email__folder--selected' : ''}`}
             onClick={() => handleFolderSelect('spam')}
           >
-            <span className="ft-email__folder-icon">🗝️</span>
+            <span className="ft-email__folder-icon">⛔️</span>
             <span className="ft-email__folder-label">Spam</span>
             {folderCounts.spam > 0 && (
               <span className="ft-email__folder-count">{folderCounts.spam}</span>
@@ -846,20 +983,27 @@ export function EmailConsole() {
           {folderTree.custom.length > 0 && (
             <>
               <div className="ft-email__folder-divider" />
-              {folderTree.custom.map((folder) => (
-                <div
-                  key={folder._id}
-                  className={`ft-email__folder ${selectedFolder === 'custom' && selectedSubfolderId === folder.externalFolderId ? 'ft-email__folder--selected' : ''}`}
-                  onClick={() => {
-                    setSelectedFolder('custom');
-                    setSelectedSubfolderId(folder.externalFolderId);
-                  }}
-                  title={folder.displayName}
-                >
-                  <span className="ft-email__folder-icon">📁</span>
-                  <span className="ft-email__folder-label">{folder.displayName}</span>
-                </div>
-              ))}
+              {folderTree.custom.map((folder) => {
+                const unreadCount = subfolderCounts[folder.externalFolderId] || 0;
+                return (
+                  <div
+                    key={folder._id}
+                    className={`ft-email__folder ${selectedFolder === 'custom' && selectedSubfolderId === folder.externalFolderId ? 'ft-email__folder--selected' : ''}`}
+                    onClick={() => {
+                      setSelectedFolder('custom');
+                      setSelectedSubfolderId(folder.externalFolderId);
+                    }}
+                    onContextMenu={(e) => handleFolderContextMenu(folder._id, e)}
+                    title={folder.displayName}
+                  >
+                    <span className="ft-email__folder-icon">📁</span>
+                    <span className="ft-email__folder-label">{folder.displayName}</span>
+                    {unreadCount > 0 && (
+                      <span className="ft-email__folder-count">{unreadCount}</span>
+                    )}
+                  </div>
+                );
+              })}
             </>
           )}
         </aside>
@@ -894,9 +1038,9 @@ export function EmailConsole() {
               className={`ft-email__refresh-btn${isSyncing ? ' ft-email__refresh-btn--syncing' : ''}`}
               onClick={triggerManualSync}
               disabled={isSyncing}
-              title={isSyncing ? 'Syncing...' : 'Refresh emails'}
+              title={isSyncing ? 'Syncing...' : 'Send and receive all items'}
             >
-              ↻
+              <Icon variant="refresh" size="xs" strokeWidth={1.5} />
             </button>
           </div>
           <div className="ft-email__threads-scroll" ref={scrollContainerRef}>
@@ -1024,6 +1168,16 @@ export function EmailConsole() {
                 <button onClick={() => handleContextAction('markAllRead')}>Mark All as Read</button>
                 <hr />
                 <button onClick={() => handleContextAction('refresh')}>Refresh</button>
+              </>
+            )}
+
+            {/* FOLDER - individual folder actions */}
+            {contextMenu.area === 'folder' && contextMenu.folderId && (
+              <>
+                <button onClick={() => handleContextAction('openFolder')}>Open</button>
+                <button onClick={() => handleContextAction('markAllRead')}>Mark All as Read</button>
+                <hr />
+                <button onClick={() => handleContextAction('deleteFolder')}>Delete</button>
               </>
             )}
 

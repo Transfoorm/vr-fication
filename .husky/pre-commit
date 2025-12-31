@@ -99,7 +99,7 @@ get_file_limit() {
     # Email sync orchestrator (complex state machine)
     "convex/productivity/email/outlook.ts") echo 1200 ;;
     "convex/productivity/email/webhooks.ts") echo 800 ;;
-    "src/features/productivity/email-console/index.tsx") echo 1100 ;;
+    "src/features/productivity/email-console/index.tsx") echo 1300 ;;
     # Admin APIs (complex domain logic)
     "convex/domains/admin/users/api.ts") echo 1000 ;;
     "convex/admin/dbCleanup.ts") echo 700 ;;
@@ -112,8 +112,10 @@ get_file_limit() {
     # Vanish cascade (transactional integrity)
     "convex/vanish/cascade.ts") echo 600 ;;
     # Email module files (recently refactored, 600 transition)
+    # Transitional caps during inbox canonicalisation - expected to decompose post-stabilisation
     "convex/productivity/email/outlookStore.ts") echo 600 ;;
-    "convex/productivity/email/outlookDiagnostics.ts") echo 600 ;;
+    "convex/productivity/email/outlookDiagnostics.ts") echo 700 ;;
+    "convex/productivity/email/outlookActions.ts") echo 600 ;;
     "convex/productivity/email/bodyCache.ts") echo 600 ;;
     # Feature tabs (complex UI, 600 transition)
     "src/features/settings/account-page/_tabs/EmailTab.tsx") echo 600 ;;

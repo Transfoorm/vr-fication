@@ -497,9 +497,9 @@ export default function SetupModal() {
             {/* Main headline */}
             <div className="ft-setup-headline-section">
               <T.hero weight="bold" className="ft-setup-headline">
-                <span className="ft-setup-headline-primary">Turning purpose </span>
+                <span className="ft-setup-headline-primary">From purpose </span>
                 <br />
-                <span className="ft-setup-headline-gradient">into profit</span>
+                <span className="ft-setup-headline-gradient">into profit!</span>
               </T.hero>
               <T.body className="ft-setup-subtext">
                 You&apos;ve been searching for a way to live your passion, make an impact, and thrive financially while making your mark in the world. Your prospects are waiting, your potential is brimming... <i>now it&apos;s time to let it out!</i>

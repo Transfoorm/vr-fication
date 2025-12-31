@@ -167,10 +167,7 @@ export const cleanupDatabase = mutation({
       console.log(`  ✅ ${table}: ${count} documents deleted`);
     };
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // PRODUCTIVITY DOMAIN TABLES
-    // ═══════════════════════════════════════════════════════════════════════
-
+    // --- PRODUCTIVITY DOMAIN TABLES ---
     console.log('\n📧 Clearing Productivity Domain...');
 
     // productivity_email_Messages
@@ -242,10 +239,7 @@ export const cleanupDatabase = mutation({
       return { mode: args.mode, totalDeleted, deletionLog };
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // OTHER DOMAIN TABLES (data_only and full_wipe)
-    // ═══════════════════════════════════════════════════════════════════════
-
+    // --- OTHER DOMAIN TABLES (data_only and full_wipe) ---
     console.log('\n💼 Clearing Clients Domain...');
     const clientsUsers = await ctx.db.query('clients_contacts_Users').collect();
     for (const doc of clientsUsers) await ctx.db.delete(doc._id);
@@ -276,10 +270,7 @@ export const cleanupDatabase = mutation({
       return { mode: args.mode, totalDeleted, deletionLog };
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // ADMIN/IDENTITY TABLES (full_wipe only - NUCLEAR)
-    // ═══════════════════════════════════════════════════════════════════════
-
+    // --- ADMIN/IDENTITY TABLES (full_wipe only - NUCLEAR) ---
     console.log('\n⚠️  FULL WIPE MODE - Clearing Admin/Identity Domain...');
     console.log('⚠️  WARNING: This will delete all users except caller!');
 
@@ -323,10 +314,7 @@ export const cleanupDatabase = mutation({
       return { mode: args.mode, totalDeleted, deletionLog };
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // ATOMIC MODE - PRISTINE DATABASE (NO PROTECTION, NO SURVIVORS)
-    // ═══════════════════════════════════════════════════════════════════════
-
+    // --- ATOMIC MODE - PRISTINE DATABASE (NO PROTECTION, NO SURVIVORS) ---
     console.log('\n☢️  ATOMIC MODE - DELETING EVERYTHING INCLUDING CALLER...');
     console.log('☢️  WARNING: This will make the database completely pristine!');
 
@@ -404,9 +392,7 @@ export const cleanupDatabase = mutation({
   },
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ATOMIC NUKE WITH CLERK DELETION
-// ═══════════════════════════════════════════════════════════════════════════
+// --- ATOMIC NUKE WITH CLERK DELETION ---
 
 /**
  * ☢️ ATOMIC NUKE ACTION - Deletes EVERYTHING including Clerk accounts
@@ -436,33 +422,60 @@ export const atomicNukeWithClerk = action({
       storageFilesDeleted: 0,
     };
 
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 1: Get all Clerk IDs from registry
-    // ═══════════════════════════════════════════════════════════════
-
-    console.log('\n📋 Step 1: Getting all Clerk IDs from registry...');
-
-    const clerkRegistry = await ctx.runQuery(api.admin.dbCleanup.getAllClerkIds);
-
-    console.log(`   Found ${clerkRegistry.length} Clerk accounts to delete`);
-
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 2: Delete each user from Clerk
-    // ═══════════════════════════════════════════════════════════════
-
-    console.log('\n🔥 Step 2: Deleting users from Clerk...');
+    // --- STEP 1: Get all users DIRECTLY from Clerk API ---
+    console.log('\n📋 Step 1: Fetching all users directly from Clerk API...');
 
     const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+    const clerkUserIds: string[] = [];
+
     if (!clerkSecretKey) {
       console.error('❌ CLERK_SECRET_KEY not found - skipping Clerk deletion');
       results.clerkErrors.push('CLERK_SECRET_KEY not found in environment');
     } else {
-      for (const entry of clerkRegistry) {
-        try {
-          console.log(`   Deleting Clerk user: ${entry.externalId}`);
+      // Fetch ALL users from Clerk directly (paginated)
+      let offset = 0;
+      const limit = 100;
+      let hasMore = true;
 
-          // Using globalThis.fetch for server-side Clerk API call (ESLint rule is for client components)
-          const response = await globalThis.fetch(`https://api.clerk.com/v1/users/${entry.externalId}`, {
+      while (hasMore) {
+        const listResponse = await globalThis.fetch(
+          `https://api.clerk.com/v1/users?limit=${limit}&offset=${offset}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${clerkSecretKey}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (listResponse.ok) {
+          const users = await listResponse.json();
+          if (Array.isArray(users) && users.length > 0) {
+            for (const user of users) {
+              clerkUserIds.push(user.id);
+            }
+            offset += users.length;
+            hasMore = users.length === limit; // If we got a full page, there might be more
+          } else {
+            hasMore = false;
+          }
+        } else {
+          console.error('❌ Failed to fetch users from Clerk');
+          hasMore = false;
+        }
+      }
+
+      console.log(`   Found ${clerkUserIds.length} Clerk users to delete`);
+
+      // --- STEP 2: Delete each user from Clerk ---
+      console.log('\n🔥 Step 2: Deleting users from Clerk...');
+
+      for (const userId of clerkUserIds) {
+        try {
+          console.log(`   Deleting Clerk user: ${userId}`);
+
+          const response = await globalThis.fetch(`https://api.clerk.com/v1/users/${userId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${clerkSecretKey}`,
@@ -471,30 +484,27 @@ export const atomicNukeWithClerk = action({
           });
 
           if (response.ok || response.status === 404) {
-            console.log(`   ✅ Deleted: ${entry.externalId}`);
+            console.log(`   ✅ Deleted: ${userId}`);
             results.clerkUsersDeleted++;
           } else {
             const errorData = await response.json().catch(() => ({}));
             const errorMsg = errorData.errors?.[0]?.message || `HTTP ${response.status}`;
-            console.error(`   ❌ Failed: ${entry.externalId} - ${errorMsg}`);
+            console.error(`   ❌ Failed: ${userId} - ${errorMsg}`);
             results.clerkUsersFailed++;
-            results.clerkErrors.push(`${entry.externalId}: ${errorMsg}`);
+            results.clerkErrors.push(`${userId}: ${errorMsg}`);
           }
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-          console.error(`   ❌ Error: ${entry.externalId} - ${errorMsg}`);
+          console.error(`   ❌ Error: ${userId} - ${errorMsg}`);
           results.clerkUsersFailed++;
-          results.clerkErrors.push(`${entry.externalId}: ${errorMsg}`);
+          results.clerkErrors.push(`${userId}: ${errorMsg}`);
         }
       }
     }
 
     console.log(`\n   Clerk deletion complete: ${results.clerkUsersDeleted} deleted, ${results.clerkUsersFailed} failed`);
 
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 3: Batch delete all Convex tables
-    // ═══════════════════════════════════════════════════════════════
-
+    // --- STEP 3: Batch delete all Convex tables ---
     console.log('\n💾 Step 3: Deleting all Convex data...');
 
     // Order matters - delete references before parents
@@ -546,10 +556,7 @@ export const atomicNukeWithClerk = action({
       }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // FINAL REPORT
-    // ═══════════════════════════════════════════════════════════════
-
+    // --- FINAL REPORT ---
     console.log('\n☢️ ═══════════════════════════════════════════════════════════════');
     console.log('☢️ ATOMIC NUKE COMPLETE');
     console.log('☢️ ═══════════════════════════════════════════════════════════════');
@@ -574,9 +581,7 @@ export const getAllClerkIds = query({
   },
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// BULK STORAGE DELETION
-// ═══════════════════════════════════════════════════════════════════════════
+// --- BULK STORAGE DELETION ---
 
 /**
  * 🗑️ BATCH DELETE STORAGE FILES

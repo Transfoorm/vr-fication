@@ -263,6 +263,7 @@ export const storeOutlookMessages = mutation({
         hasAttachments: message.hasAttachments,
         isRead: message.isRead || false,
         accountId: account._id,
+        ownerEmail: account.emailAddress, // For dashboard visibility
         resolutionState,
         canonicalFolder,
         canonicalStates,
@@ -403,6 +404,7 @@ export const storeOutlookFolders = mutation({
           childFolderCount: folder.childFolderCount,
           accountId: account._id,
           provider: 'outlook',
+          ownerEmail: account.emailAddress, // For dashboard visibility
           createdAt: now,
           updatedAt: now,
         });

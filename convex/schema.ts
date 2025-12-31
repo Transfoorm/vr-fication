@@ -463,6 +463,8 @@ export default defineSchema({
     // Connected email account (required)
     /** Which email account this message belongs to */
     accountId: v.id("productivity_email_Accounts"),
+    /** Email address of the connected account (for dashboard visibility) */
+    ownerEmail: v.optional(v.string()),
 
     // Resolution state (required - single source of truth)
     /**
@@ -635,6 +637,26 @@ export default defineSchema({
       v.literal("outlook"),
       v.literal("imap") // Future: generic IMAP support
     ),
+    /**
+     * Provider variant - distinguishes API behavior differences within same provider.
+     *
+     * For Outlook:
+     * - 'outlook_personal': Consumer accounts (outlook.com, hotmail.com, live.com, msn.com)
+     * - 'outlook_enterprise': Microsoft 365/Azure AD accounts (custom domains)
+     *
+     * Graph API behaves differently between personal and enterprise:
+     * - Folder parentFolderId structure differs
+     * - Rate limits differ
+     * - Some features (categories, rules) have different availability
+     *
+     * When this flag accumulates >5 branch points, promote to separate handlers.
+     */
+    providerVariant: v.optional(v.union(
+      v.literal("outlook_personal"),
+      v.literal("outlook_enterprise"),
+      v.literal("gmail_personal"),
+      v.literal("gmail_workspace")
+    )),
 
     // OAuth credentials (required for gmail/outlook)
     /** OAuth access token (encrypted at rest by Convex) */
@@ -741,6 +763,8 @@ export default defineSchema({
     accountId: v.id("productivity_email_Accounts"),
     /** Provider type (for provider-specific handling) */
     provider: v.union(v.literal("gmail"), v.literal("outlook")),
+    /** Email address of the connected account (for dashboard visibility) */
+    ownerEmail: v.optional(v.string()),
 
     // Delta sync (for incremental updates)
     /** Microsoft Graph deltaLink for this folder */

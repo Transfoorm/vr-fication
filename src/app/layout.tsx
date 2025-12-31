@@ -15,6 +15,7 @@ import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { ClerkProvider } from '@clerk/nextjs';
 import { ConvexClientProvider } from '@/providers/ConvexClientProvider';
+import { SessionErrorBoundary } from '@/providers/SessionErrorBoundary';
 import { SideDrawerProvider, SideDrawerPortal } from '@/vr/modal';
 import { VanishProvider, VanishPortal } from '@/features/vanish/VanishContext';
 import { PageHeaderProvider } from '@/shell/page-header/PageHeaderContext';
@@ -30,7 +31,7 @@ import '@/styles/globals.css';
 // ═══════════════════════════════════════════════════════════════════════
 export const metadata: Metadata = {
   title: {
-    default: 'Turn Purpose Into Profit | Transfoorm',
+    default: 'From Purpose Into Profit | Transfoorm',
     template: '%s | FUSE 6.0'
   },
   description: 'Instant everything. Zero loading states. The future of web applications.',
@@ -88,11 +89,12 @@ export default async function RootLayout({
         </head>
         <body>
           <ConvexClientProvider>
-            <SideDrawerProvider>
-              <VanishProvider>
-                <PageHeaderProvider>
-                  {children}
-                </PageHeaderProvider>
+            <SessionErrorBoundary>
+              <SideDrawerProvider>
+                <VanishProvider>
+                  <PageHeaderProvider>
+                    {children}
+                  </PageHeaderProvider>
                 {/* Global SideDrawer - only renders when drawer is open */}
                 <SideDrawerPortal />
                 {/* Global portal target for SideDrawer */}
@@ -101,8 +103,9 @@ export default async function RootLayout({
                 <VanishPortal />
                 {/* Global portal target for VANISH drawer */}
                 <div id="vanish-drawer-portal" />
-              </VanishProvider>
-            </SideDrawerProvider>
+                </VanishProvider>
+              </SideDrawerProvider>
+            </SessionErrorBoundary>
           </ConvexClientProvider>
         </body>
       </html>

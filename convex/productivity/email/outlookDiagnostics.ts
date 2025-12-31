@@ -430,6 +430,203 @@ export const backfillOwnerEmail = mutation({
   },
 });
 
+/**
+ * List all email accounts with their current email addresses
+ * Used for debugging email address issues
+ */
+export const listAllEmailAccounts = query({
+  args: {},
+  handler: async (ctx) => {
+    const accounts = await ctx.db.query('productivity_email_Accounts').collect();
+
+    return accounts.map((account) => ({
+      _id: account._id,
+      label: account.label,
+      emailAddress: account.emailAddress,
+      ownerEmail: account.ownerEmail,
+      provider: account.provider,
+      status: account.status,
+      userId: account.userId,
+    }));
+  },
+});
+
+/**
+ * Debug: List all users with their ranks
+ */
+export const listAllUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query('admin_users').collect();
+
+    return users.map((user) => ({
+      _id: user._id,
+      email: user.email,
+      rank: user.rank,
+      orgSlug: user.orgSlug,
+    }));
+  },
+});
+
+/**
+ * Debug: Test message query for a specific user
+ */
+export const testMessageQuery = query({
+  args: {
+    userId: v.id('admin_users'),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return { error: 'User not found' };
+
+    const rank = user.rank || 'crew';
+    const orgId = user._id as string;
+
+    // Simulate the listMessages query
+    let messages;
+    if (rank === 'admiral') {
+      messages = await ctx.db
+        .query('productivity_email_Index')
+        .order('desc')
+        .take(10);
+    } else {
+      messages = await ctx.db
+        .query('productivity_email_Index')
+        .withIndex('by_org', (q) => q.eq('orgId', orgId))
+        .order('desc')
+        .take(10);
+    }
+
+    return {
+      userId: args.userId,
+      userEmail: user.email,
+      rank,
+      orgIdUsed: orgId,
+      messagesFound: messages.length,
+      sampleMessageOrgIds: messages.slice(0, 3).map((m) => m.orgId),
+    };
+  },
+});
+
+/**
+ * Full diagnostic for all accounts - messages, folders, sync status
+ */
+export const fullAccountDiagnostics = query({
+  args: {},
+  handler: async (ctx) => {
+    const accounts = await ctx.db.query('productivity_email_Accounts').collect();
+    const results = [];
+
+    for (const account of accounts) {
+      const messages = await ctx.db
+        .query('productivity_email_Index')
+        .withIndex('by_account', (q) => q.eq('accountId', account._id))
+        .collect();
+
+      const folders = await ctx.db
+        .query('productivity_email_Folders')
+        .withIndex('by_account', (q) => q.eq('accountId', account._id))
+        .collect();
+
+      // Sample orgIds from messages to debug scoping
+      const sampleOrgIds = [...new Set(messages.slice(0, 5).map(m => m.orgId))];
+
+      results.push({
+        email: account.emailAddress,
+        accountId: account._id,
+        userId: account.userId,
+        accountOrgId: account.orgId, // What org this account belongs to
+        messageCount: messages.length,
+        folderCount: folders.length,
+        sampleMessageOrgIds: sampleOrgIds, // What org messages have
+        status: account.status,
+        lastSyncAt: account.lastSyncAt,
+        lastSyncError: account.lastSyncError,
+        initialSyncComplete: account.initialSyncComplete,
+        isSyncing: account.isSyncing,
+        tokenExpiresAt: account.tokenExpiresAt,
+        hasAccessToken: !!account.accessToken,
+        hasRefreshToken: !!account.refreshToken,
+      });
+    }
+
+    return results;
+  },
+});
+
+/**
+ * Update email address for an account
+ * Call this after fetching actual email from Microsoft
+ */
+export const updateAccountEmail = mutation({
+  args: {
+    accountId: v.id('productivity_email_Accounts'),
+    emailAddress: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const account = await ctx.db.get(args.accountId);
+    if (!account) throw new Error('Account not found');
+
+    await ctx.db.patch(args.accountId, {
+      emailAddress: args.emailAddress,
+      updatedAt: Date.now(),
+    });
+
+    console.log(`✅ Updated account ${args.accountId} email to ${args.emailAddress}`);
+    return { success: true, previousEmail: account.emailAddress, newEmail: args.emailAddress };
+  },
+});
+
+/**
+ * Backfill ownerEmail on folders and messages
+ * Run after adding ownerEmail field to schema
+ */
+export const backfillOwnerEmails = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const accounts = await ctx.db.query('productivity_email_Accounts').collect();
+    let foldersUpdated = 0;
+    let messagesUpdated = 0;
+
+    for (const account of accounts) {
+      const ownerEmail = account.emailAddress;
+      if (!ownerEmail) continue;
+
+      // Update folders
+      const folders = await ctx.db
+        .query('productivity_email_Folders')
+        .withIndex('by_account', (q) => q.eq('accountId', account._id))
+        .collect();
+
+      for (const folder of folders) {
+        if (!folder.ownerEmail) {
+          await ctx.db.patch(folder._id, { ownerEmail });
+          foldersUpdated++;
+        }
+      }
+
+      // Update messages
+      const messages = await ctx.db
+        .query('productivity_email_Index')
+        .withIndex('by_account', (q) => q.eq('accountId', account._id))
+        .collect();
+
+      for (const msg of messages) {
+        if (!msg.ownerEmail) {
+          await ctx.db.patch(msg._id, { ownerEmail });
+          messagesUpdated++;
+        }
+      }
+    }
+
+    return {
+      foldersUpdated,
+      messagesUpdated,
+      message: `Backfilled ownerEmail: ${foldersUpdated} folders, ${messagesUpdated} messages`,
+    };
+  },
+});
+
 export const fixConditionalFolderCanonicals = mutation({
   args: {},
   handler: async (ctx) => {

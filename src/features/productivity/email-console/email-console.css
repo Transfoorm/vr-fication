@@ -158,6 +158,7 @@
   color: var(--prod-text-secondary);
   transition: background var(--prod-transition-fast);
   position: relative;
+  min-width: 0; /* Required for child truncation in flex containers */
 }
 
 .ft-email__folder:hover {
@@ -187,6 +188,10 @@
 
 .ft-email__folder-label {
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0; /* Required for flexbox truncation */
 }
 
 .ft-email__folder-count {
@@ -512,7 +517,6 @@
 .ft-email__subfolders {
   display: flex;
   flex-direction: column;
-  padding-left: var(--prod-space-3xl);
 }
 
 .ft-email__subfolders--nested {
@@ -528,14 +532,15 @@
   display: flex;
   align-items: center;
   gap: var(--prod-space-md);
-  padding: var(--prod-space-sm) var(--prod-space-lg);
-  padding-left: var(--prod-space-3xl); /* Room for chevron */
+  padding: var(--prod-space-sm) var(--prod-space-2xl); /* Right padding matches parent folders for badge alignment */
+  padding-left: calc(var(--prod-space-3xl) + var(--prod-space-3xl)); /* Chevron space + indent from parent */
   border-radius: var(--prod-radius-sm);
   cursor: pointer;
   font-size: var(--prod-text-caption);
   color: var(--prod-text-muted);
   transition: background var(--prod-transition-fast), color var(--prod-transition-fast);
   position: relative; /* Required for absolutely positioned chevron */
+  min-width: 0; /* Required for child truncation in flex containers */
 }
 
 .ft-email__subfolder:hover {
@@ -552,15 +557,42 @@
   background: var(--prod-bg-selected-hover);
 }
 
+/* Context menu active - maintain hover appearance while menu is open */
+.ft-email__subfolder--context-active {
+  background: var(--prod-bg-section-hover);
+  color: var(--prod-text-secondary);
+}
+
+.ft-email__subfolder--context-active.ft-email__subfolder--selected {
+  background: var(--prod-bg-selected-hover);
+}
+
 .ft-email__subfolder-icon {
   font-size: var(--prod-icon-xs);
   opacity: 0.6;
 }
 
 .ft-email__subfolder-label {
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0; /* Required for flexbox truncation */
+}
+
+.ft-email__subfolder-count {
+  font-size: var(--prod-text-micro);
+  color: var(--prod-text-muted);
+  background: var(--prod-bg-badge);
+  padding: var(--prod-space-xxs) var(--prod-space-sm);
+  border-radius: var(--prod-radius-pill);
+  min-width: var(--prod-badge-min-width);
+  text-align: center;
+}
+
+.ft-email__subfolder--selected .ft-email__subfolder-count {
+  background: var(--prod-selected-bg);
+  color: var(--prod-selected-contrast);
 }
 
 
