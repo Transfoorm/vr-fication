@@ -506,6 +506,12 @@
   border-radius: var(--prod-radius-sm);
 }
 
+.ft-email__folder-chevron::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+}
+
 .ft-email__folder-chevron:hover {
   color: var(--prod-text-secondary);
 }
@@ -516,7 +522,7 @@
 
 /* Subfolder chevrons flow with content (not fixed to left edge) */
 .ft-email__subfolder .ft-email__folder-chevron {
-  position: static;
+  position: relative;
   width: auto;
   margin-left: calc(-1 * var(--prod-space-md)); /* Tuck closer to left edge */
 }
