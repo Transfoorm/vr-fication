@@ -131,7 +131,7 @@
   --scrollbar-border-radius: 8px;  /* Aligned with --radius-md */
 }
 
-/* Animations moved to styles/animations.css */
+/* ANIMATION LIBRARY is in this file - see bottom section */
 
 /* ===========================================================
    LAYOUT CONTROL VARIABLES - App Shell & Page Architecture

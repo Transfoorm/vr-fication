@@ -35,7 +35,7 @@ import { useProductivityData } from '@/hooks/useProductivityData';
 type ActionState = 'idle' | 'confirming' | 'executing';
 type DisconnectState = Record<string, ActionState>;
 
-export function EmailFields() {
+export function EmailTab() {
   // ─────────────────────────────────────────────────────────────────────
   // FUSE State (source of truth)
   // ─────────────────────────────────────────────────────────────────────

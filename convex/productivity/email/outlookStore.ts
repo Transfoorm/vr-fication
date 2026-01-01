@@ -108,6 +108,8 @@ export const storeOutlookMessages = mutation({
     for (const message of args.messages) {
       // Handle @removed (Microsoft delta API)
       if (message['@removed']) {
+        console.log(`🗑️ Delta @removed: ${message.id} (reason: ${message['@removed'].reason || 'unknown'})`);
+
         const existing = await ctx.db
           .query('productivity_email_Index')
           .withIndex('by_external_message_id', (q) => q.eq('externalMessageId', message.id))
@@ -115,6 +117,7 @@ export const storeOutlookMessages = mutation({
           .first();
 
         if (existing) {
+          console.log(`🗑️ Found in DB, deleting: ${existing.subject?.substring(0, 30)}...`);
           const cacheEntry = await ctx.db
             .query('productivity_email_BodyCache')
             .withIndex('by_message', (q) => q.eq('messageId', message.id))
@@ -125,6 +128,8 @@ export const storeOutlookMessages = mutation({
           }
           await ctx.db.delete(existing._id);
           messagesDeleted++;
+        } else {
+          console.log(`🗑️ Not found in DB (already deleted or never synced)`);
         }
         continue;
       }

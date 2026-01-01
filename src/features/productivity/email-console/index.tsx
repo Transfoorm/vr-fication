@@ -24,7 +24,6 @@ import { EmailContextMenu } from './EmailContextMenu';
 import { MessageBody } from './MessageBody';
 import type { EmailFolder } from './types';
 import './email-console.css';
-import './email-normalize.css'; // Gmail/Outlook-style email body normalization
 
 
 
@@ -249,6 +248,13 @@ export function EmailConsole() {
     () => buildVirtualItems(messages, collapsedSections),
     [messages, collapsedSections]
   );
+
+  // Auto-select first message when inbox loads (Outlook Web behavior)
+  useEffect(() => {
+    if (messages.length > 0 && selectedMessageIds.size === 0) {
+      setSelectedMessageIds(new Set([messages[0]._id]));
+    }
+  }, [messages, selectedMessageIds.size]);
 
   // Get selected message data from FUSE (only when single selection)
   const selectedMessage = useMemo(() => {

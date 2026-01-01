@@ -14,9 +14,9 @@
 import { useAdminData } from '@/hooks/useAdminData';
 import { useAdminSync } from '@/hooks/useAdminSync';
 import { Tabs, Stack } from '@/vr';
-import { ActiveUsersFeature } from './_tabs/ActiveUsersTab';
-import { DeletedUsersFeature } from './_tabs/DeletedUsersTab';
-import { InvitesFeature } from './_tabs/InvitesTab';
+import { ActiveUsersTab } from './_tabs/ActiveUsersTab';
+import { DeletedUsersTab } from './_tabs/DeletedUsersTab';
+import { InvitesTab } from './_tabs/InvitesTab';
 import { StatusTabFeature } from './_tabs/StatusTab';
 
 export function UsersTabsFeature() {
@@ -30,9 +30,9 @@ export function UsersTabsFeature() {
     <Stack>
       <Tabs.panels
         tabs={[
-          { id: 'active', label: 'Active Users', count: computed.usersCount, content: <ActiveUsersFeature /> },
-          { id: 'deleted', label: 'Deleted Users', count: computed.deletionLogsCount, content: <DeletedUsersFeature /> },
-          { id: 'invite', label: 'Invite Users', content: <InvitesFeature /> },
+          { id: 'active', label: 'Active Users', count: computed.usersCount, content: <ActiveUsersTab /> },
+          { id: 'deleted', label: 'Deleted Users', count: computed.deletionLogsCount, content: <DeletedUsersTab /> },
+          { id: 'invite', label: 'Invite Users', content: <InvitesTab /> },
           { id: 'status', label: 'Status', content: <StatusTabFeature /> }
         ]}
       />

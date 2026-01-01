@@ -278,12 +278,12 @@ The prefixes tell you exactly where the code belongs. `vr-` is reusable DNA. `ft
 Variables prefixed with `--anim-*` are **animation slot variables** - an intentional exception to the namespace rule.
 
 **How it works:**
-1. Shared keyframes in `styles/animations.css` use generic slot variables
+1. Shared keyframes in `styles/tokens.css` (ANIMATION LIBRARY section) use generic slot variables
 2. Components fill these slots locally to customize the animation
 3. The same keyframe can be reused with different values
 
 ```css
-/* styles/animations.css - shared keyframe */
+/* styles/tokens.css - ANIMATION LIBRARY section */
 @keyframes slide-in {
   from {
     transform: translateY(var(--anim-slide-distance, -8px));

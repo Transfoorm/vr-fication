@@ -24,7 +24,7 @@ import { UserDetailsFeature } from '@/features/admin/user-drawer';
 
 type UserData = Record<string, unknown> & { id: string };
 
-export function ActiveUsersFeature() {
+export function ActiveUsersTab() {
   const [checkedRows, setCheckedRows] = useState<Set<string>>(new Set());
 
   // 🚀 WARP: Instant data access from FUSE store (server-preloaded)

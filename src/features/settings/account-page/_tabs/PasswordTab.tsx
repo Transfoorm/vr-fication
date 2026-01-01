@@ -25,7 +25,7 @@ import '../account-page.css';
 
 type CeremonyStage = 'fresh' | 'typing' | 'valid' | 'confirming' | 'committing' | 'success';
 
-export function PasswordFields() {
+export function PasswordTab() {
   // ─────────────────────────────────────────────────────────────────────
   // State
   // ─────────────────────────────────────────────────────────────────────

@@ -127,10 +127,15 @@ export const deleteOutlookMessage = action({
         }
       );
 
-      if (!response.ok) {
+      // 404 = already deleted from Outlook - still clean up our DB
+      if (!response.ok && response.status !== 404) {
         const errorText = await response.text();
         console.error('Failed to move message to trash:', errorText);
         return { success: false, error: `Outlook API error: ${response.status}` };
+      }
+
+      if (response.status === 404) {
+        console.log(`Message ${message.externalMessageId} already deleted from Outlook, cleaning up DB`);
       }
 
       await ctx.runMutation(api.productivity.email.outlookActions.moveMessageToTrash, {
@@ -238,10 +243,15 @@ export const archiveOutlookMessage = action({
         }
       );
 
-      if (!response.ok) {
+      // 404 = already deleted from Outlook - still clean up our DB
+      if (!response.ok && response.status !== 404) {
         const errorText = await response.text();
         console.error('Failed to archive message:', errorText);
         return { success: false, error: `Outlook API error: ${response.status}` };
+      }
+
+      if (response.status === 404) {
+        console.log(`Message ${message.externalMessageId} already deleted from Outlook, cleaning up DB`);
       }
 
       await ctx.runMutation(api.productivity.email.outlookActions.moveMessageToArchive, {

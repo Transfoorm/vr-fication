@@ -104,15 +104,13 @@ If a CSS file exists **ANYWHERE ELSE**, the scan **FAILS**.
 | 1 | `/src/vr/**/*.css` | `.vr-{component}-*` | `vr-{component}-{action}` | `--{component}-*` | Classes, keyframes, variables |
 | 2 | `/src/features/**/*.css` | `.ft-{feature}-*` | `ft-{feature}-{action}` | `--{feature}-*` | Classes, keyframes, variables |
 | 3 | `/src/shell/**/*.css` | `.ly-{area}-*` | `ly-{area}-{action}` | `--{area}-*` | Classes, keyframes, variables (includes `app.css` for God Layout frame) |
-| 4 | `/src/app/domains/**/*.css` | `.ly-{component}-*` | `ly-{component}-{action}` | `--{component}-*` | Classes, keyframes, variables |
-| 5 | `/src/app/(auth)/**/*.css` | `.ft-auth-*` | `ft-auth-{action}` | `--ft-auth-*` | Classes, keyframes, variables |
-| 6 | `/styles/tokens.css` | FORBIDDEN | FORBIDDEN | `--{token}-*` | Variables ONLY |
-| 7 | `/styles/animations.css` | FORBIDDEN | ANY (generic allowed) | FORBIDDEN | Keyframes ONLY |
-| 8 | `/styles/globals.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | Element selectors ONLY (html, body, *, ::selection) |
-| 9 | `/styles/vr.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | @import statements ONLY |
-| 10 | `/styles/features.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | @import statements ONLY |
-| 11 | `/styles/layout.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | @import statements ONLY |
-| 12 | `/styles/themes/*.css` | FORBIDDEN | FORBIDDEN | `--{theme}-*` | Variables ONLY |
+| 4 | `/src/app/(auth)/**/*.css` | `.ft-auth-*` | `ft-auth-{action}` | `--ft-auth-*` | Classes, keyframes, variables |
+| 5 | `/styles/tokens.css` | FORBIDDEN | ANY (generic allowed in ANIMATION LIBRARY section) | `--{token}-*` | Variables + Keyframes (ANIMATION LIBRARY section) |
+| 6 | `/styles/globals.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | Element selectors ONLY (html, body, *, ::selection) |
+| 7 | `/styles/vr.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | @import statements ONLY |
+| 8 | `/styles/features.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | @import statements ONLY |
+| 9 | `/styles/layout.css` | FORBIDDEN | FORBIDDEN | FORBIDDEN | @import statements ONLY |
+| 10 | `/styles/themes/*.css` | FORBIDDEN | FORBIDDEN | `--{theme}-*` | Variables ONLY |
 
 **NOTE:** Vanish (quarantine zone) CSS lives at `/src/features/vanish/` and is covered by Row 2.
 
@@ -268,8 +266,8 @@ while IFS=: read -r file line content; do
   [ -z "$keyframe" ] && continue
   scanned=$((scanned + 1))
 
-  # styles/animations.css allows any keyframe name
-  echo "$file" | grep -q "styles/animations.css" && continue
+  # styles/tokens.css ANIMATION LIBRARY allows any keyframe name
+  echo "$file" | grep -q "styles/tokens.css" && continue
 
   # Extract expected prefix and folder from path
   dir=$(dirname "$file")
@@ -320,35 +318,35 @@ echo "VIOLATIONS: $violations"
 For EACH keyframe found:
 
 1. Determine which CANONICAL LIST row the file belongs to
-2. If file is `/styles/animations.css` (row 7): ANY keyframe name is allowed
-3. If file is rows 6, 8, 9, 10, 11, 12: Keyframes are FORBIDDEN → **FAIL**
-4. For rows 1-5: Keyframe MUST match the REQUIRED KEYFRAME PREFIX for that row
+2. If file is `/styles/tokens.css` (row 5): ANY keyframe name is allowed (ANIMATION LIBRARY section)
+3. If file is rows 6, 7, 8, 9, 10: Keyframes are FORBIDDEN → **FAIL**
+4. For rows 1-4: Keyframe MUST match the REQUIRED KEYFRAME PREFIX for that row
 5. **NEW:** Keyframe name after prefix MUST start with the parent folder name
 
-**GENERIC NAMES FORBIDDEN OUTSIDE animations.css:**
+**GENERIC NAMES FORBIDDEN OUTSIDE tokens.css ANIMATION LIBRARY:**
 
 | Keyframe Name | Allowed In | Violation Everywhere Else |
 |---------------|------------|---------------------------|
-| `pulse` | animations.css ONLY | YES |
-| `fade-in` | animations.css ONLY | YES |
-| `fade-out` | animations.css ONLY | YES |
-| `scale-in` | animations.css ONLY | YES |
-| `scale-out` | animations.css ONLY | YES |
-| `slide-in` | animations.css ONLY | YES |
-| `slide-out` | animations.css ONLY | YES |
-| `slide-up` | animations.css ONLY | YES |
-| `slide-down` | animations.css ONLY | YES |
-| `bounce-in` | animations.css ONLY | YES |
-| `bounce-out` | animations.css ONLY | YES |
-| `shimmer` | animations.css ONLY | YES |
-| `spin` | animations.css ONLY | YES |
-| `loading` | animations.css ONLY | YES |
-| `blink` | animations.css ONLY | YES |
-| `shake` | animations.css ONLY | YES |
-| `wiggle` | animations.css ONLY | YES |
-| `pop` | animations.css ONLY | YES |
-| `glow` | animations.css ONLY | YES |
-| `[any-unprefixed-name]` | animations.css ONLY | YES |
+| `pulse` | tokens.css ONLY | YES |
+| `fade-in` | tokens.css ONLY | YES |
+| `fade-out` | tokens.css ONLY | YES |
+| `scale-in` | tokens.css ONLY | YES |
+| `scale-out` | tokens.css ONLY | YES |
+| `slide-in` | tokens.css ONLY | YES |
+| `slide-out` | tokens.css ONLY | YES |
+| `slide-up` | tokens.css ONLY | YES |
+| `slide-down` | tokens.css ONLY | YES |
+| `bounce-in` | tokens.css ONLY | YES |
+| `bounce-out` | tokens.css ONLY | YES |
+| `shimmer` | tokens.css ONLY | YES |
+| `spin` | tokens.css ONLY | YES |
+| `loading` | tokens.css ONLY | YES |
+| `blink` | tokens.css ONLY | YES |
+| `shake` | tokens.css ONLY | YES |
+| `wiggle` | tokens.css ONLY | YES |
+| `pop` | tokens.css ONLY | YES |
+| `glow` | tokens.css ONLY | YES |
+| `[any-unprefixed-name]` | tokens.css ONLY | YES |
 
 **Output:**
 ```
@@ -365,7 +363,7 @@ grep -rh "@keyframes " src/**/*.css 2>/dev/null | \
   sed 's/.*@keyframes //' | sed 's/ {.*//' | sort | uniq -d
 ```
 
-**NOTE:** This checks `src/**/*.css`. `styles/animations.css` is the canonical source — duplicates there are impossible by definition.
+**NOTE:** This checks `src/**/*.css`. `styles/tokens.css` ANIMATION LIBRARY section is the canonical source — duplicates there are impossible by definition.
 
 **VALIDATION:**
 Output MUST be empty.
@@ -473,7 +471,7 @@ For EACH variable definition found:
 
 Variables prefixed with `--anim-*` are **animation slot variables**. They are:
 - Defined locally in component CSS (scoped to a selector)
-- Consumed by shared keyframes in `styles/animations.css`
+- Consumed by shared keyframes in `styles/tokens.css` (ANIMATION LIBRARY section)
 - Intentionally generic to enable keyframe reuse across components
 
 | Pattern | Location | Status |
@@ -574,32 +572,24 @@ PHASE 7: Orphans           Scanned: [N] classes | Orphaned: [N] | [PASS/FAIL]
 
 ## 🔒 PHASE 8: CONTENT RULE ENFORCEMENT (MANDATORY)
 
-For files with strict content rules (rows 6-12 in CANONICAL LIST):
+For files with strict content rules (rows 5-10 in CANONICAL LIST):
 
 **CHECK 8.1: tokens.css**
 ```bash
-# Must contain ONLY :root, variables, comments, whitespace
-# Looks for violations: class selectors, element selectors (except :root)
-grep -E "^\.[a-z]|^[a-z]+\s*\{" styles/tokens.css 2>/dev/null
+# Must contain ONLY :root, variables, @keyframes (ANIMATION LIBRARY), comments, whitespace
+# Looks for violations: class selectors, element selectors (except :root, @keyframes)
+grep -E "^\.[a-z]|^[a-z]+\s*\{" styles/tokens.css 2>/dev/null | grep -v "@keyframes"
 ```
 If output is non-empty: **FAIL**
 
-**CHECK 8.2: animations.css**
-```bash
-# Must contain ONLY @keyframes, comments, whitespace
-# Looks for violations: class selectors, element selectors, :root
-grep -E "^\.[a-z]|^[a-z]+\s*\{|^:root" styles/animations.css 2>/dev/null
-```
-If output is non-empty: **FAIL**
-
-**CHECK 8.3: globals.css**
+**CHECK 8.2: globals.css**
 ```bash
 # Must contain ONLY element selectors
 grep -E "^\.[a-z]" styles/globals.css 2>/dev/null
 ```
 If output is non-empty: **FAIL**
 
-**CHECK 8.4: Import Hub Files (must contain ONLY @import statements)**
+**CHECK 8.3: Import Hub Files (must contain ONLY @import statements)**
 ```bash
 # Must contain ONLY @import statements (and comments/whitespace)
 # Looks for violations: class selectors, id selectors, element selectors, CSS properties
@@ -611,7 +601,7 @@ done
 ```
 If output is non-empty: **FAIL**
 
-**CHECK 8.5: Theme Files (must contain ONLY variables)**
+**CHECK 8.4: Theme Files (must contain ONLY variables)**
 ```bash
 # Must contain ONLY :root, variables, comments, whitespace
 # Looks for violations: class selectors, element selectors, @keyframes
