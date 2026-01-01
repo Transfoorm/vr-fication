@@ -301,3 +301,280 @@
   --stack-gap-2xl: var(--space-2xl);      /* 2X large stack gap */
   --stack-gap-3xl: var(--space-3xl);      /* 3X large stack gap */
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   📨 📅 PRODUCTIVITY TOKENS - Derived Layer for Work Applications
+
+   ARCHITECTURE:
+   Global Tokens (source of truth)
+         ↓
+   Productivity Tokens (derives from global)
+         ↓
+   Feature CSS (consumes --prod-*)
+
+   Email, Calendar, Booking are APPLICATIONS, not marketing pages.
+   They require tighter density, different hierarchy, and stability
+   independent of site-wide typography changes.
+
+   RULES:
+   - Feature CSS may ONLY reference var(--prod-*)
+   - No raw pixel values in feature CSS
+   - Productivity tokens derive from global tokens where possible
+   - Stylelint remains strict - no exceptions
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ─────────────────────────────────────────────────────────────────────────
+     TYPOGRAPHY - Derived from global font tokens
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Primary content hierarchy - derived from global --font-size-* */
+  --prod-text-heading: var(--font-size-lg);        /* Reading pane subject, major headings */
+  --prod-text-body: var(--font-size-sm);           /* Email body, message content */
+  --prod-text-body-sm: var(--font-size-sm);        /* Sender names, meta info, headers */
+  --prod-text-caption: var(--font-size-xs);        /* Subject lines, snippets */
+  --prod-text-micro: var(--font-size-xs);          /* Dates, counts, section labels */
+
+  /* Icon sizes - productivity-specific (no global equivalent) */
+  --prod-icon-sm: 13px;                            /* Folder icons, inline icons */
+  --prod-icon-md: 14px;                            /* Section chevrons, action icons */
+  --prod-icon-lg: 16px;                            /* Primary action icons */
+
+  /* Font weights - derived from global --font-weight-* */
+  --prod-weight-normal: var(--font-weight-normal);
+  --prod-weight-medium: var(--font-weight-medium);
+  --prod-weight-semibold: var(--font-weight-semibold);
+
+  /* Line heights - derived from global --line-height-* */
+  --prod-line-height-tight: var(--line-height-tight);
+  --prod-line-height-normal: var(--line-height-normal);
+  --prod-line-height-relaxed: var(--line-height-relaxed);
+
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     SPACING - Derived from global space tokens where possible
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Core spacing scale - derived from global --space-* */
+  --prod-space-xxs: 2px;                           /* Micro gaps (no global equivalent) */
+  --prod-space-xs: var(--space-xs);                /* Tight internal spacing */
+  --prod-space-sm: 6px;                            /* Small padding (no global equivalent) */
+  --prod-space-md: var(--space-sm);                /* Standard padding, icon spacing */
+  --prod-space-lg: 10px;                           /* Icon gaps (no global equivalent) */
+  --prod-space-xl: var(--size-sm);                 /* Card padding, section gaps */
+  --prod-space-2xl: var(--space-md);               /* Large padding, message gaps */
+  --prod-space-3xl: var(--space-lg);               /* Major section spacing */
+
+  /* Margin tokens for specific use cases */
+  --prod-margin-thread-row: 2px;                   /* Thread item bottom margin */
+  --prod-margin-section: var(--space-sm);          /* Reading pane subject margin */
+  --prod-margin-message: var(--size-sm);           /* Message header margin */
+  --prod-margin-block: var(--space-md);            /* Block-level element margins */
+
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     BORDER RADIUS - Derived from global radius tokens
+     ───────────────────────────────────────────────────────────────────────── */
+
+  --prod-radius-xs: 3px;                           /* Scrollbar thumb (no global equivalent) */
+  --prod-radius-sm: var(--radius-sm);              /* Folder items, small elements */
+  --prod-radius-md: var(--radius-md);              /* Cards, panels, containers */
+  --prod-radius-pill: 10px;                        /* Badge/pill elements */
+
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     LAYOUT - Productivity-specific dimensions
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Rail widths */
+  --prod-mailbox-width: 180px;                     /* Left folder rail */
+  --prod-resize-handle: var(--size-sm);            /* Draggable resize handles */
+
+  /* Icon container widths */
+  --prod-folder-icon-width: var(--icon-size-xs);   /* Folder icon container */
+  --prod-badge-min-width: 18px;                    /* Minimum badge width */
+
+  /* Scrollbar dimensions */
+  --prod-scrollbar-width: 6px;                     /* Thin scrollbar for density */
+
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     COLORS - Productivity-specific colors (semantic layer)
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Text colors */
+  --prod-text-primary: #333;                       /* Primary content */
+  --prod-text-secondary: #444;                     /* Secondary content */
+  --prod-text-tertiary: #666;                      /* Meta information */
+  --prod-text-muted: #888;                         /* Dates, counts, captions */
+  --prod-text-faint: #999;                         /* Loading states, empty states */
+
+  /* Background colors */
+  --prod-bg-surface: #fff;                         /* Card/panel backgrounds */
+  --prod-bg-hover: #f5f5f5;                        /* Hover states */
+  --prod-bg-selected: #fef6f0;                     /* Selected items (warm cream) */
+  --prod-bg-selected-hover: #fdeee3;               /* Selected + hover (slightly warmer) */
+  --prod-bg-section: #fafafa;                      /* Section headers */
+  --prod-bg-section-hover: #f0f0f0;                /* Section header hover */
+  --prod-bg-badge: #eee;                           /* Unselected badge background */
+
+  /* Border colors */
+  --prod-border-light: #eee;                       /* Dividers, thread separators */
+  --prod-border-normal: #ccc;                      /* Panel borders */
+  --prod-border-hover: #aaa;                       /* Scrollbar thumb hover */
+
+  /* Selected state colors (orange brand) */
+  --prod-selected-text: #e85d35;                   /* Selected folder text */
+  --prod-selected-bg: #f97550;                     /* Selected badge background (matches sidebar bracket) */
+  --prod-selected-contrast: #fff;                  /* Text on selected background */
+  --prod-selected-indicator: #f97550;              /* Left bracket indicator */
+
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     TRANSITIONS - Animation timing for productivity interactions
+     ───────────────────────────────────────────────────────────────────────── */
+
+  --prod-transition-fast: var(--duration-fast) var(--easing);
+  --prod-transition-normal: var(--duration-normal) var(--easing);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FUSE ANIMATION LIBRARY
+   ═══════════════════════════════════════════════════════════════════
+   The ONE source of truth for all animations.
+   Components do NOT define keyframes. Period.
+
+   Usage: animation: fade-in 200ms ease-out;
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── OPACITY ─────────────────────────────────────────────────────── */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes pulse-warning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ─── SLIDE ───────────────────────────────────────────────────────── */
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(var(--anim-slide-distance, -8px));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(var(--anim-slide-distance, 8px));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--anim-slide-distance, -8px));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── SCALE ───────────────────────────────────────────────────────── */
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(var(--anim-scale-start, 0.95));
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(var(--anim-scale-end, 0.95));
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ─── SPIN ────────────────────────────────────────────────────────── */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ─── LOADING ─────────────────────────────────────────────────────── */
+
+@keyframes shimmer {
+  100% { left: 100%; }
+}
+
+@keyframes loading {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ─── CHECKMARK ───────────────────────────────────────────────────── */
+
+@keyframes checkmark-pop {
+  0% { transform: translate(-50%, -50%) scale(0); }
+  50% { transform: translate(-50%, -50%) scale(1.2); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}

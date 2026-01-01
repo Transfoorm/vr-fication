@@ -138,10 +138,10 @@ const eslintConfig = [
       // VR-1: Enforce Stack VR for multiple cards
       "vr/no-manual-card-stacking": "error",
 
-      // NOTE: class-prefix and no-component-css DISABLED for now
-      // Legacy uses VR architecture, not 5-file system yet
-      // "class-prefix/enforce-class-prefix": "error",  // DISABLED
-      // "no-component-css/no-component-css": "error",  // DISABLED
+      // WCCC 5-File System Enforcement
+      "class-prefix/enforce-class-prefix": "error",
+      // NOTE: no-component-css superseded by pre-commit hook page.css blocking
+      // "no-component-css/no-component-css": "error",
     },
   },
   // ═══════════════════════════════════════════════════════════════════

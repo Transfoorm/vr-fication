@@ -10,7 +10,7 @@ import { T, Stack } from '@/vr';
 export function ThemeTab() {
   return (
     <Stack.lg>
-      <T.body className="text-secondary">Theme settings coming soon...</T.body>
+      <T.body>Theme settings coming soon...</T.body>
     </Stack.lg>
   );
 }
