@@ -279,6 +279,9 @@ export function EmailConsole() {
     let newMailboxWidth = startMailboxWidth;
     let newThreadsWidth = startThreadsWidth;
 
+    // Add resizing class to disable iframe pointer events
+    container.classList.add('ft-email__body--resizing');
+
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
 
@@ -296,6 +299,9 @@ export function EmailConsole() {
       document.removeEventListener('mouseup', onMouseUp);
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
+
+      // Remove resizing class to restore iframe pointer events
+      container.classList.remove('ft-email__body--resizing');
 
       // Persist to state and localStorage
       if (handle === 'mailbox') {
@@ -377,13 +383,15 @@ export function EmailConsole() {
               <div className="ft-email__empty"><T.body color="secondary">Message not found</T.body></div>
             ) : (
               <>
-                <div className="ft-email__reading-subject">{selectedMessage.subject}</div>
-                <div className="ft-email__message-header">
-                  <strong>From:</strong> {selectedMessage.from.name || selectedMessage.from.email}<br />
-                  <strong>Date:</strong> {new Date(selectedMessage.receivedAt).toLocaleString()}<br />
-                  <strong>To:</strong> {selectedMessage.to.map(r => r.name || r.email).join(', ')}
+                <div className="ft-email__reading-header">
+                  <div className="ft-email__reading-subject">{selectedMessage.subject}</div>
+                  <div className="ft-email__message-header">
+                    <strong>From:</strong> {selectedMessage.from.name || selectedMessage.from.email}<br />
+                    <strong>Date:</strong> {new Date(selectedMessage.receivedAt).toLocaleString()}<br />
+                    <strong>To:</strong> {selectedMessage.to.map(r => r.name || r.email).join(', ')}
+                  </div>
+                  <hr />
                 </div>
-                <hr />
                 <MessageBody messageId={selectedMessage._id as Id<'productivity_email_Index'>} />
               </>
             )}

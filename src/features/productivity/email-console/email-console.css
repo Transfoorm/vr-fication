@@ -124,13 +124,19 @@
   /* Invisible - no background, just the hit area */
 }
 
-.ft-email__resize-handle:hover {
-  /* Optional: subtle highlight on hover */
-  background: rgb(0 0 0 / 3%);
+.ft-email__resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: transparent;
+  transition: background 0.15s ease;
 }
 
-.ft-email__resize-handle:active {
-  background: rgb(0 0 0 / 6%);
+.ft-email__resize-handle:hover::after {
+  background: rgb(0 0 0 / 15%);
 }
 
 
@@ -141,6 +147,7 @@
 .ft-email__mailbox {
   padding: var(--prod-space-md) var(--prod-space-md) var(--prod-space-md) 0; /* No left padding - container invisible */
   overflow-y: auto;
+  overscroll-behavior: contain; /* Prevents sticking at scroll boundaries */
   display: flex;
   flex-direction: column;
   gap: var(--prod-space-xxs);
@@ -271,6 +278,7 @@
 .ft-email__threads-scroll {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain; /* Prevents sticking at scroll boundaries */
 
   /* Firefox thin scrollbar */
   scrollbar-width: thin;
@@ -313,11 +321,9 @@
 .ft-email__reading-scroll {
   flex: 1;
   padding: var(--prod-space-xl);
-  overflow-y: auto;
-
-  /* Firefox thin scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: var(--prod-border-normal) transparent;
+  display: grid;
+  grid-template-rows: auto 1fr;  /* Header auto, iframe fills rest */
+  overflow: hidden;              /* NO scroll here - iframe owns scrolling */
 }
 
 /* Webkit (Chrome/Safari) thin scrollbar */
@@ -483,6 +489,28 @@
   color: var(--prod-text-faint);
   font-size: var(--prod-text-body-sm);
   padding: var(--prod-space-md) 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Message Body Iframe (3-Layer Architecture - Layer 3)
+
+   CRITICAL: This iframe is the content sandbox. It must NEVER affect parent layout.
+   - Fixed height (no measurement, no observers)
+   - Internal scroll (handled inside iframe)
+   - Parent scroll container (.ft-email__reading-scroll) unchanged
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__message-iframe {
+  width: 100%;
+  height: 100%;    /* Fills the 1fr grid row */
+  border: none;
+  display: block;
+  background: transparent;
+}
+
+/* During resize, prevent iframe from capturing mouse events */
+.ft-email__body--resizing .ft-email__message-iframe {
+  pointer-events: none;
 }
 
 
