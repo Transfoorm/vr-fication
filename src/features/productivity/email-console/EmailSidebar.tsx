@@ -41,7 +41,7 @@ export function EmailSidebar({
       {/* Inbox with expandable subfolders */}
       <div className="ft-email__folder-group">
         <div
-          className={`ft-email__folder ${selectedFolder === 'inbox' && !selectedSubfolderId ? 'ft-email__folder--selected' : ''}`}
+          className={`ft-email__folder ${selectedFolder === 'inbox' ? 'ft-email__folder--selected' : ''}`}
           onClick={() => onFolderSelect('inbox')}
         >
           {folderTree.inbox.length > 0 && (
@@ -100,7 +100,7 @@ export function EmailSidebar({
       {/* Archive with expandable subfolders */}
       <div className="ft-email__folder-group">
         <div
-          className={`ft-email__folder ${selectedFolder === 'archive' && !selectedSubfolderId ? 'ft-email__folder--selected' : ''}`}
+          className={`ft-email__folder ${selectedFolder === 'archive' ? 'ft-email__folder--selected' : ''}`}
           onClick={() => onFolderSelect('archive')}
         >
           {folderTree.archive.length > 0 && (
@@ -135,7 +135,7 @@ export function EmailSidebar({
       {/* Deleted with expandable subfolders */}
       <div className="ft-email__folder-group">
         <div
-          className={`ft-email__folder ${selectedFolder === 'trash' && !selectedSubfolderId ? 'ft-email__folder--selected' : ''}`}
+          className={`ft-email__folder ${selectedFolder === 'trash' ? 'ft-email__folder--selected' : ''}`}
           onClick={() => onFolderSelect('trash')}
         >
           {folderTree.trash.length > 0 && (
