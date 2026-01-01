@@ -331,6 +331,7 @@ export const getOutlookTokens = query({
       refreshToken: account.refreshToken || '',
       expiresAt: account.tokenExpiresAt || 0,
       scope: '', // Not stored in account table
+      emailAddress: account.emailAddress, // CRITICAL: Needed for token refresh to prevent phantom accounts
     };
   },
 });
@@ -489,13 +490,14 @@ export const syncOutlookMessages = action({
           expires_in: number;
         };
 
-        // Store new tokens
+        // Store new tokens - MUST pass emailAddress to prevent phantom account creation
         await ctx.runMutation(api.productivity.email.outlook.storeOutlookTokens, {
           userId: args.userId,
           accessToken: refreshData.access_token,
           refreshToken: refreshData.refresh_token || tokens.refreshToken,
           expiresAt: now + refreshData.expires_in * 1000,
           scope: 'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access',
+          emailAddress: tokens.emailAddress, // CRITICAL: Prevents creating duplicate account with user.email fallback
         });
 
         // Update tokens for this sync

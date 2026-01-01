@@ -31,7 +31,7 @@ import '@/styles/globals.css';
 // ═══════════════════════════════════════════════════════════════════════
 export const metadata: Metadata = {
   title: {
-    default: 'From Purpose Into Profit | Transfoorm',
+    default: 'Purpose to Profit | Transfoorm',
     template: '%s | FUSE 6.0'
   },
   description: 'Instant everything. Zero loading states. The future of web applications.',
