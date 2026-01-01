@@ -41,10 +41,14 @@ export function SubfolderTree({
         const isContextActive = contextMenuFolderId === folder._id;
         const unreadCount = unreadCounts?.[folder.externalFolderId] || 0;
 
+        // Additional left padding for nested depth (keeps badges aligned to right edge)
+        const depthPadding = depth > 0 ? `calc(var(--prod-space-xl) * ${depth})` : undefined;
+
         return (
           <div key={folder._id} className="ft-email__subfolder-group">
             <div
               className={`ft-email__subfolder ${selectedSubfolderId === folder.externalFolderId ? 'ft-email__subfolder--selected' : ''} ${isContextActive ? 'ft-email__subfolder--context-active' : ''}`}
+              style={depthPadding ? { paddingLeft: `calc(var(--prod-space-3xl) + ${depthPadding})` } : undefined}
               title={folder.displayName}
               onClick={() => onSelect(folder)}
               onContextMenu={onContextMenu ? (e) => onContextMenu(folder._id, e) : undefined}

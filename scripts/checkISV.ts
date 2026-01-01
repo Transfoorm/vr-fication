@@ -52,6 +52,9 @@ const EXCEPTION_FILES = new Set([
   // - Resizable grid: computed column widths from drag handles
   // - Context menu: pointer-based coordinates for positioning
   'src/features/productivity/email-console/index.tsx',
+  'src/features/productivity/email-console/EmailContextMenu.tsx',  // Context menu xy positioning
+  'src/features/productivity/email-console/EmailMessageList.tsx',  // Virtualizer row positioning
+  'src/features/productivity/email-console/SubfolderTree.tsx',     // Dynamic depth indentation
 
   // MirorAI star toggle (SVG particle circles need inline opacity:0 - CSS alone failed)
   'src/features/preferences/MirorAiTab/index.tsx',

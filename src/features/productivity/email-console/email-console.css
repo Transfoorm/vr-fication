@@ -195,6 +195,7 @@
 }
 
 .ft-email__folder-count {
+  margin-left: auto;
   font-size: var(--prod-text-micro);
   color: var(--prod-text-muted);
   background: var(--prod-bg-badge);
@@ -534,10 +535,6 @@
   margin-top: var(--prod-space-xxs);
 }
 
-/* Nested subfolders get automatic indentation via CSS nesting */
-.ft-email__subfolders .ft-email__subfolders {
-  padding-left: var(--prod-space-xl);
-}
 
 .ft-email__subfolder-group {
   display: flex;
@@ -548,8 +545,7 @@
   display: flex;
   align-items: center;
   gap: var(--prod-space-md);
-  padding: var(--prod-space-sm) var(--prod-space-lg);
-  padding-left: var(--prod-space-3xl); /* Room for chevron */
+  padding: var(--prod-space-sm) var(--prod-space-2xl) var(--prod-space-sm) var(--prod-space-3xl); /* Match folder right padding */
   border-radius: var(--prod-radius-sm);
   cursor: pointer;
   font-size: var(--prod-text-caption);
@@ -597,6 +593,7 @@
 }
 
 .ft-email__subfolder-count {
+  margin-left: auto;
   font-size: var(--prod-text-micro);
   color: var(--prod-text-muted);
   background: var(--prod-bg-badge);
