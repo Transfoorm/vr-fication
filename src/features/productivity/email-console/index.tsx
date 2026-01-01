@@ -28,7 +28,8 @@ import { T, Icon } from '@/vr';
 import { MessageBody } from './MessageBody';
 import type { Id } from '@/convex/_generated/dataModel';
 import { getTimeBucket, formatThreadDate, getSavedWidth, STORAGE_KEY_MAILBOX, STORAGE_KEY_THREADS, STANDARD_FOLDERS } from './utils';
-import { SubfolderTree } from './SubfolderTree';
+import { EmailSidebar } from './EmailSidebar';
+import type { EmailFolder } from './types';
 import './email-console.css';
 import './email-normalize.css'; // Gmail/Outlook-style email body normalization
 
@@ -111,9 +112,15 @@ export function EmailConsole() {
   };
 
   // Handle subfolder selection
-  const handleSubfolderSelect = (subfolder: typeof allFolders[0]) => {
+  const handleSubfolderSelect = (subfolder: EmailFolder) => {
     setSelectedFolder(subfolder.canonicalFolder); // Set parent canonical folder
     setSelectedSubfolderId(subfolder.externalFolderId); // Set specific subfolder
+  };
+
+  // Handle custom folder selection
+  const handleCustomFolderSelect = (folderId: string) => {
+    setSelectedFolder('custom');
+    setSelectedSubfolderId(folderId);
   };
 
   const toggleSection = (bucket: string) => {
@@ -683,176 +690,22 @@ export function EmailConsole() {
         }}
       >
         {/* RAIL 1: Mailbox */}
-        <aside className="ft-email__mailbox" onContextMenu={handleMailboxContextMenu}>
-          {/* Inbox with expandable subfolders */}
-          <div className="ft-email__folder-group">
-            <div
-              className={`ft-email__folder ${selectedFolder === 'inbox' && !selectedSubfolderId ? 'ft-email__folder--selected' : ''}`}
-              onClick={() => handleFolderSelect('inbox')}
-            >
-              {folderTree.inbox.length > 0 && (
-                <span
-                  className={`ft-email__folder-chevron ${expandedFolders.has('inbox') ? 'ft-email__folder-chevron--expanded' : ''}`}
-                  onClick={(e) => { e.stopPropagation(); toggleFolderExpand('inbox'); }}
-                >
-                  ›
-                </span>
-              )}
-              <span className="ft-email__folder-icon">📥</span>
-              <span className="ft-email__folder-label">Inbox</span>
-              {folderCounts.inbox > 0 && (
-                <span className="ft-email__folder-count">{folderCounts.inbox}</span>
-              )}
-            </div>
-            {expandedFolders.has('inbox') && folderTree.inbox.length > 0 && (
-              <SubfolderTree
-                folders={folderTree.inbox}
-                getChildFolders={getChildFolders}
-                selectedSubfolderId={selectedSubfolderId}
-                expandedFolders={expandedFolders}
-                toggleFolderExpand={toggleFolderExpand}
-                onSelect={handleSubfolderSelect}
-                onContextMenu={handleFolderContextMenu}
-                contextMenuFolderId={contextMenu?.folderId}
-                unreadCounts={subfolderCounts}
-              />
-            )}
-          </div>
-
-          {/* Drafts */}
-          <div
-            className={`ft-email__folder ${selectedFolder === 'drafts' ? 'ft-email__folder--selected' : ''}`}
-            onClick={() => handleFolderSelect('drafts')}
-          >
-            <span className="ft-email__folder-icon">✏️</span>
-            <span className="ft-email__folder-label">Drafts</span>
-            {folderCounts.drafts > 0 && (
-              <span className="ft-email__folder-count">{folderCounts.drafts}</span>
-            )}
-          </div>
-
-          {/* Sent */}
-          <div
-            className={`ft-email__folder ${selectedFolder === 'sent' ? 'ft-email__folder--selected' : ''}`}
-            onClick={() => handleFolderSelect('sent')}
-          >
-            <span className="ft-email__folder-icon">📨</span>
-            <span className="ft-email__folder-label">Sent</span>
-            {folderCounts.sent > 0 && (
-              <span className="ft-email__folder-count">{folderCounts.sent}</span>
-            )}
-          </div>
-
-          {/* Archive with expandable subfolders */}
-          <div className="ft-email__folder-group">
-            <div
-              className={`ft-email__folder ${selectedFolder === 'archive' && !selectedSubfolderId ? 'ft-email__folder--selected' : ''}`}
-              onClick={() => handleFolderSelect('archive')}
-            >
-              {folderTree.archive.length > 0 && (
-                <span
-                  className={`ft-email__folder-chevron ${expandedFolders.has('archive') ? 'ft-email__folder-chevron--expanded' : ''}`}
-                  onClick={(e) => { e.stopPropagation(); toggleFolderExpand('archive'); }}
-                >
-                  ›
-                </span>
-              )}
-              <span className="ft-email__folder-icon">🔍</span>
-              <span className="ft-email__folder-label">Archive</span>
-              {folderCounts.archive > 0 && (
-                <span className="ft-email__folder-count">{folderCounts.archive}</span>
-              )}
-            </div>
-            {expandedFolders.has('archive') && folderTree.archive.length > 0 && (
-              <SubfolderTree
-                folders={folderTree.archive}
-                getChildFolders={getChildFolders}
-                selectedSubfolderId={selectedSubfolderId}
-                expandedFolders={expandedFolders}
-                toggleFolderExpand={toggleFolderExpand}
-                onSelect={handleSubfolderSelect}
-                onContextMenu={handleFolderContextMenu}
-                contextMenuFolderId={contextMenu?.folderId}
-                unreadCounts={subfolderCounts}
-              />
-            )}
-          </div>
-
-          {/* Deleted with expandable subfolders */}
-          <div className="ft-email__folder-group">
-            <div
-              className={`ft-email__folder ${selectedFolder === 'trash' && !selectedSubfolderId ? 'ft-email__folder--selected' : ''}`}
-              onClick={() => handleFolderSelect('trash')}
-            >
-              {folderTree.trash.length > 0 && (
-                <span
-                  className={`ft-email__folder-chevron ${expandedFolders.has('trash') ? 'ft-email__folder-chevron--expanded' : ''}`}
-                  onClick={(e) => { e.stopPropagation(); toggleFolderExpand('trash'); }}
-                >
-                  ›
-                </span>
-              )}
-              <span className="ft-email__folder-icon">🗑️</span>
-              <span className="ft-email__folder-label">Deleted</span>
-              {folderCounts.trash > 0 && (
-                <span className="ft-email__folder-count">{folderCounts.trash}</span>
-              )}
-            </div>
-            {expandedFolders.has('trash') && folderTree.trash.length > 0 && (
-              <SubfolderTree
-                folders={folderTree.trash}
-                getChildFolders={getChildFolders}
-                selectedSubfolderId={selectedSubfolderId}
-                expandedFolders={expandedFolders}
-                toggleFolderExpand={toggleFolderExpand}
-                onSelect={handleSubfolderSelect}
-                onContextMenu={handleFolderContextMenu}
-                contextMenuFolderId={contextMenu?.folderId}
-                unreadCounts={subfolderCounts}
-              />
-            )}
-          </div>
-
-          {/* Junk */}
-          <div
-            className={`ft-email__folder ${selectedFolder === 'spam' ? 'ft-email__folder--selected' : ''}`}
-            onClick={() => handleFolderSelect('spam')}
-          >
-            <span className="ft-email__folder-icon">⛔️</span>
-            <span className="ft-email__folder-label">Spam</span>
-            {folderCounts.spam > 0 && (
-              <span className="ft-email__folder-count">{folderCounts.spam}</span>
-            )}
-          </div>
-
-          {/* Custom Folders (e.g., Fyxer AI) */}
-          {folderTree.custom.length > 0 && (
-            <>
-              <div className="ft-email__folder-divider" />
-              {folderTree.custom.map((folder) => {
-                const unreadCount = subfolderCounts[folder.externalFolderId] || 0;
-                return (
-                  <div
-                    key={folder._id}
-                    className={`ft-email__folder ${selectedFolder === 'custom' && selectedSubfolderId === folder.externalFolderId ? 'ft-email__folder--selected' : ''}`}
-                    onClick={() => {
-                      setSelectedFolder('custom');
-                      setSelectedSubfolderId(folder.externalFolderId);
-                    }}
-                    onContextMenu={(e) => handleFolderContextMenu(folder._id, e)}
-                    title={folder.displayName}
-                  >
-                    <span className="ft-email__folder-icon">📁</span>
-                    <span className="ft-email__folder-label">{folder.displayName}</span>
-                    {unreadCount > 0 && (
-                      <span className="ft-email__folder-count">{unreadCount}</span>
-                    )}
-                  </div>
-                );
-              })}
-            </>
-          )}
-        </aside>
+        <EmailSidebar
+          selectedFolder={selectedFolder}
+          selectedSubfolderId={selectedSubfolderId}
+          expandedFolders={expandedFolders}
+          folderTree={folderTree}
+          folderCounts={folderCounts}
+          subfolderCounts={subfolderCounts}
+          contextMenuFolderId={contextMenu?.folderId ?? null}
+          getChildFolders={getChildFolders}
+          onFolderSelect={handleFolderSelect}
+          onSubfolderSelect={handleSubfolderSelect}
+          onToggleFolderExpand={toggleFolderExpand}
+          onContextMenu={handleMailboxContextMenu}
+          onFolderContextMenu={handleFolderContextMenu}
+          onCustomFolderSelect={handleCustomFolderSelect}
+        />
 
         {/* RESIZE HANDLE 1: Between Mailbox and Threads */}
         <div
