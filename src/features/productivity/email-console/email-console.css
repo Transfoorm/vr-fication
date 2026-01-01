@@ -534,7 +534,8 @@
   margin-top: var(--prod-space-xxs);
 }
 
-.ft-email__subfolders--nested {
+/* Nested subfolders get automatic indentation via CSS nesting */
+.ft-email__subfolders .ft-email__subfolders {
   padding-left: var(--prod-space-xl);
 }
 
