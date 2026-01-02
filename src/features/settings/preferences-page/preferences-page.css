@@ -19,10 +19,6 @@
   overflow: visible !important;
 }
 
-.ft-preferences .vr-card__content {
-  overflow: visible !important;
-}
-
 /* ─────────────────────────────────────────────────────────────────────
    Avatar Row: Grid + Preview side by side
    ───────────────────────────────────────────────────────────────────── */
@@ -109,12 +105,6 @@
   align-items: center;
   align-self: center;
   overflow: visible !important;
-}
-
-.ft-preferences-star-label {
-  /* Commented out in TSX - no text content */
-  color: var(--text-tertiary);
-  margin-top: -6px;
 }
 
 /* Smaller star for enchantment */

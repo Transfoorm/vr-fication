@@ -324,10 +324,6 @@
   background-color: var(--bg-secondary);
 }
 
-.ft-userbutton-menu-value--placeholder {
-  color: var(--text-tertiary);
-}
-
 /* Theme Toggle Button - reduce padding to match other buttons */
 .ft-userbutton-menu-item:has(.ft-theme-label) {
   padding: var(--user-button-padding-theme-reduced) var(--user-button-padding-item-x);

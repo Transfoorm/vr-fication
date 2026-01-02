@@ -287,7 +287,7 @@ function main() {
   checkKeyframeCollisions();
   checkCrossContamination();
   checkImportOnlyFiles();
-  checkOrphans(ROOT, pass);
+  totalViolations += checkOrphans(ROOT, pass);
 
   console.log('');
   console.log('═══════════════════════════════════════════════════════════════');

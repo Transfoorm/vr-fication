@@ -502,11 +502,6 @@
   border: 1px solid var(--setup-border-warm);
 }
 
-.ft-setup-welcome-text {
-  /* Typography handled by T.body */
-  color: var(--setup-text-secondary) !important;
-}
-
 .ft-setup-welcome-link {
   /* Reset button styles */
   background: none;

@@ -47,13 +47,6 @@
   margin-bottom: var(--space-lg, 20px);
 }
 
-/* Introduction paragraph - larger, more prominent */
-.ft-showcasetabs-guide-intro {
-  line-height: 1.7;
-  color: var(--text-primary);
-  margin-bottom: var(--space-sm, 8px);
-}
-
 /* Flow diagram "VR → Feature → Tab" */
 .ft-showcasetabs-guide-flow {
   display: block;
@@ -172,11 +165,6 @@
   gap: var(--space-lg);
 }
 
-.ft-showcasetabs-tooltips-title-hover {
-  cursor: pointer;
-  display: inline-block;
-}
-
 .ft-showcasetabs-tooltips-link-inline {
   min-height: auto;
   padding: 0;
@@ -232,14 +220,6 @@
   gap: var(--space-lg);
 }
 
-.ft-showcasetabs-tooltips-docs-title {
-  margin-bottom: var(--space-md);
-}
-
-.ft-showcasetabs-tooltips-docs-intro {
-  margin-bottom: var(--space-md);
-}
-
 .ft-showcasetabs-tooltips-docs-list {
   display: flex;
   flex-direction: column;
@@ -269,10 +249,6 @@
   border: 1px solid #fef3c7;
 }
 
-.ft-showcasetabs-tooltips-props-title {
-  margin-bottom: var(--space-xs);
-}
-
 .ft-showcasetabs-tooltips-props-list {
   margin-left: var(--space-lg);
 }
@@ -299,12 +275,6 @@
 .ft-patterns__list {
   margin: 0;
   padding-left: var(--space-lg, 24px);
-}
-
-.ft-patterns__list-spaced {
-  margin: 0;
-  padding-left: var(--space-lg, 24px);
-  margin-top: var(--space-md, 16px);
 }
 
 .ft-patterns__check-list {
