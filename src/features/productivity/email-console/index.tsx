@@ -10,6 +10,7 @@ import { useFuse } from '@/store/fuse';
 import { T } from '@/vr';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useEmailActions } from './useEmailActions';
+import { useViewportPrefetch } from './useViewportPrefetch';
 import {
   getSavedWidth,
   STORAGE_KEY_MAILBOX,
@@ -96,6 +97,9 @@ export function EmailConsole() {
 
   // Keyboard navigation mode (suppresses hover while using arrow keys)
   const [isKeyboardNav, setIsKeyboardNav] = useState(false);
+
+  // Visible message IDs for viewport prefetch
+  const [visibleMessageIds, setVisibleMessageIds] = useState<string[]>([]);
 
   // Expanded folders state (for sidebar folder tree) - persisted to localStorage
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => {
@@ -340,6 +344,9 @@ export function EmailConsole() {
   // Trigger fetch for selected message (runs in background while old email displayed)
   useEmailBodySync(selectedId as Id<'productivity_email_Index'> | null);
 
+  // Viewport prefetch: preload visible email bodies before user clicks
+  useViewportPrefetch(visibleMessageIds, selectedId);
+
   const handleResize = useCallback((handle: 'mailbox' | 'threads', e: React.MouseEvent) => {
     e.preventDefault();
     const container = containerRef.current;
@@ -444,6 +451,7 @@ export function EmailConsole() {
           onListContextMenu={handleListContextMenu}
           onRefresh={triggerManualSync}
           onMouseMove={() => setIsKeyboardNav(false)}
+          onVisibleIdsChange={setVisibleMessageIds}
         />
 
         <div className="ft-email__resize-handle" onMouseDown={(e) => handleResize('threads', e)} />

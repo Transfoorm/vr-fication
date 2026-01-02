@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { T, Icon } from '@/vr';
 import { formatThreadDate } from './utils';
@@ -28,6 +28,7 @@ interface EmailMessageListProps {
   onListContextMenu: (event: React.MouseEvent) => void;
   onRefresh: () => void;
   onMouseMove: () => void;
+  onVisibleIdsChange: (ids: string[]) => void;
 }
 
 export function EmailMessageList({
@@ -47,9 +48,11 @@ export function EmailMessageList({
   onListContextMenu,
   onRefresh,
   onMouseMove,
+  onVisibleIdsChange,
 }: EmailMessageListProps) {
   // Own scroll container ref and virtualizer
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const prevVisibleIdsRef = useRef<string>('');
 
   const virtualizer = useVirtualizer({
     count: virtualItems.length,
@@ -57,6 +60,24 @@ export function EmailMessageList({
     estimateSize: (index) => virtualItems[index].type === 'header' ? 32 : 72,
     overscan: 5,
   });
+
+  // Extract visible message IDs for prefetch
+  const visibleRows = virtualizer.getVirtualItems();
+  const visibleIds = visibleRows
+    .map((row) => virtualItems[row.index])
+    .filter((item): item is { type: 'message'; message: EmailMessage; bucket: string } =>
+      item.type === 'message'
+    )
+    .map((item) => item.message._id);
+
+  // Report visible IDs to parent (only when they change)
+  useEffect(() => {
+    const key = visibleIds.join(',');
+    if (key !== prevVisibleIdsRef.current) {
+      prevVisibleIdsRef.current = key;
+      onVisibleIdsChange(visibleIds);
+    }
+  }, [visibleIds, onVisibleIdsChange]);
 
   return (
     <section
