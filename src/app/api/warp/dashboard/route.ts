@@ -16,14 +16,17 @@ import { readSessionCookie } from '@/fuse/hydration/session/cookie';
 import { DEFAULT_WIDGETS_BY_RANK } from '@/store/domains/dashboard';
 
 export async function GET() {
-  // 🛡️ SID-9.1: Identity from FUSE session cookie
-  const session = await readSessionCookie();
-
-  if (!session || !session._id) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-
   try {
+    // 🛡️ SID-9.1: Identity from FUSE session cookie
+    const session = await readSessionCookie();
+
+    if (!session || !session._id) {
+      return Response.json({
+        layout: 'classic',
+        visibleWidgets: [],
+        expandedSections: [],
+      });
+    }
     // For now, Dashboard owns zero data - just UI preferences
     // The rank-based widget defaults are handled client-side
     //
@@ -47,7 +50,12 @@ export async function GET() {
     });
   } catch (error) {
     console.error('❌ WARP API: Failed to prepare dashboard data:', error);
-    return new Response('Internal Server Error', { status: 500 });
+    // Return empty data - WARP preloads should fail silently
+    return Response.json({
+      layout: 'classic',
+      visibleWidgets: [],
+      expandedSections: [],
+    });
   }
 }
 

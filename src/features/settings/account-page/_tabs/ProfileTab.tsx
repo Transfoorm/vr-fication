@@ -117,7 +117,7 @@ function CountrySelectorLive({ label, onSave }: CountrySelectorLiveProps) {
 // ─────────────────────────────────────────────────────────────────────
 // PROFILE FIELDS (main export)
 // ─────────────────────────────────────────────────────────────────────
-export function ProfileFields() {
+export function ProfileTab() {
   const user = useFuse((s) => s.user);
   const updateUserLocal = useFuse((s) => s.updateUserLocal);
 

@@ -82,6 +82,90 @@ if git diff --cached --name-only | grep -qE "^($PROTECTED_FILES)"; then
   fi
 fi
 
+# ═══════════════════════════════════════════════════════════════════
+# 📏 GLOBAL FILE SIZE GATE - Prevent code bloat (400 lines default)
+# ═══════════════════════════════════════════════════════════════════
+# See: .husky/CODE-SIZE-POLICY.md
+# Default: 400 lines | Exceptions require in-file justification
+DEFAULT_LIMIT=400
+
+# Exception list: path=limit (explicit allowlist per policy)
+# These are acknowledged architectural debt - not permanent privileges
+get_file_limit() {
+  case "$1" in
+    # Schema/Store (inherently large, single source of truth)
+    "convex/schema.ts") echo 1200 ;;
+    "src/store/fuse.ts") echo 1400 ;;
+    # Email sync orchestrator (complex state machine)
+    "convex/productivity/email/outlook.ts") echo 1200 ;;
+    "convex/productivity/email/webhooks.ts") echo 800 ;;
+    "src/features/productivity/email-console/index.tsx") echo 1300 ;;
+    # Admin APIs (complex domain logic)
+    "convex/domains/admin/users/api.ts") echo 1000 ;;
+    "convex/admin/dbCleanup.ts") echo 700 ;;
+    "convex/domains/productivity/mutations.ts") echo 700 ;;
+    "convex/domains/productivity/queries.ts") echo 600 ;;
+    # Setup/Shell (multi-step flows)
+    "src/features/setup/setup-modal/index.tsx") echo 800 ;;
+    "src/features/shell/user-button/index.tsx") echo 700 ;;
+    "src/features/shell/company-button/index.tsx") echo 600 ;;
+    # Vanish cascade (transactional integrity)
+    "convex/vanish/cascade.ts") echo 600 ;;
+    # Email module files (recently refactored, 600 transition)
+    # Transitional caps during inbox canonicalisation - expected to decompose post-stabilisation
+    "convex/productivity/email/outlookStore.ts") echo 600 ;;
+    "convex/productivity/email/outlookDiagnostics.ts") echo 700 ;;
+    "convex/productivity/email/outlookActions.ts") echo 600 ;;
+    "convex/productivity/email/bodyCache.ts") echo 600 ;;
+    # Feature tabs (complex UI, 600 transition)
+    "src/features/settings/account-page/_tabs/EmailTab.tsx") echo 600 ;;
+    "src/features/admin/showcase-page/_tabs/FtGuideTab.tsx") echo 600 ;;
+    "src/features/admin/showcase-page/_tabs/TypographyTab.tsx") echo 600 ;;
+    "src/features/admin/users-page/_tabs/InvitesTab.tsx") echo 600 ;;
+    "src/features/vanish/VanishQuarantine.tsx") echo 600 ;;
+    # Clerk actions (auth complexity)
+    "src/app/(clerk)/actions/email.ts") echo 600 ;;
+    "src/app/(clerk)/features/VerifySecondary/index.tsx") echo 600 ;;
+    "src/app/actions/user-mutations.ts") echo 600 ;;
+    # Mock data (not real code)
+    "src/features/productivity/email2-console/mockData.ts") echo 1000 ;;
+    # Default
+    *) echo $DEFAULT_LIMIT ;;
+  esac
+}
+
+# Check all staged .ts and .tsx files
+for file in $(git diff --cached --name-only | grep -E '\.(ts|tsx)$'); do
+  if [ -f "$file" ]; then
+    lines=$(wc -l < "$file" | tr -d ' ')
+    limit=$(get_file_limit "$file")
+
+    if [ "$lines" -gt "$limit" ]; then
+      echo ""
+      echo "⛔ FILE SIZE VIOLATION: $file"
+      echo ""
+      echo "   Current: $lines lines"
+      echo "   Limit:   $limit lines"
+      echo ""
+      if [ "$limit" -eq "$DEFAULT_LIMIT" ]; then
+        echo "   This file exceeds the 400-line default limit."
+        echo "   Options:"
+        echo "     1. Split into smaller, focused modules"
+        echo "     2. Request exception (requires in-file justification)"
+        echo ""
+        echo "   See: .husky/CODE-SIZE-POLICY.md"
+      else
+        echo "   This file exceeds its exception limit."
+        echo "   The exception exists for a reason - don't exceed it."
+        echo "   Consider splitting or refactoring."
+      fi
+      echo ""
+      echo "   Commit blocked."
+      exit 1
+    fi
+  fi
+done
+
 # Run critical VRP scripts (manifest validation skipped - legacy routes not yet in SRS manifests)
 npm run vrp:isv || exit 1
 npm run vrp:naming || exit 1

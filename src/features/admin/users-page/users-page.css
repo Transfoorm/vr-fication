@@ -6,22 +6,6 @@
 │  Card stacking handled by Stack VR                                     │
 └────────────────────────────────────────────────────────────────────────┘ */
 
-/* Invite section - border only, no background */
-.ft-userspage__section {
-  margin-top: var(--space-md, 16px);
-  padding: var(--space-lg, 24px);
-  border: 1px solid var(--border-primary, #e5e7eb);
-  border-radius: var(--radius-md, 8px);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg, 24px);
-}
-
-.ft-userspage__header {
-  /* Typography handled by T.h4 */
-  color: var(--text-primary, #111827);
-}
-
 /* Removed VR targeting - Field VR should provide success/error color variants */
 
 /* Link display box */

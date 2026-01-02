@@ -22,7 +22,7 @@ interface BatchResult {
   magicLink?: string;
 }
 
-export function InvitesFeature() {
+export function InvitesTab() {
   // Single invite state
   const [lastSentTo, setLastSentTo] = useState<string | null>(null);
   const [magicLink, setMagicLink] = useState<string | null>(null);

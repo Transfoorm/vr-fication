@@ -17,6 +17,8 @@
 import { useEffect } from 'react';
 import { usePageHeaderContext, ActionPosition } from '@/shell/page-header/PageHeaderContext';
 import { useRouteTitle } from '@/hooks/useRouteTitle';
+import { useUserRank } from '@/hooks/useUserRank';
+import { isAdmiral } from '@/rank/checks';
 
 /**
  * Sets the page header title and optional subtitle with action button
@@ -55,6 +57,7 @@ export function useSetPageHeader(
 ) {
   const { setHeaderData } = usePageHeaderContext();
   const autoTitle = useRouteTitle();
+  const rank = useUserRank();
 
   const action = options?.action;
   const actionPosition = options?.actionPosition ?? 'bottom';
@@ -63,8 +66,9 @@ export function useSetPageHeader(
   useEffect(() => {
     const pageTitle = title || autoTitle;
 
-    // Set browser tab title
-    document.title = `Transfoorm | ${pageTitle}`;
+    // Set browser tab title (Admiral sees "SAAS ADMIN", everyone else sees "Transfoorm")
+    const appName = isAdmiral(rank) ? 'SAAS ADMIN' : 'Transfoorm';
+    document.title = `${appName} | ${pageTitle}`;
 
     setHeaderData({
       title: pageTitle,
@@ -76,5 +80,5 @@ export function useSetPageHeader(
 
     // NO CLEANUP - Next page immediately sets its own header
     // Clearing causes unnecessary null → reappear flash
-  }, [title, subtitle, action, actionPosition, hidden, autoTitle, setHeaderData]);
+  }, [title, subtitle, action, actionPosition, hidden, autoTitle, setHeaderData, rank]);
 }

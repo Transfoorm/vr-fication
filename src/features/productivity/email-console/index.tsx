@@ -1,95 +1,33 @@
 'use client';
 
-/**──────────────────────────────────────────────────────────────────────┐
-│  EMAIL CONSOLE - Live Mode (Outlook Web Clone)                       │
-│  /src/features/productivity/email-console/index.tsx                  │
-│                                                                       │
-│  WIREFRAME STAGE - Structure only, no styling                        │
-│  TTTS-2 COMPLIANT: Pure FUSE reader (Golden Bridge pattern)          │
-│                                                                       │
-│  Layout:                                                              │
-│  ┌─────────────────────────────────────────────────────────────────┐ │
-│  │ HEADER                                                          │ │
-│  ├───────────┬─────────────────────┬───────────────────────────────┤ │
-│  │ MAILBOX   │ MESSAGE LIST        │ READING PANE                  │ │
-│  └───────────┴─────────────────────┴───────────────────────────────┘ │
-│                                                                       │
-│  Individual message view (not conversation threads)                  │
-└───────────────────────────────────────────────────────────────────────*/
+// EMAIL CONSOLE - Outlook Web Clone (FUSE Golden Bridge pattern)
 
 import { useRef, useCallback, useState, useMemo, useEffect } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { useAction } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 import { useProductivityData } from '@/hooks/useProductivityData';
 import { useEmailSyncIntent } from '@/hooks/useEmailSyncIntent';
+import { useEmailBodySync } from '@/hooks/useEmailBodySync';
 import { useFuse } from '@/store/fuse';
 import { T } from '@/vr';
-import { MessageBody } from './MessageBody';
 import type { Id } from '@/convex/_generated/dataModel';
+import { useEmailActions } from './useEmailActions';
+import { useViewportPrefetch } from './useViewportPrefetch';
+import {
+  getSavedWidth,
+  STORAGE_KEY_MAILBOX,
+  STORAGE_KEY_THREADS,
+  buildFolderTree,
+  computeFolderCounts,
+  filterMessages,
+  buildVirtualItems,
+} from './utils';
+import { EmailSidebar } from './EmailSidebar';
+import { EmailMessageList } from './EmailMessageList';
+import { EmailContextMenu } from './EmailContextMenu';
+import { MessageBody } from './MessageBody';
+import type { EmailFolder } from './types';
 import './email-console.css';
-import './email-normalize.css'; // Gmail/Outlook-style email body normalization
 
-// Standard canonical folder types (defined outside component - static)
-const STANDARD_FOLDERS = ['inbox', 'drafts', 'sent', 'archive', 'spam', 'trash'];
 
-/** Get time bucket for grouping */
-function getTimeBucket(timestamp: number): string {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-  const thisWeekStart = new Date(today.getTime() - today.getDay() * 24 * 60 * 60 * 1000);
-  const lastWeekStart = new Date(thisWeekStart.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-
-  if (date >= today) return 'Today';
-  if (date >= yesterday) return 'Yesterday';
-  if (date >= thisWeekStart) return 'This Week';
-  if (date >= lastWeekStart) return 'Last Week';
-  if (date >= thisMonthStart) return 'This Month';
-  if (date >= lastMonthStart) return 'Last Month';
-  return 'Older';
-}
-
-/** Format date like Outlook Web: today=time, recent=day+time, older=day+date */
-function formatThreadDate(timestamp: number): string {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-  const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-  const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-  const dayShort = date.toLocaleDateString('en-US', { weekday: 'short' });
-  const dayDate = `${date.getDate()}/${date.getMonth() + 1}`;
-
-  if (date >= today) {
-    // Today: just time
-    return time;
-  } else if (date >= yesterday) {
-    // Yesterday: day + time
-    return `${dayShort} ${time}`;
-  } else if (date >= oneWeekAgo) {
-    // Within a week: day + time
-    return `${dayShort} ${time}`;
-  } else {
-    // Older: day + date
-    return `${dayShort} ${dayDate}`;
-  }
-}
-
-// localStorage keys for persisted column widths
-const STORAGE_KEY_MAILBOX = 'email-column-mailbox';
-const STORAGE_KEY_THREADS = 'email-column-threads';
-
-// Get saved width from localStorage (SSR-safe)
-function getSavedWidth(key: string, defaultValue: number): number {
-  if (typeof window === 'undefined') return defaultValue;
-  const saved = localStorage.getItem(key);
-  return saved ? parseInt(saved, 10) : defaultValue;
-}
 
 export function EmailConsole() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -109,12 +47,8 @@ export function EmailConsole() {
   const user = useFuse((state) => state.user);
   const userId = user?.convexId as Id<'admin_users'> | undefined;
 
-  // Email actions
-  const deleteMessage = useAction(api.productivity.email.outlook.deleteOutlookMessage);
-  const archiveMessage = useAction(api.productivity.email.outlook.archiveOutlookMessage);
-
   // Intent-based sync (triggers on focus, network, manual refresh)
-  const { triggerManualSync } = useEmailSyncIntent();
+  const { triggerManualSync, isSyncing } = useEmailSyncIntent();
 
   // Memoize arrays to prevent new references on every render
   const allMessages = useMemo(() => data.email?.messages ?? [], [data.email?.messages]);
@@ -136,21 +70,36 @@ export function EmailConsole() {
   const [selectedSubfolderId, setSelectedSubfolderId] = useState<string | null>(null);
 
   // Selected messages state (multi-select with Cmd/Ctrl+click) - uses _id
+  // This controls thread list highlighting (changes immediately on click)
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+
+  // Displayed message ID - controls reading pane content
+  // Decoupled from selection: only updates when body is ready (Outlook pattern)
+  const [displayedMessageId, setDisplayedMessageId] = useState<string | null>(null);
 
   // Anchor message for Shift+click range selection
   const [anchorMessageId, setAnchorMessageId] = useState<string | null>(null);
+
+  // Read email bodies from FUSE to know when content is ready
+  const emailBodies = useFuse((state) => state.productivity.emailBodies);
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
-    area: 'mailbox' | 'list' | 'reading';
+    area: 'mailbox' | 'list' | 'reading' | 'folder';
     messageId: string | null;
+    folderId: string | null; // For folder context menu
   } | null>(null);
 
   // Collapsed sections state (for thread time buckets)
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+
+  // Keyboard navigation mode (suppresses hover while using arrow keys)
+  const [isKeyboardNav, setIsKeyboardNav] = useState(false);
+
+  // Visible message IDs for viewport prefetch
+  const [visibleMessageIds, setVisibleMessageIds] = useState<string[]>([]);
 
   // Expanded folders state (for sidebar folder tree) - persisted to localStorage
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => {
@@ -166,9 +115,15 @@ export function EmailConsole() {
   };
 
   // Handle subfolder selection
-  const handleSubfolderSelect = (subfolder: typeof allFolders[0]) => {
+  const handleSubfolderSelect = (subfolder: EmailFolder) => {
     setSelectedFolder(subfolder.canonicalFolder); // Set parent canonical folder
     setSelectedSubfolderId(subfolder.externalFolderId); // Set specific subfolder
+  };
+
+  // Handle custom folder selection
+  const handleCustomFolderSelect = (folderId: string) => {
+    setSelectedFolder('custom');
+    setSelectedSubfolderId(folderId);
   };
 
   const toggleSection = (bucket: string) => {
@@ -252,259 +207,145 @@ export function EmailConsole() {
       y: event.clientY,
       area: 'list',
       messageId,
+      folderId: null,
     });
   };
 
-  // Handle right-click on the mailbox sidebar
-  const handleMailboxContextMenu = (event: React.MouseEvent) => {
+  // Context menu handler factory for simple areas
+  const createContextHandler = (area: 'mailbox' | 'list' | 'reading') => (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-
-    setContextMenu({
-      x: event.clientX,
-      y: event.clientY,
-      area: 'mailbox',
-      messageId: null,
-    });
+    setContextMenu({ x: event.clientX, y: event.clientY, area, messageId: null, folderId: null });
   };
+  const handleMailboxContextMenu = createContextHandler('mailbox');
+  const handleListContextMenu = createContextHandler('list');
+  const handleReadingContextMenu = createContextHandler('reading');
 
-  // Handle right-click on the message list area (not on a specific message)
-  const handleListContextMenu = (event: React.MouseEvent) => {
+  // Handle right-click on a folder in the sidebar
+  const handleFolderContextMenu = (folderId: string, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-
-    setContextMenu({
-      x: event.clientX,
-      y: event.clientY,
-      area: 'list',
-      messageId: null,
-    });
+    setContextMenu({ x: event.clientX, y: event.clientY, area: 'folder', messageId: null, folderId });
   };
 
-  // Handle right-click on the reading pane
-  const handleReadingContextMenu = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    setContextMenu({
-      x: event.clientX,
-      y: event.clientY,
-      area: 'reading',
-      messageId: null,
-    });
-  };
-
-  // Handle context menu actions
-  const handleContextAction = async (action: string) => {
-    setContextMenu(null);
-
-    if (action === 'refresh') {
-      triggerManualSync();
-      return;
-    }
-
-    if (action === 'delete') {
-      if (!userId) {
-        console.error('❌ Cannot delete: No user ID');
-        return;
-      }
-
-      // Delete all selected messages
-      const messageIdsToDelete = [...selectedMessageIds];
-      console.log(`🗑️ Deleting ${messageIdsToDelete.length} message(s)...`);
-
-      for (const messageId of messageIdsToDelete) {
-        try {
-          const result = await deleteMessage({
-            userId,
-            messageId: messageId as Id<'productivity_email_Index'>,
-          });
-
-          if (result.success) {
-            console.log(`✅ Deleted message ${messageId}`);
-          } else {
-            console.error(`❌ Failed to delete ${messageId}:`, result.error);
-          }
-        } catch (error) {
-          console.error(`❌ Error deleting ${messageId}:`, error);
-        }
-      }
-
-      // Clear selection after delete
-      setSelectedMessageIds(new Set());
-      return;
-    }
-
-    if (action === 'archive') {
-      if (!userId) {
-        console.error('❌ Cannot archive: No user ID');
-        return;
-      }
-
-      // Archive all selected messages
-      const messageIdsToArchive = [...selectedMessageIds];
-      console.log(`📁 Archiving ${messageIdsToArchive.length} message(s)...`);
-
-      for (const messageId of messageIdsToArchive) {
-        try {
-          const result = await archiveMessage({
-            userId,
-            messageId: messageId as Id<'productivity_email_Index'>,
-          });
-
-          if (result.success) {
-            console.log(`✅ Archived message ${messageId}`);
-          } else {
-            console.error(`❌ Failed to archive ${messageId}:`, result.error);
-          }
-        } catch (error) {
-          console.error(`❌ Error archiving ${messageId}:`, error);
-        }
-      }
-
-      // Clear selection after archive
-      setSelectedMessageIds(new Set());
-      return;
-    }
-
-    // Other actions are still stubbed
-    console.log(`Context action: ${action}`, {
-      selectedCount: selectedMessageIds.size,
-      messageIds: [...selectedMessageIds],
-    });
-  };
-
-  // Build folder tree: group subfolders by their parent's canonical type
-  // Also capture custom root-level folders (like Fyxer AI folders)
-  const folderTree = useMemo(() => {
-    const tree: Record<string, typeof allFolders> = {
-      inbox: [],
-      drafts: [],
-      sent: [],
-      archive: [],
-      spam: [],
-      trash: [],
-      custom: [], // Root-level custom folders (e.g., Fyxer AI)
-    };
-
-    for (const folder of allFolders) {
-      if (folder.parentFolderId) {
-        // This is a subfolder - add to its canonical folder's children
-        const canonical = folder.canonicalFolder || 'system';
-        if (canonical in tree) {
-          tree[canonical].push(folder);
-        }
-      } else {
-        // Root-level folder - check if it's a custom/other folder
-        const canonical = folder.canonicalFolder || '';
-
-        // Include any folder that's not a standard canonical folder
-        // This includes: Fyxer folders, Outlook system folders (Clutter, etc.)
-        // Better to show everything than risk orphaning emails
-        if (!STANDARD_FOLDERS.includes(canonical)) {
-          tree.custom.push(folder);
-        }
-      }
-    }
-
-    // Sort custom folders by display name (preserves Fyxer's numbered order)
-    tree.custom.sort((a, b) => a.displayName.localeCompare(b.displayName));
-
-    return tree;
-  }, [allFolders]);
-
-  // Compute folder unread counts (count unread messages)
-  const folderCounts = useMemo(() => {
-    const counts: Record<string, number> = {
-      inbox: 0,
-      sent: 0,
-      drafts: 0,
-      archive: 0,
-      spam: 0,
-      trash: 0,
-    };
-
-    for (const message of allMessages) {
-      if (message.isRead) continue; // Only count unread messages
-      const folder = message.canonicalFolder || 'inbox';
-      if (folder in counts) {
-        counts[folder]++;
-      }
-    }
-
-    return counts;
-  }, [allMessages]);
-
-  // Filter messages by selected folder (and subfolder if selected)
-  // Sort by receivedAt descending (newest first)
-  const messages = useMemo(() => {
-    if (!allMessages.length) return allMessages;
-
-    let filtered: typeof allMessages;
-
-    if (selectedFolder === 'custom' && selectedSubfolderId) {
-      // Custom folder - filter by providerFolderId
-      filtered = allMessages.filter(m => m.providerFolderId === selectedSubfolderId);
-    } else {
-      // Standard folder - filter by canonical folder
-      filtered = allMessages.filter(m => (m.canonicalFolder || 'inbox') === selectedFolder);
-
-      // If a subfolder is selected, further filter by providerFolderId
-      if (selectedSubfolderId) {
-        filtered = filtered.filter(m => m.providerFolderId === selectedSubfolderId);
-      }
-    }
-
-    // Sort by receivedAt descending (newest first)
-    return filtered.sort((a, b) => b.receivedAt - a.receivedAt);
-  }, [allMessages, selectedFolder, selectedSubfolderId]);
-
-  // Build flat list of virtual items (headers + messages) for virtualization
-  type VirtualItem =
-    | { type: 'header'; bucket: string }
-    | { type: 'message'; message: typeof messages[0]; bucket: string };
-
-  const virtualItems = useMemo((): VirtualItem[] => {
-    const items: VirtualItem[] = [];
-    let lastBucket: string | null = null;
-
-    for (const message of messages) {
-      const bucket = getTimeBucket(message.receivedAt);
-
-      // Add header when bucket changes
-      if (bucket !== lastBucket) {
-        items.push({ type: 'header', bucket });
-        lastBucket = bucket;
-      }
-
-      // Add message (skip if section is collapsed)
-      if (!collapsedSections.has(bucket)) {
-        items.push({ type: 'message', message, bucket });
-      }
-    }
-
-    return items;
-  }, [messages, collapsedSections]);
-
-  // Ref for virtual scroll container
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  // Virtual list setup
-  const virtualizer = useVirtualizer({
-    count: virtualItems.length,
-    getScrollElement: () => scrollContainerRef.current,
-    estimateSize: (index) => virtualItems[index].type === 'header' ? 32 : 72,
-    overscan: 5,
+  // Email actions hook
+  const { handleContextAction } = useEmailActions({
+    userId,
+    contextMenu,
+    selectedMessageIds,
+    selectedSubfolderId,
+    setContextMenu,
+    setSelectedMessageIds,
+    setSelectedSubfolderId,
+    setSelectedFolder,
+    triggerManualSync,
   });
 
-  // Get selected message data from FUSE (only when single selection)
-  const selectedMessage = useMemo(() => {
-    // Only show message content when exactly one is selected
-    if (selectedMessageIds.size !== 1) return null;
+  // Build folder tree using utility function
+  const { folderTree, getChildFolders, rootFolderIds } = useMemo(
+    () => buildFolderTree(allFolders, allMessages),
+    [allFolders, allMessages]
+  );
+
+  // Compute folder unread counts using utility function
+  const { folderCounts, subfolderCounts } = useMemo(
+    () => computeFolderCounts(allMessages, rootFolderIds),
+    [allMessages, rootFolderIds]
+  );
+
+  // Filter messages by selected folder using utility function
+  const messages = useMemo(
+    () => filterMessages(allMessages, selectedFolder, selectedSubfolderId, rootFolderIds),
+    [allMessages, selectedFolder, selectedSubfolderId, rootFolderIds]
+  );
+
+  // Build virtual items using utility function
+  const virtualItems = useMemo(
+    () => buildVirtualItems(messages, collapsedSections),
+    [messages, collapsedSections]
+  );
+
+  // Auto-select first message when inbox loads (Outlook Web behavior)
+  useEffect(() => {
+    if (messages.length > 0 && selectedMessageIds.size === 0) {
+      setSelectedMessageIds(new Set([messages[0]._id]));
+    }
+  }, [messages, selectedMessageIds.size]);
+
+  // Keyboard navigation: Arrow Up/Down to move between emails
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle arrow keys
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+
+      // Don't interfere with input fields
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      // Need messages to navigate
+      if (messages.length === 0) return;
+
+      e.preventDefault();
+
+      // Enter keyboard navigation mode (suppresses hover on old item)
+      setIsKeyboardNav(true);
+
+      // Find current selection index (use first selected if multiple)
+      const currentId = [...selectedMessageIds][0];
+      const currentIndex = currentId ? messages.findIndex(m => m._id === currentId) : -1;
+
+      // Calculate new index
+      let newIndex: number;
+      if (e.key === 'ArrowUp') {
+        newIndex = currentIndex <= 0 ? 0 : currentIndex - 1;
+      } else {
+        newIndex = currentIndex >= messages.length - 1 ? messages.length - 1 : currentIndex + 1;
+      }
+
+      // Select new message
+      const newMessageId = messages[newIndex]._id;
+      setSelectedMessageIds(new Set([newMessageId]));
+      setAnchorMessageId(newMessageId);
+
+      // Scroll into view (after React renders)
+      requestAnimationFrame(() => {
+        const element = document.querySelector(`[data-message-id="${newMessageId}"]`);
+        element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [messages, selectedMessageIds]);
+
+  // Decoupled display: update displayedMessageId only when body is ready
+  // This keeps the old email visible until the new one is loaded (Outlook pattern)
+  useEffect(() => {
+    // Only applies to single selection
+    if (selectedMessageIds.size !== 1) return;
 
     const selectedId = [...selectedMessageIds][0];
-    return allMessages.find(m => m._id === selectedId) ?? null;
-  }, [selectedMessageIds, allMessages]);
+
+    // If body is already in FUSE, swap immediately
+    if (emailBodies?.[selectedId]) {
+      setDisplayedMessageId(selectedId);
+    }
+    // Otherwise, the effect will re-run when emailBodies updates
+  }, [selectedMessageIds, emailBodies]);
+
+  // Get the currently selected message ID (for triggering fetch)
+  const selectedId = selectedMessageIds.size === 1 ? [...selectedMessageIds][0] : null;
+
+  // Get displayed message data from FUSE (what's shown in reading pane)
+  const displayedMessage = useMemo(() => {
+    if (!displayedMessageId) return null;
+    return allMessages.find(m => m._id === displayedMessageId) ?? null;
+  }, [displayedMessageId, allMessages]);
+
+  // Trigger fetch for selected message (runs in background while old email displayed)
+  useEmailBodySync(selectedId as Id<'productivity_email_Index'> | null);
+
+  // Viewport prefetch: preload visible email bodies before user clicks
+  useViewportPrefetch(visibleMessageIds, selectedId);
 
   const handleResize = useCallback((handle: 'mailbox' | 'threads', e: React.MouseEvent) => {
     e.preventDefault();
@@ -519,6 +360,9 @@ export function EmailConsole() {
     // Track the new width during drag
     let newMailboxWidth = startMailboxWidth;
     let newThreadsWidth = startThreadsWidth;
+
+    // Add resizing class to disable iframe pointer events
+    container.classList.add('ft-email__body--resizing');
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
@@ -538,6 +382,9 @@ export function EmailConsole() {
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
 
+      // Remove resizing class to restore iframe pointer events
+      container.classList.remove('ft-email__body--resizing');
+
       // Persist to state and localStorage
       if (handle === 'mailbox') {
         setMailboxWidth(newMailboxWidth);
@@ -556,27 +403,11 @@ export function EmailConsole() {
 
   return (
     <div className="ft-email">
-      {/* ─────────────────────────────────────────────────────────────
-          HEADER BAR
-          ───────────────────────────────────────────────────────────── */}
       <header className="ft-email__header">
-        <div className="ft-email__header-left">
-          <T.body weight="medium">Email</T.body>
-        </div>
-        <div className="ft-email__header-right">
-          <button
-            className="ft-email__refresh-btn"
-            onClick={triggerManualSync}
-            title="Refresh emails"
-          >
-            ↻
-          </button>
-        </div>
+        <div className="ft-email__header-left"><T.body weight="medium">Email</T.body></div>
+        <div className="ft-email__header-right" />
       </header>
 
-      {/* ─────────────────────────────────────────────────────────────
-          THREE-RAIL LAYOUT (with resize handles)
-          ───────────────────────────────────────────────────────────── */}
       <div
         className="ft-email__body"
         ref={containerRef}
@@ -584,258 +415,47 @@ export function EmailConsole() {
           gridTemplateColumns: `${mailboxWidth}px 12px ${threadsWidth ? threadsWidth + 'px' : '1fr'} 12px 1fr`,
         }}
       >
-        {/* RAIL 1: Mailbox */}
-        <aside className="ft-email__mailbox" onContextMenu={handleMailboxContextMenu}>
-          {/* Inbox with expandable subfolders */}
-          <div className="ft-email__folder-group">
-            <div
-              className={`ft-email__folder ${selectedFolder === 'inbox' && !selectedSubfolderId ? 'ft-email__folder--selected' : ''}`}
-              onClick={() => handleFolderSelect('inbox')}
-            >
-              {folderTree.inbox.length > 0 && (
-                <span
-                  className={`ft-email__folder-chevron ${expandedFolders.has('inbox') ? 'ft-email__folder-chevron--expanded' : ''}`}
-                  onClick={(e) => { e.stopPropagation(); toggleFolderExpand('inbox'); }}
-                >
-                  ›
-                </span>
-              )}
-              <span className="ft-email__folder-icon">📥</span>
-              <span className="ft-email__folder-label">Inbox</span>
-              {folderCounts.inbox > 0 && (
-                <span className="ft-email__folder-count">{folderCounts.inbox}</span>
-              )}
-            </div>
-            {expandedFolders.has('inbox') && folderTree.inbox.length > 0 && (
-              <div className="ft-email__subfolders">
-                {folderTree.inbox.map((subfolder) => (
-                  <div
-                    key={subfolder._id}
-                    className={`ft-email__subfolder ${selectedSubfolderId === subfolder.externalFolderId ? 'ft-email__subfolder--selected' : ''}`}
-                    title={subfolder.displayName}
-                    onClick={() => handleSubfolderSelect(subfolder)}
-                  >
-                    <span className="ft-email__subfolder-icon">📁</span>
-                    <span className="ft-email__subfolder-label">{subfolder.displayName}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Drafts */}
-          <div
-            className={`ft-email__folder ${selectedFolder === 'drafts' ? 'ft-email__folder--selected' : ''}`}
-            onClick={() => handleFolderSelect('drafts')}
-          >
-            <span className="ft-email__folder-icon">📝</span>
-            <span className="ft-email__folder-label">Drafts</span>
-            {folderCounts.drafts > 0 && (
-              <span className="ft-email__folder-count">{folderCounts.drafts}</span>
-            )}
-          </div>
-
-          {/* Sent */}
-          <div
-            className={`ft-email__folder ${selectedFolder === 'sent' ? 'ft-email__folder--selected' : ''}`}
-            onClick={() => handleFolderSelect('sent')}
-          >
-            <span className="ft-email__folder-icon">📨</span>
-            <span className="ft-email__folder-label">Sent</span>
-            {folderCounts.sent > 0 && (
-              <span className="ft-email__folder-count">{folderCounts.sent}</span>
-            )}
-          </div>
-
-          {/* Archive with expandable subfolders */}
-          <div className="ft-email__folder-group">
-            <div
-              className={`ft-email__folder ${selectedFolder === 'archive' && !selectedSubfolderId ? 'ft-email__folder--selected' : ''}`}
-              onClick={() => handleFolderSelect('archive')}
-            >
-              {folderTree.archive.length > 0 && (
-                <span
-                  className={`ft-email__folder-chevron ${expandedFolders.has('archive') ? 'ft-email__folder-chevron--expanded' : ''}`}
-                  onClick={(e) => { e.stopPropagation(); toggleFolderExpand('archive'); }}
-                >
-                  ›
-                </span>
-              )}
-              <span className="ft-email__folder-icon">📁</span>
-              <span className="ft-email__folder-label">Archive</span>
-              {folderCounts.archive > 0 && (
-                <span className="ft-email__folder-count">{folderCounts.archive}</span>
-              )}
-            </div>
-            {expandedFolders.has('archive') && folderTree.archive.length > 0 && (
-              <div className="ft-email__subfolders">
-                {folderTree.archive.map((subfolder) => (
-                  <div
-                    key={subfolder._id}
-                    className={`ft-email__subfolder ${selectedSubfolderId === subfolder.externalFolderId ? 'ft-email__subfolder--selected' : ''}`}
-                    title={subfolder.displayName}
-                    onClick={() => handleSubfolderSelect(subfolder)}
-                  >
-                    <span className="ft-email__subfolder-icon">📁</span>
-                    <span className="ft-email__subfolder-label">{subfolder.displayName}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Deleted */}
-          <div
-            className={`ft-email__folder ${selectedFolder === 'trash' ? 'ft-email__folder--selected' : ''}`}
-            onClick={() => handleFolderSelect('trash')}
-          >
-            <span className="ft-email__folder-icon">🗑️</span>
-            <span className="ft-email__folder-label">Deleted</span>
-            {folderCounts.trash > 0 && (
-              <span className="ft-email__folder-count">{folderCounts.trash}</span>
-            )}
-          </div>
-
-          {/* Junk */}
-          <div
-            className={`ft-email__folder ${selectedFolder === 'spam' ? 'ft-email__folder--selected' : ''}`}
-            onClick={() => handleFolderSelect('spam')}
-          >
-            <span className="ft-email__folder-icon">✋</span>
-            <span className="ft-email__folder-label">Junk</span>
-            {folderCounts.spam > 0 && (
-              <span className="ft-email__folder-count">{folderCounts.spam}</span>
-            )}
-          </div>
-
-          {/* Custom Folders (e.g., Fyxer AI) */}
-          {folderTree.custom.length > 0 && (
-            <>
-              <div className="ft-email__folder-divider" />
-              {folderTree.custom.map((folder) => (
-                <div
-                  key={folder._id}
-                  className={`ft-email__folder ${selectedFolder === 'custom' && selectedSubfolderId === folder.externalFolderId ? 'ft-email__folder--selected' : ''}`}
-                  onClick={() => {
-                    setSelectedFolder('custom');
-                    setSelectedSubfolderId(folder.externalFolderId);
-                  }}
-                  title={folder.displayName}
-                >
-                  <span className="ft-email__folder-icon">📁</span>
-                  <span className="ft-email__folder-label">{folder.displayName}</span>
-                </div>
-              ))}
-            </>
-          )}
-        </aside>
-
-        {/* RESIZE HANDLE 1: Between Mailbox and Threads */}
-        <div
-          className="ft-email__resize-handle"
-          onMouseDown={(e) => handleResize('mailbox', e)}
+        <EmailSidebar
+          selectedFolder={selectedFolder}
+          selectedSubfolderId={selectedSubfolderId}
+          expandedFolders={expandedFolders}
+          folderTree={folderTree}
+          folderCounts={folderCounts}
+          subfolderCounts={subfolderCounts}
+          contextMenuFolderId={contextMenu?.folderId ?? null}
+          getChildFolders={getChildFolders}
+          onFolderSelect={handleFolderSelect}
+          onSubfolderSelect={handleSubfolderSelect}
+          onToggleFolderExpand={toggleFolderExpand}
+          onContextMenu={handleMailboxContextMenu}
+          onFolderContextMenu={handleFolderContextMenu}
+          onCustomFolderSelect={handleCustomFolderSelect}
         />
 
-        {/* RAIL 2: Message List */}
-        <section className="ft-email__threads" onContextMenu={handleListContextMenu}>
-          {/* Folder title header */}
-          <div className="ft-email__threads-header">
-            <span className="ft-email__threads-title">
-              {selectedFolder === 'inbox' && 'Inbox'}
-              {selectedFolder === 'sent' && 'Sent'}
-              {selectedFolder === 'drafts' && 'Drafts'}
-              {selectedFolder === 'archive' && 'Archive'}
-              {selectedFolder === 'trash' && 'Deleted'}
-              {selectedFolder === 'spam' && 'Junk'}
-              {selectedFolder === 'custom' && (allFolders.find(f => f.externalFolderId === selectedSubfolderId)?.displayName || 'Custom')}
-              {selectedFolder !== 'custom' && selectedSubfolderId && ` / ${allFolders.find(f => f.externalFolderId === selectedSubfolderId)?.displayName || ''}`}
-            </span>
-            <span className="ft-email__threads-count">
-              {messages.length} item{messages.length !== 1 ? 's' : ''}
-              {selectedMessageIds.size > 1 && ` · ${selectedMessageIds.size} selected`}
-            </span>
-          </div>
-          <div className="ft-email__threads-scroll" ref={scrollContainerRef}>
-            {!flags.isHydrated ? (
-              <div className="ft-email__loading"><T.body color="secondary">Loading...</T.body></div>
-            ) : messages.length === 0 ? (
-              <div className="ft-email__empty"><T.body color="secondary">No emails yet</T.body></div>
-            ) : (
-              <div
-                style={{
-                  height: `${virtualizer.getTotalSize()}px`,
-                  width: '100%',
-                  position: 'relative',
-                }}
-              >
-                {virtualizer.getVirtualItems().map((virtualRow) => {
-                  const item = virtualItems[virtualRow.index];
+        <div className="ft-email__resize-handle" onMouseDown={(e) => handleResize('mailbox', e)} />
 
-                  if (item.type === 'header') {
-                    const isCollapsed = collapsedSections.has(item.bucket);
-                    return (
-                      <div
-                        key={`header-${item.bucket}`}
-                        className="ft-email__section-header"
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: `${virtualRow.size}px`,
-                          transform: `translateY(${virtualRow.start}px)`,
-                        }}
-                        onClick={() => toggleSection(item.bucket)}
-                      >
-                        <span>{item.bucket}</span>
-                        <span className={`ft-email__section-chevron ${isCollapsed ? 'ft-email__section-chevron--collapsed' : ''}`}>
-                          ›
-                        </span>
-                      </div>
-                    );
-                  }
-
-                  const message = item.message;
-                  return (
-                    <div
-                      key={message._id}
-                      className={`ft-email__thread-item ${selectedMessageIds.has(message._id) ? 'ft-email__thread-item--selected' : ''} ${!message.isRead ? 'ft-email__thread-item--unread' : ''}`}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: `${virtualRow.size}px`,
-                        transform: `translateY(${virtualRow.start}px)`,
-                      }}
-                      onClick={(e) => handleMessageClick(message._id, e)}
-                      onContextMenu={(e) => handleMessageContextMenu(message._id, e)}
-                    >
-                      <div className="ft-email__thread-top">
-                        <div className="ft-email__thread-sender">
-                          {message.from.name || message.from.email || 'Unknown'}
-                        </div>
-                        <div className="ft-email__thread-date">
-                          {formatThreadDate(message.receivedAt)}
-                        </div>
-                      </div>
-                      <div className="ft-email__thread-subject">{message.subject}</div>
-                      <div className="ft-email__thread-snippet">{message.snippet}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* RESIZE HANDLE 2: Between Threads and Reading */}
-        <div
-          className="ft-email__resize-handle"
-          onMouseDown={(e) => handleResize('threads', e)}
+        <EmailMessageList
+          selectedFolder={selectedFolder}
+          selectedSubfolderId={selectedSubfolderId}
+          allFolders={allFolders}
+          messages={messages}
+          isSyncing={isSyncing}
+          isHydrated={flags.isHydrated}
+          selectedMessageIds={selectedMessageIds}
+          virtualItems={virtualItems}
+          collapsedSections={collapsedSections}
+          isKeyboardNav={isKeyboardNav}
+          onToggleSection={toggleSection}
+          onMessageClick={handleMessageClick}
+          onMessageContextMenu={handleMessageContextMenu}
+          onListContextMenu={handleListContextMenu}
+          onRefresh={triggerManualSync}
+          onMouseMove={() => setIsKeyboardNav(false)}
+          onVisibleIdsChange={setVisibleMessageIds}
         />
 
-        {/* RAIL 3: Reading Pane */}
+        <div className="ft-email__resize-handle" onMouseDown={(e) => handleResize('threads', e)} />
+
         <main className="ft-email__reading" onContextMenu={handleReadingContextMenu}>
           <div className="ft-email__reading-scroll">
             {selectedMessageIds.size === 0 ? (
@@ -844,84 +464,33 @@ export function EmailConsole() {
               <div className="ft-email__empty"><T.body color="secondary">{selectedMessageIds.size} items selected</T.body></div>
             ) : !flags.isHydrated ? (
               <div className="ft-email__loading"><T.body color="secondary">Loading...</T.body></div>
-            ) : selectedMessage === null ? (
+            ) : displayedMessage === null ? (
               <div className="ft-email__empty"><T.body color="secondary">Message not found</T.body></div>
             ) : (
               <>
-                <div className="ft-email__reading-subject">{selectedMessage.subject}</div>
-                <div className="ft-email__message-header">
-                  <strong>From:</strong> {selectedMessage.from.name || selectedMessage.from.email}<br />
-                  <strong>Date:</strong> {new Date(selectedMessage.receivedAt).toLocaleString()}<br />
-                  <strong>To:</strong> {selectedMessage.to.map(r => r.name || r.email).join(', ')}
+                <div className="ft-email__reading-header">
+                  <div className="ft-email__reading-subject">{displayedMessage.subject}</div>
+                  <div className="ft-email__message-header">
+                    <strong>From:</strong> {displayedMessage.from.name || displayedMessage.from.email}<br />
+                    <strong>Date:</strong> {new Date(displayedMessage.receivedAt).toLocaleString()}<br />
+                    <strong>To:</strong> {displayedMessage.to.map(r => r.name || r.email).join(', ')}
+                  </div>
+                  <hr />
                 </div>
-                <hr />
-                <MessageBody messageId={selectedMessage._id as Id<'productivity_email_Index'>} />
-              </>
-            )}
-          </div>{/* end reading-scroll */}
-        </main>
-      </div>
-
-      {/* Context Menu */}
-      {contextMenu && (
-        <>
-          <div
-            className="ft-email__context-backdrop"
-            onClick={() => setContextMenu(null)}
-          />
-          <div
-            className="ft-email__context-menu"
-            style={{ '--ctx-x': `${contextMenu.x}px`, '--ctx-y': `${contextMenu.y}px` } as React.CSSProperties}
-          >
-            {/* MAILBOX SIDEBAR - folder actions */}
-            {contextMenu.area === 'mailbox' && (
-              <>
-                <button onClick={() => handleContextAction('newFolder')}>New Folder</button>
-                <button onClick={() => handleContextAction('markAllRead')}>Mark All as Read</button>
-                <hr />
-                <button onClick={() => handleContextAction('refresh')}>Refresh</button>
-              </>
-            )}
-
-            {/* MESSAGE LIST - email actions */}
-            {contextMenu.area === 'list' && (contextMenu.messageId || selectedMessageIds.size > 0) && (
-              <>
-                <button onClick={() => handleContextAction('open')}>Open</button>
-                <hr />
-                <button onClick={() => handleContextAction('reply')}>Reply</button>
-                <button onClick={() => handleContextAction('replyAll')}>Reply All</button>
-                <button onClick={() => handleContextAction('forward')}>Forward</button>
-                <hr />
-                <button onClick={() => handleContextAction('markRead')}>Mark as Read</button>
-                <button onClick={() => handleContextAction('markUnread')}>Mark as Unread</button>
-                <hr />
-                <button onClick={() => handleContextAction('archive')}>Archive</button>
-                <button onClick={() => handleContextAction('delete')}>Delete</button>
-              </>
-            )}
-
-            {/* MESSAGE LIST - empty area (no message selected) */}
-            {contextMenu.area === 'list' && !contextMenu.messageId && selectedMessageIds.size === 0 && (
-              <>
-                <button onClick={() => handleContextAction('newEmail')}>New Email</button>
-                <button onClick={() => handleContextAction('refresh')}>Refresh</button>
-              </>
-            )}
-
-            {/* READING PANE - content actions */}
-            {contextMenu.area === 'reading' && (
-              <>
-                <button onClick={() => handleContextAction('reply')}>Reply</button>
-                <button onClick={() => handleContextAction('replyAll')}>Reply All</button>
-                <button onClick={() => handleContextAction('forward')}>Forward</button>
-                <hr />
-                <button onClick={() => handleContextAction('print')}>Print</button>
-                <hr />
-                <button onClick={() => handleContextAction('delete')}>Delete</button>
+                <MessageBody messageId={displayedMessageId as Id<'productivity_email_Index'>} />
               </>
             )}
           </div>
-        </>
+        </main>
+      </div>
+
+      {contextMenu && (
+        <EmailContextMenu
+          contextMenu={contextMenu}
+          selectedMessageIds={selectedMessageIds}
+          onClose={() => setContextMenu(null)}
+          onAction={handleContextAction}
+        />
       )}
     </div>
   );

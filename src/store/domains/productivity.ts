@@ -32,6 +32,9 @@ export interface ProductivityData {
   emailBodies?: Record<string, string>;
 }
 
+// LRU cap for email bodies (memory bound)
+const EMAIL_BODY_LRU_CAP = 50;
+
 export interface ProductivitySlice {
   // Domain data
   email?: ProductivityEmail;
@@ -41,6 +44,8 @@ export interface ProductivitySlice {
   tasks: Record<string, unknown>[];
   // Email bodies (hydrated on-demand, keyed by messageId)
   emailBodies: Record<string, string>;
+  // LRU order tracking (oldest first, newest last)
+  emailBodyOrder: string[];
   // UI preferences (persisted)
   emailViewMode: EmailViewMode;
   // ADP Coordination (REQUIRED)
@@ -68,6 +73,8 @@ const initialProductivityState: ProductivitySlice = {
   tasks: [],
   // Email bodies (on-demand hydration)
   emailBodies: {},
+  // LRU order (oldest first)
+  emailBodyOrder: [],
   // UI preferences
   emailViewMode: 'live', // Default to Live mode (traditional Outlook-style)
   // ADP Coordination
@@ -109,15 +116,34 @@ export const createProductivitySlice: StateCreator<
   },
 
   hydrateEmailBody: (messageId, htmlContent) => {
-    set((state) => ({
-      ...state,
-      emailBodies: {
-        ...state.emailBodies,
-        [messageId]: htmlContent,
-      },
-    }));
+    set((state) => {
+      const bodies = { ...state.emailBodies };
+      const order = [...state.emailBodyOrder];
+
+      // If already cached, remove from order (will re-add at end = touch)
+      const existingIdx = order.indexOf(messageId);
+      if (existingIdx !== -1) {
+        order.splice(existingIdx, 1);
+      }
+
+      // Evict oldest if at cap (evict AFTER successful hydrate)
+      while (order.length >= EMAIL_BODY_LRU_CAP) {
+        const oldest = order.shift();
+        if (oldest) delete bodies[oldest];
+      }
+
+      // Add new body at end (most recently used)
+      bodies[messageId] = htmlContent;
+      order.push(messageId);
+
+      return {
+        ...state,
+        emailBodies: bodies,
+        emailBodyOrder: order,
+      };
+    });
     if (process.env.NODE_ENV === 'development') {
-      console.log(`⚡ FUSE: Email body hydrated for ${messageId.slice(-8)}`);
+      console.log(`⚡ FUSE: Email body hydrated for ${messageId.slice(-8)} (cache: ${EMAIL_BODY_LRU_CAP} cap)`);
     }
   },
 

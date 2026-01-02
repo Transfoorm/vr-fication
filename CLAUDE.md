@@ -856,3 +856,47 @@ git diff <commit-hash>        # Compare with commit
 There is NO exception. Not for "cleaning up". Not for "resetting state". Not for "starting fresh".
 
 **Uncommitted work is sacred. Ask before destroying.**
+
+---
+
+# 🔔 DING SOUND - CLAUDE COMPLETION NOTIFICATION
+
+## WHAT THIS IS
+
+The user has a sound that plays when Claude finishes responding - a "ding" notification so they know you're done and waiting for them.
+
+**Sound file:** `/Users/ken/App/vr/public/audio/stop.wav`
+**Settings file:** `~/.claude/settings.json`
+
+## WHEN THE USER SAYS...
+
+**"Turn off the ding"** or **"Turn off the sound"**
+→ Edit `~/.claude/settings.json` to:
+```json
+{
+  "hooks": {}
+}
+```
+
+**"Turn on the ding"** or **"Turn on the sound"**
+→ Edit `~/.claude/settings.json` to:
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /Users/ken/App/vr/public/audio/stop.wav"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## IMPORTANT
+
+After changing the settings, tell the user: **"Restart Claude Code for the change to take effect."**

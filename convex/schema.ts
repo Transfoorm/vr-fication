@@ -463,6 +463,8 @@ export default defineSchema({
     // Connected email account (required)
     /** Which email account this message belongs to */
     accountId: v.id("productivity_email_Accounts"),
+    /** Email address of the connected account (for dashboard visibility) */
+    ownerEmail: v.optional(v.string()),
 
     // Resolution state (required - single source of truth)
     /**
@@ -627,12 +629,34 @@ export default defineSchema({
     label: v.string(),
     /** Email address of connected account */
     emailAddress: v.string(),
+    /** Owner's email (from admin_users) - for dashboard identification */
+    ownerEmail: v.optional(v.string()),
     /** Provider type */
     provider: v.union(
       v.literal("gmail"),
       v.literal("outlook"),
       v.literal("imap") // Future: generic IMAP support
     ),
+    /**
+     * Provider variant - distinguishes API behavior differences within same provider.
+     *
+     * For Outlook:
+     * - 'outlook_personal': Consumer accounts (outlook.com, hotmail.com, live.com, msn.com)
+     * - 'outlook_enterprise': Microsoft 365/Azure AD accounts (custom domains)
+     *
+     * Graph API behaves differently between personal and enterprise:
+     * - Folder parentFolderId structure differs
+     * - Rate limits differ
+     * - Some features (categories, rules) have different availability
+     *
+     * When this flag accumulates >5 branch points, promote to separate handlers.
+     */
+    providerVariant: v.optional(v.union(
+      v.literal("outlook_personal"),
+      v.literal("outlook_enterprise"),
+      v.literal("gmail_personal"),
+      v.literal("gmail_workspace")
+    )),
 
     // OAuth credentials (required for gmail/outlook)
     /** OAuth access token (encrypted at rest by Convex) */
@@ -651,8 +675,25 @@ export default defineSchema({
     syncFrequency: v.number(),
     /** Whether background sync is enabled */
     syncEnabled: v.boolean(),
+    /** Whether a USER-INITIATED sync is in progress (shows spinner) */
+    isSyncing: v.optional(v.boolean()),
+    /** Whether BACKGROUND polling is in progress (invisible to UI) */
+    isBackgroundPolling: v.optional(v.boolean()),
+    /** When folder structure was last fetched (for caching) */
+    foldersCachedAt: v.optional(v.number()),
     /** Last sync error (if any) */
     lastSyncError: v.optional(v.string()),
+    /**
+     * Whether initial historical sync is complete.
+     *
+     * TWO-PHASE SYNC DOCTRINE:
+     * - Phase A (initialSyncComplete=false): Full history via /messages API
+     * - Phase B (initialSyncComplete=true): Incremental via /messages/delta API
+     *
+     * Delta API only returns recent activity, NOT full history.
+     * Initial sync MUST use standard /messages endpoint.
+     */
+    initialSyncComplete: v.optional(v.boolean()),
 
     // Sync lock (prevents parallel syncs)
     /** When current sync started (null = not syncing) */
@@ -722,6 +763,8 @@ export default defineSchema({
     accountId: v.id("productivity_email_Accounts"),
     /** Provider type (for provider-specific handling) */
     provider: v.union(v.literal("gmail"), v.literal("outlook")),
+    /** Email address of the connected account (for dashboard visibility) */
+    ownerEmail: v.optional(v.string()),
 
     // Delta sync (for incremental updates)
     /** Microsoft Graph deltaLink for this folder */
@@ -991,4 +1034,45 @@ export default defineSchema({
     .index("by_subscription_id", ["subscriptionId"])
     .index("by_expiration", ["expirationDateTime"])
     .index("by_status", ["status"]),
+
+  /**
+   * 📦 EMAIL BODY CACHE
+   *
+   * Ring buffer cache for email body content.
+   * Accelerates repeat opens without becoming a system of record.
+   *
+   * DOCTRINE (from STORAGE-LIFECYCLE-DOCTRINE.md):
+   * - Cache Loss Invariant: System works perfectly if cache disappears
+   * - Bodies are disposable acceleration artifacts, never authoritative
+   * - Per-account granularity (100 bodies per account, not per user)
+   * - Ring buffer eviction: oldest evicted when count >= max
+   * - TTL cleanup: stale entries removed after 14 days
+   *
+   * GRADUATED ENABLEMENT:
+   * - CACHE_SIZE = 0: Pure on-demand (prefetch still works in memory)
+   * - CACHE_SIZE = 20-100: Working set coverage
+   * - Change requires deploy, not schema migration
+   */
+  productivity_email_BodyCache: defineTable({
+    // Identity (required)
+    /** Which email account this cached body belongs to */
+    accountId: v.id("productivity_email_Accounts"),
+    /** External message ID from Microsoft/Google (matches externalMessageId in Index) */
+    messageId: v.string(),
+
+    // Storage reference (required)
+    /** Convex Storage blob ID containing the HTML/text body */
+    storageId: v.id("_storage"),
+
+    // Eviction metadata (required)
+    /** When this body was cached (for LRU eviction) */
+    cachedAt: v.number(),
+    /** Body size in bytes (for future size-based limits) */
+    size: v.number(),
+
+    // Timestamps (required)
+    createdAt: v.number(),
+  }).index("by_account", ["accountId"])
+    .index("by_message", ["messageId"])
+    .index("by_account_oldest", ["accountId", "cachedAt"]),
 });

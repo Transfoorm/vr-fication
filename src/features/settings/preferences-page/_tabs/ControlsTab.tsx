@@ -10,7 +10,7 @@ import { T, Stack } from '@/vr';
 export function ControlsTab() {
   return (
     <Stack.lg>
-      <T.body className="text-secondary">Controls settings coming soon...</T.body>
+      <T.body>Controls settings coming soon...</T.body>
     </Stack.lg>
   );
 }

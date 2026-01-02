@@ -75,7 +75,7 @@ button.ft-profiletab-country-button {
 .ft-emailtab-action-pill--confirm {
   background-color: var(--brand-primary);
   color: #fff;
-  animation: ft-emailtab-nudge 0.3s ease;
+  animation: ft-account-page-nudge 0.3s ease;
 }
 
 .ft-emailtab-action-pill--confirm:hover {
@@ -83,7 +83,7 @@ button.ft-profiletab-country-button {
   color: #fff;
 }
 
-@keyframes ft-emailtab-nudge {
+@keyframes ft-account-page-nudge {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-3px); }
   75% { transform: translateX(3px); }
@@ -99,10 +99,10 @@ button.ft-profiletab-country-button {
   display: inline-block;
   overflow: hidden;
   white-space: nowrap;
-  animation: ft-emailtab-typing-cycle 6s ease-in-out infinite;
+  animation: ft-account-page-typing 6s ease-in-out infinite;
 }
 
-@keyframes ft-emailtab-typing-cycle {
+@keyframes ft-account-page-typing {
   0% { width: 0; }
   40% { width: 100%; }
   80% { width: 100%; }
@@ -168,6 +168,61 @@ button.ft-profiletab-country-button {
   box-shadow: 0 4px 12px rgb(59 130 246 / 30%);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   DISCONNECT BUTTON - Red/danger variant of action pill
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ft-emailtab-disconnect-pill {
+  padding: 6px 12px;
+  min-width: 110px;
+  height: 28px;
+  color: var(--text-secondary);
+  background-color: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* T.caption inside pill must inherit button's color */
+.ft-emailtab-disconnect-pill .vr-typography-caption {
+  color: inherit;
+  line-height: 1;
+}
+
+.ft-emailtab-disconnect-pill:hover:not(.ft-emailtab-disconnect-pill--active, .ft-emailtab-disconnect-pill--confirm) {
+  background-color: var(--error-100);
+  color: var(--error-600);
+}
+
+.ft-emailtab-disconnect-pill:disabled:not(.ft-emailtab-disconnect-pill--confirm, .ft-emailtab-disconnect-pill--active) {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Confirmation state - red/danger with subtle shake */
+.ft-emailtab-disconnect-pill--confirm {
+  background-color: var(--error-500);
+  color: #fff;
+  animation: ft-account-page-nudge 0.3s ease;
+}
+
+.ft-emailtab-disconnect-pill--confirm:hover {
+  background-color: var(--error-600);
+  color: #fff;
+}
+
+/* Active operation (disconnecting) - yellow with typing animation */
+.ft-emailtab-disconnect-pill--active {
+  background-color: var(--editing-bg);
+  color: var(--editing-text);
+}
+
 /* ──────────────────────────────────────────────────────────────────────┐
 │  🔱 PASSWORD CHANGE CEREMONY - Styles                                 │
 │  /src/features/VerifyPassword/password-ceremony.css                   │
@@ -182,24 +237,24 @@ button.ft-profiletab-country-button {
 
 :root {
   /* Password ceremony dimensions */
-  --password-tab-input-pill-space: 140px;
-  --password-tab-eye-size: 28px;
-  --password-tab-eye-offset: 12px;
-  --password-tab-pill-offset: 8px;
-  --password-tab-pill-padding: 8px 14px;
-  --password-tab-pill-min-width: 100px;
-  --password-tab-pill-shadow: 0 2px 8px;
-  --password-tab-ring-width: 3px;
-  --password-tab-letter-spacing: 2px;
-  --password-tab-line-height: 1.4;
+  --account-page-input-pill-space: 140px;
+  --account-page-eye-size: 28px;
+  --account-page-eye-offset: 12px;
+  --account-page-pill-offset: 8px;
+  --account-page-pill-padding: 8px 14px;
+  --account-page-pill-min-width: 100px;
+  --account-page-pill-shadow: 0 2px 8px;
+  --account-page-ring-width: 3px;
+  --account-page-letter-spacing: 2px;
+  --account-page-line-height: 1.4;
 
   /* Timing */
-  --password-tab-transition: 150ms ease;
-  --password-tab-transition-out: 150ms ease-out;
+  --account-page-transition: 150ms ease;
+  --account-page-transition-out: 150ms ease-out;
 
   /* Colors */
-  --password-tab-focus-bg: #fffef5;
-  --password-tab-pill-text-light: #fff;
+  --account-page-focus-bg: #fffef5;
+  --account-page-pill-text-light: #fff;
 }
 
 .ft-passwordtab {
@@ -240,7 +295,7 @@ button.ft-profiletab-country-button {
 .ft-passwordtab__input {
   width: 100%;
   padding: var(--space-md);
-  padding-right: var(--password-tab-input-pill-space);
+  padding-right: var(--account-page-input-pill-space);
 
   /* Typography handled by input element and browser defaults */
   font-family: inherit; /* Preserve inherited font-family for form inputs */
@@ -252,9 +307,9 @@ button.ft-profiletab-country-button {
   height: var(--form-input-height);
   box-sizing: border-box;
   transition:
-    border-color var(--password-tab-transition-out),
-    box-shadow var(--password-tab-transition-out),
-    background-color var(--password-tab-transition-out);
+    border-color var(--account-page-transition-out),
+    box-shadow var(--account-page-transition-out),
+    background-color var(--account-page-transition-out);
   position: relative;
   z-index: 0;
 }
@@ -262,8 +317,8 @@ button.ft-profiletab-country-button {
 .ft-passwordtab__input:focus {
   outline: none;
   border-color: var(--brand-primary);
-  box-shadow: 0 0 0 var(--password-tab-ring-width) var(--brand-light);
-  background-color: var(--password-tab-focus-bg);
+  box-shadow: 0 0 0 var(--account-page-ring-width) var(--brand-light);
+  background-color: var(--account-page-focus-bg);
 }
 
 .ft-passwordtab__input::placeholder {
@@ -276,7 +331,7 @@ button.ft-profiletab-country-button {
   align-items: center;
   cursor: pointer;
   color: var(--text-secondary);
-  letter-spacing: var(--password-tab-letter-spacing);
+  letter-spacing: var(--account-page-letter-spacing);
 
   /* Typography handled by T.body */
 }
@@ -296,10 +351,10 @@ button.ft-profiletab-country-button {
 .ft-passwordtab__eye {
   position: absolute;
   top: 50%;
-  right: var(--password-tab-eye-offset);
+  right: var(--account-page-eye-offset);
   transform: translateY(-50%);
-  width: var(--password-tab-eye-size);
-  height: var(--password-tab-eye-size);
+  width: var(--account-page-eye-size);
+  height: var(--account-page-eye-size);
   padding: 0;
   border: none;
   border-radius: var(--radius-sm);
@@ -309,7 +364,7 @@ button.ft-profiletab-country-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color var(--password-tab-transition);
+  transition: color var(--account-page-transition);
 }
 
 .ft-passwordtab__eye:hover {
@@ -323,24 +378,24 @@ button.ft-profiletab-country-button {
 .ft-passwordtab__pill {
   position: absolute;
   top: 50%;
-  right: var(--password-tab-pill-offset);
+  right: var(--account-page-pill-offset);
   transform: translateY(-50%);
 
   /* Typography handled by button text */
-  padding: var(--password-tab-pill-padding);
+  padding: var(--account-page-pill-padding);
   border-radius: var(--radius-full);
   border: none;
   cursor: pointer;
   transition:
-    background-color var(--password-tab-transition),
-    box-shadow var(--password-tab-transition);
+    background-color var(--account-page-transition),
+    box-shadow var(--account-page-transition);
   white-space: nowrap;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
   z-index: 1;
-  min-width: var(--password-tab-pill-min-width);
+  min-width: var(--account-page-pill-min-width);
 
   /* Default - gray empty */
   background-color: var(--bg-tertiary);
@@ -369,7 +424,7 @@ button.ft-profiletab-country-button {
 
 .ft-passwordtab__pill--active:hover {
   background-color: var(--brand-hover);
-  box-shadow: var(--password-tab-pill-shadow) var(--brand-light);
+  box-shadow: var(--account-page-pill-shadow) var(--brand-light);
 }
 
 .ft-passwordtab__pill--committing {
@@ -385,10 +440,10 @@ button.ft-profiletab-country-button {
   display: inline-block;
   overflow: hidden;
   white-space: nowrap;
-  animation: ft-passwordtab-typing-cycle 6s ease-in-out infinite;
+  animation: ft-account-page-password-typing 6s ease-in-out infinite;
 }
 
-@keyframes ft-passwordtab-typing-cycle {
+@keyframes ft-account-page-password-typing {
   0% { width: 0; }
   40% { width: 100%; }
   80% { width: 100%; }
@@ -397,13 +452,13 @@ button.ft-profiletab-country-button {
 
 .ft-passwordtab__pill--success {
   background-color: var(--success-500);
-  color: var(--password-tab-pill-text-light);
+  color: var(--account-page-pill-text-light);
   pointer-events: none;
 }
 
 .ft-passwordtab__pill--error {
   background-color: var(--error-500);
-  color: var(--password-tab-pill-text-light);
+  color: var(--account-page-pill-text-light);
   cursor: pointer;
 }
 
@@ -421,13 +476,13 @@ button.ft-profiletab-country-button {
   /* Typography handled by T.caption */
   color: var(--text-tertiary);
   font-style: italic;
-  line-height: var(--password-tab-line-height);
+  line-height: var(--account-page-line-height);
 }
 
 .ft-passwordtab__error {
   /* Typography handled by T.caption */
   color: var(--error-600);
-  line-height: var(--password-tab-line-height);
+  line-height: var(--account-page-line-height);
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -444,21 +499,21 @@ button.ft-profiletab-country-button {
 /* Valid state - green ring (matches .vr-field-verify--success) */
 .ft-passwordtab__box--valid .ft-passwordtab__input {
   border-color: var(--success-500);
-  box-shadow: 0 0 0 var(--password-tab-ring-width) var(--success-100);
+  box-shadow: 0 0 0 var(--account-page-ring-width) var(--success-100);
   background-color: var(--bg-input);
 }
 
 /* Error state - red ring (matches .vr-field-verify--error) */
 .ft-passwordtab__box--error .ft-passwordtab__input {
   border-color: var(--error-500);
-  box-shadow: 0 0 0 var(--password-tab-ring-width) var(--error-100);
+  box-shadow: 0 0 0 var(--account-page-ring-width) var(--error-100);
   background-color: var(--warning-50);
 }
 
 /* Success state - green ring */
 .ft-passwordtab__box--success .ft-passwordtab__input {
   border-color: var(--success-500);
-  box-shadow: 0 0 0 var(--password-tab-ring-width) var(--success-100);
+  box-shadow: 0 0 0 var(--account-page-ring-width) var(--success-100);
 }
 
 /* Disabled state - alive, shows pointer cursor, but blocks editing */
@@ -476,7 +531,7 @@ button.ft-profiletab-country-button {
 /* Mismatch state - box 2 has content but doesn't match box 1 (orange focus) */
 .ft-passwordtab__box--mismatch .ft-passwordtab__input {
   border-color: var(--brand-primary);
-  box-shadow: 0 0 0 var(--password-tab-ring-width) var(--brand-light);
+  box-shadow: 0 0 0 var(--account-page-ring-width) var(--brand-light);
 }
 
 /* Ready state - hover shows orange border */

@@ -39,6 +39,9 @@ export const getDatabaseCounts = query({
     counts['productivity_email_SenderCache'] = (await ctx.db.query('productivity_email_SenderCache').collect()).length;
     counts['productivity_email_AssetReferences'] = (await ctx.db.query('productivity_email_AssetReferences').collect()).length;
     counts['productivity_email_Assets'] = (await ctx.db.query('productivity_email_Assets').collect()).length;
+    counts['productivity_email_Folders'] = (await ctx.db.query('productivity_email_Folders').collect()).length;
+    counts['productivity_email_WebhookSubscriptions'] = (await ctx.db.query('productivity_email_WebhookSubscriptions').collect()).length;
+    counts['productivity_email_BodyCache'] = (await ctx.db.query('productivity_email_BodyCache').collect()).length;
     counts['productivity_calendar_Events'] = (await ctx.db.query('productivity_calendar_Events').collect()).length;
     counts['productivity_bookings_Form'] = (await ctx.db.query('productivity_bookings_Form').collect()).length;
     counts['productivity_pipeline_Prospects'] = (await ctx.db.query('productivity_pipeline_Prospects').collect()).length;
@@ -164,10 +167,7 @@ export const cleanupDatabase = mutation({
       console.log(`  ✅ ${table}: ${count} documents deleted`);
     };
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // PRODUCTIVITY DOMAIN TABLES
-    // ═══════════════════════════════════════════════════════════════════════
-
+    // --- PRODUCTIVITY DOMAIN TABLES ---
     console.log('\n📧 Clearing Productivity Domain...');
 
     // productivity_email_Messages
@@ -200,6 +200,24 @@ export const cleanupDatabase = mutation({
     for (const doc of assets) await ctx.db.delete(doc._id);
     logDeletion('productivity_email_Assets', assets.length);
 
+    // productivity_email_Folders
+    const emailFolders = await ctx.db.query('productivity_email_Folders').collect();
+    for (const doc of emailFolders) await ctx.db.delete(doc._id);
+    logDeletion('productivity_email_Folders', emailFolders.length);
+
+    // productivity_email_WebhookSubscriptions
+    const webhookSubs = await ctx.db.query('productivity_email_WebhookSubscriptions').collect();
+    for (const doc of webhookSubs) await ctx.db.delete(doc._id);
+    logDeletion('productivity_email_WebhookSubscriptions', webhookSubs.length);
+
+    // productivity_email_BodyCache (with storage blob cleanup)
+    const bodyCache = await ctx.db.query('productivity_email_BodyCache').collect();
+    for (const doc of bodyCache) {
+      await ctx.storage.delete(doc.storageId);
+      await ctx.db.delete(doc._id);
+    }
+    logDeletion('productivity_email_BodyCache', bodyCache.length);
+
     // productivity_calendar_Events
     const calendarEvents = await ctx.db.query('productivity_calendar_Events').collect();
     for (const doc of calendarEvents) await ctx.db.delete(doc._id);
@@ -221,10 +239,7 @@ export const cleanupDatabase = mutation({
       return { mode: args.mode, totalDeleted, deletionLog };
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // OTHER DOMAIN TABLES (data_only and full_wipe)
-    // ═══════════════════════════════════════════════════════════════════════
-
+    // --- OTHER DOMAIN TABLES (data_only and full_wipe) ---
     console.log('\n💼 Clearing Clients Domain...');
     const clientsUsers = await ctx.db.query('clients_contacts_Users').collect();
     for (const doc of clientsUsers) await ctx.db.delete(doc._id);
@@ -255,10 +270,7 @@ export const cleanupDatabase = mutation({
       return { mode: args.mode, totalDeleted, deletionLog };
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // ADMIN/IDENTITY TABLES (full_wipe only - NUCLEAR)
-    // ═══════════════════════════════════════════════════════════════════════
-
+    // --- ADMIN/IDENTITY TABLES (full_wipe only - NUCLEAR) ---
     console.log('\n⚠️  FULL WIPE MODE - Clearing Admin/Identity Domain...');
     console.log('⚠️  WARNING: This will delete all users except caller!');
 
@@ -302,10 +314,7 @@ export const cleanupDatabase = mutation({
       return { mode: args.mode, totalDeleted, deletionLog };
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // ATOMIC MODE - PRISTINE DATABASE (NO PROTECTION, NO SURVIVORS)
-    // ═══════════════════════════════════════════════════════════════════════
-
+    // --- ATOMIC MODE - PRISTINE DATABASE (NO PROTECTION, NO SURVIVORS) ---
     console.log('\n☢️  ATOMIC MODE - DELETING EVERYTHING INCLUDING CALLER...');
     console.log('☢️  WARNING: This will make the database completely pristine!');
 
@@ -383,9 +392,7 @@ export const cleanupDatabase = mutation({
   },
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ATOMIC NUKE WITH CLERK DELETION
-// ═══════════════════════════════════════════════════════════════════════════
+// --- ATOMIC NUKE WITH CLERK DELETION ---
 
 /**
  * ☢️ ATOMIC NUKE ACTION - Deletes EVERYTHING including Clerk accounts
@@ -415,33 +422,60 @@ export const atomicNukeWithClerk = action({
       storageFilesDeleted: 0,
     };
 
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 1: Get all Clerk IDs from registry
-    // ═══════════════════════════════════════════════════════════════
-
-    console.log('\n📋 Step 1: Getting all Clerk IDs from registry...');
-
-    const clerkRegistry = await ctx.runQuery(api.admin.dbCleanup.getAllClerkIds);
-
-    console.log(`   Found ${clerkRegistry.length} Clerk accounts to delete`);
-
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 2: Delete each user from Clerk
-    // ═══════════════════════════════════════════════════════════════
-
-    console.log('\n🔥 Step 2: Deleting users from Clerk...');
+    // --- STEP 1: Get all users DIRECTLY from Clerk API ---
+    console.log('\n📋 Step 1: Fetching all users directly from Clerk API...');
 
     const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+    const clerkUserIds: string[] = [];
+
     if (!clerkSecretKey) {
       console.error('❌ CLERK_SECRET_KEY not found - skipping Clerk deletion');
       results.clerkErrors.push('CLERK_SECRET_KEY not found in environment');
     } else {
-      for (const entry of clerkRegistry) {
-        try {
-          console.log(`   Deleting Clerk user: ${entry.externalId}`);
+      // Fetch ALL users from Clerk directly (paginated)
+      let offset = 0;
+      const limit = 100;
+      let hasMore = true;
 
-          // Using globalThis.fetch for server-side Clerk API call (ESLint rule is for client components)
-          const response = await globalThis.fetch(`https://api.clerk.com/v1/users/${entry.externalId}`, {
+      while (hasMore) {
+        const listResponse = await globalThis.fetch(
+          `https://api.clerk.com/v1/users?limit=${limit}&offset=${offset}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${clerkSecretKey}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (listResponse.ok) {
+          const users = await listResponse.json();
+          if (Array.isArray(users) && users.length > 0) {
+            for (const user of users) {
+              clerkUserIds.push(user.id);
+            }
+            offset += users.length;
+            hasMore = users.length === limit; // If we got a full page, there might be more
+          } else {
+            hasMore = false;
+          }
+        } else {
+          console.error('❌ Failed to fetch users from Clerk');
+          hasMore = false;
+        }
+      }
+
+      console.log(`   Found ${clerkUserIds.length} Clerk users to delete`);
+
+      // --- STEP 2: Delete each user from Clerk ---
+      console.log('\n🔥 Step 2: Deleting users from Clerk...');
+
+      for (const userId of clerkUserIds) {
+        try {
+          console.log(`   Deleting Clerk user: ${userId}`);
+
+          const response = await globalThis.fetch(`https://api.clerk.com/v1/users/${userId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${clerkSecretKey}`,
@@ -450,30 +484,27 @@ export const atomicNukeWithClerk = action({
           });
 
           if (response.ok || response.status === 404) {
-            console.log(`   ✅ Deleted: ${entry.externalId}`);
+            console.log(`   ✅ Deleted: ${userId}`);
             results.clerkUsersDeleted++;
           } else {
             const errorData = await response.json().catch(() => ({}));
             const errorMsg = errorData.errors?.[0]?.message || `HTTP ${response.status}`;
-            console.error(`   ❌ Failed: ${entry.externalId} - ${errorMsg}`);
+            console.error(`   ❌ Failed: ${userId} - ${errorMsg}`);
             results.clerkUsersFailed++;
-            results.clerkErrors.push(`${entry.externalId}: ${errorMsg}`);
+            results.clerkErrors.push(`${userId}: ${errorMsg}`);
           }
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-          console.error(`   ❌ Error: ${entry.externalId} - ${errorMsg}`);
+          console.error(`   ❌ Error: ${userId} - ${errorMsg}`);
           results.clerkUsersFailed++;
-          results.clerkErrors.push(`${entry.externalId}: ${errorMsg}`);
+          results.clerkErrors.push(`${userId}: ${errorMsg}`);
         }
       }
     }
 
     console.log(`\n   Clerk deletion complete: ${results.clerkUsersDeleted} deleted, ${results.clerkUsersFailed} failed`);
 
-    // ═══════════════════════════════════════════════════════════════
-    // STEP 3: Batch delete all Convex tables
-    // ═══════════════════════════════════════════════════════════════
-
+    // --- STEP 3: Batch delete all Convex tables ---
     console.log('\n💾 Step 3: Deleting all Convex data...');
 
     // Order matters - delete references before parents
@@ -485,6 +516,9 @@ export const atomicNukeWithClerk = action({
       { table: 'productivity_email_Messages', includeStorage: false },
       { table: 'productivity_email_Accounts', includeStorage: false },
       { table: 'productivity_email_SenderCache', includeStorage: false },
+      { table: 'productivity_email_Folders', includeStorage: false },
+      { table: 'productivity_email_WebhookSubscriptions', includeStorage: false },
+      { table: 'productivity_email_BodyCache', includeStorage: true },
       { table: 'productivity_calendar_Events', includeStorage: false },
       { table: 'productivity_bookings_Form', includeStorage: false },
       { table: 'productivity_pipeline_Prospects', includeStorage: false },
@@ -522,10 +556,7 @@ export const atomicNukeWithClerk = action({
       }
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // FINAL REPORT
-    // ═══════════════════════════════════════════════════════════════
-
+    // --- FINAL REPORT ---
     console.log('\n☢️ ═══════════════════════════════════════════════════════════════');
     console.log('☢️ ATOMIC NUKE COMPLETE');
     console.log('☢️ ═══════════════════════════════════════════════════════════════');
@@ -547,5 +578,117 @@ export const getAllClerkIds = query({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query('admin_users_ClerkRegistry').collect();
+  },
+});
+
+// --- BULK STORAGE DELETION ---
+
+/**
+ * 🗑️ BATCH DELETE STORAGE FILES
+ *
+ * Queries the _storage system table and deletes files in batches.
+ * Run repeatedly until hasMore is false.
+ *
+ * Usage:
+ *   npx convex run admin/dbCleanup:batchDeleteStorage '{}'
+ *   (run multiple times until hasMore: false)
+ */
+export const batchDeleteStorage = mutation({
+  args: {
+    batchSize: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.batchSize || 500; // Stay well under 4096 read limit
+
+    // Query _storage system table
+    const storageFiles = await ctx.db.system
+      .query('_storage')
+      .take(limit);
+
+    let deleted = 0;
+    for (const file of storageFiles) {
+      await ctx.storage.delete(file._id);
+      deleted++;
+    }
+
+    const hasMore = storageFiles.length === limit;
+
+    console.log(`🗑️ Deleted ${deleted} storage files. hasMore: ${hasMore}`);
+
+    return {
+      deleted,
+      hasMore,
+    };
+  },
+});
+
+/**
+ * 🔍 GET STORAGE COUNT
+ *
+ * Returns approximate count of files in storage.
+ * Note: System tables don't support .count(), so we paginate.
+ */
+export const getStorageCount = query({
+  args: {},
+  handler: async (ctx) => {
+    // Take a large sample to estimate
+    const sample = await ctx.db.system.query('_storage').take(10000);
+    return {
+      count: sample.length,
+      note: sample.length === 10000 ? 'More than 10,000 files' : 'Exact count',
+    };
+  },
+});
+
+/**
+ * 🧹 GARBAGE COLLECT ORPHANED ASSETS
+ *
+ * Deletes all assets that have no AssetReferences pointing to them.
+ * Also deletes their storage blobs.
+ * Call this after disconnect to ensure ZERO orphaned blobs.
+ */
+export const gcOrphanedAssets = mutation({
+  args: {
+    batchSize: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const batchSize = args.batchSize ?? 100;
+    let assetsDeleted = 0;
+    let blobsDeleted = 0;
+
+    // Get all assets (batch for safety)
+    const assets = await ctx.db.query('productivity_email_Assets').take(batchSize);
+
+    for (const asset of assets) {
+      // Check if this asset has ANY references
+      const hasRefs = await ctx.db
+        .query('productivity_email_AssetReferences')
+        .withIndex('by_asset', (q) => q.eq('assetId', asset._id))
+        .first();
+
+      if (!hasRefs) {
+        // Orphan - delete storage blob first
+        if (asset.storageId) {
+          try {
+            await ctx.storage.delete(asset.storageId);
+            blobsDeleted++;
+          } catch {
+            // Storage file may already be deleted
+          }
+        }
+        // Delete the asset record
+        await ctx.db.delete(asset._id);
+        assetsDeleted++;
+      }
+    }
+
+    const hasMore = assets.length === batchSize;
+    console.log(`🧹 GC: ${assetsDeleted} orphaned assets, ${blobsDeleted} storage blobs deleted. hasMore: ${hasMore}`);
+
+    return {
+      assetsDeleted,
+      blobsDeleted,
+      hasMore,
+    };
   },
 });

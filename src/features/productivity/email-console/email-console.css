@@ -77,6 +77,26 @@
   background: var(--prod-bg-pressed);
 }
 
+.ft-email__refresh-btn--syncing {
+  animation: ft-email-console-spin 1.5s linear infinite;
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.ft-email__refresh-btn:disabled {
+  pointer-events: none;
+}
+
+@keyframes ft-email-console-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Three-Rail Body - Takes remaining space
@@ -104,13 +124,23 @@
   /* Invisible - no background, just the hit area */
 }
 
-.ft-email__resize-handle:hover {
-  /* Optional: subtle highlight on hover */
-  background: rgb(0 0 0 / 3%);
+.ft-email__resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: transparent;
+  transition: background 0.15s ease;
 }
 
-.ft-email__resize-handle:active {
-  background: rgb(0 0 0 / 6%);
+.ft-email__resize-handle:hover {
+  background: rgb(255 255 255 / 100%);
+}
+
+.ft-email__resize-handle:hover::after {
+  background: rgb(0 0 0 / 15%);
 }
 
 
@@ -121,10 +151,33 @@
 .ft-email__mailbox {
   padding: var(--prod-space-md) var(--prod-space-md) var(--prod-space-md) 0; /* No left padding - container invisible */
   overflow-y: auto;
+  overscroll-behavior: contain; /* Prevents sticking at scroll boundaries */
   display: flex;
   flex-direction: column;
   gap: var(--prod-space-xxs);
   user-select: none;
+
+  /* Firefox thin scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--prod-border-normal) transparent;
+}
+
+/* Webkit (Chrome/Safari) thin scrollbar */
+.ft-email__mailbox::-webkit-scrollbar {
+  width: var(--prod-scrollbar-width) !important;
+}
+
+.ft-email__mailbox::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.ft-email__mailbox::-webkit-scrollbar-thumb {
+  background: var(--prod-border-normal) !important;
+  border-radius: var(--prod-radius-xs) !important;
+}
+
+.ft-email__mailbox::-webkit-scrollbar-thumb:hover {
+  background: var(--prod-border-hover) !important;
 }
 
 .ft-email__folder {
@@ -138,6 +191,7 @@
   color: var(--prod-text-secondary);
   transition: background var(--prod-transition-fast);
   position: relative;
+  min-width: 0; /* Required for child truncation in flex containers */
 }
 
 .ft-email__folder:hover {
@@ -145,31 +199,50 @@
 }
 
 .ft-email__folder--selected {
-  background: var(--prod-bg-selected);
-  color: var(--prod-selected-text);
-  font-weight: var(--prod-weight-medium);
+  background: var(--prod-bg-section-hover);
+  color: var(--prod-text-primary);
+  text-shadow: 0.4px 0 0 currentcolor;
   box-shadow: inset 4px 0 0 var(--prod-selected-indicator);
 }
 
 .ft-email__folder--selected:hover {
-  background: var(--prod-bg-selected-hover);
+  background: var(--prod-bg-section-hover);
 }
 
 .ft-email__folder-icon {
   font-size: var(--prod-icon-sm);
   width: var(--prod-folder-icon-width);
   text-align: center;
+  filter: grayscale(100%);
+}
+
+.ft-email__folder-icon--trash {
+  transform: scale(0.85);
+}
+
+.ft-email__folder-icon--flipped {
+  transform: scaleX(-1);
+}
+
+.ft-email__folder-icon--junk {
+  opacity: 0.6;
 }
 
 .ft-email__folder--selected .ft-email__folder-icon {
   opacity: 1;
+  text-shadow: none; /* Keep icon flat, no bold effect */
 }
 
 .ft-email__folder-label {
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0; /* Required for flexbox truncation */
 }
 
 .ft-email__folder-count {
+  margin-left: auto;
   font-size: var(--prod-text-micro);
   color: var(--prod-text-muted);
   background: var(--prod-bg-badge);
@@ -201,14 +274,15 @@
 .ft-email__threads-header {
   flex-shrink: 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: var(--prod-space-lg);
   padding: var(--prod-space-lg) var(--prod-space-xl);
   border-bottom: 1px solid var(--prod-border-light);
   background: var(--prod-bg-section);
 }
 
 .ft-email__threads-title {
+  flex: 1;
   font-size: var(--prod-text-body-sm);
   font-weight: var(--prod-weight-semibold);
   color: var(--prod-text-primary);
@@ -222,6 +296,7 @@
 .ft-email__threads-scroll {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain; /* Prevents sticking at scroll boundaries */
 
   /* Firefox thin scrollbar */
   scrollbar-width: thin;
@@ -264,11 +339,9 @@
 .ft-email__reading-scroll {
   flex: 1;
   padding: var(--prod-space-xl);
-  overflow-y: auto;
-
-  /* Firefox thin scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: var(--prod-border-normal) transparent;
+  display: grid;
+  grid-template-rows: auto 1fr;  /* Header auto, iframe fills rest */
+  overflow: hidden;              /* NO scroll here - iframe owns scrolling */
 }
 
 /* Webkit (Chrome/Safari) thin scrollbar */
@@ -344,6 +417,15 @@
   background: var(--prod-bg-selected-hover);
 }
 
+/* Suppress hover during keyboard navigation */
+.ft-email__threads--keyboard-nav .ft-email__thread-item:hover {
+  background: transparent;
+}
+
+.ft-email__threads--keyboard-nav .ft-email__thread-item--selected:hover {
+  background: var(--prod-bg-selected);
+}
+
 .ft-email__thread-top {
   display: flex;
   justify-content: space-between;
@@ -393,22 +475,19 @@
    Reading Pane Messages
    ───────────────────────────────────────────────────────────────────────────── */
 
+.ft-email__reading-header {
+  flex-shrink: 0;
+}
+
 .ft-email__reading-subject {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: var(--prod-text-heading);
   font-weight: var(--prod-weight-semibold);
   margin-bottom: var(--prod-margin-section);
-}
-
-.ft-email__reading-meta {
-  font-size: var(--prod-text-body-sm);
-  color: var(--prod-text-tertiary);
-  margin-bottom: var(--prod-margin-block);
-}
-
-.ft-email__reading-messages {
-  display: flex;
-  flex-direction: column;
-  gap: var(--prod-margin-block);
+  line-height: 1.2;
+  height: 1.2em;  /* Lock to single line height - emoji won't push it */
 }
 
 .ft-email__message {
@@ -422,21 +501,26 @@
   line-height: var(--prod-line-height-relaxed);
 }
 
-.ft-email__message-snippet {
-  font-size: var(--prod-text-body);
-  line-height: var(--prod-line-height-normal);
-  color: var(--prod-text-primary);
+/* ─────────────────────────────────────────────────────────────────────────────
+   Message Body Iframe (3-Layer Architecture - Layer 3)
+
+   CRITICAL: This iframe is the content sandbox. It must NEVER affect parent layout.
+   - Fixed height (no measurement, no observers)
+   - Internal scroll (handled inside iframe)
+   - Parent scroll container (.ft-email__reading-scroll) unchanged
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__message-iframe {
+  width: 100%;
+  height: 100%;    /* Fills the 1fr grid row */
+  border: none;
+  display: block;
+  background: transparent;
 }
 
-/* Email body normalization rules are in email-normalize.css
-   NO styles here - let emails render exactly as sender intended */
-
-.ft-email__body-loading,
-.ft-email__body-error,
-.ft-email__body-empty {
-  color: var(--prod-text-faint);
-  font-size: var(--prod-text-body-sm);
-  padding: var(--prod-space-md) 0;
+/* During resize, prevent iframe from capturing mouse events */
+.ft-email__body--resizing .ft-email__message-iframe {
+  pointer-events: none;
 }
 
 
@@ -480,6 +564,12 @@
   border-radius: var(--prod-radius-sm);
 }
 
+.ft-email__folder-chevron::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+}
+
 .ft-email__folder-chevron:hover {
   color: var(--prod-text-secondary);
 }
@@ -488,22 +578,37 @@
   transform: rotate(90deg);
 }
 
+/* Subfolder chevrons flow with content (not fixed to left edge) */
+.ft-email__subfolder .ft-email__folder-chevron {
+  position: relative;
+  width: auto;
+  margin-left: calc(-1 * var(--prod-space-md)); /* Tuck closer to left edge */
+}
+
 .ft-email__subfolders {
   display: flex;
   flex-direction: column;
-  padding-left: var(--prod-space-3xl);
+  gap: var(--prod-space-xxs);
+  margin-top: var(--prod-space-xxs);
+}
+
+
+.ft-email__subfolder-group {
+  display: flex;
+  flex-direction: column;
 }
 
 .ft-email__subfolder {
   display: flex;
   align-items: center;
   gap: var(--prod-space-md);
-  padding: var(--prod-space-sm) var(--prod-space-lg);
+  padding: var(--prod-space-sm) var(--prod-space-2xl) var(--prod-space-sm) var(--prod-space-3xl); /* Match folder right padding */
   border-radius: var(--prod-radius-sm);
   cursor: pointer;
   font-size: var(--prod-text-caption);
-  color: var(--prod-text-muted);
+  color: var(--prod-text-secondary);
   transition: background var(--prod-transition-fast), color var(--prod-transition-fast);
+  position: relative; /* Required for absolutely positioned chevron */
 }
 
 .ft-email__subfolder:hover {
@@ -512,12 +617,23 @@
 }
 
 .ft-email__subfolder--selected {
-  background: var(--prod-bg-selected);
-  color: var(--prod-selected-text);
+  background: var(--prod-bg-section-hover);
+  color: var(--prod-text-primary);
+  text-shadow: 0.4px 0 0 currentcolor;
 }
 
 .ft-email__subfolder--selected:hover {
-  background: var(--prod-bg-selected-hover);
+  background: var(--prod-bg-section-hover);
+}
+
+/* Context menu active - maintain hover appearance while menu is open */
+.ft-email__subfolder--context-active {
+  background: var(--prod-bg-section-hover);
+  color: var(--prod-text-secondary);
+}
+
+.ft-email__subfolder--context-active.ft-email__subfolder--selected {
+  background: var(--prod-bg-section-hover);
 }
 
 .ft-email__subfolder-icon {
@@ -526,19 +642,27 @@
 }
 
 .ft-email__subfolder-label {
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0; /* Required for flexbox truncation */
 }
 
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Status Bar
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.ft-email__status {
-  font-size: var(--prod-text-caption);
+.ft-email__subfolder-count {
+  margin-left: auto;
+  font-size: var(--prod-text-micro);
   color: var(--prod-text-muted);
+  background: var(--prod-bg-badge);
+  padding: var(--prod-space-xxs) var(--prod-space-sm);
+  border-radius: var(--prod-radius-pill);
+  min-width: var(--prod-badge-min-width);
+  text-align: center;
+}
+
+.ft-email__subfolder--selected .ft-email__subfolder-count {
+  background: var(--prod-selected-bg);
+  color: var(--prod-selected-contrast);
 }
 
 

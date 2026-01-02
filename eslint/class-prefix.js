@@ -1,10 +1,16 @@
 // Custom ESLint rule: enforce-class-prefix
-// Ensures 5-file CSS architecture compliance
-// DISABLED FOR NOW - Will enable after full 5-file migration
+// Ensures 5-file CSS architecture compliance (WCCC)
+//
+// WCCC Prefix Rules:
+// - VR components (/src/vr/): MUST use vr-* only (pure component library)
+// - Shell components (/src/shell/): MUST use ly-* or vr-* (layout + can use VR)
+// - Feature components (/src/features/): MUST use ft-*, vr-*, or ly-* (can use all)
+//
+// Classes with no valid prefix are violations.
 
 module.exports = {
   rules: {
-    'enforce-class-prefix-DISABLED': {
+    'enforce-class-prefix': {
       meta: {
         type: 'problem',
         docs: {
@@ -26,62 +32,49 @@ module.exports = {
             // Skip if no class value
             if (!classValue) return;
 
-            // ut-* allowed anywhere
-            if (classValue.includes('ut-')) return;
+            // Valid prefix patterns
+            const hasVrPrefix = /\bvr-/.test(classValue);
+            const hasLyPrefix = /\bly-/.test(classValue);
+            const hasFtPrefix = /\bft-/.test(classValue);
 
-            // Prebuilts must use vr-* (Variant Robot architecture)
-            if (filename.includes('/vr/') || filename.includes('/src/vr/')) {
-              if (!classValue.match(/\bvr-/)) {
+            // VR components: MUST use vr-* only (pure component library)
+            if (filename.includes('/src/vr/')) {
+              if (!hasVrPrefix) {
                 context.report({
                   node,
                   messageId: 'wrongPrefix',
                   data: {
-                    message: '⛔ PREFIX VIOLATION: VR components must use vr-* class prefix (Variant Robot architecture). All VR classes follow strict parent-child naming hierarchy. Ref: 04-VRS-COMPONENT-SYSTEM.md',
+                    message: '⛔ PREFIX VIOLATION: VR components must use vr-* class prefix (5-file system: vr.css). Ref: WCCC-PROTOCOL.md',
                   },
                 });
               }
+              return;
             }
 
-            // Shell components must use sh-*
-            if (filename.includes('/appshell/') || filename.includes('/src/appshell/')) {
-              if (!classValue.match(/\bsh-/)) {
+            // Shell components: MUST use ly-* or vr-* (layout layer, can use VR)
+            if (filename.includes('/src/shell/')) {
+              if (!hasLyPrefix && !hasVrPrefix) {
                 context.report({
                   node,
                   messageId: 'wrongPrefix',
                   data: {
-                    message: '⛔ PREFIX VIOLATION: Shell components must use sh-* class prefix (5-file system: shell.css). Ref: 03-FUSE-STYLE-5-FILE-ARCHITECTURE.md',
+                    message: '⛔ PREFIX VIOLATION: Shell components must use ly-* or vr-* class prefix. Ref: WCCC-PROTOCOL.md',
                   },
                 });
               }
+              return;
             }
 
-            // Features must use ft-*
-            if (filename.includes('/features/') || filename.includes('/src/components/features/')) {
-              if (!classValue.match(/\bft-/)) {
+            // Feature components: MUST use ft-*, vr-*, or ly-* (can use all component libraries)
+            if (filename.includes('/src/features/')) {
+              if (!hasFtPrefix && !hasVrPrefix && !hasLyPrefix) {
                 context.report({
                   node,
                   messageId: 'wrongPrefix',
                   data: {
-                    message: '⛔ PREFIX VIOLATION: Feature components must use ft-* class prefix (5-file system: feature.css). Ref: 03-FUSE-STYLE-5-FILE-ARCHITECTURE.md',
+                    message: '⛔ PREFIX VIOLATION: Feature components must use ft-*, vr-*, or ly-* class prefix. Ref: WCCC-PROTOCOL.md',
                   },
                 });
-              }
-            }
-
-            // Pages must use pg-*
-            if (filename.includes('/app/') && filename.includes('/page.tsx')) {
-              if (!classValue.match(/\bpg-/) && !classValue.match(/\but-/) && !classValue.match(/\bpb-/) && !classValue.match(/\bsh-/)) {
-                // Pages can use pg-*, ut-*, pb-*, sh-* but should primarily use pg-* for page-specific styles
-                // Only warn if they're using custom classes without any prefix
-                if (!classValue.match(/^(pg-|ut-|pb-|sh-|ft-)/)) {
-                  context.report({
-                    node,
-                    messageId: 'wrongPrefix',
-                    data: {
-                      message: '⛔ PREFIX VIOLATION: Page components should use pg-* for page-specific styles (5-file system: page.css). Allowed: pg-*, ut-*, pb-*, sh-*. Ref: 03-FUSE-STYLE-5-FILE-ARCHITECTURE.md',
-                    },
-                  });
-                }
               }
             }
           },

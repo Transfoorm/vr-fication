@@ -68,7 +68,7 @@ const TIMELINE_URGENCY_OPTIONS = [
 // Component
 // ─────────────────────────────────────────────────────────────────────
 
-export function GenomeFields() {
+export function GenomeTab() {
   // ─────────────────────────────────────────────────────────────────────
   // FUSE wiring - all state access lives here in the Feature
   // Data flows: WARP → FUSE (Golden Bridge pattern)

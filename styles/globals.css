@@ -1,12 +1,10 @@
 /* FUSE Style System - Global Reset & Base Styles */
 
-@import url('./animations.css');
-@import url('./features.css');
-@import url('./layout.css');
-@import url('./vr.css');
-@import url('./tokens.css');
-@import url('./productivity-tokens.css');
-@import url('./themes/transtheme.css');
+@import url('./tokens.css');              /* 1. Foundation - design primitives */
+@import url('./layout.css');              /* 2. Shell structure */
+@import url('./vr.css');                  /* 3. VR components */
+@import url('./features.css');            /* 4. Feature components */
+@import url('./themes/transtheme.css');   /* 5. Theme overrides - must be last */
 
 /* Box model reset + kill not-allowed cursor virus */
 * {

@@ -81,7 +81,7 @@ export default function ActionPill({
 
   const getContent = () => {
     if (state === 'executing') {
-      return <span className="ft-field-action-pill__typing">{executingLabel}</span>;
+      return <span>{executingLabel}</span>;
     }
     if (state === 'confirming') {
       return 'Confirm';

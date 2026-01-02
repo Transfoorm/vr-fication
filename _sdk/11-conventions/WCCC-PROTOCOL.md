@@ -22,7 +22,7 @@ This is achieved through the **5-File System** with **semantic prefixes** and **
 
 1. **`tokens.css`** - Design system primitives (spacing, typography, radius, shadows)
 2. **`vr.css`** - Variant Robot components (`vr-*` prefix) - Import hub for all VR components
-3. **`layout.css`** - Shell structure (`ly-*` prefix) - Imports `/src/shell/css/shell.css` hub
+3. **`layout.css`** - Shell structure (`ly-*` prefix) - Imports `/src/shell/shell.css` hub
 4. **`globals.css`** - CSS reset, base styles, and orchestrates the import order
 5. **`features.css`** - Application features (`ft-*` prefix) - Import hub for all feature components
 
@@ -39,7 +39,7 @@ This is achieved through the **5-File System** with **semantic prefixes** and **
 Each of the 5 files acts as an **import hub** that aggregates component-scoped CSS:
 
 - **`vr.css`** → Imports 26 VR components from `/src/vr/*/`
-- **`layout.css`** → Imports `/src/shell/css/shell.css` (which imports 6 shell components)
+- **`layout.css`** → Imports `/src/shell/shell.css` (which imports 6 shell components)
 - **`features.css`** → Imports all feature components from `/src/features/*/`
 
 ### 2. Component-Scoped CSS (Local Definition, Global Availability)
@@ -51,7 +51,7 @@ Components keep their own CSS files (local definition for maintainability), but 
 ```
 LOCAL DEFINITION:
 /src/vr/button/button.css  →  vr.css  →  globals.css  →  GLOBALLY AVAILABLE
-/src/shell/css/topbar.css         →  shell.css → layout.css → globals.css → GLOBALLY AVAILABLE
+/src/shell/topbar/topbar.css         →  shell.css → layout.css → globals.css → GLOBALLY AVAILABLE
 /src/features/UserButton/user-button.css → features.css → globals.css → GLOBALLY AVAILABLE
 ```
 
@@ -62,7 +62,7 @@ LOCAL DEFINITION:
 
 **Example:**
 ```css
-/* LOCAL DEFINITION: /src/shell/css/topbar.css */
+/* LOCAL DEFINITION: /src/shell/topbar/topbar.css */
 .ly-topbar-header { ... }
 
 /* GLOBAL AVAILABILITY: After flowing through shell.css → layout.css → globals.css */
@@ -180,7 +180,7 @@ The "Variant Robot" name reflects the systematic, automated nature of these comp
 
 **Location:** `/src/shell/`
 
-**CSS:** Component-scoped files in `/src/shell/css/`, imported via `/src/shell/css/shell.css`
+**CSS:** Component-scoped files in `/src/shell/*/`, imported via `/src/shell/shell.css`
 
 **Examples:**
 ```css
@@ -195,8 +195,8 @@ The "Variant Robot" name reflects the systematic, automated nature of these comp
 - Controls app structure and navigation
 - Usually unique (one topbar, one footer)
 - Each component has its own CSS file
-- Import hub: `/src/shell/css/shell.css`
-- Main import: `/styles/layout.css` imports `/src/shell/css/shell.css`
+- Import hub: `/src/shell/shell.css`
+- Main import: `/styles/layout.css` imports `/src/shell/shell.css`
 
 ---
 
@@ -236,7 +236,7 @@ The "Variant Robot" name reflects the systematic, automated nature of these comp
 ├── globals.css             # CSS reset + base styles
 ├── vr.css           # vr-* import hub
 ├── features.css            # ft-* import hub
-└── layout.css              # Imports /src/shell/css/shell.css
+└── layout.css              # Imports /src/shell/shell.css
 
 /src/vr/
 ├── button/

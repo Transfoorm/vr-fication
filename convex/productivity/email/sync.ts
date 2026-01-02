@@ -27,9 +27,9 @@ import { api } from '@/convex/_generated/api';
  * Conservative defaults to respect rate limits
  */
 const SYNC_INTERVALS = {
-  outlook: 3 * 60 * 1000,  // 3 minutes (Microsoft: 10k requests/10min)
-  gmail: 2 * 60 * 1000,    // 2 minutes (Google: 250 requests/sec, but quota-based)
-  imap: 5 * 60 * 1000,     // 5 minutes (varies by provider)
+  outlook: 30 * 1000,      // 30 seconds for testing
+  gmail: 30 * 1000,        // 30 seconds
+  imap: 60 * 1000,         // 1 minute
 } as const;
 
 /**
@@ -224,17 +224,31 @@ export const requestImmediateSync = mutation({
     let syncTriggered = 0;
     let skippedCooldown = 0;
 
+    // Manual refresh bypasses cooldown (explicit user action)
+    // Other intents (focus, reconnect) respect cooldown to prevent spam
+    const bypassCooldown = args.intent === 'manual';
+
     for (const account of accounts) {
-      // Check cooldown (prevent sync spam)
+      // Check cooldown (prevent sync spam) - manual bypasses this
       const lastSync = account.lastSyncAt || 0;
-      if (now - lastSync < MIN_SYNC_COOLDOWN) {
+      if (!bypassCooldown && now - lastSync < MIN_SYNC_COOLDOWN) {
         skippedCooldown++;
         continue;
       }
 
-      // Schedule immediate sync
+      // For manual: don't trigger if already syncing (user will see spinner)
+      if (args.intent === 'manual' && account.isSyncing) {
+        console.log(`📧 Manual sync skipped - already syncing ${account.emailAddress}`);
+        continue;
+      }
+
+      // Schedule immediate sync - all intents sync all folders
+      // Manual = show spinner, other intents = invisible
+      const isManual = args.intent === 'manual';
       await ctx.scheduler.runAfter(0, api.productivity.email.outlook.syncOutlookMessages, {
         userId: user._id,
+        syncMode: 'full',
+        isBackground: !isManual, // manual = visible, focus/reconnect/inbox_open = invisible
       });
 
       // Update nextSyncAt to prevent duplicate triggers
@@ -336,9 +350,12 @@ export const processEmailSyncQueue = internalMutation({
       });
 
       // Trigger provider-specific sync action
+      // Background sync is invisible - sync all folders for correctness
       if (account.provider === 'outlook') {
         await ctx.scheduler.runAfter(0, api.productivity.email.outlook.syncOutlookMessages, {
           userId: account.userId,
+          syncMode: 'full',
+          isBackground: true, // Cron = invisible, no spinner
         });
         triggered++;
       } else if (account.provider === 'gmail') {

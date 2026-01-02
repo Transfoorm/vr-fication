@@ -17,14 +17,17 @@
 import { readSessionCookie } from '@/fuse/hydration/session/cookie';
 
 export async function GET() {
-  // 🛡️ SID-9.1: Identity from FUSE session cookie
-  const session = await readSessionCookie();
-
-  if (!session || !session._id) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-
   try {
+    // 🛡️ SID-9.1: Identity from FUSE session cookie
+    const session = await readSessionCookie();
+
+    if (!session || !session._id) {
+      return Response.json({
+        charts: [],
+        locations: [],
+        tracking: []
+      });
+    }
     // 🔮 FUTURE: Add Convex queries when Projects domain has data
     // Use ConvexHttpClient with session._id for sovereign queries
 
@@ -37,6 +40,11 @@ export async function GET() {
     });
   } catch (error) {
     console.error('❌ WARP API: Failed to fetch projects data:', error);
-    return new Response('Internal Server Error', { status: 500 });
+    // Return empty data - WARP preloads should fail silently
+    return Response.json({
+      charts: [],
+      locations: [],
+      tracking: []
+    });
   }
 }

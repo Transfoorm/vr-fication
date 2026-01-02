@@ -33,8 +33,9 @@ import { refreshSessionAfterUpload } from '@/app/actions/user-mutations';
 import { useProductivityData } from '@/hooks/useProductivityData';
 
 type ActionState = 'idle' | 'confirming' | 'executing';
+type DisconnectState = Record<string, ActionState>;
 
-export function EmailFields() {
+export function EmailTab() {
   // ─────────────────────────────────────────────────────────────────────
   // FUSE State (source of truth)
   // ─────────────────────────────────────────────────────────────────────
@@ -53,6 +54,7 @@ export function EmailFields() {
   // Convex Mutations
   // ─────────────────────────────────────────────────────────────────────
   const updateUserSettings = useMutation(api.domains.settings.mutations.updateUserSettings);
+  const disconnectOutlook = useMutation(api.productivity.email.outlookDiagnostics.disconnectOutlookAccount);
 
   // ─────────────────────────────────────────────────────────────────────
   // Modal State (for email verification)
@@ -70,6 +72,11 @@ export function EmailFields() {
   // ─────────────────────────────────────────────────────────────────────
   const [swapState, setSwapState] = useState<ActionState>('idle');
   const [removeState, setRemoveState] = useState<ActionState>('idle');
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Disconnect State (per account, keyed by accountId)
+  // ─────────────────────────────────────────────────────────────────────
+  const [disconnectStates, setDisconnectStates] = useState<DisconnectState>({});
 
   // ─────────────────────────────────────────────────────────────────────
   // Email Commit Handler (triggers verification modal)
@@ -233,6 +240,55 @@ export function EmailFields() {
   }, [removeState]);
 
   // ─────────────────────────────────────────────────────────────────────
+  // Disconnect Outlook Handler
+  // ─────────────────────────────────────────────────────────────────────
+
+  const getDisconnectState = useCallback((accountId: string): ActionState => {
+    return disconnectStates[accountId] ?? 'idle';
+  }, [disconnectStates]);
+
+  const setDisconnectState = useCallback((accountId: string, state: ActionState) => {
+    setDisconnectStates((prev) => ({ ...prev, [accountId]: state }));
+  }, []);
+
+  const handleDisconnectClick = useCallback(async (account: EmailAccount) => {
+    const accountId = account._id;
+    const currentState = getDisconnectState(accountId);
+
+    if (currentState === 'executing') return;
+
+    if (currentState === 'idle') {
+      setDisconnectState(accountId, 'confirming');
+      return;
+    }
+
+    // State is 'confirming' - execute disconnect
+    setDisconnectState(accountId, 'executing');
+    try {
+      const userId = user?.convexId as Id<'admin_users'>;
+      if (!userId) throw new Error('No user ID');
+
+      // Cascade delete: messages, folders, cache, webhooks, account record
+      await disconnectOutlook({
+        userId,
+        accountId: account._id as Id<'productivity_email_Accounts'>,
+      });
+
+      // Account is gone - state will update via useProductivityData reactivity
+    } catch (err) {
+      console.error('Failed to disconnect Outlook:', err);
+      setDisconnectState(accountId, 'idle');
+    }
+  }, [user?.convexId, disconnectOutlook, getDisconnectState, setDisconnectState]);
+
+  const handleDisconnectBlur = useCallback((accountId: string) => {
+    const currentState = getDisconnectState(accountId);
+    if (currentState === 'confirming') {
+      setTimeout(() => setDisconnectState(accountId, 'idle'), 150);
+    }
+  }, [getDisconnectState, setDisconnectState]);
+
+  // ─────────────────────────────────────────────────────────────────────
   // Derived
   // ─────────────────────────────────────────────────────────────────────
 
@@ -358,28 +414,50 @@ export function EmailFields() {
             </div>
           ) : (
             <div className="ft-emailtab-connected-accounts">
-              {connectedAccounts.map((account: EmailAccount) => (
-                <div key={account._id} className="ft-emailtab-account-row">
-                  <div className="ft-emailtab-account-info">
-                    <T.body size="md" weight="medium">
-                      {account.label}
-                    </T.body>
-                    <T.caption size="sm" color="secondary">
-                      {account.emailAddress}
-                    </T.caption>
-                    {account.status === 'active' && (
-                      <T.caption size="xs" color="primary">
-                        ✓ Connected
+              {connectedAccounts.map((account: EmailAccount) => {
+                const disconnectState = getDisconnectState(account._id);
+                const disconnectClasses = [
+                  'ft-emailtab-disconnect-pill',
+                  disconnectState === 'executing' && 'ft-emailtab-disconnect-pill--active',
+                  disconnectState === 'confirming' && 'ft-emailtab-disconnect-pill--confirm',
+                ].filter(Boolean).join(' ');
+
+                return (
+                  <div key={account._id} className="ft-emailtab-account-row">
+                    <div className="ft-emailtab-account-info">
+                      <T.body size="md" weight="medium">
+                        {account.label}
+                      </T.body>
+                      <T.caption size="sm" color="secondary">
+                        {account.emailAddress}
                       </T.caption>
-                    )}
-                    {account.status === 'error' && account.lastSyncError && (
-                      <T.caption size="xs" color="muted">
-                        ⚠ {account.lastSyncError}
+                      {account.status === 'active' && disconnectState === 'idle' && (
+                        <T.caption size="xs" color="primary">
+                          ✓ Connected
+                        </T.caption>
+                      )}
+                      {account.status === 'error' && account.lastSyncError && (
+                        <T.caption size="xs" color="muted">
+                          ⚠ {account.lastSyncError}
+                        </T.caption>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDisconnectClick(account)}
+                      onBlur={() => handleDisconnectBlur(account._id)}
+                      disabled={disconnectState === 'executing'}
+                      className={disconnectClasses}
+                    >
+                      <T.caption size="xs" weight="medium">
+                        {disconnectState === 'executing' ? (
+                          <span className="ft-emailtab-action-pill__typing">Disconnecting...</span>
+                        ) : disconnectState === 'confirming' ? 'Confirm →' : 'Disconnect'}
                       </T.caption>
-                    )}
+                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </Card.standard>

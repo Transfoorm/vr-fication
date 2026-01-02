@@ -98,6 +98,7 @@ import {
   Gem,
   PackageOpen,
   Send,
+  RefreshCw,
   // Gender icons
   Venus,
   Mars,
@@ -206,6 +207,7 @@ const iconRegistry = {
   'gem': Gem,
   'package': PackageOpen,
   'send': Send,
+  'refresh': RefreshCw,
 
   // Gender / Avatar profile
   'venus': Venus,

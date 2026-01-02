@@ -47,31 +47,38 @@ export function useProductivitySync(): void {
   const callerUserId = user?.convexId as Id<'admin_users'> | undefined;
 
   // ═══════════════════════════════════════════════════════════════════════
+  // 🛡️ IDENTITY GATE: No queries until user identity is stable
+  // This prevents empty query results from overwriting WARP-preloaded data
+  // ═══════════════════════════════════════════════════════════════════════
+  const isIdentityStable = Boolean(callerUserId);
+
+  // ═══════════════════════════════════════════════════════════════════════
   // 🌉 GOLDEN BRIDGE: Live queries from Convex
+  // CRITICAL: ALL queries skip until identity is stable
   // ═══════════════════════════════════════════════════════════════════════
 
   // Email accounts (connected OAuth accounts)
   const liveEmailAccounts = useQuery(
     api.domains.productivity.queries.listEmailAccounts,
-    callerUserId ? { callerUserId } : 'skip'
+    isIdentityStable ? { callerUserId: callerUserId! } : 'skip'
   );
 
   // Email threads (grouped messages with derived state)
   const liveThreads = useQuery(
     api.domains.productivity.queries.listThreads,
-    callerUserId ? { callerUserId } : 'skip'
+    isIdentityStable ? { callerUserId: callerUserId! } : 'skip'
   );
 
   // Email messages (individual messages for reading pane)
   const liveMessages = useQuery(
     api.domains.productivity.queries.listMessages,
-    callerUserId ? { callerUserId } : 'skip'
+    isIdentityStable ? { callerUserId: callerUserId! } : 'skip'
   );
 
   // Email folders (hierarchical folder structure for sidebar)
   const liveFolders = useQuery(
     api.domains.productivity.queries.listEmailFolders,
-    callerUserId ? { callerUserId } : 'skip'
+    isIdentityStable ? { callerUserId: callerUserId! } : 'skip'
   );
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -79,6 +86,9 @@ export function useProductivitySync(): void {
   // ═══════════════════════════════════════════════════════════════════════
 
   useEffect(() => {
+    // 🛡️ IDENTITY GATE: Skip effect entirely if identity is not stable
+    if (!isIdentityStable) return;
+
     // Only hydrate when we have data from all sources
     // This prevents partial hydration and race conditions
     if (liveEmailAccounts && liveThreads && liveMessages && liveFolders) {
@@ -94,6 +104,7 @@ export function useProductivitySync(): void {
         connectedAt: account.connectedAt,
         lastSyncAt: account.lastSyncAt,
         lastSyncError: account.lastSyncError,
+        isSyncing: account.isSyncing,
       }));
 
       // Transform threads to FUSE format (ThreadMetadata → EmailThread)
@@ -154,10 +165,15 @@ export function useProductivitySync(): void {
         provider: folder.provider as 'outlook' | 'gmail',
       }));
 
+      // 🛡️ MONOTONIC HYDRATION: Never overwrite good data with empty data
+      // This ensures WARP-preloaded data survives until live queries return real data
+      // Empty data can only occur from timing issues, never from intentional clearing
+      if (messages.length === 0 && accounts.length === 0) return;
+
       // Hydrate FUSE with complete email data
       hydrateProductivity({
         email: { accounts, threads, messages, folders },
       }, 'CONVEX_LIVE');
     }
-  }, [liveEmailAccounts, liveThreads, liveMessages, liveFolders, hydrateProductivity]);
+  }, [liveEmailAccounts, liveThreads, liveMessages, liveFolders, hydrateProductivity, isIdentityStable, callerUserId]);
 }

@@ -18,10 +18,10 @@ import './account-page.css';
 
 import { useFuse } from '@/store/fuse';
 import { Tabs, Stack, Icon } from '@/vr';
-import { ProfileFields } from './_tabs/ProfileTab';
-import { EmailFields } from './_tabs/EmailTab';
-import { PasswordFields } from './_tabs/PasswordTab';
-import { GenomeFields } from './_tabs/GenomeTab';
+import { ProfileTab } from './_tabs/ProfileTab';
+import { EmailTab } from './_tabs/EmailTab';
+import { PasswordTab } from './_tabs/PasswordTab';
+import { GenomeTab } from './_tabs/GenomeTab';
 
 export function AccountPageFeature() {
   const user = useFuse((s) => s.user);
@@ -70,10 +70,10 @@ export function AccountPageFeature() {
       >
         <Tabs.panels
           tabs={[
-            { id: 'profile', label: 'Profile', icon: <Icon variant="user" />, content: <ProfileFields /> },
-            { id: 'email', label: 'Email', icon: <Icon variant="send" />, content: <EmailFields /> },
-            { id: 'password', label: 'Password', icon: <Icon variant="lock" />, content: <PasswordFields /> },
-            { id: 'genome', label: <><span>Genome</span> <span className="vr-tabs-panels-label-sm">{genomePercent}%</span></>, icon: <Icon variant="dna" />, content: <GenomeFields />, highlight: genomePercent < 100 },
+            { id: 'profile', label: 'Profile', icon: <Icon variant="user" />, content: <ProfileTab /> },
+            { id: 'email', label: 'Email', icon: <Icon variant="send" />, content: <EmailTab /> },
+            { id: 'password', label: 'Password', icon: <Icon variant="lock" />, content: <PasswordTab /> },
+            { id: 'genome', label: <><span>Genome</span> <span className="vr-tabs-panels-label-sm">{genomePercent}%</span></>, icon: <Icon variant="dna" />, content: <GenomeTab />, highlight: genomePercent < 100 },
           ]}
         />
       </div>

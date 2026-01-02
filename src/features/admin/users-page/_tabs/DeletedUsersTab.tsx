@@ -23,7 +23,7 @@ import { useAdminData } from '@/hooks/useAdminData';
 
 type DeletionLog = Doc<"admin_users_DeleteLog">;
 
-export function DeletedUsersFeature() {
+export function DeletedUsersTab() {
 
   // 🚀 WARP: Instant data access from FUSE store (server-preloaded)
   const { data } = useAdminData();

@@ -10,7 +10,7 @@ import { T, Stack } from '@/vr';
 export function PanelThreeTab() {
   return (
     <Stack.lg>
-      <T.body className="text-secondary">Panel Three coming soon...</T.body>
+      <T.body>Panel Three coming soon...</T.body>
     </Stack.lg>
   );
 }
