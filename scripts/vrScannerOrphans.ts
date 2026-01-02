@@ -145,18 +145,16 @@ export function checkOrphans(
     if (violations === 0) {
       pass(`Orphan Detection: ${scanned} classes, all used`);
     } else {
-      // Report as warning not failure
-      console.log(`⚠️  Orphan Detection: ${scanned} scanned, ${violations} potential orphans`);
-      // Always list orphans for review
+      // Orphans now BLOCK commits - pristine CSS policy
+      console.log(`❌ Orphan Detection: ${scanned} scanned, ${violations} orphan(s) BLOCKING`);
       for (const orphan of orphans) {
         console.log(`   └─ ${orphan}`);
       }
-      // Don't add to totalViolations - orphans are warnings, not blockers
-      return 0;
+      return violations; // Return count to block commit
     }
   } catch (e) {
     console.log(`⚠️  Orphan Detection: Skipped (${e instanceof Error ? e.message : 'command error'})`);
   }
 
-  return 0; // Orphans don't block commits (yet)
+  return 0;
 }
