@@ -356,6 +356,49 @@
   /* Spinner */
   --verify-spinner: #f40;                                        /* Brand orange */
 
+
+  /* ═══════════════════════════════════════════════════════════════════
+     📧 PRODUCTIVITY EMAIL - Light Mode Colors
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Text colors */
+  --prod-text-primary: #333;                                     /* Primary content */
+  --prod-text-secondary: #444;                                   /* Secondary content */
+  --prod-text-tertiary: #666;                                    /* Meta information */
+  --prod-text-muted: #888;                                       /* Dates, counts, captions */
+  --prod-text-faint: #999;                                       /* Loading states, empty states */
+
+  /* Surface colors */
+  --prod-bg-surface: #fff;                                       /* Card/panel backgrounds */
+  --prod-bg-hover: #f5f5f5;                                      /* General hover states */
+  --prod-bg-pressed: #eee;                                       /* Pressed state */
+  --prod-bg-section: #fafafa;                                    /* Section backgrounds */
+  --prod-bg-section-hover: #f0f0f0;                              /* Section hover */
+  --prod-bg-badge: #eee;                                         /* Badge backgrounds */
+
+  /* Selected states (warm cream) */
+  --prod-bg-selected: #fef6f0;                                   /* Selected items */
+  --prod-bg-selected-hover: #fdeee3;                             /* Selected + hover */
+
+  /* Border colors */
+  --prod-border-light: #eee;                                     /* Dividers, separators */
+  --prod-border-normal: #ccc;                                    /* Panel borders */
+  --prod-border-hover: #aaa;                                     /* Scrollbar hover */
+
+  /* Brand/selected indicator (orange) */
+  --prod-selected-text: #e85d35;                                 /* Selected folder text */
+  --prod-selected-bg: #f97550;                                   /* Selected badge bg */
+  --prod-selected-contrast: #fff;                                /* Text on selected */
+  --prod-selected-indicator: #f97550;                            /* Left bracket indicator */
+
+  /* Thread list specific */
+  --prod-thread-hover: #fdfdfd;                                  /* Thread item hover (subtle) */
+  --prod-thread-selected-hover: #fef3ec;                         /* Selected thread hover */
+  --prod-thread-sender: #555;                                    /* Sender name text */
+  --prod-section-header: #f5f5f5;                                /* Section headers (Today, Yesterday) */
+  --prod-unread-text: #ec540e;                                   /* Unread sender orange */
+  --prod-unread-dot: #f97550;                                    /* Unread indicator dot */
+
 }
 
 
@@ -747,6 +790,49 @@
 
   /* Spinner */
   --verify-spinner: #ff7a52;                                     /* Bright orange */
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     📧 PRODUCTIVITY EMAIL - Dark Mode Colors
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Text colors */
+  --prod-text-primary: #e5e5e5;                                  /* Primary content */
+  --prod-text-secondary: #c0c0c0;                                /* Secondary content */
+  --prod-text-tertiary: #999;                                    /* Meta information */
+  --prod-text-muted: #777;                                       /* Dates, counts, captions */
+  --prod-text-faint: #666;                                       /* Loading states, empty states */
+
+  /* Surface colors */
+  --prod-bg-surface: #1e1e1e;                                    /* Card/panel backgrounds */
+  --prod-bg-hover: #2a2a2a;                                      /* General hover states */
+  --prod-bg-pressed: #333;                                       /* Pressed state */
+  --prod-bg-section: #252525;                                    /* Section backgrounds */
+  --prod-bg-section-hover: #2f2f2f;                              /* Section hover */
+  --prod-bg-badge: #333;                                         /* Badge backgrounds */
+
+  /* Selected states (warm dark) */
+  --prod-bg-selected: #2d2520;                                   /* Selected items */
+  --prod-bg-selected-hover: #3a3025;                             /* Selected + hover */
+
+  /* Border colors */
+  --prod-border-light: #333;                                     /* Dividers, separators */
+  --prod-border-normal: #444;                                    /* Panel borders */
+  --prod-border-hover: #555;                                     /* Scrollbar hover */
+
+  /* Brand/selected indicator (orange - brighter for dark) */
+  --prod-selected-text: #ff8a60;                                 /* Selected folder text */
+  --prod-selected-bg: #ff7a52;                                   /* Selected badge bg */
+  --prod-selected-contrast: #1a1a1a;                             /* Text on selected */
+  --prod-selected-indicator: #ff7a52;                            /* Left bracket indicator */
+
+  /* Thread list specific */
+  --prod-thread-hover: #242424;                                  /* Thread item hover (subtle) */
+  --prod-thread-selected-hover: #352a22;                         /* Selected thread hover */
+  --prod-thread-sender: #ccc;                                    /* Sender name text */
+  --prod-section-header: #2a2a2a;                                /* Section headers (Today, Yesterday) */
+  --prod-unread-text: #ff8a60;                                   /* Unread sender orange */
+  --prod-unread-dot: #ff7a52;                                    /* Unread indicator dot */
 
 }
 

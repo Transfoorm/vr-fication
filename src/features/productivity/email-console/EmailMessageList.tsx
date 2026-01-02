@@ -172,16 +172,19 @@ export function EmailMessageList({
                   onClick={(e) => onMessageClick(message._id, e)}
                   onContextMenu={(e) => onMessageContextMenu(message._id, e)}
                 >
-                  <div className="ft-email__thread-top">
-                    <div className="ft-email__thread-sender">
-                      {message.from.name || message.from.email || 'Unknown'}
+                  <div className="ft-email__unread-dot" />
+                  <div className="ft-email__thread-content">
+                    <div className="ft-email__thread-top">
+                      <div className="ft-email__thread-sender">
+                        {message.from.name || message.from.email || 'Unknown'}
+                      </div>
+                      <div className="ft-email__thread-date">
+                        {formatThreadDate(message.receivedAt)}
+                      </div>
                     </div>
-                    <div className="ft-email__thread-date">
-                      {formatThreadDate(message.receivedAt)}
-                    </div>
+                    <div className="ft-email__thread-subject">{message.subject}</div>
+                    <div className="ft-email__thread-snippet">{message.snippet || ''}</div>
                   </div>
-                  <div className="ft-email__thread-subject">{message.subject}</div>
-                  <div className="ft-email__thread-snippet">{message.snippet || ''}</div>
                 </div>
               );
             })}

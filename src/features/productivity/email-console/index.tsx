@@ -4,6 +4,8 @@
 
 import { useRef, useCallback, useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useMutation, useAction } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import { useProductivityData } from '@/hooks/useProductivityData';
 import { useEmailSyncIntent } from '@/hooks/useEmailSyncIntent';
 import { useEmailBodySync } from '@/hooks/useEmailBodySync';
@@ -340,6 +342,55 @@ export function EmailConsole() {
     }
     // Otherwise, the effect will re-run when emailBodies updates
   }, [selectedMessageIds, emailBodies]);
+
+  // Auto-mark-read hooks
+  const updateEmailReadStatus = useFuse((state) => state.updateEmailReadStatus);
+  const clearPendingReadUpdate = useFuse((state) => state.clearPendingReadUpdate);
+  const updateConvexReadStatus = useMutation(api.productivity.email.outlookActions.updateMessageReadStatus);
+  const batchSyncReadStatus = useAction(api.productivity.email.outlookActions.batchMarkOutlookReadStatus);
+
+  // Auto-mark as read: after 2 seconds of viewing an unread email, mark it read
+  useEffect(() => {
+    // Only for single selection
+    if (selectedMessageIds.size !== 1 || !userId) return;
+
+    const selectedId = [...selectedMessageIds][0];
+    const message = allMessages.find(m => m._id === selectedId);
+
+    // Only trigger for unread messages
+    if (!message || message.isRead) return;
+
+    const timer = setTimeout(async () => {  // 1.5s debounce
+      // Double-check it's still selected and unread
+      const currentMessage = allMessages.find(m => m._id === selectedId);
+      if (!currentMessage || currentMessage.isRead) return;
+
+      // 1. Instant UI update via FUSE
+      updateEmailReadStatus(selectedId, true);
+
+      // 2. Persist to Convex DB
+      try {
+        await updateConvexReadStatus({
+          userId,
+          messageId: selectedId as Id<'productivity_email_Index'>,
+          isRead: true,
+        });
+      } catch (error) {
+        console.error('Auto-mark-read Convex update failed:', error);
+      } finally {
+        setTimeout(() => clearPendingReadUpdate(selectedId), 500);
+      }
+
+      // 3. Sync to Outlook (background)
+      batchSyncReadStatus({
+        userId,
+        messageIds: [selectedId as Id<'productivity_email_Index'>],
+        isRead: true,
+      }).catch((error) => console.error('Auto-mark-read Outlook sync failed:', error));
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [selectedMessageIds, allMessages, userId, updateEmailReadStatus, clearPendingReadUpdate, updateConvexReadStatus, batchSyncReadStatus]);
 
   // Get the currently selected message ID (for triggering fetch)
   const selectedId = selectedMessageIds.size === 1 ? [...selectedMessageIds][0] : null;

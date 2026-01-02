@@ -382,7 +382,7 @@
   font-weight: var(--prod-weight-semibold);
   color: var(--prod-text-muted);
   padding: var(--prod-space-sm) var(--prod-space-xl);
-  background: #f5f5f5;
+  background: var(--prod-section-header);
   border-bottom: 1px solid var(--prod-border-light);
   display: flex;
   justify-content: space-between;
@@ -393,7 +393,7 @@
 }
 
 .ft-email__section-header:hover {
-  background: #f5f5f5;
+  background: var(--prod-section-header);
 }
 
 .ft-email__section-chevron {
@@ -406,6 +406,9 @@
 }
 
 .ft-email__thread-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--prod-space-md);
   padding: var(--prod-space-lg) var(--prod-space-xl);
   border-bottom: 1px solid var(--prod-border-light);
   cursor: pointer;
@@ -413,8 +416,13 @@
   user-select: none;
 }
 
+.ft-email__thread-content {
+  flex: 1;
+  min-width: 0;
+}
+
 .ft-email__thread-item:hover {
-  background: #fdfdfd;
+  background: var(--prod-thread-hover);
 }
 
 .ft-email__thread-item--selected {
@@ -422,7 +430,7 @@
 }
 
 .ft-email__thread-item--selected:hover {
-  background: #fef3ec;
+  background: var(--prod-thread-selected-hover);
 }
 
 /* Suppress hover during keyboard navigation */
@@ -442,33 +450,34 @@
   margin-bottom: var(--prod-space-xxs);
 }
 
+.ft-email__unread-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: transparent;
+  margin-top: 5px;
+}
+
+.ft-email__thread-item--unread .ft-email__unread-dot {
+  background: var(--prod-unread-dot);
+}
+
 .ft-email__thread-sender {
+  flex: 1;
   font-size: var(--prod-text-body-sm);
+  font-weight: var(--prod-weight-semibold);
+  color: var(--prod-thread-sender);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
 }
 
-.ft-email__thread-item--unread {
-  box-shadow: inset 4px 0 0 var(--prod-selected-indicator);
-}
-
 .ft-email__thread-item--unread .ft-email__thread-sender {
-  font-weight: var(--prod-weight-semibold);
-  color: #ec540e;
+  color: var(--prod-unread-text);
 }
 
-.ft-email__thread-item--unread .ft-email__thread-sender::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background: #f97550;
-  border-radius: 50%;
-  margin-right: 6px;
-  vertical-align: middle;
-}
 
 .ft-email__thread-date {
   font-size: var(--prod-text-micro);
