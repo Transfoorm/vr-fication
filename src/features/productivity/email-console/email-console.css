@@ -278,7 +278,7 @@
   gap: var(--prod-space-lg);
   padding: var(--prod-space-lg) var(--prod-space-xl);
   border-bottom: 1px solid var(--prod-border-light);
-  background: var(--prod-bg-section);
+  background: var(--prod-bg-section-hover);
 }
 
 .ft-email__threads-title {
@@ -384,7 +384,7 @@
 }
 
 .ft-email__section-header:hover {
-  background: var(--prod-bg-section-hover);
+  background: var(--prod-bg-hover);
 }
 
 .ft-email__section-chevron {
@@ -405,16 +405,16 @@
 }
 
 .ft-email__thread-item:hover {
-  background: var(--prod-bg-hover);
+  background: transparent;
+  cursor: pointer;
 }
 
 .ft-email__thread-item--selected {
-  background: var(--prod-bg-selected);
-  box-shadow: inset 4px 0 0 var(--prod-selected-indicator);
+  background: var(--prod-bg-hover);
 }
 
 .ft-email__thread-item--selected:hover {
-  background: var(--prod-bg-selected-hover);
+  background: var(--prod-bg-hover);
 }
 
 /* Suppress hover during keyboard navigation */
@@ -423,7 +423,7 @@
 }
 
 .ft-email__threads--keyboard-nav .ft-email__thread-item--selected:hover {
-  background: var(--prod-bg-selected);
+  background: var(--prod-bg-hover);
 }
 
 .ft-email__thread-top {
@@ -440,6 +440,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+}
+
+.ft-email__thread-item--unread {
+  background: var(--prod-bg-selected);
+  box-shadow: inset 4px 0 0 var(--prod-selected-indicator);
+}
+
+.ft-email__thread-item--unread:hover {
+  background: var(--prod-bg-selected);
+  cursor: pointer;
+}
+
+.ft-email__thread-item--unread.ft-email__thread-item--selected {
+  background: var(--prod-bg-selected-hover);
 }
 
 .ft-email__thread-item--unread .ft-email__thread-sender {
