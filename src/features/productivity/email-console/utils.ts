@@ -28,7 +28,6 @@ export function formatThreadDate(timestamp: number): string {
 
   const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
   const dayShort = date.toLocaleDateString('en-US', { weekday: 'short' });
-  const dayDate = `${date.getDate()}/${date.getMonth() + 1}`;
 
   if (date >= today) {
     // Today: just time
@@ -40,8 +39,8 @@ export function formatThreadDate(timestamp: number): string {
     // Within a week: day + time
     return `${dayShort} ${time}`;
   } else {
-    // Older: day + date
-    return `${dayShort} ${dayDate}`;
+    // Older: just date (no day name)
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   }
 }
 

@@ -3,6 +3,7 @@
 // EMAIL CONSOLE - Outlook Web Clone (FUSE Golden Bridge pattern)
 
 import { useRef, useCallback, useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useProductivityData } from '@/hooks/useProductivityData';
 import { useEmailSyncIntent } from '@/hooks/useEmailSyncIntent';
 import { useEmailBodySync } from '@/hooks/useEmailBodySync';
@@ -31,6 +32,14 @@ import './email-console.css';
 
 export function EmailConsole() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+
+  // Clear error param from URL on mount (prevents re-showing on refresh)
+  useEffect(() => {
+    if (searchParams.get('outlook_error')) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [searchParams]);
 
   // Column widths - initialized from localStorage, persisted on resize
   const [mailboxWidth, setMailboxWidth] = useState(() => getSavedWidth(STORAGE_KEY_MAILBOX, 180));
