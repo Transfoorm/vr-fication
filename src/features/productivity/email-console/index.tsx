@@ -5,6 +5,7 @@
 import { useRef, useCallback, useState, useMemo, useEffect } from 'react';
 import { useProductivityData } from '@/hooks/useProductivityData';
 import { useEmailSyncIntent } from '@/hooks/useEmailSyncIntent';
+import { useEmailBodySync } from '@/hooks/useEmailBodySync';
 import { useFuse } from '@/store/fuse';
 import { T } from '@/vr';
 import type { Id } from '@/convex/_generated/dataModel';
@@ -68,10 +69,18 @@ export function EmailConsole() {
   const [selectedSubfolderId, setSelectedSubfolderId] = useState<string | null>(null);
 
   // Selected messages state (multi-select with Cmd/Ctrl+click) - uses _id
+  // This controls thread list highlighting (changes immediately on click)
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+
+  // Displayed message ID - controls reading pane content
+  // Decoupled from selection: only updates when body is ready (Outlook pattern)
+  const [displayedMessageId, setDisplayedMessageId] = useState<string | null>(null);
 
   // Anchor message for Shift+click range selection
   const [anchorMessageId, setAnchorMessageId] = useState<string | null>(null);
+
+  // Read email bodies from FUSE to know when content is ready
+  const emailBodies = useFuse((state) => state.productivity.emailBodies);
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{
@@ -84,6 +93,9 @@ export function EmailConsole() {
 
   // Collapsed sections state (for thread time buckets)
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+
+  // Keyboard navigation mode (suppresses hover while using arrow keys)
+  const [isKeyboardNav, setIsKeyboardNav] = useState(false);
 
   // Expanded folders state (for sidebar folder tree) - persisted to localStorage
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => {
@@ -256,14 +268,77 @@ export function EmailConsole() {
     }
   }, [messages, selectedMessageIds.size]);
 
-  // Get selected message data from FUSE (only when single selection)
-  const selectedMessage = useMemo(() => {
-    // Only show message content when exactly one is selected
-    if (selectedMessageIds.size !== 1) return null;
+  // Keyboard navigation: Arrow Up/Down to move between emails
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle arrow keys
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+
+      // Don't interfere with input fields
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      // Need messages to navigate
+      if (messages.length === 0) return;
+
+      e.preventDefault();
+
+      // Enter keyboard navigation mode (suppresses hover on old item)
+      setIsKeyboardNav(true);
+
+      // Find current selection index (use first selected if multiple)
+      const currentId = [...selectedMessageIds][0];
+      const currentIndex = currentId ? messages.findIndex(m => m._id === currentId) : -1;
+
+      // Calculate new index
+      let newIndex: number;
+      if (e.key === 'ArrowUp') {
+        newIndex = currentIndex <= 0 ? 0 : currentIndex - 1;
+      } else {
+        newIndex = currentIndex >= messages.length - 1 ? messages.length - 1 : currentIndex + 1;
+      }
+
+      // Select new message
+      const newMessageId = messages[newIndex]._id;
+      setSelectedMessageIds(new Set([newMessageId]));
+      setAnchorMessageId(newMessageId);
+
+      // Scroll into view (after React renders)
+      requestAnimationFrame(() => {
+        const element = document.querySelector(`[data-message-id="${newMessageId}"]`);
+        element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [messages, selectedMessageIds]);
+
+  // Decoupled display: update displayedMessageId only when body is ready
+  // This keeps the old email visible until the new one is loaded (Outlook pattern)
+  useEffect(() => {
+    // Only applies to single selection
+    if (selectedMessageIds.size !== 1) return;
 
     const selectedId = [...selectedMessageIds][0];
-    return allMessages.find(m => m._id === selectedId) ?? null;
-  }, [selectedMessageIds, allMessages]);
+
+    // If body is already in FUSE, swap immediately
+    if (emailBodies?.[selectedId]) {
+      setDisplayedMessageId(selectedId);
+    }
+    // Otherwise, the effect will re-run when emailBodies updates
+  }, [selectedMessageIds, emailBodies]);
+
+  // Get the currently selected message ID (for triggering fetch)
+  const selectedId = selectedMessageIds.size === 1 ? [...selectedMessageIds][0] : null;
+
+  // Get displayed message data from FUSE (what's shown in reading pane)
+  const displayedMessage = useMemo(() => {
+    if (!displayedMessageId) return null;
+    return allMessages.find(m => m._id === displayedMessageId) ?? null;
+  }, [displayedMessageId, allMessages]);
+
+  // Trigger fetch for selected message (runs in background while old email displayed)
+  useEmailBodySync(selectedId as Id<'productivity_email_Index'> | null);
 
   const handleResize = useCallback((handle: 'mailbox' | 'threads', e: React.MouseEvent) => {
     e.preventDefault();
@@ -362,11 +437,13 @@ export function EmailConsole() {
           selectedMessageIds={selectedMessageIds}
           virtualItems={virtualItems}
           collapsedSections={collapsedSections}
+          isKeyboardNav={isKeyboardNav}
           onToggleSection={toggleSection}
           onMessageClick={handleMessageClick}
           onMessageContextMenu={handleMessageContextMenu}
           onListContextMenu={handleListContextMenu}
           onRefresh={triggerManualSync}
+          onMouseMove={() => setIsKeyboardNav(false)}
         />
 
         <div className="ft-email__resize-handle" onMouseDown={(e) => handleResize('threads', e)} />
@@ -379,20 +456,20 @@ export function EmailConsole() {
               <div className="ft-email__empty"><T.body color="secondary">{selectedMessageIds.size} items selected</T.body></div>
             ) : !flags.isHydrated ? (
               <div className="ft-email__loading"><T.body color="secondary">Loading...</T.body></div>
-            ) : selectedMessage === null ? (
+            ) : displayedMessage === null ? (
               <div className="ft-email__empty"><T.body color="secondary">Message not found</T.body></div>
             ) : (
               <>
                 <div className="ft-email__reading-header">
-                  <div className="ft-email__reading-subject">{selectedMessage.subject}</div>
+                  <div className="ft-email__reading-subject">{displayedMessage.subject}</div>
                   <div className="ft-email__message-header">
-                    <strong>From:</strong> {selectedMessage.from.name || selectedMessage.from.email}<br />
-                    <strong>Date:</strong> {new Date(selectedMessage.receivedAt).toLocaleString()}<br />
-                    <strong>To:</strong> {selectedMessage.to.map(r => r.name || r.email).join(', ')}
+                    <strong>From:</strong> {displayedMessage.from.name || displayedMessage.from.email}<br />
+                    <strong>Date:</strong> {new Date(displayedMessage.receivedAt).toLocaleString()}<br />
+                    <strong>To:</strong> {displayedMessage.to.map(r => r.name || r.email).join(', ')}
                   </div>
                   <hr />
                 </div>
-                <MessageBody messageId={selectedMessage._id as Id<'productivity_email_Index'>} />
+                <MessageBody messageId={displayedMessageId as Id<'productivity_email_Index'>} />
               </>
             )}
           </div>

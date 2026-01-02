@@ -13,11 +13,14 @@
 │  Layer 1: .ft-email__reading (resize owner)                           │
 │  Layer 2: .ft-email__reading-scroll (scroll container)                │
 │  Layer 3: This iframe (content sandbox)                               │
+│                                                                        │
+│  DECOUPLED DISPLAY (Outlook pattern):                                 │
+│  - Fetch is triggered by parent (useEmailBodySync in index.tsx)       │
+│  - This component only displays - receives displayedMessageId         │
+│  - Old email stays visible until new body is ready                    │
 └────────────────────────────────────────────────────────────────────────*/
 
-import { useEmailBodySync } from '@/hooks/useEmailBodySync';
 import { useFuse } from '@/store/fuse';
-import { T } from '@/vr';
 import type { Id } from '@/convex/_generated/dataModel';
 
 interface MessageBodyProps {
@@ -27,23 +30,16 @@ interface MessageBodyProps {
 /**
  * MessageBody - Displays full email HTML content in isolated iframe
  *
- * Fixed height. Internal scroll. No layout negotiation.
+ * Pure display component. Fetch triggered by parent.
  * The iframe is a sandbox - it never affects parent layout.
  */
 export function MessageBody({ messageId }: MessageBodyProps) {
-  // Trigger sync hook (hydrates into FUSE)
-  useEmailBodySync(messageId);
-
-  // Read from FUSE
+  // Read from FUSE (fetch triggered by parent)
   const htmlContent = useFuse((state) => state.productivity.emailBodies?.[messageId]);
 
-  // Loading state
+  // No content yet - render nothing (no loading message)
   if (!htmlContent) {
-    return (
-      <div className="ft-email__body-loading">
-        <T.body color="secondary">Loading email content...</T.body>
-      </div>
-    );
+    return null;
   }
 
   // Email HTML with internal scroll + styled scrollbar

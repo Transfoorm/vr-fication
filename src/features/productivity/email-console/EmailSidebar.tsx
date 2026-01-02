@@ -78,7 +78,7 @@ export function EmailSidebar({
         className={`ft-email__folder ${selectedFolder === 'drafts' ? 'ft-email__folder--selected' : ''}`}
         onClick={() => onFolderSelect('drafts')}
       >
-        <span className="ft-email__folder-icon">✏️</span>
+        <span className="ft-email__folder-icon ft-email__folder-icon--flipped">✏️</span>
         <span className="ft-email__folder-label">Drafts</span>
         {folderCounts.drafts > 0 && (
           <span className="ft-email__folder-count">{folderCounts.drafts}</span>
@@ -90,7 +90,7 @@ export function EmailSidebar({
         className={`ft-email__folder ${selectedFolder === 'sent' ? 'ft-email__folder--selected' : ''}`}
         onClick={() => onFolderSelect('sent')}
       >
-        <span className="ft-email__folder-icon">📨</span>
+        <span className="ft-email__folder-icon">📩</span>
         <span className="ft-email__folder-label">Sent</span>
         {folderCounts.sent > 0 && (
           <span className="ft-email__folder-count">{folderCounts.sent}</span>
@@ -111,7 +111,7 @@ export function EmailSidebar({
               ›
             </span>
           )}
-          <span className="ft-email__folder-icon">🔍</span>
+          <span className="ft-email__folder-icon">🔎</span>
           <span className="ft-email__folder-label">Archive</span>
           {folderCounts.archive > 0 && (
             <span className="ft-email__folder-count">{folderCounts.archive}</span>
@@ -146,7 +146,7 @@ export function EmailSidebar({
               ›
             </span>
           )}
-          <span className="ft-email__folder-icon">🗑️</span>
+          <span className="ft-email__folder-icon ft-email__folder-icon--trash">🗑️</span>
           <span className="ft-email__folder-label">Deleted</span>
           {folderCounts.trash > 0 && (
             <span className="ft-email__folder-count">{folderCounts.trash}</span>
@@ -172,8 +172,8 @@ export function EmailSidebar({
         className={`ft-email__folder ${selectedFolder === 'spam' ? 'ft-email__folder--selected' : ''}`}
         onClick={() => onFolderSelect('spam')}
       >
-        <span className="ft-email__folder-icon">⛔️</span>
-        <span className="ft-email__folder-label">Spam</span>
+        <span className="ft-email__folder-icon ft-email__folder-icon--junk">🚫</span>
+        <span className="ft-email__folder-label">Junk</span>
         {folderCounts.spam > 0 && (
           <span className="ft-email__folder-count">{folderCounts.spam}</span>
         )}

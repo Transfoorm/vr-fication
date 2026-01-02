@@ -135,6 +135,10 @@
   transition: background 0.15s ease;
 }
 
+.ft-email__resize-handle:hover {
+  background: rgb(255 255 255 / 100%);
+}
+
 .ft-email__resize-handle:hover::after {
   background: rgb(0 0 0 / 15%);
 }
@@ -209,10 +213,24 @@
   font-size: var(--prod-icon-sm);
   width: var(--prod-folder-icon-width);
   text-align: center;
+  filter: grayscale(100%);
+}
+
+.ft-email__folder-icon--trash {
+  transform: scale(0.85);
+}
+
+.ft-email__folder-icon--flipped {
+  transform: scaleX(-1);
+}
+
+.ft-email__folder-icon--junk {
+  opacity: 0.6;
 }
 
 .ft-email__folder--selected .ft-email__folder-icon {
   opacity: 1;
+  text-shadow: none; /* Keep icon flat, no bold effect */
 }
 
 .ft-email__folder-label {
@@ -399,6 +417,15 @@
   background: var(--prod-bg-selected-hover);
 }
 
+/* Suppress hover during keyboard navigation */
+.ft-email__threads--keyboard-nav .ft-email__thread-item:hover {
+  background: transparent;
+}
+
+.ft-email__threads--keyboard-nav .ft-email__thread-item--selected:hover {
+  background: var(--prod-bg-selected);
+}
+
 .ft-email__thread-top {
   display: flex;
   justify-content: space-between;
@@ -448,10 +475,19 @@
    Reading Pane Messages
    ───────────────────────────────────────────────────────────────────────────── */
 
+.ft-email__reading-header {
+  flex-shrink: 0;
+}
+
 .ft-email__reading-subject {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: var(--prod-text-heading);
   font-weight: var(--prod-weight-semibold);
   margin-bottom: var(--prod-margin-section);
+  line-height: 1.2;
+  height: 1.2em;  /* Lock to single line height - emoji won't push it */
 }
 
 .ft-email__reading-meta {

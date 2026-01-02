@@ -21,11 +21,13 @@ interface EmailMessageListProps {
   selectedMessageIds: Set<string>;
   virtualItems: VirtualItem[];
   collapsedSections: Set<string>;
+  isKeyboardNav: boolean;
   onToggleSection: (bucket: string) => void;
   onMessageClick: (messageId: string, event: React.MouseEvent) => void;
   onMessageContextMenu: (messageId: string, event: React.MouseEvent) => void;
   onListContextMenu: (event: React.MouseEvent) => void;
   onRefresh: () => void;
+  onMouseMove: () => void;
 }
 
 export function EmailMessageList({
@@ -38,11 +40,13 @@ export function EmailMessageList({
   selectedMessageIds,
   virtualItems,
   collapsedSections,
+  isKeyboardNav,
   onToggleSection,
   onMessageClick,
   onMessageContextMenu,
   onListContextMenu,
   onRefresh,
+  onMouseMove,
 }: EmailMessageListProps) {
   // Own scroll container ref and virtualizer
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -55,7 +59,11 @@ export function EmailMessageList({
   });
 
   return (
-    <section className="ft-email__threads" onContextMenu={onListContextMenu}>
+    <section
+      className={`ft-email__threads${isKeyboardNav ? ' ft-email__threads--keyboard-nav' : ''}`}
+      onContextMenu={onListContextMenu}
+      onMouseMove={onMouseMove}
+    >
       {/* Folder title header */}
       <div className="ft-email__threads-header">
         <span className="ft-email__threads-title">
@@ -127,6 +135,7 @@ export function EmailMessageList({
               return (
                 <div
                   key={message._id}
+                  data-message-id={message._id}
                   className={`ft-email__thread-item ${selectedMessageIds.has(message._id) ? 'ft-email__thread-item--selected' : ''} ${!message.isRead ? 'ft-email__thread-item--unread' : ''}`}
                   style={{
                     position: 'absolute',
