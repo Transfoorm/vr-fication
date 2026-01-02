@@ -48,6 +48,8 @@ export interface ProductivitySlice {
   emailBodyOrder: string[];
   // UI preferences (persisted)
   emailViewMode: EmailViewMode;
+  // Pending read status updates (skip sync for these messages)
+  pendingReadUpdates: Set<string>;
   // ADP Coordination (REQUIRED)
   status: ADPStatus;
   lastFetchedAt?: number;
@@ -57,6 +59,8 @@ export interface ProductivitySlice {
 export interface ProductivityActions {
   hydrateProductivity: (data: Partial<ProductivityData>, source?: ADPSource) => void;
   hydrateEmailBody: (messageId: string, htmlContent: string) => void;
+  updateEmailReadStatus: (messageId: string, isRead: boolean) => void;
+  clearPendingReadUpdate: (messageId: string) => void;
   clearProductivity: () => void;
   setEmailViewMode: (mode: EmailViewMode) => void;
 }
@@ -77,6 +81,8 @@ const initialProductivityState: ProductivitySlice = {
   emailBodyOrder: [],
   // UI preferences
   emailViewMode: 'live', // Default to Live mode (traditional Outlook-style)
+  // Pending read status updates (protected from sync overwrite)
+  pendingReadUpdates: new Set(),
   // ADP Coordination
   status: 'idle',
   lastFetchedAt: undefined,
@@ -113,6 +119,37 @@ export const createProductivitySlice: StateCreator<
       });
     }
     fuseTimer.end('hydrateProductivity', start);
+  },
+
+  updateEmailReadStatus: (messageId, isRead) => {
+    set((state) => {
+      if (!state.email?.messages) return state;
+
+      const updatedMessages = state.email.messages.map((msg) =>
+        msg._id === messageId ? { ...msg, isRead } : msg
+      );
+
+      // Add to pending set to protect from sync overwrite
+      const newPending = new Set(state.pendingReadUpdates);
+      newPending.add(messageId);
+
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          messages: updatedMessages,
+        },
+        pendingReadUpdates: newPending,
+      };
+    });
+  },
+
+  clearPendingReadUpdate: (messageId) => {
+    set((state) => {
+      const newPending = new Set(state.pendingReadUpdates);
+      newPending.delete(messageId);
+      return { ...state, pendingReadUpdates: newPending };
+    });
   },
 
   hydrateEmailBody: (messageId, htmlContent) => {

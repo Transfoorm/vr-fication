@@ -150,15 +150,19 @@
 
 .ft-email__mailbox {
   padding: var(--prod-space-md) var(--prod-space-md) var(--prod-space-md) 0; /* No left padding - container invisible */
-  overflow-y: auto;
+  overflow: hidden auto;
   overscroll-behavior: contain; /* Prevents sticking at scroll boundaries */
   display: flex;
   flex-direction: column;
   gap: var(--prod-space-xxs);
   user-select: none;
 
-  /* Firefox thin scrollbar */
+  /* Firefox: hide scrollbar by default */
   scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.ft-email__mailbox:hover {
   scrollbar-color: var(--prod-border-normal) transparent;
 }
 
@@ -172,8 +176,13 @@
 }
 
 .ft-email__mailbox::-webkit-scrollbar-thumb {
-  background: var(--prod-border-normal) !important;
+  background: transparent !important;
   border-radius: var(--prod-radius-xs) !important;
+  transition: background 500ms ease;
+}
+
+.ft-email__mailbox:hover::-webkit-scrollbar-thumb {
+  background: var(--prod-border-normal) !important;
 }
 
 .ft-email__mailbox::-webkit-scrollbar-thumb:hover {
@@ -278,7 +287,7 @@
   gap: var(--prod-space-lg);
   padding: var(--prod-space-lg) var(--prod-space-xl);
   border-bottom: 1px solid var(--prod-border-light);
-  background: var(--prod-bg-section-hover);
+  background: var(--prod-bg-section);
 }
 
 .ft-email__threads-title {
@@ -373,7 +382,7 @@
   font-weight: var(--prod-weight-semibold);
   color: var(--prod-text-muted);
   padding: var(--prod-space-sm) var(--prod-space-xl);
-  background: var(--prod-bg-section);
+  background: #f5f5f5;
   border-bottom: 1px solid var(--prod-border-light);
   display: flex;
   justify-content: space-between;
@@ -384,7 +393,7 @@
 }
 
 .ft-email__section-header:hover {
-  background: var(--prod-bg-hover);
+  background: #f5f5f5;
 }
 
 .ft-email__section-chevron {
@@ -405,16 +414,15 @@
 }
 
 .ft-email__thread-item:hover {
-  background: transparent;
-  cursor: pointer;
+  background: #fdfdfd;
 }
 
 .ft-email__thread-item--selected {
-  background: var(--prod-bg-hover);
+  background: var(--prod-bg-selected);
 }
 
 .ft-email__thread-item--selected:hover {
-  background: var(--prod-bg-hover);
+  background: #fef3ec;
 }
 
 /* Suppress hover during keyboard navigation */
@@ -423,7 +431,7 @@
 }
 
 .ft-email__threads--keyboard-nav .ft-email__thread-item--selected:hover {
-  background: var(--prod-bg-hover);
+  background: var(--prod-bg-selected);
 }
 
 .ft-email__thread-top {
@@ -443,21 +451,23 @@
 }
 
 .ft-email__thread-item--unread {
-  background: var(--prod-bg-selected);
   box-shadow: inset 4px 0 0 var(--prod-selected-indicator);
-}
-
-.ft-email__thread-item--unread:hover {
-  background: var(--prod-bg-selected);
-  cursor: pointer;
-}
-
-.ft-email__thread-item--unread.ft-email__thread-item--selected {
-  background: var(--prod-bg-selected-hover);
 }
 
 .ft-email__thread-item--unread .ft-email__thread-sender {
   font-weight: var(--prod-weight-semibold);
+  color: #ec540e;
+}
+
+.ft-email__thread-item--unread .ft-email__thread-sender::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #f97550;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
 }
 
 .ft-email__thread-date {
@@ -702,6 +712,7 @@
   padding: var(--prod-space-sm) 0;
   min-width: 180px;
   user-select: none;
+  overflow: hidden;
 }
 
 .ft-email__context-menu button {

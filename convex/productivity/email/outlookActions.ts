@@ -6,8 +6,50 @@
  */
 
 import { v } from 'convex/values';
-import { mutation, query, action } from '@/convex/_generated/server';
+import { mutation, query, action, ActionCtx } from '@/convex/_generated/server';
 import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+
+// Shared helper for token refresh (DRY - used by all actions)
+async function ensureFreshToken(
+  ctx: ActionCtx,
+  userId: Id<'admin_users'>,
+  tokens: { accessToken: string; refreshToken: string; expiresAt?: number }
+): Promise<string | null> {
+  const now = Date.now();
+  if (!tokens.expiresAt || tokens.expiresAt >= now + 5 * 60 * 1000) {
+    return tokens.accessToken; // Token still valid
+  }
+
+  try {
+    const response = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: process.env.MICROSOFT_CLIENT_ID || '',
+        client_secret: process.env.MICROSOFT_CLIENT_SECRET || '',
+        refresh_token: tokens.refreshToken,
+        grant_type: 'refresh_token',
+        scope: 'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access',
+      }),
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json() as { access_token: string; refresh_token?: string; expires_in: number };
+    await ctx.runMutation(api.productivity.email.outlook.storeOutlookTokens, {
+      userId,
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token || tokens.refreshToken,
+      expiresAt: now + data.expires_in * 1000,
+      scope: 'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access',
+    });
+
+    return data.access_token;
+  } catch {
+    return null;
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // QUERIES
@@ -268,172 +310,44 @@ export const archiveOutlookMessage = action({
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FOLDER OPERATIONS
+// MARK READ/UNREAD
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const getFolderById = query({
+export const updateMessageReadStatus = mutation({
   args: {
     userId: v.id('admin_users'),
-    folderId: v.id('productivity_email_Folders'),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    if (!user) return null;
-
-    const folder = await ctx.db.get(args.folderId);
-    if (!folder) return null;
-
-    return {
-      _id: folder._id,
-      externalFolderId: folder.externalFolderId,
-      displayName: folder.displayName,
-      canonicalFolder: folder.canonicalFolder,
-      accountId: folder.accountId,
-      parentFolderId: folder.parentFolderId,
-    };
-  },
-});
-
-export const getFolderByExternalId = query({
-  args: {
-    userId: v.id('admin_users'),
-    externalFolderId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    if (!user) return null;
-
-    const account = await ctx.db
-      .query('productivity_email_Accounts')
-      .withIndex('by_user', (q) => q.eq('userId', user._id))
-      .first();
-
-    if (!account) return null;
-
-    const folder = await ctx.db
-      .query('productivity_email_Folders')
-      .withIndex('by_account', (q) => q.eq('accountId', account._id))
-      .filter((q) => q.eq(q.field('externalFolderId'), args.externalFolderId))
-      .first();
-
-    if (!folder) return null;
-
-    return {
-      _id: folder._id,
-      externalFolderId: folder.externalFolderId,
-      displayName: folder.displayName,
-      canonicalFolder: folder.canonicalFolder,
-      accountId: folder.accountId,
-      parentFolderId: folder.parentFolderId,
-    };
-  },
-});
-
-export const removeFolderFromDb = mutation({
-  args: {
-    userId: v.id('admin_users'),
-    folderId: v.id('productivity_email_Folders'),
+    messageId: v.id('productivity_email_Index'),
+    isRead: v.boolean(),
   },
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error('User not found');
 
-    const folder = await ctx.db.get(args.folderId);
-    if (!folder) throw new Error('Folder not found');
+    const message = await ctx.db.get(args.messageId);
+    if (!message) throw new Error('Message not found');
 
-    // Delete all messages in this folder
-    const messages = await ctx.db
-      .query('productivity_email_Index')
-      .withIndex('by_account', (q) => q.eq('accountId', folder.accountId))
-      .filter((q) => q.eq(q.field('providerFolderId'), folder.externalFolderId))
-      .collect();
-
-    for (const message of messages) {
-      await ctx.db.delete(message._id);
-    }
-
-    // Delete the folder
-    await ctx.db.delete(args.folderId);
-
-    return { success: true, messagesDeleted: messages.length };
-  },
-});
-
-export const moveFolderToTrash = mutation({
-  args: {
-    userId: v.id('admin_users'),
-    folderId: v.id('productivity_email_Folders'),
-    newExternalFolderId: v.string(), // Microsoft gives new ID after move
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    if (!user) throw new Error('User not found');
-
-    const folder = await ctx.db.get(args.folderId);
-    if (!folder) throw new Error('Folder not found');
-
-    // Find the Deleted Items folder to get its externalFolderId
-    const trashFolder = await ctx.db
-      .query('productivity_email_Folders')
-      .withIndex('by_account', (q) => q.eq('accountId', folder.accountId))
-      .filter((q) => q.eq(q.field('canonicalFolder'), 'trash'))
-      .first();
-
-    // Update folder: new ID, new parent (Deleted Items), new canonical (trash)
-    await ctx.db.patch(args.folderId, {
-      externalFolderId: args.newExternalFolderId,
-      parentFolderId: trashFolder?.externalFolderId,
-      canonicalFolder: 'trash',
+    await ctx.db.patch(args.messageId, {
+      isRead: args.isRead,
       updatedAt: Date.now(),
     });
 
-    // Update all messages in this folder to reflect the move
-    const messages = await ctx.db
-      .query('productivity_email_Index')
-      .withIndex('by_account', (q) => q.eq('accountId', folder.accountId))
-      .filter((q) => q.eq(q.field('providerFolderId'), folder.externalFolderId))
-      .collect();
-
-    for (const message of messages) {
-      await ctx.db.patch(message._id, {
-        providerFolderId: args.newExternalFolderId,
-        canonicalFolder: 'trash',
-      });
-    }
-
-    console.log(`📁 Moved folder to trash: ${folder.displayName}, updated ${messages.length} messages`);
-    return { success: true, messagesUpdated: messages.length };
+    return { success: true };
   },
 });
 
-export const deleteOutlookFolder = action({
+export const markOutlookMessageReadStatus = action({
   args: {
     userId: v.id('admin_users'),
-    folderId: v.id('productivity_email_Folders'),
+    messageId: v.id('productivity_email_Index'),
+    isRead: v.boolean(),
   },
   handler: async (ctx, args): Promise<{ success: boolean; error?: string }> => {
-    const folder = await ctx.runQuery(api.productivity.email.outlookActions.getFolderById, {
+    const message = await ctx.runQuery(api.productivity.email.outlookActions.getMessageById, {
       userId: args.userId,
-      folderId: args.folderId,
+      messageId: args.messageId,
     });
 
-    if (!folder) return { success: false, error: 'Folder not found' };
-
-    // Prevent deleting ROOT system folders (no parent = root folder)
-    // Subfolders of Inbox etc. can still be deleted
-    const systemFolders = ['inbox', 'sent', 'drafts', 'trash', 'archive', 'spam', 'junk'];
-    const isRootSystemFolder = !folder.parentFolderId && systemFolders.includes(folder.canonicalFolder);
-
-    console.log('🗑️ Delete folder check:', {
-      displayName: folder.displayName,
-      canonicalFolder: folder.canonicalFolder,
-      parentFolderId: folder.parentFolderId,
-      isRootSystemFolder,
-    });
-
-    if (isRootSystemFolder) {
-      return { success: false, error: 'Cannot delete system folders' };
-    }
+    if (!message) return { success: false, error: 'Message not found' };
 
     let tokens = await ctx.runQuery(api.productivity.email.outlook.getOutlookTokens, {
       userId: args.userId,
@@ -441,10 +355,9 @@ export const deleteOutlookFolder = action({
 
     if (!tokens?.accessToken) return { success: false, error: 'No Outlook access token' };
 
-    // Check if token needs refresh (expires within 5 minutes)
+    // Check if token needs refresh
     const now = Date.now();
     if (tokens.expiresAt && tokens.expiresAt < now + 5 * 60 * 1000) {
-      console.log('🔄 Token expired or expiring soon, refreshing...');
       try {
         const refreshResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
           method: 'POST',
@@ -457,115 +370,176 @@ export const deleteOutlookFolder = action({
             scope: 'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access',
           }),
         });
-
-        if (!refreshResponse.ok) {
-          console.error('Token refresh failed');
-          return { success: false, error: 'Token expired - please reconnect Outlook' };
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json() as { access_token: string; refresh_token?: string; expires_in: number };
+          await ctx.runMutation(api.productivity.email.outlook.storeOutlookTokens, {
+            userId: args.userId,
+            accessToken: refreshData.access_token,
+            refreshToken: refreshData.refresh_token || tokens.refreshToken,
+            expiresAt: now + refreshData.expires_in * 1000,
+            scope: 'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access',
+          });
+          tokens = { ...tokens, accessToken: refreshData.access_token };
         }
-
-        const refreshData = await refreshResponse.json() as {
-          access_token: string;
-          refresh_token?: string;
-          expires_in: number;
-        };
-
-        // Store new tokens
-        await ctx.runMutation(api.productivity.email.outlook.storeOutlookTokens, {
-          userId: args.userId,
-          accessToken: refreshData.access_token,
-          refreshToken: refreshData.refresh_token || tokens.refreshToken,
-          expiresAt: now + refreshData.expires_in * 1000,
-          scope: 'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access',
-        });
-
-        tokens = { ...tokens, accessToken: refreshData.access_token };
-        console.log('✅ Token refreshed successfully');
-      } catch {
-        return { success: false, error: 'Token refresh failed - please reconnect Outlook' };
-      }
+      } catch { /* continue with existing token */ }
     }
 
     try {
-      // If folder is already in trash → PERMANENT DELETE
-      // Otherwise → MOVE to Deleted Items
-      // Check both canonicalFolder AND if parent is trash (for nested folders like Kenn.org/Expenses)
-      let isAlreadyInTrash = folder.canonicalFolder === 'trash';
-
-      // Also check if parent folder is in Deleted Items
-      if (!isAlreadyInTrash && folder.parentFolderId) {
-        const parentFolder = await ctx.runQuery(api.productivity.email.outlookActions.getFolderByExternalId, {
-          userId: args.userId,
-          externalFolderId: folder.parentFolderId,
-        });
-        if (parentFolder?.canonicalFolder === 'trash') {
-          isAlreadyInTrash = true;
+      // PATCH the message to update isRead status
+      const response = await fetch(
+        `https://graph.microsoft.com/v1.0/me/messages/${message.externalMessageId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${tokens.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ isRead: args.isRead }),
         }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to update message read status:', errorText);
+        return { success: false, error: `Outlook API error: ${response.status}` };
       }
 
-      if (isAlreadyInTrash) {
-        // PERMANENT DELETE - folder is already in Deleted Items
-        console.log(`🗑️ Permanently deleting folder: ${folder.displayName}`);
-        const response = await fetch(
-          `https://graph.microsoft.com/v1.0/me/mailFolders/${folder.externalFolderId}`,
-          {
-            method: 'DELETE',
-            headers: {
-              Authorization: `Bearer ${tokens.accessToken}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Failed to permanently delete folder:', errorText);
-          return { success: false, error: `Outlook API error: ${response.status}` };
-        }
-
-        // Remove from our DB entirely
-        await ctx.runMutation(api.productivity.email.outlookActions.removeFolderFromDb, {
-          userId: args.userId,
-          folderId: args.folderId,
-        });
-
-        console.log(`🗑️ Permanently deleted folder: ${folder.displayName}`);
-        return { success: true };
-      } else {
-        // MOVE to Deleted Items (soft delete)
-        console.log(`🗑️ Moving folder to Deleted Items: ${folder.displayName}`);
-        const response = await fetch(
-          `https://graph.microsoft.com/v1.0/me/mailFolders/${folder.externalFolderId}/move`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${tokens.accessToken}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ destinationId: 'deleteditems' }),
-          }
-        );
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Failed to move folder to trash:', errorText);
-          return { success: false, error: `Outlook API error: ${response.status}` };
-        }
-
-        // Get the moved folder's new ID (Microsoft returns updated folder)
-        const movedFolder = await response.json();
-        console.log(`🗑️ Moved folder to Deleted Items: ${folder.displayName} → new ID: ${movedFolder.id}`);
-
-        // Update our DB - change parent to Deleted Items, update canonicalFolder to trash
-        await ctx.runMutation(api.productivity.email.outlookActions.moveFolderToTrash, {
-          userId: args.userId,
-          folderId: args.folderId,
-          newExternalFolderId: movedFolder.id,
-        });
-
-        return { success: true };
-      }
+      // Local DB already updated via optimistic update - just confirm API success
+      return { success: true };
     } catch (error) {
-      console.error('Delete folder error:', error);
+      console.error('Mark read/unread error:', error);
       return { success: false, error: String(error) };
     }
   },
 });
+
+/**
+ * BATCH Mark Read/Unread - Uses Microsoft Graph Batch API
+ *
+ * Handles bulk operations without throttling:
+ * - Batches up to 20 requests per API call (Microsoft limit)
+ * - 200ms delay between batches to avoid rate limits
+ * - Returns summary of successes/failures
+ */
+export const batchMarkOutlookReadStatus = action({
+  args: {
+    userId: v.id('admin_users'),
+    messageIds: v.array(v.id('productivity_email_Index')),
+    isRead: v.boolean(),
+  },
+  handler: async (ctx, args): Promise<{ success: boolean; processed: number; failed: number; errors?: string[] }> => {
+    const BATCH_SIZE = 20; // Microsoft Graph batch limit
+    const BATCH_DELAY_MS = 200; // Delay between batches to avoid throttling
+
+    // Get all messages with their external IDs
+    const messages = await Promise.all(
+      args.messageIds.map((id) =>
+        ctx.runQuery(api.productivity.email.outlookActions.getMessageById, {
+          userId: args.userId,
+          messageId: id,
+        })
+      )
+    );
+
+    // Filter out null messages and get external IDs
+    const validMessages = messages.filter((m): m is NonNullable<typeof m> => m !== null);
+
+    if (validMessages.length === 0) {
+      return { success: false, processed: 0, failed: args.messageIds.length, errors: ['No valid messages found'] };
+    }
+
+    // Get tokens
+    const tokens = await ctx.runQuery(api.productivity.email.outlook.getOutlookTokens, {
+      userId: args.userId,
+    });
+
+    if (!tokens?.accessToken) {
+      return { success: false, processed: 0, failed: validMessages.length, errors: ['No Outlook access token'] };
+    }
+
+    // Refresh token if needed
+    const accessToken = await ensureFreshToken(ctx, args.userId, tokens);
+    if (!accessToken) {
+      return { success: false, processed: 0, failed: validMessages.length, errors: ['Token refresh failed'] };
+    }
+
+    // Split into batches of 20
+    const batches: typeof validMessages[] = [];
+    for (let i = 0; i < validMessages.length; i += BATCH_SIZE) {
+      batches.push(validMessages.slice(i, i + BATCH_SIZE));
+    }
+
+    console.log(`📦 Batch sync: ${validMessages.length} messages in ${batches.length} batches`);
+
+    let totalProcessed = 0;
+    let totalFailed = 0;
+    const errors: string[] = [];
+
+    // Process each batch
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
+
+      // Build batch request body
+      // Microsoft Graph Batch API: https://learn.microsoft.com/en-us/graph/json-batching
+      const batchRequests = batch.map((msg, idx) => ({
+        id: String(idx + 1),
+        method: 'PATCH',
+        url: `/me/messages/${msg.externalMessageId}`,
+        headers: { 'Content-Type': 'application/json' },
+        body: { isRead: args.isRead },
+      }));
+
+      try {
+        const response = await fetch('https://graph.microsoft.com/v1.0/$batch', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ requests: batchRequests }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`❌ Batch ${batchIndex + 1} failed:`, errorText);
+          totalFailed += batch.length;
+          errors.push(`Batch ${batchIndex + 1}: ${response.status}`);
+          continue;
+        }
+
+        const data = await response.json() as { responses: Array<{ id: string; status: number; body?: unknown }> };
+
+        // Count successes and failures in this batch
+        for (const res of data.responses) {
+          if (res.status >= 200 && res.status < 300) {
+            totalProcessed++;
+          } else {
+            totalFailed++;
+            errors.push(`Message failed: ${res.status}`);
+          }
+        }
+
+        console.log(`✅ Batch ${batchIndex + 1}/${batches.length}: ${batch.length} processed`);
+
+        // Delay before next batch (except for last batch)
+        if (batchIndex < batches.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+        }
+      } catch (error) {
+        console.error(`❌ Batch ${batchIndex + 1} error:`, error);
+        totalFailed += batch.length;
+        errors.push(`Batch ${batchIndex + 1}: ${String(error)}`);
+      }
+    }
+
+    console.log(`📦 Batch sync complete: ${totalProcessed} success, ${totalFailed} failed`);
+
+    return {
+      success: totalFailed === 0,
+      processed: totalProcessed,
+      failed: totalFailed,
+      errors: errors.length > 0 ? errors.slice(0, 5) : undefined, // Limit errors to avoid huge payloads
+    };
+  },
+});
+

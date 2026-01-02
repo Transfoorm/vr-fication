@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useAction } from 'convex/react';
+import { useAction, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
+import { useFuse } from '@/store/fuse';
 
 interface ContextMenuState {
   x: number;
@@ -39,7 +40,13 @@ export function useEmailActions({
   // Email actions from Convex
   const deleteMessage = useAction(api.productivity.email.outlookActions.deleteOutlookMessage);
   const archiveMessage = useAction(api.productivity.email.outlookActions.archiveOutlookMessage);
-  const deleteFolder = useAction(api.productivity.email.outlookActions.deleteOutlookFolder);
+  const deleteFolder = useAction(api.productivity.email.outlookFolderActions.deleteOutlookFolder);
+  const batchSyncReadStatus = useAction(api.productivity.email.outlookActions.batchMarkOutlookReadStatus);
+  const updateConvexReadStatus = useMutation(api.productivity.email.outlookActions.updateMessageReadStatus);
+
+  // FUSE actions for instant UI update (no round-trip)
+  const updateEmailReadStatus = useFuse((state) => state.updateEmailReadStatus);
+  const clearPendingReadUpdate = useFuse((state) => state.clearPendingReadUpdate);
 
   const handleContextAction = useCallback(async (action: string) => {
     const currentContextMenu = contextMenu;
@@ -145,6 +152,64 @@ export function useEmailActions({
       return;
     }
 
+    if (action === 'markRead' || action === 'markUnread') {
+      console.log(`📧 Mark action triggered:`, { action, userId, selectedCount: selectedMessageIds.size });
+
+      if (!userId) {
+        console.error('❌ Cannot mark read/unread: No user ID');
+        return;
+      }
+
+      const isRead = action === 'markRead';
+      const messageIdsToUpdate = [...selectedMessageIds];
+
+      if (messageIdsToUpdate.length === 0) {
+        console.error('❌ Cannot mark read/unread: No messages selected');
+        return;
+      }
+
+      console.log(`📧 Mark ${isRead ? 'READ' : 'UNREAD'}: ${messageIdsToUpdate.length} messages`, messageIdsToUpdate);
+
+      // INSTANT UI: Update FUSE store directly (no round-trip)
+      for (const messageId of messageIdsToUpdate) {
+        updateEmailReadStatus(messageId, isRead);
+      }
+
+      // Update Convex DB and clear pending flag when done
+      await Promise.all(
+        messageIdsToUpdate.map(async (messageId) => {
+          try {
+            await updateConvexReadStatus({
+              userId,
+              messageId: messageId as Id<'productivity_email_Index'>,
+              isRead,
+            });
+          } catch (error) {
+            console.error(`❌ Convex update failed:`, error);
+          } finally {
+            // Delay clearing pending to give sync time to see the protection
+            // The CONVEX_LIVE sync runs immediately on mutation, so we need buffer
+            setTimeout(() => clearPendingReadUpdate(messageId), 500);
+          }
+        })
+      );
+
+      // BACKGROUND: Batch sync to Outlook API (20 messages per request, avoids throttling)
+      batchSyncReadStatus({
+        userId,
+        messageIds: messageIdsToUpdate as Id<'productivity_email_Index'>[],
+        isRead,
+      }).then((result) => {
+        if (result.failed > 0) {
+          console.warn(`⚠️ Outlook batch sync: ${result.processed} success, ${result.failed} failed`);
+        } else {
+          console.log(`✅ Outlook batch sync: ${result.processed} messages synced`);
+        }
+      }).catch((error) => console.error(`❌ Outlook batch sync failed:`, error));
+
+      return;
+    }
+
     // Other actions are still stubbed
     console.log(`Context action: ${action}`, {
       selectedCount: selectedMessageIds.size,
@@ -163,6 +228,10 @@ export function useEmailActions({
     deleteMessage,
     archiveMessage,
     deleteFolder,
+    updateEmailReadStatus,
+    clearPendingReadUpdate,
+    updateConvexReadStatus,
+    batchSyncReadStatus,
   ]);
 
   return { handleContextAction };

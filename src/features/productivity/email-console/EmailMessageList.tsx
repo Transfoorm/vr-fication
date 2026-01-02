@@ -61,23 +61,26 @@ export function EmailMessageList({
     overscan: 5,
   });
 
-  // Extract visible message IDs for prefetch
-  const visibleRows = virtualizer.getVirtualItems();
-  const visibleIds = visibleRows
-    .map((row) => virtualItems[row.index])
-    .filter((item): item is { type: 'message'; message: EmailMessage; bucket: string } =>
-      item.type === 'message'
-    )
-    .map((item) => item.message._id);
-
-  // Report visible IDs to parent (only when they change)
+  // Extract visible message IDs for prefetch (in effect to avoid flushSync during render)
   useEffect(() => {
-    const key = visibleIds.join(',');
-    if (key !== prevVisibleIdsRef.current) {
-      prevVisibleIdsRef.current = key;
-      onVisibleIdsChange(visibleIds);
-    }
-  }, [visibleIds, onVisibleIdsChange]);
+    // Defer to avoid flushSync conflict with React rendering
+    const frame = requestAnimationFrame(() => {
+      const rows = virtualizer.getVirtualItems();
+      const ids = rows
+        .map((row) => virtualItems[row.index])
+        .filter((item): item is { type: 'message'; message: EmailMessage; bucket: string } =>
+          item.type === 'message'
+        )
+        .map((item) => item.message._id);
+
+      const key = ids.join(',');
+      if (key !== prevVisibleIdsRef.current) {
+        prevVisibleIdsRef.current = key;
+        onVisibleIdsChange(ids);
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  });
 
   return (
     <section
