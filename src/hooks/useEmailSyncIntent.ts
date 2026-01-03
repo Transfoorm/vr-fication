@@ -16,11 +16,10 @@
 
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useFuse } from '@/store/fuse';
-import { useProductivityData } from '@/hooks/useProductivityData';
 import type { Id } from '@/convex/_generated/dataModel';
 
 type SyncIntent = 'focus' | 'inbox_open' | 'manual' | 'reconnect';
@@ -52,10 +51,12 @@ export function useEmailSyncIntent(): UseEmailSyncIntentReturn {
   const user = useFuse((state) => state.user);
   const callerUserId = user?.convexId as Id<'admin_users'> | undefined;
 
-  // Get isSyncing from account record (server-controlled)
-  const { data } = useProductivityData();
-  const account = data.email?.accounts?.[0]; // First connected account
-  const isSyncing = account?.isSyncing ?? false;
+  // LOCAL spinner state - immediate feedback, not tied to slow DB updates
+  const [isSpinning, setIsSpinning] = useState(false);
+  const spinTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // isSyncing is now local - spins briefly on click for instant feedback
+  const isSyncing = isSpinning;
 
   const requestSync = useMutation(api.productivity.email.sync.requestImmediateSync);
 
@@ -90,8 +91,23 @@ export function useEmailSyncIntent(): UseEmailSyncIntentReturn {
 
   /**
    * Manual sync trigger (for refresh button)
+   * Spins icon briefly (1.5s) for instant feedback
    */
   const triggerManualSync = useCallback(async () => {
+    // Clear any existing timeout
+    if (spinTimeoutRef.current) {
+      clearTimeout(spinTimeoutRef.current);
+    }
+
+    // Start spinning immediately (instant feedback)
+    setIsSpinning(true);
+
+    // Stop spinning after 3s (two full rotations)
+    spinTimeoutRef.current = setTimeout(() => {
+      setIsSpinning(false);
+    }, 3000);
+
+    // Fire the sync (runs in background)
     await doSync('manual');
   }, [doSync]);
 

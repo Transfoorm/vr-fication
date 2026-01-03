@@ -187,15 +187,15 @@ export const initialNavigationState: NavigationSlice = {
 // Slice Creator
 // ─────────────────────────────────────────────────────────────────────────────
 
-type SetState = (
-  partial: Partial<NavigationSlice> | ((state: NavigationSlice) => Partial<NavigationSlice>)
-) => void;
-type GetState = () => NavigationSlice;
+import type { StateCreator } from 'zustand';
 
-export const createNavigationActions = (
-  set: SetState,
-  get: GetState
-): NavigationActions => ({
+export const createSovereignRouterSlice: StateCreator<
+  NavigationSlice & NavigationActions,
+  [],
+  [],
+  NavigationSlice & NavigationActions
+> = (set, get) => ({
+  ...initialNavigationState,
   navigate: (route: string) => {
     const start = fuseTimer.start('navigate');
     const current = get().route;
@@ -322,6 +322,17 @@ export const createNavigationActions = (
     fuseTimer.end('toggleSidebar', start);
   },
 });
+
+// Legacy alias for backwards compatibility (deprecated - use createSovereignRouterSlice)
+type SetState = (partial: Partial<NavigationSlice> | ((state: NavigationSlice) => Partial<NavigationSlice>)) => void;
+type GetState = () => NavigationSlice;
+export const createNavigationActions = (set: SetState, get: GetState): NavigationActions => {
+  const slice = createSovereignRouterSlice(set as Parameters<typeof createSovereignRouterSlice>[0], get as Parameters<typeof createSovereignRouterSlice>[1], {} as Parameters<typeof createSovereignRouterSlice>[2]);
+  // Extract only actions, discard state properties
+  const { route, history, lastNavigatedAt, expandedSections, sidebarCollapsed, ...actions } = slice;
+  void route; void history; void lastNavigatedAt; void expandedSections; void sidebarCollapsed;
+  return actions as NavigationActions;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Route Helpers

@@ -47,14 +47,8 @@
   opacity: 1;
 }
 
-/* Remove not-allowed cursor when disabled */
-.ft-preferences-enchant-radio .vr-radio-fancy-label--disabled,
-.ft-preferences-enchant-radio .vr-radio-fancy-button--disabled {
-  cursor: default;
-}
-
 /* Override VR: Adjust spacing and width for enchantment options */
-.ft-preferences-enchant-radio .vr-radio-fancy-label {
+.ft-preferences-enchant-radio .vr-input-radio-label {
   display: block;
   width: 200px;
   padding: 12px var(--space-md);
@@ -62,30 +56,31 @@
   transition: all var(--duration-fast) var(--easing);
 }
 
-/* Label styling: darker color */
-.ft-preferences-enchant-radio .vr-radio-fancy-label strong {
-  color: var(--text-primary);
+/* Remove not-allowed cursor when disabled */
+.ft-preferences-enchant-radio .vr-input-radio--disabled .vr-input-radio-label,
+.ft-preferences-enchant-radio .vr-input-radio--disabled .vr-input-radio-button {
+  cursor: default;
 }
 
 /* Description styling: lighter color + italic */
-.ft-preferences-enchant-radio .vr-radio-fancy-desc {
+.ft-preferences-enchant-radio .vr-input-radio-desc {
   color: var(--text-tertiary);
   font-style: italic;
 }
 
 /* Subtle inset effect when selected */
-.ft-preferences-enchant-radio .vr-radio-fancy-input:checked ~ .vr-radio-fancy-label {
+.ft-preferences-enchant-radio .vr-input-radio-input:checked ~ .vr-input-radio-label {
   box-shadow: inset 0 1px 2px rgb(0 0 0 / 12%);
   background: rgb(0 0 0 / 1%);
 }
 
 /* Override VR radio group spacing */
-.ft-preferences-enchant-radio .vr-radio-fancy-group {
+.ft-preferences-enchant-radio .vr-input-radio-group {
   gap: 0;
 }
 
 /* Tighter spacing between radio rows */
-.ft-preferences-enchant-radio .vr-radio-fancy-row {
+.ft-preferences-enchant-radio .vr-input-radio {
   margin-bottom: -4px;
 }
 

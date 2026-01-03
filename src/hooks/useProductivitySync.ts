@@ -126,33 +126,34 @@ export function useProductivitySync(): void {
       }));
 
       // Transform messages to FUSE format (Doc<productivity_email_Index> → EmailMessage)
+      // NOTE: Pending read status protection is handled in hydrateProductivity()
       const messages: EmailMessage[] = liveMessages.map((msg) => ({
-        _id: msg._id,
-        externalThreadId: msg.externalThreadId,
-        subject: msg.subject,
-        from: {
-          name: msg.from.name,
-          email: msg.from.email,
-        },
-        to: msg.to.map((recipient): Participant => ({
-          name: recipient.name,
-          email: recipient.email,
-        })),
-        receivedAt: msg.receivedAt,
-        snippet: msg.snippet,
-        hasAttachments: msg.hasAttachments,
-        resolutionState: msg.resolutionState as 'awaiting_me' | 'awaiting_them' | 'resolved' | 'none',
-        aiClassification: msg.aiClassification ? {
-          intent: msg.aiClassification.intent,
-          priority: msg.aiClassification.priority as 'low' | 'medium' | 'high' | undefined,
-          senderType: msg.aiClassification.senderType,
-          explanation: msg.aiClassification.explanation,
-          confidence: msg.aiClassification.confidence,
-        } : undefined,
-        providerFolderId: msg.providerFolderId,
-        canonicalFolder: msg.canonicalFolder,
-        isRead: msg.isRead,
-      }));
+          _id: msg._id,
+          externalThreadId: msg.externalThreadId,
+          subject: msg.subject,
+          from: {
+            name: msg.from.name,
+            email: msg.from.email,
+          },
+          to: msg.to.map((recipient): Participant => ({
+            name: recipient.name,
+            email: recipient.email,
+          })),
+          receivedAt: msg.receivedAt,
+          snippet: msg.snippet,
+          hasAttachments: msg.hasAttachments,
+          resolutionState: msg.resolutionState as 'awaiting_me' | 'awaiting_them' | 'resolved' | 'none',
+          aiClassification: msg.aiClassification ? {
+            intent: msg.aiClassification.intent,
+            priority: msg.aiClassification.priority as 'low' | 'medium' | 'high' | undefined,
+            senderType: msg.aiClassification.senderType,
+            explanation: msg.aiClassification.explanation,
+            confidence: msg.aiClassification.confidence,
+          } : undefined,
+          providerFolderId: msg.providerFolderId,
+          canonicalFolder: msg.canonicalFolder,
+          isRead: msg.isRead,
+        }));
 
       // Transform folders to FUSE format
       const folders: EmailFolder[] = liveFolders.map((folder) => ({

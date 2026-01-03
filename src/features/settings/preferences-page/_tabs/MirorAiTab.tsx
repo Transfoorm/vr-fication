@@ -190,7 +190,7 @@ export function MirorAiTab() {
           {/* Radio options - standalone item for space-evenly */}
           <div className={`ft-preferences-enchant-radio ${enchantmentEnabled ? 'ft-preferences-enchant-radio--active' : ''}`}>
             <span className="ft-preferences-enchantment-label"></span>
-            <Input.radioFancy
+            <Input.radio
               value={enchantmentTiming}
               onChange={(val) => updateMirorLocal({ mirorEnchantmentTiming: val as 'subtle' | 'magical' | 'playful' })}
               options={[

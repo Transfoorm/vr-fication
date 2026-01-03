@@ -52,6 +52,14 @@
   gap: var(--prod-space-md);
 }
 
+/* Constrained mode - responsive width, centered (matches body) */
+.ft-email__header--constrained {
+  width: 100%;
+  max-width: var(--layout-constrained-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .ft-email__refresh-btn {
   display: flex;
   align-items: center;
@@ -112,6 +120,14 @@
   min-height: 0;
 }
 
+/* Constrained mode - responsive width, centered */
+.ft-email__body--constrained {
+  width: 100%;
+  max-width: var(--layout-constrained-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    Resize Handles - Invisible until hover
    ───────────────────────────────────────────────────────────────────────────── */
@@ -120,6 +136,8 @@
   width: var(--prod-resize-handle);
   cursor: col-resize;
   position: relative;
+  border-radius: var(--radius-full);
+  transition: background var(--prod-transition-fast);
 
   /* Invisible - no background, just the hit area */
 }
@@ -127,20 +145,20 @@
 .ft-email__resize-handle::after {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: var(--prod-space-sm);
+  bottom: var(--prod-space-sm);
   left: 50%;
   width: 1px;
   background: transparent;
-  transition: background 0.15s ease;
+  transition: background var(--prod-transition-fast);
 }
 
 .ft-email__resize-handle:hover {
-  background: rgb(255 255 255 / 100%);
+  background: var(--prod-resize-hover-bg);
 }
 
 .ft-email__resize-handle:hover::after {
-  background: rgb(0 0 0 / 15%);
+  background: var(--prod-resize-line);
 }
 
 
@@ -150,15 +168,19 @@
 
 .ft-email__mailbox {
   padding: var(--prod-space-md) var(--prod-space-md) var(--prod-space-md) 0; /* No left padding - container invisible */
-  overflow-y: auto;
+  overflow: hidden auto;
   overscroll-behavior: contain; /* Prevents sticking at scroll boundaries */
   display: flex;
   flex-direction: column;
   gap: var(--prod-space-xxs);
   user-select: none;
 
-  /* Firefox thin scrollbar */
+  /* Firefox: hide scrollbar by default */
   scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.ft-email__mailbox:hover {
   scrollbar-color: var(--prod-border-normal) transparent;
 }
 
@@ -172,8 +194,13 @@
 }
 
 .ft-email__mailbox::-webkit-scrollbar-thumb {
-  background: var(--prod-border-normal) !important;
+  background: transparent !important;
   border-radius: var(--prod-radius-xs) !important;
+  transition: background 500ms ease;
+}
+
+.ft-email__mailbox:hover::-webkit-scrollbar-thumb {
+  background: var(--prod-border-normal) !important;
 }
 
 .ft-email__mailbox::-webkit-scrollbar-thumb:hover {
@@ -257,6 +284,12 @@
   color: var(--prod-selected-contrast);
 }
 
+/* When a child subfolder is selected, parent's badge goes grey */
+.ft-email__folder--child-selected .ft-email__folder-count {
+  background: var(--prod-bg-badge);
+  color: var(--prod-text-muted);
+}
+
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Rail 2: Thread List
@@ -279,6 +312,7 @@
   padding: var(--prod-space-lg) var(--prod-space-xl);
   border-bottom: 1px solid var(--prod-border-light);
   background: var(--prod-bg-section);
+  overflow: hidden;
 }
 
 .ft-email__threads-title {
@@ -286,11 +320,19 @@
   font-size: var(--prod-text-body-sm);
   font-weight: var(--prod-weight-semibold);
   color: var(--prod-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .ft-email__threads-count {
   font-size: var(--prod-text-caption);
   color: var(--prod-text-muted);
+  white-space: nowrap;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ft-email__threads-scroll {
@@ -367,36 +409,43 @@
    Thread List Items
    ───────────────────────────────────────────────────────────────────────────── */
 
-/* Section headers - minimal and modern */
+/* Section headers - matches thread item layout */
 .ft-email__section-header {
-  font-size: var(--prod-text-micro);
-  font-weight: var(--prod-weight-semibold);
-  color: var(--prod-text-muted);
-  padding: var(--prod-space-sm) var(--prod-space-xl);
-  background: var(--prod-bg-section);
-  border-bottom: 1px solid var(--prod-border-light);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: var(--prod-space-md);
+  padding: var(--prod-space-sm) var(--prod-space-xl);
+  background: rgb(0 0 0 / 0.7%); /* Testing: very faint grey */
+  border-bottom: 1px solid var(--prod-border-light);
   cursor: pointer;
   user-select: none;
   box-sizing: border-box;
 }
 
-.ft-email__section-header:hover {
-  background: var(--prod-bg-section-hover);
-}
-
 .ft-email__section-chevron {
-  font-size: var(--prod-icon-md);
+  width: 8px; /* Same as unread dot */
+  flex-shrink: 0;
+  font-size: var(--prod-icon-sm);
+  color: var(--prod-text-muted);
   transform: rotate(90deg);
+  text-align: center;
+  margin-left: 2px;
 }
 
 .ft-email__section-chevron--collapsed {
   transform: rotate(0deg);
 }
 
+.ft-email__section-label {
+  font-size: var(--prod-text-micro);
+  font-weight: var(--prod-weight-semibold);
+  color: var(--prod-thread-sender);
+}
+
 .ft-email__thread-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--prod-space-md);
   padding: var(--prod-space-lg) var(--prod-space-xl);
   border-bottom: 1px solid var(--prod-border-light);
   cursor: pointer;
@@ -404,17 +453,21 @@
   user-select: none;
 }
 
+.ft-email__thread-content {
+  flex: 1;
+  min-width: 0;
+}
+
 .ft-email__thread-item:hover {
-  background: var(--prod-bg-hover);
+  background: var(--prod-thread-hover);
 }
 
 .ft-email__thread-item--selected {
   background: var(--prod-bg-selected);
-  box-shadow: inset 4px 0 0 var(--prod-selected-indicator);
 }
 
 .ft-email__thread-item--selected:hover {
-  background: var(--prod-bg-selected-hover);
+  background: var(--prod-thread-selected-hover);
 }
 
 /* Suppress hover during keyboard navigation */
@@ -434,8 +487,24 @@
   margin-bottom: var(--prod-space-xxs);
 }
 
+.ft-email__unread-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: transparent;
+  margin-top: 5px;
+}
+
+.ft-email__thread-item--unread .ft-email__unread-dot {
+  background: var(--prod-unread-dot);
+}
+
 .ft-email__thread-sender {
+  flex: 1;
   font-size: var(--prod-text-body-sm);
+  font-weight: var(--prod-weight-semibold);
+  color: var(--prod-thread-sender);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -443,8 +512,14 @@
 }
 
 .ft-email__thread-item--unread .ft-email__thread-sender {
-  font-weight: var(--prod-weight-semibold);
+  color: var(--prod-unread-text);
 }
+
+/* Orange bar on left edge for unread emails */
+.ft-email__thread-item--unread {
+  box-shadow: inset 4px 0 0 var(--prod-unread-dot);
+}
+
 
 .ft-email__thread-date {
   font-size: var(--prod-text-micro);
@@ -529,7 +604,8 @@
    ───────────────────────────────────────────────────────────────────────────── */
 
 .ft-email__loading,
-.ft-email__empty {
+.ft-email__empty,
+.ft-email__error {
   padding: var(--prod-space-3xl);
   text-align: center;
   color: var(--prod-text-faint);
@@ -674,6 +750,7 @@
   position: fixed;
   inset: 0;
   z-index: 999;
+  background: transparent; /* Invisible but captures all pointer events */
 }
 
 .ft-email__context-menu {
@@ -688,6 +765,7 @@
   padding: var(--prod-space-sm) 0;
   min-width: 180px;
   user-select: none;
+  overflow: hidden;
 }
 
 .ft-email__context-menu button {
@@ -721,4 +799,78 @@
   height: 1px;
   background: var(--prod-border-light);
   margin: var(--prod-space-md) 0;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Confirmation Modal
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.ft-email__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  background: rgb(0 0 0 / 30%);
+}
+
+.ft-email__modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1002;
+  background: var(--prod-bg-surface);
+  border: 1px solid var(--prod-border-normal);
+  border-radius: var(--prod-radius-lg);
+  box-shadow: var(--prod-shadow-xl);
+  padding: var(--prod-space-xl);
+  min-width: 320px;
+  max-width: 400px;
+}
+
+.ft-email__modal-title {
+  font-size: var(--prod-text-body);
+  font-weight: var(--prod-weight-semibold);
+  color: var(--prod-text-primary);
+  margin-bottom: var(--prod-space-sm);
+}
+
+.ft-email__modal-message {
+  font-size: var(--prod-text-body-sm);
+  color: var(--prod-text-secondary);
+  line-height: var(--prod-line-height-relaxed);
+  margin-bottom: var(--prod-space-xl);
+}
+
+.ft-email__modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--prod-space-md);
+}
+
+.ft-email__modal-btn {
+  padding: var(--prod-space-sm) var(--prod-space-xl);
+  border-radius: var(--prod-radius-md);
+  font-size: var(--prod-text-body-sm);
+  font-weight: var(--prod-weight-medium);
+  cursor: pointer;
+  border: none;
+}
+
+.ft-email__modal-btn--cancel {
+  background: var(--prod-bg-section);
+  color: var(--prod-text-primary);
+}
+
+.ft-email__modal-btn--cancel:hover {
+  background: var(--prod-bg-hover);
+}
+
+.ft-email__modal-btn--confirm {
+  background: var(--prod-selected-bg);
+  color: var(--prod-selected-contrast);
+}
+
+.ft-email__modal-btn--confirm:hover {
+  opacity: 0.9;
 }

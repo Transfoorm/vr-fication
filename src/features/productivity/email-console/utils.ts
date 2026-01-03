@@ -28,7 +28,6 @@ export function formatThreadDate(timestamp: number): string {
 
   const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
   const dayShort = date.toLocaleDateString('en-US', { weekday: 'short' });
-  const dayDate = `${date.getDate()}/${date.getMonth() + 1}`;
 
   if (date >= today) {
     // Today: just time
@@ -40,20 +39,61 @@ export function formatThreadDate(timestamp: number): string {
     // Within a week: day + time
     return `${dayShort} ${time}`;
   } else {
-    // Older: day + date
-    return `${dayShort} ${dayDate}`;
+    // Older: just date (no day name)
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   }
 }
 
-// localStorage keys for persisted column widths
-export const STORAGE_KEY_MAILBOX = 'email-column-mailbox';
-export const STORAGE_KEY_THREADS = 'email-column-threads';
+// localStorage keys for persisted column widths (per mode)
+export const STORAGE_KEY_MAILBOX_FULL = 'email-column-mailbox-full';
+export const STORAGE_KEY_THREADS_FULL = 'email-column-threads-full';
+export const STORAGE_KEY_MAILBOX_CENTERED = 'email-column-mailbox-centered';
+export const STORAGE_KEY_THREADS_CENTERED = 'email-column-threads-centered';
+
+// Default column widths per mode
+export const DEFAULTS = {
+  full: { mailbox: 300, threads: 670 },
+  constrained: { mailbox: 200, threads: 450 },
+} as const;
+
+/** Get storage keys for a mode */
+export function getStorageKeys(mode: 'full' | 'constrained') {
+  return mode === 'full'
+    ? { mailbox: STORAGE_KEY_MAILBOX_FULL, threads: STORAGE_KEY_THREADS_FULL }
+    : { mailbox: STORAGE_KEY_MAILBOX_CENTERED, threads: STORAGE_KEY_THREADS_CENTERED };
+}
 
 /** Get saved width from localStorage (SSR-safe) */
 export function getSavedWidth(key: string, defaultValue: number): number {
   if (typeof window === 'undefined') return defaultValue;
   const saved = localStorage.getItem(key);
   return saved ? parseInt(saved, 10) : defaultValue;
+}
+
+/** Reset column widths to defaults for a mode */
+export function resetColumnWidths(mode: 'full' | 'constrained'): void {
+  if (typeof window === 'undefined') return;
+  const keys = getStorageKeys(mode);
+  const defaults = DEFAULTS[mode];
+  localStorage.setItem(keys.mailbox, String(defaults.mailbox));
+  localStorage.setItem(keys.threads, String(defaults.threads));
+}
+
+/** Minimum column widths for responsive viewport shrinking */
+export const MIN_WIDTHS = {
+  mailbox: 120,
+  threads: 150,
+} as const;
+
+/**
+ * Generate responsive grid template for email columns
+ * Uses minmax() so threads and mailbox shrink when viewport narrows:
+ * 1. Reading pane shrinks first (1fr - already works perfectly)
+ * 2. Threads shrinks next when reading can't shrink more
+ * 3. Mailbox shrinks last
+ */
+export function getGridTemplate(mailboxWidth: number, threadsWidth: number): string {
+  return `minmax(${MIN_WIDTHS.mailbox}px, ${mailboxWidth}px) 12px minmax(${MIN_WIDTHS.threads}px, ${threadsWidth}px) 12px 1fr`;
 }
 
 /** Standard canonical folder types */

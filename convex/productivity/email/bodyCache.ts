@@ -19,6 +19,14 @@ import type { Id } from '@/convex/_generated/dataModel';
 import type { ActionCtx, MutationCtx } from '@/convex/_generated/server';
 import { CACHE_CONFIG } from './cacheConfig';
 
+// Result type for email body fetch
+export type EmailBodyResult = {
+  body: string;
+  fromCache: boolean;
+  status: 'ok' | 'not_found' | 'rate_limited' | 'error';
+  retryAfter?: number; // Seconds to wait before retry (for rate_limited)
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // MAIN ENTRY POINT
 // ═══════════════════════════════════════════════════════════════════════════
@@ -62,7 +70,7 @@ export const getEmailBody = action({
     userId: v.id('admin_users'),
     messageId: v.id('productivity_email_Index'), // Convex document ID
   },
-  handler: async (ctx, args): Promise<{ body: string; fromCache: boolean }> => {
+  handler: async (ctx, args): Promise<EmailBodyResult> => {
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 0: Look up email record to get external message ID
     // ─────────────────────────────────────────────────────────────────────────
@@ -72,7 +80,7 @@ export const getEmailBody = action({
     );
 
     if (!emailRecord) {
-      throw new Error('Email not found');
+      return { body: '', fromCache: false, status: 'not_found' as const };
     }
 
     const externalMessageId = emailRecord.externalMessageId;
@@ -100,7 +108,7 @@ export const getEmailBody = action({
             // Touch failure is silent
           });
 
-          return { body, fromCache: true };
+          return { body, fromCache: true, status: 'ok' as const };
         }
         // Blob missing — cache corrupted, fall through to fetch
         console.warn(`⚠️ Cache blob missing for ${externalMessageId}, fetching fresh`);
@@ -110,12 +118,19 @@ export const getEmailBody = action({
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 2: Fetch from Microsoft Graph (always works if token valid)
     // ─────────────────────────────────────────────────────────────────────────
-    const body = await fetchBodyFromMicrosoft(ctx, args.userId, externalMessageId);
+    const fetchResult = await fetchBodyFromMicrosoft(ctx, args.userId, externalMessageId);
+
+    // If fetch failed (404, 429, error), return immediately with status
+    if (fetchResult.status !== 'ok') {
+      return { ...fetchResult, fromCache: false };
+    }
+
+    const body = fetchResult.body;
 
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 3: Populate cache for next time (fire and forget)
     // ─────────────────────────────────────────────────────────────────────────
-    if (CACHE_CONFIG.maxBodiesPerAccount > 0) {
+    if (CACHE_CONFIG.maxBodiesPerAccount > 0 && body) {
       // Actions can store blobs, mutations cannot
       try {
         const storageId = await ctx.storage.store(new Blob([body], { type: 'text/html' }));
@@ -137,9 +152,16 @@ export const getEmailBody = action({
       }
     }
 
-    return { body, fromCache: false };
+    return { body, fromCache: false, status: 'ok' as const };
   },
 });
+
+// Internal result type for Microsoft fetch
+type MicrosoftFetchResult = {
+  body: string;
+  status: 'ok' | 'not_found' | 'rate_limited' | 'error';
+  retryAfter?: number;
+};
 
 /**
  * Fetch body directly from Microsoft Graph API
@@ -148,7 +170,7 @@ async function fetchBodyFromMicrosoft(
   ctx: ActionCtx,
   userId: Id<'admin_users'>,
   messageId: string
-): Promise<string> {
+): Promise<MicrosoftFetchResult> {
   // Get OAuth tokens
   let tokens = await ctx.runQuery(
     api.productivity.email.outlook.getOutlookTokens,
@@ -156,7 +178,7 @@ async function fetchBodyFromMicrosoft(
   ) as { accessToken?: string; refreshToken: string; expiresAt?: number } | null;
 
   if (!tokens?.accessToken) {
-    throw new Error('No valid OAuth token — user must reconnect Outlook');
+    return { body: '', status: 'error' };
   }
 
   // Check if token needs refresh (expires within 5 minutes)
@@ -215,16 +237,22 @@ async function fetchBodyFromMicrosoft(
     const errorText = await response.text();
     console.error(`Microsoft Graph error: ${response.status}`, errorText);
     // 404 = message no longer exists (deleted, moved, or stale reference)
-    // Return empty string instead of throwing - UI will show "unavailable"
     if (response.status === 404) {
       console.log(`⚠️ Message not found in Microsoft Graph (404) - may have been deleted`);
-      return '';
+      return { body: '', status: 'not_found' };
     }
-    throw new Error(`Microsoft Graph error: ${response.status}`);
+    // 429 = Rate limited - return with retry hint
+    if (response.status === 429) {
+      const retryAfterHeader = response.headers.get('Retry-After');
+      const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : 5;
+      console.log(`⚠️ Microsoft rate limit (429) - retry after ${retryAfter}s`);
+      return { body: '', status: 'rate_limited', retryAfter };
+    }
+    return { body: '', status: 'error' };
   }
 
   const data = await response.json() as { body?: { content?: string } };
-  return data.body?.content || '';
+  return { body: data.body?.content || '', status: 'ok' };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

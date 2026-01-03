@@ -18,13 +18,22 @@
 │  - Fetch is triggered by parent (useEmailBodySync in index.tsx)       │
 │  - This component only displays - receives displayedMessageId         │
 │  - Old email stays visible until new body is ready                    │
+│                                                                        │
+│  LOADING STATES:                                                       │
+│  - loading: "Loading email..."                                        │
+│  - rate_limited: "Loading email (retrying...)"                        │
+│  - error: "Failed to load email"                                      │
+│  - loaded: Shows email body                                           │
 └────────────────────────────────────────────────────────────────────────*/
 
+import { useRef, useEffect } from 'react';
 import { useFuse } from '@/store/fuse';
+import { T } from '@/vr';
 import type { Id } from '@/convex/_generated/dataModel';
 
 interface MessageBodyProps {
   messageId: Id<'productivity_email_Index'>;
+  onContextMenu?: (x: number, y: number) => void;
 }
 
 /**
@@ -32,17 +41,76 @@ interface MessageBodyProps {
  *
  * Pure display component. Fetch triggered by parent.
  * The iframe is a sandbox - it never affects parent layout.
+ * Shows loading/error states based on emailBodyStatus.
  */
-export function MessageBody({ messageId }: MessageBodyProps) {
-  // Read from FUSE (fetch triggered by parent)
-  const htmlContent = useFuse((state) => state.productivity.emailBodies?.[messageId]);
+export function MessageBody({ messageId, onContextMenu }: MessageBodyProps) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // No content yet - render nothing (no loading message)
-  if (!htmlContent) {
+  // Read from FUSE (fetch triggered by parent)
+  const htmlContent = useFuse((state) => state.emailBodyCache.emailBodies?.[messageId]);
+  const status = useFuse((state) => state.emailBodyCache.emailBodyStatus?.[messageId]);
+
+  // Listen for postMessage from iframe for context menu
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'email-contextmenu') {
+        const iframe = iframeRef.current;
+        if (!iframe) return;
+
+        // Convert iframe coordinates to parent window coordinates
+        const iframeRect = iframe.getBoundingClientRect();
+        const x = iframeRect.left + event.data.clientX;
+        const y = iframeRect.top + event.data.clientY;
+
+        onContextMenu?.(x, y);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [onContextMenu]);
+
+  // Loading state - show feedback
+  if (status === 'loading') {
+    return (
+      <div className="ft-email__loading">
+        <T.body>Loading email...</T.body>
+      </div>
+    );
+  }
+
+  if (status === 'rate_limited') {
+    return (
+      <div className="ft-email__loading">
+        <T.body>Loading email (retrying...)</T.body>
+      </div>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="ft-email__error">
+        <T.body>Failed to load email. Try selecting another email.</T.body>
+      </div>
+    );
+  }
+
+  // No content and no status - not yet triggered
+  if (!htmlContent && !status) {
     return null;
   }
 
+  // Empty content but loaded (404 case) - message deleted
+  if (!htmlContent && status === 'loaded') {
+    return (
+      <div className="ft-email__empty">
+        <T.body>This message is no longer available.</T.body>
+      </div>
+    );
+  }
+
   // Email HTML with internal scroll + styled scrollbar
+  // Script sends postMessage to parent for context menu handling
   const iframeContent = `<!DOCTYPE html>
 <html>
 <head>
@@ -79,17 +147,24 @@ a { color: #0066cc; }
 pre, code { overflow-x: auto; }
 table { max-width: 100%; }
 </style>
+<script>
+document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+  window.parent.postMessage({ type: 'email-contextmenu', x: e.screenX, y: e.screenY, clientX: e.clientX, clientY: e.clientY }, '*');
+});
+</script>
 </head>
 <body>${htmlContent}</body>
 </html>`;
 
   return (
     <iframe
+      ref={iframeRef}
       key={messageId}
       srcDoc={iframeContent}
       className="ft-email__message-iframe"
       title="Email content"
-      sandbox="allow-same-origin"
+      sandbox="allow-same-origin allow-scripts"
     />
   );
 }

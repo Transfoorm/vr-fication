@@ -225,10 +225,24 @@
 }
 
 .ft-company-button-menu-header-status {
+  /* Reset button styles */
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+
   /* Typography handled by T.caption */
-  color: var(--text-tertiary);
+  color: var(--brand-primary);
   line-height: 1;
-  margin-top: 1px;
+  margin-top: 2px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.ft-company-button-menu-header-status:hover {
+  color: var(--brand-hover);
+  text-decoration: underline;
 }
 
 

@@ -381,6 +381,9 @@ export const storeOutlookFolders = mutation({
     let created = 0;
     let updated = 0;
 
+    // Build set of incoming folder IDs from Microsoft (source of truth)
+    const incomingFolderIds = new Set(args.folders.map(f => f.externalFolderId));
+
     for (const folder of args.folders) {
       const existing = await ctx.db
         .query('productivity_email_Folders')
@@ -417,7 +420,24 @@ export const storeOutlookFolders = mutation({
       }
     }
 
-    console.log(`Folders: ${created} created, ${updated} updated`);
-    return { created, updated };
+    // RECONCILIATION: Delete folders that exist in our DB but not on Microsoft
+    // Microsoft is the source of truth - if it's gone there, remove it here
+    let deleted = 0;
+    const allLocalFolders = await ctx.db
+      .query('productivity_email_Folders')
+      .withIndex('by_account', (q) => q.eq('accountId', account._id))
+      .collect();
+
+    for (const localFolder of allLocalFolders) {
+      if (!incomingFolderIds.has(localFolder.externalFolderId)) {
+        // Folder exists locally but not on Microsoft - delete it
+        await ctx.db.delete(localFolder._id);
+        deleted++;
+        console.log(`🗑️ Reconciled: Deleted stale folder "${localFolder.displayName}" (not on Microsoft)`);
+      }
+    }
+
+    console.log(`Folders: ${created} created, ${updated} updated, ${deleted} reconciled`);
+    return { created, updated, deleted };
   },
 });

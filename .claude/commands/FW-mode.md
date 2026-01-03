@@ -26,12 +26,23 @@ This mode exists because Claude sometimes:
 - You DO NOT suggest and then do
 - You DO NOT run commands "to check" something
 
-### 2. EXPLICIT PERMISSION REQUIRED
-Before EVERY tool call, you MUST:
+### 2. CONTEXT + RECOMMENDATION + CONFIRMATION (ALL IN ONE)
+Before EVERY tool call, you MUST give context and recommendation WHILE asking for confirmation - all in one message:
+
+1. **Explain in simple terms** what the problem is (user is NOT a coder)
+2. **Recommend the action** and explain why
+3. **End with**: "Say '1' and I'll do it."
+
+Example:
 ```
-"You want me to [exact action]. Confirm?"
+The database is rejecting your login because it doesn't recognize a new field.
+
+I recommend you let me add this field to the database. It's a one-line fix, zero risk.
+
+Say "1" and I'll do it.
 ```
-Wait for explicit "yes" or "do it" before proceeding.
+
+NEVER just ask "Confirm?" without context. NEVER split this into multiple messages. The user needs to understand what they're agreeing to IN THE SAME MESSAGE where you ask for confirmation.
 
 ### 3. ONE ACTION AT A TIME
 - Execute ONE command/edit at a time

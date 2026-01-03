@@ -3,18 +3,23 @@
 // EMAIL CONSOLE - Outlook Web Clone (FUSE Golden Bridge pattern)
 
 import { useRef, useCallback, useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useMutation, useAction } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import { useProductivityData } from '@/hooks/useProductivityData';
 import { useEmailSyncIntent } from '@/hooks/useEmailSyncIntent';
 import { useEmailBodySync } from '@/hooks/useEmailBodySync';
 import { useFuse } from '@/store/fuse';
-import { T } from '@/vr';
+import { T, Input } from '@/vr';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useEmailActions } from './useEmailActions';
 import { useViewportPrefetch } from './useViewportPrefetch';
 import {
   getSavedWidth,
-  STORAGE_KEY_MAILBOX,
-  STORAGE_KEY_THREADS,
+  getStorageKeys,
+  DEFAULTS,
+  resetColumnWidths,
+  getGridTemplate,
   buildFolderTree,
   computeFolderCounts,
   filterMessages,
@@ -23,6 +28,7 @@ import {
 import { EmailSidebar } from './EmailSidebar';
 import { EmailMessageList } from './EmailMessageList';
 import { EmailContextMenu } from './EmailContextMenu';
+import { ConfirmModal } from './ConfirmModal';
 import { MessageBody } from './MessageBody';
 import type { EmailFolder } from './types';
 import './email-console.css';
@@ -31,13 +37,35 @@ import './email-console.css';
 
 export function EmailConsole() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
 
-  // Column widths - initialized from localStorage, persisted on resize
-  const [mailboxWidth, setMailboxWidth] = useState(() => getSavedWidth(STORAGE_KEY_MAILBOX, 180));
-  const [threadsWidth, setThreadsWidth] = useState<number | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const saved = localStorage.getItem(STORAGE_KEY_THREADS);
-    return saved ? parseInt(saved, 10) : null;
+  // Clear error param from URL on mount (prevents re-showing on refresh)
+  useEffect(() => {
+    if (searchParams.get('outlook_error')) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [searchParams]);
+
+  // Content width mode - persisted to localStorage (declare early for column init)
+  const [contentWidth, setContentWidth] = useState<'full' | 'constrained'>(() => {
+    if (typeof window === 'undefined') return 'full';
+    return (localStorage.getItem('email-content-width') as 'full' | 'constrained') || 'full';
+  });
+
+  // Column widths - initialized from localStorage per mode
+  const [mailboxWidth, setMailboxWidth] = useState(() => {
+    const mode = typeof window !== 'undefined'
+      ? (localStorage.getItem('email-content-width') as 'full' | 'constrained') || 'full'
+      : 'full';
+    const keys = getStorageKeys(mode);
+    return getSavedWidth(keys.mailbox, DEFAULTS[mode].mailbox);
+  });
+  const [threadsWidth, setThreadsWidth] = useState<number>(() => {
+    const mode = typeof window !== 'undefined'
+      ? (localStorage.getItem('email-content-width') as 'full' | 'constrained') || 'full'
+      : 'full';
+    const keys = getStorageKeys(mode);
+    return getSavedWidth(keys.threads, DEFAULTS[mode].threads);
   });
 
   // Get data from FUSE (Golden Bridge pattern)
@@ -81,7 +109,7 @@ export function EmailConsole() {
   const [anchorMessageId, setAnchorMessageId] = useState<string | null>(null);
 
   // Read email bodies from FUSE to know when content is ready
-  const emailBodies = useFuse((state) => state.productivity.emailBodies);
+  const emailBodies = useFuse((state) => state.emailBodyCache.emailBodies);
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{
@@ -91,6 +119,16 @@ export function EmailConsole() {
     messageId: string | null;
     folderId: string | null; // For folder context menu
   } | null>(null);
+
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
+
+  // Check if currently viewing trash or a subfolder within trash
+  const isInTrash = selectedFolder === 'trash';
 
   // Collapsed sections state (for thread time buckets)
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
@@ -107,6 +145,27 @@ export function EmailConsole() {
     const saved = localStorage.getItem('email-expanded-folders');
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
+
+  // Handle width mode change - switches column widths to match mode
+  const handleWidthChange = (value: string) => {
+    const newMode = value as 'full' | 'constrained';
+
+    // Save current widths to current mode before switching
+    const currentKeys = getStorageKeys(contentWidth);
+    localStorage.setItem(currentKeys.mailbox, String(mailboxWidth));
+    localStorage.setItem(currentKeys.threads, String(threadsWidth));
+
+    // Load widths for new mode
+    const newKeys = getStorageKeys(newMode);
+    const newMailbox = getSavedWidth(newKeys.mailbox, DEFAULTS[newMode].mailbox);
+    const newThreads = getSavedWidth(newKeys.threads, DEFAULTS[newMode].threads);
+
+    // Switch everything
+    setMailboxWidth(newMailbox);
+    setThreadsWidth(newThreads);
+    setContentWidth(newMode);
+    localStorage.setItem('email-content-width', newMode);
+  };
 
   // Handle folder selection (canonical folder)
   const handleFolderSelect = (folder: string) => {
@@ -228,18 +287,10 @@ export function EmailConsole() {
     setContextMenu({ x: event.clientX, y: event.clientY, area: 'folder', messageId: null, folderId });
   };
 
-  // Email actions hook
-  const { handleContextAction } = useEmailActions({
-    userId,
-    contextMenu,
-    selectedMessageIds,
-    selectedSubfolderId,
-    setContextMenu,
-    setSelectedMessageIds,
-    setSelectedSubfolderId,
-    setSelectedFolder,
-    triggerManualSync,
-  });
+  // Handle right-click inside email body iframe (called with raw coordinates)
+  const handleIframeContextMenu = useCallback((x: number, y: number) => {
+    setContextMenu({ x, y, area: 'reading', messageId: null, folderId: null });
+  }, []);
 
   // Build folder tree using utility function
   const { folderTree, getChildFolders, rootFolderIds } = useMemo(
@@ -265,6 +316,32 @@ export function EmailConsole() {
     [messages, collapsedSections]
   );
 
+  // Email actions hook
+  const { handleContextAction: baseHandleContextAction } = useEmailActions({
+    userId,
+    contextMenu,
+    selectedMessageIds,
+    selectedSubfolderId,
+    messages,
+    setContextMenu,
+    setSelectedMessageIds,
+    setSelectedSubfolderId,
+    setSelectedFolder,
+    triggerManualSync,
+  });
+
+  // Wrap context action to handle layout reset locally
+  const handleContextAction = useCallback((action: string) => {
+    if (action === 'resetLayout') {
+      resetColumnWidths(contentWidth);
+      setMailboxWidth(DEFAULTS[contentWidth].mailbox);
+      setThreadsWidth(DEFAULTS[contentWidth].threads);
+      setContextMenu(null);
+      return;
+    }
+    baseHandleContextAction(action);
+  }, [baseHandleContextAction, setContextMenu, contentWidth]);
+
   // Auto-select first message when inbox loads (Outlook Web behavior)
   useEffect(() => {
     if (messages.length > 0 && selectedMessageIds.size === 0) {
@@ -273,13 +350,26 @@ export function EmailConsole() {
   }, [messages, selectedMessageIds.size]);
 
   // Keyboard navigation: Arrow Up/Down to move between emails
+  // Shift+Arrow extends selection (multi-select)
+  // Cmd/Ctrl+A to select all
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only handle arrow keys
-      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
-
       // Don't interfere with input fields
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      // Cmd+A (Mac) or Ctrl+A (Windows) - Select All
+      if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+        e.preventDefault();
+        if (messages.length > 0) {
+          const allIds = new Set(messages.map(m => m._id));
+          setSelectedMessageIds(allIds);
+          console.log(`✅ Selected all ${allIds.size} messages (keyboard)`);
+        }
+        return;
+      }
+
+      // Only handle arrow keys beyond this point
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
 
       // Need messages to navigate
       if (messages.length === 0) return;
@@ -289,9 +379,23 @@ export function EmailConsole() {
       // Enter keyboard navigation mode (suppresses hover on old item)
       setIsKeyboardNav(true);
 
-      // Find current selection index (use first selected if multiple)
-      const currentId = [...selectedMessageIds][0];
-      const currentIndex = currentId ? messages.findIndex(m => m._id === currentId) : -1;
+      // Find current selection indices
+      const selectedIndices = [...selectedMessageIds]
+        .map(id => messages.findIndex(m => m._id === id))
+        .filter(idx => idx !== -1)
+        .sort((a, b) => a - b);
+
+      // For Shift+Arrow, use the edge in the direction of movement
+      // For regular arrow, use any selected item
+      let currentIndex: number;
+      if (e.shiftKey && selectedIndices.length > 0) {
+        // Going UP: extend from topmost; Going DOWN: extend from bottommost
+        currentIndex = e.key === 'ArrowUp'
+          ? selectedIndices[0]
+          : selectedIndices[selectedIndices.length - 1];
+      } else {
+        currentIndex = selectedIndices.length > 0 ? selectedIndices[0] : -1;
+      }
 
       // Calculate new index
       let newIndex: number;
@@ -301,10 +405,29 @@ export function EmailConsole() {
         newIndex = currentIndex >= messages.length - 1 ? messages.length - 1 : currentIndex + 1;
       }
 
-      // Select new message
       const newMessageId = messages[newIndex]._id;
-      setSelectedMessageIds(new Set([newMessageId]));
-      setAnchorMessageId(newMessageId);
+
+      if (e.shiftKey) {
+        // Shift+Arrow: Extend selection from anchor to new position
+        const anchorIndex = anchorMessageId
+          ? messages.findIndex(m => m._id === anchorMessageId)
+          : currentIndex;
+
+        const start = Math.min(anchorIndex, newIndex);
+        const end = Math.max(anchorIndex, newIndex);
+
+        // Select all messages in range
+        const rangeIds = new Set<string>();
+        for (let i = start; i <= end; i++) {
+          rangeIds.add(messages[i]._id);
+        }
+        setSelectedMessageIds(rangeIds);
+        // Keep anchor unchanged for continued Shift+Arrow
+      } else {
+        // Regular arrow: Select only new message
+        setSelectedMessageIds(new Set([newMessageId]));
+        setAnchorMessageId(newMessageId);
+      }
 
       // Scroll into view (after React renders)
       requestAnimationFrame(() => {
@@ -315,7 +438,7 @@ export function EmailConsole() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [messages, selectedMessageIds]);
+  }, [messages, selectedMessageIds, anchorMessageId]);
 
   // Decoupled display: update displayedMessageId only when body is ready
   // This keeps the old email visible until the new one is loaded (Outlook pattern)
@@ -331,6 +454,117 @@ export function EmailConsole() {
     }
     // Otherwise, the effect will re-run when emailBodies updates
   }, [selectedMessageIds, emailBodies]);
+
+  // Auto-mark-read hooks (only Convex mutations - FUSE actions via getState() for stable deps)
+  const updateConvexReadStatus = useMutation(api.productivity.email.outlookActions.updateMessageReadStatus);
+  const batchSyncReadStatus = useAction(api.productivity.email.outlookActions.batchMarkOutlookReadStatus);
+
+  // Auto-mark as read: 1s after selecting an unread email
+  // HARDENED: Timer won't reset on Convex updates, only on selection change
+  const autoMarkTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoMarkTimerForIdRef = useRef<string | null>(null); // Track which ID the timer is for
+
+  useEffect(() => {
+    const currentSelectedId = selectedMessageIds.size === 1 ? [...selectedMessageIds][0] : null;
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`⏱️ Effect run: selected=${currentSelectedId?.slice(-8) ?? 'none'}, timerFor=${autoMarkTimerForIdRef.current?.slice(-8) ?? 'none'}, hasTimer=${!!autoMarkTimerRef.current}`);
+    }
+
+    // GUARD: Only reset timer if selection actually changed
+    if (autoMarkTimerForIdRef.current === currentSelectedId && autoMarkTimerRef.current) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`⏱️ Same selection, timer running - no reset`);
+      }
+      return;
+    }
+
+    // Selection changed - clear old timer
+    if (autoMarkTimerRef.current) {
+      clearTimeout(autoMarkTimerRef.current);
+      autoMarkTimerRef.current = null;
+      autoMarkTimerForIdRef.current = null;
+    }
+
+    // No selection or no user
+    if (!currentSelectedId || !userId) {
+      return () => {
+        if (autoMarkTimerRef.current) {
+          clearTimeout(autoMarkTimerRef.current);
+          autoMarkTimerRef.current = null;
+          autoMarkTimerForIdRef.current = null;
+        }
+      };
+    }
+
+    // Start timer - check message state when it fires
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`⏱️ Starting timer for ${currentSelectedId.slice(-8)}`);
+    }
+    autoMarkTimerForIdRef.current = currentSelectedId;
+    autoMarkTimerRef.current = setTimeout(async () => {
+      autoMarkTimerForIdRef.current = null; // Timer fired, clear tracking
+
+      // Read fresh state at timer fire time
+      const state = useFuse.getState();
+      const freshMessages = state.productivity.email?.messages;
+      const freshMessage = freshMessages?.find(m => m._id === currentSelectedId);
+
+      // Bail conditions (checked at fire time, not effect time)
+      if (!freshMessage) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`⏱️ Skip ${currentSelectedId.slice(-8)}: not in FUSE`);
+        }
+        return;
+      }
+      if (freshMessage.isRead) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`⏱️ Skip ${currentSelectedId.slice(-8)}: already read`);
+        }
+        return;
+      }
+
+      console.log(`⏱️ Auto-mark: ${currentSelectedId.slice(-8)} → read`);
+
+      // 1. Instant UI update via FUSE
+      state.updateEmailReadStatus(currentSelectedId, true);
+
+      // 2. Persist to Convex DB with rollback on failure
+      try {
+        await updateConvexReadStatus({
+          userId: userId!,
+          messageId: currentSelectedId as Id<'productivity_email_Index'>,
+          isRead: true,
+        });
+      } catch (error) {
+        console.error('❌ Auto-mark Convex failed, rolling back UI:', error);
+        state.updateEmailReadStatus(currentSelectedId, false); // ROLLBACK
+        return; // Don't sync to Outlook if Convex failed
+      } finally {
+        // 10 second protection window - Convex live queries can be slow to reflect mutations
+        setTimeout(() => state.clearPendingReadUpdate(currentSelectedId), 10000);
+      }
+
+      // 3. Fire-and-forget Outlook sync (silent failures)
+      batchSyncReadStatus({
+        userId: userId!,
+        messageIds: [currentSelectedId as Id<'productivity_email_Index'>],
+        isRead: true,
+      }).catch(() => {
+        // Silent - WebSocket drops are irrelevant to UX
+      });
+    }, 1000);
+
+    // Cleanup: only clear timer (exempt is cleared on arrival, not departure)
+    return () => {
+      if (autoMarkTimerRef.current) {
+        clearTimeout(autoMarkTimerRef.current);
+        autoMarkTimerRef.current = null;
+        autoMarkTimerForIdRef.current = null;
+      }
+    };
+  // STABLE: Only re-run on selection change, not on Convex updates
+  }, [selectedMessageIds, userId, updateConvexReadStatus, batchSyncReadStatus]);
 
   // Get the currently selected message ID (for triggering fetch)
   const selectedId = selectedMessageIds.size === 1 ? [...selectedMessageIds][0] : null;
@@ -353,9 +587,8 @@ export function EmailConsole() {
     if (!container) return;
 
     const startX = e.clientX;
-    const containerRect = container.getBoundingClientRect();
     const startMailboxWidth = mailboxWidth;
-    const startThreadsWidth = threadsWidth ?? containerRect.width * 0.25;
+    const startThreadsWidth = threadsWidth;
 
     // Track the new width during drag
     let newMailboxWidth = startMailboxWidth;
@@ -367,12 +600,35 @@ export function EmailConsole() {
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
 
-      if (handle === 'mailbox') {
-        newMailboxWidth = Math.max(120, Math.min(300, startMailboxWidth + deltaX));
-        container.style.gridTemplateColumns = `${newMailboxWidth}px 12px ${threadsWidth ? threadsWidth + 'px' : '1fr'} 12px 1fr`;
+      if (contentWidth === 'full') {
+        // FULL MODE: Original behavior - no max constraints
+        if (handle === 'mailbox') {
+          newMailboxWidth = Math.max(120, Math.min(300, startMailboxWidth + deltaX));
+          container.style.gridTemplateColumns = getGridTemplate(newMailboxWidth, threadsWidth);
+        } else {
+          newThreadsWidth = Math.max(150, startThreadsWidth + deltaX);
+          container.style.gridTemplateColumns = getGridTemplate(mailboxWidth, newThreadsWidth);
+        }
       } else {
-        newThreadsWidth = Math.max(150, startThreadsWidth + deltaX);
-        container.style.gridTemplateColumns = `${mailboxWidth}px 12px ${newThreadsWidth}px 12px 1fr`;
+        // CENTERED MODE: Constrained container - enforce max limits
+        // Use MINIMUM widths for constraints so columns can always resize
+        const CONSTRAINED_WIDTH = 1320;
+        const minMailbox = 120;
+        const minThreads = 150;
+        const minReadingPane = 250;
+        const handleSpace = 24;
+
+        if (handle === 'mailbox') {
+          // Max mailbox = total minus minimums for threads and reading
+          const maxMailbox = Math.min(300, CONSTRAINED_WIDTH - handleSpace - minThreads - minReadingPane);
+          newMailboxWidth = Math.max(minMailbox, Math.min(maxMailbox, startMailboxWidth + deltaX));
+          container.style.gridTemplateColumns = getGridTemplate(newMailboxWidth, threadsWidth);
+        } else {
+          // Max threads = total minus minimums for mailbox and reading
+          const maxThreads = CONSTRAINED_WIDTH - handleSpace - minMailbox - minReadingPane;
+          newThreadsWidth = Math.max(minThreads, Math.min(maxThreads, startThreadsWidth + deltaX));
+          container.style.gridTemplateColumns = getGridTemplate(mailboxWidth, newThreadsWidth);
+        }
       }
     };
 
@@ -385,13 +641,14 @@ export function EmailConsole() {
       // Remove resizing class to restore iframe pointer events
       container.classList.remove('ft-email__body--resizing');
 
-      // Persist to state and localStorage
+      // Persist to state and localStorage (using mode-specific keys)
+      const keys = getStorageKeys(contentWidth);
       if (handle === 'mailbox') {
         setMailboxWidth(newMailboxWidth);
-        localStorage.setItem(STORAGE_KEY_MAILBOX, String(newMailboxWidth));
+        localStorage.setItem(keys.mailbox, String(newMailboxWidth));
       } else {
         setThreadsWidth(newThreadsWidth);
-        localStorage.setItem(STORAGE_KEY_THREADS, String(newThreadsWidth));
+        localStorage.setItem(keys.threads, String(newThreadsWidth));
       }
     };
 
@@ -399,20 +656,32 @@ export function EmailConsole() {
     document.addEventListener('mouseup', onMouseUp);
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
-  }, [mailboxWidth, threadsWidth]);
+  }, [mailboxWidth, threadsWidth, contentWidth]);
 
   return (
     <div className="ft-email">
-      <header className="ft-email__header">
+      <header className={`ft-email__header ${contentWidth === 'constrained' ? 'ft-email__header--constrained' : ''}`}>
         <div className="ft-email__header-left"><T.body weight="medium">Email</T.body></div>
-        <div className="ft-email__header-right" />
+        <div className="ft-email__header-right">
+          <Input.radio
+            value={contentWidth}
+            onChange={handleWidthChange}
+            options={[
+              { value: 'full', label: 'Full' },
+              { value: 'constrained', label: 'Centered' },
+            ]}
+            direction="horizontal"
+            size="sm"
+            weight="light"
+          />
+        </div>
       </header>
 
       <div
-        className="ft-email__body"
+        className={`ft-email__body ${contentWidth === 'constrained' ? 'ft-email__body--constrained' : ''}`}
         ref={containerRef}
         style={{
-          gridTemplateColumns: `${mailboxWidth}px 12px ${threadsWidth ? threadsWidth + 'px' : '1fr'} 12px 1fr`,
+          gridTemplateColumns: getGridTemplate(mailboxWidth, threadsWidth),
         }}
       >
         <EmailSidebar
@@ -477,7 +746,7 @@ export function EmailConsole() {
                   </div>
                   <hr />
                 </div>
-                <MessageBody messageId={displayedMessageId as Id<'productivity_email_Index'>} />
+                <MessageBody messageId={displayedMessageId as Id<'productivity_email_Index'>} onContextMenu={handleIframeContextMenu} />
               </>
             )}
           </div>
@@ -488,8 +757,50 @@ export function EmailConsole() {
         <EmailContextMenu
           contextMenu={contextMenu}
           selectedMessageIds={selectedMessageIds}
+          selectedFolder={selectedFolder}
+          isInTrash={isInTrash}
           onClose={() => setContextMenu(null)}
-          onAction={handleContextAction}
+          onAction={(action) => {
+            // Intercept destructive actions to show confirmation modal
+            if (action === 'deleteForever') {
+              const count = selectedMessageIds.size;
+              setConfirmModal({
+                title: 'Delete Forever',
+                message: `Are you sure you want to permanently delete ${count} message${count !== 1 ? 's' : ''}? This cannot be undone.`,
+                onConfirm: () => {
+                  // Delete FIRST (instant UI), then close modal
+                  handleContextAction('deleteForever');
+                  setConfirmModal(null);
+                },
+              });
+              setContextMenu(null);
+              return;
+            }
+            if (action === 'emptyFolder') {
+              setConfirmModal({
+                title: 'Empty Folder',
+                message: 'Are you sure you want to permanently delete all of the messages in this folder?',
+                onConfirm: () => {
+                  // Delete FIRST (instant UI), then close modal
+                  handleContextAction('emptyFolder');
+                  setConfirmModal(null);
+                },
+              });
+              setContextMenu(null);
+              return;
+            }
+            handleContextAction(action);
+          }}
+        />
+      )}
+
+      {confirmModal && (
+        <ConfirmModal
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmLabel="Delete"
+          onConfirm={confirmModal.onConfirm}
+          onCancel={() => setConfirmModal(null)}
         />
       )}
     </div>

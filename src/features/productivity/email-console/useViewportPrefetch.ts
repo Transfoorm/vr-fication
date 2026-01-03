@@ -9,6 +9,7 @@
 │  - Throttled: max 2 concurrent, 300ms delay between requests              │
 │  - Silent failure: no UI indicators, just retry on next visibility        │
 │  - LRU eviction handled by FUSE store                                     │
+│  - HARDENED: Tracks pending IDs to prevent duplicate fetches              │
 │                                                                            │
 │  Invariant: "There must always be at least one message body ready         │
 │              before the user can plausibly act"                            │
@@ -40,29 +41,33 @@ export function useViewportPrefetch(
 ): void {
   const user = useFuse((state) => state.user);
   const hydrateEmailBody = useFuse((state) => state.hydrateEmailBody);
-  const emailBodies = useFuse((state) => state.productivity.emailBodies);
   const userId = user?.convexId as Id<'admin_users'> | undefined;
 
-  // Track in-flight count
-  const inflightRef = useRef(0);
+  // Track pending fetches by ID (prevents duplicates)
+  const pendingRef = useRef<Set<string>>(new Set());
+  const inflightCountRef = useRef(0);
 
   // Get the bodyCache action
   const getEmailBody = useAction(api.productivity.email.bodyCache.getEmailBody);
 
-  // Stable fetch function
+  // Stable fetch function with deduplication
   const fetchBody = useCallback(async (messageId: string) => {
     if (!userId) return;
 
-    // Skip if already in FUSE
-    const currentBodies = useFuse.getState().productivity.emailBodies;
+    // GUARD: Skip if already pending or in FUSE
+    if (pendingRef.current.has(messageId)) return;
+    const currentBodies = useFuse.getState().emailBodyCache.emailBodies;
     if (currentBodies?.[messageId]) return;
 
+    // Mark as pending BEFORE any async work
+    pendingRef.current.add(messageId);
+
     // Wait for slot
-    while (inflightRef.current >= MAX_CONCURRENT) {
+    while (inflightCountRef.current >= MAX_CONCURRENT) {
       await new Promise((r) => setTimeout(r, 50));
     }
 
-    inflightRef.current++;
+    inflightCountRef.current++;
 
     try {
       const result = await getEmailBody({
@@ -73,13 +78,15 @@ export function useViewportPrefetch(
         hydrateEmailBody(messageId, result.body);
       }
     } catch {
-      // Silent failure
+      // Silent failure - remove from pending so it can retry later
     } finally {
-      inflightRef.current--;
+      inflightCountRef.current--;
+      pendingRef.current.delete(messageId);
     }
   }, [userId, getEmailBody, hydrateEmailBody]);
 
-  // Main effect - runs on every viewport change
+  // Main effect - runs only when visible IDs or selection changes
+  // NOT when emailBodies changes (that would cause cascade)
   useEffect(() => {
     if (!userId || visibleMessageIds.length === 0) return;
 
@@ -88,9 +95,10 @@ export function useViewportPrefetch(
       ? [selectedId, ...visibleMessageIds.filter((id) => id !== selectedId)]
       : visibleMessageIds;
 
-    // Filter to unfetched (not in FUSE)
+    // Filter to: not in FUSE, not pending
+    const currentBodies = useFuse.getState().emailBodyCache.emailBodies;
     const toFetch = priority
-      .filter((id) => !emailBodies?.[id])
+      .filter((id) => !currentBodies?.[id] && !pendingRef.current.has(id))
       .slice(0, MAX_PREFETCH);
 
     if (toFetch.length === 0) return;
@@ -102,10 +110,8 @@ export function useViewportPrefetch(
       for (let i = 0; i < toFetch.length; i++) {
         if (cancelled) break;
 
-        // Don't await - fire and let it run
         fetchBody(toFetch[i]);
 
-        // Small delay before next request
         if (i < toFetch.length - 1) {
           await new Promise((r) => setTimeout(r, REQUEST_DELAY_MS));
         }
@@ -113,5 +119,5 @@ export function useViewportPrefetch(
     })();
 
     return () => { cancelled = true; };
-  }, [visibleMessageIds, selectedId, userId, emailBodies, fetchBody]);
+  }, [visibleMessageIds, selectedId, userId, fetchBody]);
 }
