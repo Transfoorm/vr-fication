@@ -22,6 +22,7 @@
     "vrp:clerk": "tsx scripts/checkClerkVirus.ts",
     "vrp:class-scan": "tsx scripts/checkVRClasses.ts",
     "vrp:typography": "tsx scripts/checkTypography.ts",
+    "vrp:schema": "tsx scripts/checkSchemaFields.ts",
     "vrp:all": "npm run vrp:isv && npm run vrp:naming && npm run vrp:clerk && npm run vrp:manifest && npm run vrp:cascade && npm run vrp:warp && npm run vrp:prism && npm run vrp:css && npm run vrp:class-scan && npm run vrp:typography",
     "prebuild": "npm run vrp:cascade",
     "clean:buildinfo": "tsx scripts/cleanBuildinfo.ts",

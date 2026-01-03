@@ -129,6 +129,8 @@ get_file_limit() {
     "src/app/actions/user-mutations.ts") echo 600 ;;
     # Mock data (not real code)
     "src/features/productivity/email2-console/mockData.ts") echo 1000 ;;
+    # Schema scanner (4-phase analysis, inherently comprehensive)
+    "scripts/checkSchemaFields.ts") echo 700 ;;
     # Default
     *) echo $DEFAULT_LIMIT ;;
   esac

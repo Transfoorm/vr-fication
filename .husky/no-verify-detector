@@ -18,10 +18,11 @@ echo ""
 #   - .husky/no-verify-detector (the hook itself)
 #   - .husky/pre-commit (contains comment header about the detector)
 #   - CLAUDE.md (project documentation about the prohibition)
-#   - _sdk/09-protocols/*.md (SDK protocol documentation)
+#   - _sdk/09-protocols/*.md (SDK protocol documentation - old path)
+#   - .sdk/09-protocols/*.md (SDK protocol documentation - new path)
 #   - scripts/checkISV.ts (validation script showing error examples)
 #   - scripts/checkNaming.ts (validation script showing error examples)
-INFECTED_FILES=$(git diff --cached --name-only | grep -vE "^(\.claude/commands/.*\.md|\.husky/no-verify-detector|\.husky/pre-commit|CLAUDE\.md|_sdk/09-protocols/.*\.md|scripts/checkISV\.ts|scripts/checkNaming\.ts|Independant-Report-Review\.md|Independent-Technical-Appraisal-Directive\.md)$" | xargs grep -l "\-\-no-verify" 2>/dev/null || true)
+INFECTED_FILES=$(git diff --cached --name-only | grep -vE "^(\.claude/commands/.*\.md|\.husky/no-verify-detector|\.husky/pre-commit|CLAUDE\.md|_sdk/09-protocols/.*\.md|\.sdk/09-protocols/.*\.md|scripts/checkISV\.ts|scripts/checkNaming\.ts|Independant-Report-Review\.md|Independent-Technical-Appraisal-Directive\.md)$" | xargs grep -l "\-\-no-verify" 2>/dev/null || true)
 
 if [ -n "$INFECTED_FILES" ]; then
   echo ""

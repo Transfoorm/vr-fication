@@ -74,14 +74,32 @@ Database is pristine.
 
 ---
 
-### Step 4: Next Steps
+### Step 4: Schema Scan
+
+Run the TTT Schema Scanner in post-nuke mode:
+
+```bash
+npx tsx scripts/checkSchemaFields.ts --nuke
+```
+
+This shows:
+- **🎯 NUKE OPPORTUNITIES** - Optional fields that could become required
+- No migration needed since DB is empty
+- Chance to make schema rock solid
+
+Show the NUKE OPPORTUNITIES section to the user. Ask if they want to review and upgrade any fields.
+
+---
+
+### Step 5: Next Steps
 
 ```
 ☢️ Next Steps:
-1. Clear browser cookies and local storage
-2. Sign up as a new user via Clerk
-3. Complete onboarding
-4. Reconnect OAuth integrations (Outlook, Gmail)
+1. Review 🎯 NUKE OPPORTUNITIES above (optional→required upgrades)
+2. Clear browser cookies and local storage
+3. Sign up as a new user via Clerk
+4. Complete onboarding
+5. Reconnect OAuth integrations (Outlook, Gmail)
 ```
 
 ---
