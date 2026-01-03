@@ -65,3 +65,5 @@ docs/EMAIL_DESIGN_PLAN.md
 docs/poppins-emai-design.md
 docs/ASSET & STORAGE DIRECTION.txt
 *.jsonl
+public/audio/_stored/
+public/audio/paper.mp3

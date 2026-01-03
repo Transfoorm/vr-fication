@@ -12,11 +12,12 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useFuse } from '@/store/fuse';
+import { sounds } from '@/features/productivity/email-console/sounds';
 import type {
   EmailAccount,
   EmailThread,
@@ -45,6 +46,9 @@ export function useProductivitySync(): void {
   const hydrateProductivity = useFuse((state) => state.hydrateProductivity);
   const user = useFuse((state) => state.user);
   const callerUserId = user?.convexId as Id<'admin_users'> | undefined;
+
+  // Track message count for new email sound
+  const prevMessageCountRef = useRef<number | null>(null);
 
   // ═══════════════════════════════════════════════════════════════════════
   // 🛡️ IDENTITY GATE: No queries until user identity is stable
@@ -170,6 +174,13 @@ export function useProductivitySync(): void {
       // This ensures WARP-preloaded data survives until live queries return real data
       // Empty data can only occur from timing issues, never from intentional clearing
       if (messages.length === 0 && accounts.length === 0) return;
+
+      // 🔔 NEW EMAIL SOUND: Play when message count increases (not on initial load)
+      const currentCount = messages.length;
+      if (prevMessageCountRef.current !== null && currentCount > prevMessageCountRef.current) {
+        sounds.receive();
+      }
+      prevMessageCountRef.current = currentCount;
 
       // Hydrate FUSE with complete email data
       hydrateProductivity({

@@ -5,6 +5,7 @@ import { useAction, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useFuse } from '@/store/fuse';
+import { sounds } from './sounds';
 
 // Module-level reconciliation queue (survives re-renders, shared across hook instances)
 // Accumulates message IDs from multiple rate-limited batches, runs ONE reconciliation
@@ -121,6 +122,7 @@ export function useEmailActions({
 
       const messageIdsToDelete = [...selectedMessageIds];
       console.log(`🗑️ Deleting ${messageIdsToDelete.length} message(s)...`);
+      sounds.trash();
 
       for (const messageId of messageIdsToDelete) {
         try {
@@ -156,6 +158,7 @@ export function useEmailActions({
       removeEmailMessages(messageIdsToDelete);
       clearBodiesForMessages(messageIdsToDelete);
       setSelectedMessageIds(new Set());
+      sounds.trash();
 
       // 2. BACKGROUND: Fire API calls (fire-and-forget)
       for (const messageId of messageIdsToDelete) {
@@ -189,6 +192,7 @@ export function useEmailActions({
       removeEmailMessages(messageIdsToDelete);
       clearBodiesForMessages(messageIdsToDelete);
       setSelectedMessageIds(new Set());
+      sounds.trash();
 
       // 2. BACKGROUND: Fire API calls (fire-and-forget)
       for (const messageId of messageIdsToDelete) {
