@@ -132,6 +132,8 @@ export type FuseUser = {
   mirorAvatarProfile?: AvatarOption;
   mirorEnchantmentEnabled?: boolean;
   mirorEnchantmentTiming?: 'subtle' | 'magical' | 'playful';
+  // Email preferences
+  emailMarkReadMode?: 'timer' | 'departure' | 'never';
   // Professional Genome fields
   phoneNumber?: string | null;
   jobTitle?: string | null;

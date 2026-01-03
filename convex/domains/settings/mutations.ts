@@ -103,6 +103,35 @@ export const updateThemeSettings = mutation({
 });
 
 /**
+ * Update Email preferences
+ * 🛡️ SID Phase 10: Accepts sovereign callerUserId
+ */
+export const updateEmailSettings = mutation({
+  args: {
+    callerUserId: v.id("admin_users"),
+    emailMarkReadMode: v.optional(v.union(
+      v.literal("timer"),
+      v.literal("departure"),
+      v.literal("never")
+    )),
+  },
+  handler: async (ctx: MutationCtx, args) => {
+    const { callerUserId, ...updateFields } = args;
+
+    // 🛡️ SID-5.3: Direct lookup by sovereign _id
+    const user = await ctx.db.get(callerUserId);
+    if (!user) throw new Error("User not found");
+
+    await ctx.db.patch(user._id, {
+      ...updateFields,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+/**
  * Update Miror AI preferences
  * 🛡️ SID Phase 10: Accepts sovereign callerUserId
  */

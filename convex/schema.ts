@@ -98,6 +98,14 @@ export default defineSchema({
       v.literal("playful")
     )),
 
+    // Email preferences (optional - defaults to 'timer')
+    // timer = mark read after 3 seconds, departure = mark read on click away, never = manual only
+    emailMarkReadMode: v.optional(v.union(
+      v.literal("timer"),
+      v.literal("departure"),
+      v.literal("never")
+    )),
+
     // Timestamps (required)
     createdAt: v.number(),
     updatedAt: v.number(),

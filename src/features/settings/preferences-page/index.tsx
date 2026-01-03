@@ -15,6 +15,7 @@ import { Tabs, Stack, Icon } from '@/vr';
 import { MirorAiTab } from './_tabs/MirorAiTab';
 import { ThemeTab } from './_tabs/ThemeTab';
 import { ControlsTab } from './_tabs/ControlsTab';
+import { EmailTab } from './_tabs/EmailTab';
 
 export function PreferencesPageFeature() {
   return (
@@ -23,6 +24,7 @@ export function PreferencesPageFeature() {
         tabs={[
           { id: 'miror-ai', label: 'Miror AI', icon: <Icon variant="sparkles" />, content: <MirorAiTab /> },
           { id: 'theme', label: 'Theme', icon: <Icon variant="palette" />, content: <ThemeTab /> },
+          { id: 'email', label: 'Email', icon: <Icon variant="mail" />, content: <EmailTab /> },
           { id: 'controls', label: 'Controls', icon: <Icon variant="sliders" />, content: <ControlsTab /> },
         ]}
       />

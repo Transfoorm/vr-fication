@@ -108,6 +108,10 @@ export function EmailConsole() {
   // Anchor message for Shift+click range selection
   const [anchorMessageId, setAnchorMessageId] = useState<string | null>(null);
 
+  // Track if selection was user-initiated (click/keyboard) vs auto-selected on mount
+  // Auto-mark-read only triggers for user-initiated selections
+  const isUserInitiatedSelectionRef = useRef(false);
+
   // Read email bodies from FUSE to know when content is ready
   const emailBodies = useFuse((state) => state.emailBodyCache.emailBodies);
 
@@ -169,20 +173,27 @@ export function EmailConsole() {
 
   // Handle folder selection (canonical folder)
   const handleFolderSelect = (folder: string) => {
+    console.log(`📂 Folder select: ${folder}`);
     setSelectedFolder(folder);
     setSelectedSubfolderId(null); // Clear subfolder when selecting a top-level folder
+    setSelectedMessageIds(new Set()); // Clear selection so auto-select fires for new folder
+    setDisplayedMessageId(null); // Clear reading pane
   };
 
   // Handle subfolder selection
   const handleSubfolderSelect = (subfolder: EmailFolder) => {
     setSelectedFolder(subfolder.canonicalFolder); // Set parent canonical folder
     setSelectedSubfolderId(subfolder.externalFolderId); // Set specific subfolder
+    setSelectedMessageIds(new Set()); // Clear selection so auto-select fires for new folder
+    setDisplayedMessageId(null); // Clear reading pane
   };
 
   // Handle custom folder selection
   const handleCustomFolderSelect = (folderId: string) => {
     setSelectedFolder('custom');
     setSelectedSubfolderId(folderId);
+    setSelectedMessageIds(new Set()); // Clear selection so auto-select fires for new folder
+    setDisplayedMessageId(null); // Clear reading pane
   };
 
   const toggleSection = (bucket: string) => {
@@ -216,6 +227,8 @@ export function EmailConsole() {
   // - Shift+click: select range from anchor to clicked
   // - Regular click: single select (becomes new anchor)
   const handleMessageClick = (messageId: string, event: React.MouseEvent) => {
+    console.log(`📖 Click: setting userInitiated=true`);
+    isUserInitiatedSelectionRef.current = true; // User clicked - enable mark-on-departure
     const isModifierHeld = event.metaKey || event.ctrlKey; // Cmd (Mac) or Ctrl (PC)
     const isShiftHeld = event.shiftKey;
 
@@ -342,12 +355,14 @@ export function EmailConsole() {
     baseHandleContextAction(action);
   }, [baseHandleContextAction, setContextMenu, contentWidth]);
 
-  // Auto-select first message when inbox loads (Outlook Web behavior)
+  // Auto-select first message when folder loads (Outlook Web behavior)
   useEffect(() => {
+    console.log(`📂 Auto-select check: folder=${selectedFolder}, messages=${messages.length}, selected=${selectedMessageIds.size}`);
     if (messages.length > 0 && selectedMessageIds.size === 0) {
+      console.log(`📂 Auto-selecting first message: ${messages[0]._id.slice(-8)}`);
       setSelectedMessageIds(new Set([messages[0]._id]));
     }
-  }, [messages, selectedMessageIds.size]);
+  }, [messages, selectedMessageIds.size, selectedFolder]);
 
   // Keyboard navigation: Arrow Up/Down to move between emails
   // Shift+Arrow extends selection (multi-select)
@@ -375,6 +390,7 @@ export function EmailConsole() {
       if (messages.length === 0) return;
 
       e.preventDefault();
+      isUserInitiatedSelectionRef.current = true; // Keyboard nav - enable mark-on-departure
 
       // Enter keyboard navigation mode (suppresses hover on old item)
       setIsKeyboardNav(true);
@@ -459,112 +475,130 @@ export function EmailConsole() {
   const updateConvexReadStatus = useMutation(api.productivity.email.outlookActions.updateMessageReadStatus);
   const batchSyncReadStatus = useAction(api.productivity.email.outlookActions.batchMarkOutlookReadStatus);
 
-  // Auto-mark as read: 1s after selecting an unread email
-  // HARDENED: Timer won't reset on Convex updates, only on selection change
-  const autoMarkTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const autoMarkTimerForIdRef = useRef<string | null>(null); // Track which ID the timer is for
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MARK-AS-READ PREFERENCE
+  // Options: 'departure' (when click away), 'timer' (after 3s), 'never' (manual)
+  // Priority: FUSE (from DB) > localStorage > default ('timer')
+  // ═══════════════════════════════════════════════════════════════════════════
+  const userEmailPref = useFuse((state) => state.user?.emailMarkReadMode);
 
+  const [markReadMode, setMarkReadMode] = useState<'departure' | 'timer' | 'never'>(() => {
+    if (typeof window === 'undefined') return 'timer';
+    return (localStorage.getItem('email-mark-read-mode') as 'departure' | 'timer' | 'never') || 'timer';
+  });
+
+  // Sync from FUSE when user preference changes (DB is source of truth)
+  useEffect(() => {
+    if (userEmailPref && ['departure', 'timer', 'never'].includes(userEmailPref)) {
+      setMarkReadMode(userEmailPref);
+      localStorage.setItem('email-mark-read-mode', userEmailPref);
+    }
+  }, [userEmailPref]);
+
+  // Track previous selection and unread state
+  const previousSelectedIdRef = useRef<string | null>(null);
+  const wasUnreadWhenSelectedRef = useRef(false);
+
+  // Timer ref for 3-second debounce mode
+  const markReadTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const markReadTimerForIdRef = useRef<string | null>(null);
+
+  // Helper: Mark a message as read (shared by both modes)
+  const markMessageAsRead = useCallback((messageId: string) => {
+    const state = useFuse.getState();
+    const freshMessage = state.productivity.email?.messages?.find(m => m._id === messageId);
+
+    if (!freshMessage || freshMessage.isRead) return;
+
+    console.log(`📖 Marking as read: ${messageId.slice(-8)}`);
+
+    // 1. Instant UI update
+    state.updateEmailReadStatus(messageId, true);
+
+    // 2. Persist to Convex
+    updateConvexReadStatus({
+      userId: userId!,
+      messageId: messageId as Id<'productivity_email_Index'>,
+      isRead: true,
+    }).catch((error) => {
+      console.error('❌ Mark-read Convex failed, rolling back:', error);
+      state.updateEmailReadStatus(messageId, false);
+    });
+
+    // 3. Fire-and-forget Outlook sync
+    batchSyncReadStatus({
+      userId: userId!,
+      messageIds: [messageId as Id<'productivity_email_Index'>],
+      isRead: true,
+    }).catch(() => {});
+
+    // 4. Protection window
+    setTimeout(() => state.clearPendingReadUpdate(messageId), 10000);
+  }, [userId, updateConvexReadStatus, batchSyncReadStatus]);
+
+  // Main auto-mark-read effect
   useEffect(() => {
     const currentSelectedId = selectedMessageIds.size === 1 ? [...selectedMessageIds][0] : null;
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`⏱️ Effect run: selected=${currentSelectedId?.slice(-8) ?? 'none'}, timerFor=${autoMarkTimerForIdRef.current?.slice(-8) ?? 'none'}, hasTimer=${!!autoMarkTimerRef.current}`);
-    }
-
-    // GUARD: Only reset timer if selection actually changed
-    if (autoMarkTimerForIdRef.current === currentSelectedId && autoMarkTimerRef.current) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`⏱️ Same selection, timer running - no reset`);
-      }
+    // Same selection - nothing to do (unless timer mode needs to start)
+    if (previousSelectedIdRef.current === currentSelectedId) {
       return;
     }
 
-    // Selection changed - clear old timer
-    if (autoMarkTimerRef.current) {
-      clearTimeout(autoMarkTimerRef.current);
-      autoMarkTimerRef.current = null;
-      autoMarkTimerForIdRef.current = null;
+    // Clear any pending timer from previous selection
+    if (markReadTimerRef.current) {
+      clearTimeout(markReadTimerRef.current);
+      markReadTimerRef.current = null;
+      markReadTimerForIdRef.current = null;
     }
 
-    // No selection or no user
-    if (!currentSelectedId || !userId) {
-      return () => {
-        if (autoMarkTimerRef.current) {
-          clearTimeout(autoMarkTimerRef.current);
-          autoMarkTimerRef.current = null;
-          autoMarkTimerForIdRef.current = null;
-        }
-      };
+    // ─────────────────────────────────────────────────────────────────────────
+    // DEPARTURE MODE: Mark previous message when clicking away
+    // ─────────────────────────────────────────────────────────────────────────
+    if (markReadMode === 'departure') {
+      const departingId = previousSelectedIdRef.current;
+      const shouldMarkRead = departingId && wasUnreadWhenSelectedRef.current && isUserInitiatedSelectionRef.current;
+
+      if (shouldMarkRead) {
+        markMessageAsRead(departingId);
+      }
     }
 
-    // Start timer - check message state when it fires
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`⏱️ Starting timer for ${currentSelectedId.slice(-8)}`);
-    }
-    autoMarkTimerForIdRef.current = currentSelectedId;
-    autoMarkTimerRef.current = setTimeout(async () => {
-      autoMarkTimerForIdRef.current = null; // Timer fired, clear tracking
-
-      // Read fresh state at timer fire time
+    // ─────────────────────────────────────────────────────────────────────────
+    // TIMER MODE: Start 3-second timer for new selection
+    // ─────────────────────────────────────────────────────────────────────────
+    if (markReadMode === 'timer' && currentSelectedId && isUserInitiatedSelectionRef.current) {
       const state = useFuse.getState();
-      const freshMessages = state.productivity.email?.messages;
-      const freshMessage = freshMessages?.find(m => m._id === currentSelectedId);
+      const message = state.productivity.email?.messages?.find(m => m._id === currentSelectedId);
 
-      // Bail conditions (checked at fire time, not effect time)
-      if (!freshMessage) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`⏱️ Skip ${currentSelectedId.slice(-8)}: not in FUSE`);
-        }
-        return;
+      if (message && !message.isRead) {
+        markReadTimerForIdRef.current = currentSelectedId;
+        markReadTimerRef.current = setTimeout(() => {
+          markReadTimerForIdRef.current = null;
+          markMessageAsRead(currentSelectedId);
+        }, 3000); // 3 second debounce
       }
-      if (freshMessage.isRead) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`⏱️ Skip ${currentSelectedId.slice(-8)}: already read`);
-        }
-        return;
-      }
+    }
 
-      console.log(`⏱️ Auto-mark: ${currentSelectedId.slice(-8)} → read`);
+    // ARRIVAL: Record the new selection and whether it's unread
+    previousSelectedIdRef.current = currentSelectedId;
+    if (currentSelectedId) {
+      const state = useFuse.getState();
+      const message = state.productivity.email?.messages?.find(m => m._id === currentSelectedId);
+      wasUnreadWhenSelectedRef.current = message ? !message.isRead : false;
+    } else {
+      wasUnreadWhenSelectedRef.current = false;
+    }
 
-      // 1. Instant UI update via FUSE
-      state.updateEmailReadStatus(currentSelectedId, true);
-
-      // 2. Persist to Convex DB with rollback on failure
-      try {
-        await updateConvexReadStatus({
-          userId: userId!,
-          messageId: currentSelectedId as Id<'productivity_email_Index'>,
-          isRead: true,
-        });
-      } catch (error) {
-        console.error('❌ Auto-mark Convex failed, rolling back UI:', error);
-        state.updateEmailReadStatus(currentSelectedId, false); // ROLLBACK
-        return; // Don't sync to Outlook if Convex failed
-      } finally {
-        // 10 second protection window - Convex live queries can be slow to reflect mutations
-        setTimeout(() => state.clearPendingReadUpdate(currentSelectedId), 10000);
-      }
-
-      // 3. Fire-and-forget Outlook sync (silent failures)
-      batchSyncReadStatus({
-        userId: userId!,
-        messageIds: [currentSelectedId as Id<'productivity_email_Index'>],
-        isRead: true,
-      }).catch(() => {
-        // Silent - WebSocket drops are irrelevant to UX
-      });
-    }, 1000);
-
-    // Cleanup: only clear timer (exempt is cleared on arrival, not departure)
+    // Cleanup timer on unmount
     return () => {
-      if (autoMarkTimerRef.current) {
-        clearTimeout(autoMarkTimerRef.current);
-        autoMarkTimerRef.current = null;
-        autoMarkTimerForIdRef.current = null;
+      if (markReadTimerRef.current) {
+        clearTimeout(markReadTimerRef.current);
+        markReadTimerRef.current = null;
+        markReadTimerForIdRef.current = null;
       }
     };
-  // STABLE: Only re-run on selection change, not on Convex updates
-  }, [selectedMessageIds, userId, updateConvexReadStatus, batchSyncReadStatus]);
+  }, [selectedMessageIds, markReadMode, markMessageAsRead]);
 
   // Get the currently selected message ID (for triggering fetch)
   const selectedId = selectedMessageIds.size === 1 ? [...selectedMessageIds][0] : null;
