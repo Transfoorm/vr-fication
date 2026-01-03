@@ -79,6 +79,23 @@ export function resetColumnWidths(mode: 'full' | 'constrained'): void {
   localStorage.setItem(keys.threads, String(defaults.threads));
 }
 
+/** Minimum column widths for responsive viewport shrinking */
+export const MIN_WIDTHS = {
+  mailbox: 120,
+  threads: 150,
+} as const;
+
+/**
+ * Generate responsive grid template for email columns
+ * Uses minmax() so threads and mailbox shrink when viewport narrows:
+ * 1. Reading pane shrinks first (1fr - already works perfectly)
+ * 2. Threads shrinks next when reading can't shrink more
+ * 3. Mailbox shrinks last
+ */
+export function getGridTemplate(mailboxWidth: number, threadsWidth: number): string {
+  return `minmax(${MIN_WIDTHS.mailbox}px, ${mailboxWidth}px) 12px minmax(${MIN_WIDTHS.threads}px, ${threadsWidth}px) 12px 1fr`;
+}
+
 /** Standard canonical folder types */
 export const STANDARD_FOLDERS = ['inbox', 'drafts', 'sent', 'archive', 'spam', 'trash'];
 

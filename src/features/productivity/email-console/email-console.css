@@ -52,10 +52,9 @@
   gap: var(--prod-space-md);
 }
 
-/* Constrained mode - FIXED width, centered (matches body) */
+/* Constrained mode - responsive width, centered (matches body) */
 .ft-email__header--constrained {
-  width: var(--layout-constrained-width);
-  min-width: var(--layout-constrained-width);
+  width: 100%;
   max-width: var(--layout-constrained-width);
   margin-left: auto;
   margin-right: auto;
@@ -121,10 +120,9 @@
   min-height: 0;
 }
 
-/* Constrained mode - FIXED width, centered */
+/* Constrained mode - responsive width, centered */
 .ft-email__body--constrained {
-  width: var(--layout-constrained-width);
-  min-width: var(--layout-constrained-width);
+  width: 100%;
   max-width: var(--layout-constrained-width);
   margin-left: auto;
   margin-right: auto;

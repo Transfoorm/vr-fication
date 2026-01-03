@@ -19,6 +19,7 @@ import {
   getStorageKeys,
   DEFAULTS,
   resetColumnWidths,
+  getGridTemplate,
   buildFolderTree,
   computeFolderCounts,
   filterMessages,
@@ -592,26 +593,30 @@ export function EmailConsole() {
         // FULL MODE: Original behavior - no max constraints
         if (handle === 'mailbox') {
           newMailboxWidth = Math.max(120, Math.min(300, startMailboxWidth + deltaX));
-          container.style.gridTemplateColumns = `${newMailboxWidth}px 12px ${threadsWidth}px 12px 1fr`;
+          container.style.gridTemplateColumns = getGridTemplate(newMailboxWidth, threadsWidth);
         } else {
           newThreadsWidth = Math.max(150, startThreadsWidth + deltaX);
-          container.style.gridTemplateColumns = `${mailboxWidth}px 12px ${newThreadsWidth}px 12px 1fr`;
+          container.style.gridTemplateColumns = getGridTemplate(mailboxWidth, newThreadsWidth);
         }
       } else {
-        // CENTERED MODE: Fixed 1320px container - enforce max limits
+        // CENTERED MODE: Constrained container - enforce max limits
+        // Use MINIMUM widths for constraints so columns can always resize
         const CONSTRAINED_WIDTH = 1320;
+        const minMailbox = 120;
+        const minThreads = 150;
         const minReadingPane = 250;
         const handleSpace = 24;
 
         if (handle === 'mailbox') {
-          const currentThreads = threadsWidth;
-          const maxMailbox = Math.min(300, CONSTRAINED_WIDTH - handleSpace - currentThreads - minReadingPane);
-          newMailboxWidth = Math.max(120, Math.min(maxMailbox, startMailboxWidth + deltaX));
-          container.style.gridTemplateColumns = `${newMailboxWidth}px 12px ${threadsWidth}px 12px 1fr`;
+          // Max mailbox = total minus minimums for threads and reading
+          const maxMailbox = Math.min(300, CONSTRAINED_WIDTH - handleSpace - minThreads - minReadingPane);
+          newMailboxWidth = Math.max(minMailbox, Math.min(maxMailbox, startMailboxWidth + deltaX));
+          container.style.gridTemplateColumns = getGridTemplate(newMailboxWidth, threadsWidth);
         } else {
-          const maxThreads = CONSTRAINED_WIDTH - handleSpace - mailboxWidth - minReadingPane;
-          newThreadsWidth = Math.max(150, Math.min(maxThreads, startThreadsWidth + deltaX));
-          container.style.gridTemplateColumns = `${mailboxWidth}px 12px ${newThreadsWidth}px 12px 1fr`;
+          // Max threads = total minus minimums for mailbox and reading
+          const maxThreads = CONSTRAINED_WIDTH - handleSpace - minMailbox - minReadingPane;
+          newThreadsWidth = Math.max(minThreads, Math.min(maxThreads, startThreadsWidth + deltaX));
+          container.style.gridTemplateColumns = getGridTemplate(mailboxWidth, newThreadsWidth);
         }
       }
     };
@@ -665,7 +670,7 @@ export function EmailConsole() {
         className={`ft-email__body ${contentWidth === 'constrained' ? 'ft-email__body--constrained' : ''}`}
         ref={containerRef}
         style={{
-          gridTemplateColumns: `${mailboxWidth}px 12px ${threadsWidth}px 12px 1fr`,
+          gridTemplateColumns: getGridTemplate(mailboxWidth, threadsWidth),
         }}
       >
         <EmailSidebar
