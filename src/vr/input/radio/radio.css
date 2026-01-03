@@ -97,6 +97,27 @@
   font-size: var(--font-size-lg);
 }
 
+/* Weight variants */
+.vr-input-radio--weight-light .vr-input-radio-label {
+  font-weight: var(--font-weight-light);
+}
+
+.vr-input-radio--weight-normal .vr-input-radio-label {
+  font-weight: var(--font-weight-normal);
+}
+
+.vr-input-radio--weight-medium .vr-input-radio-label {
+  font-weight: var(--font-weight-medium);
+}
+
+.vr-input-radio--weight-semibold .vr-input-radio-label {
+  font-weight: var(--font-weight-semibold);
+}
+
+.vr-input-radio--weight-bold .vr-input-radio-label {
+  font-weight: var(--font-weight-bold);
+}
+
 /* States */
 .vr-input-radio:hover .vr-input-radio-button {
   opacity: 0.8;
@@ -127,4 +148,14 @@
 
 .vr-input-radio--disabled:hover .vr-input-radio-button {
   opacity: 1;
+}
+
+/* Description text (optional, appears after label) */
+.vr-input-radio-desc {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--text-tertiary);
+  line-height: 1.4;
+  margin-top: 2px;
 }

@@ -11,6 +11,7 @@ import { Tooltip } from '@/vr/tooltip';
 export interface RadioOption {
   value: string;
   label: string;
+  description?: string;
   disabled?: boolean;
   tooltip?: string;
   tooltipSize?: 'sm' | 'md' | 'lg';
@@ -30,6 +31,8 @@ export interface InputRadioProps {
   direction?: 'vertical' | 'horizontal';
   /** Size variant */
   size?: 'sm' | 'md' | 'lg';
+  /** Font weight */
+  weight?: 'light' | 'normal' | 'medium' | 'semibold' | 'bold';
   /** Disabled state for entire group */
   disabled?: boolean;
   /** Additional className */
@@ -47,6 +50,7 @@ export default function InputRadio({
   name,
   direction = 'vertical',
   size = 'md',
+  weight,
   disabled = false,
   className = ''
 }: InputRadioProps) {
@@ -62,6 +66,7 @@ export default function InputRadio({
   const itemClasses = [
     'vr-input-radio',
     `vr-input-radio--${size}`,
+    weight && `vr-input-radio--weight-${weight}`,
     disabled && 'vr-input-radio--disabled'
   ].filter(Boolean).join(' ');
 
@@ -85,7 +90,12 @@ export default function InputRadio({
             <span className="vr-input-radio-button">
               <span className="vr-input-radio-dot" />
             </span>
-            <span className="vr-input-radio-label">{option.label}</span>
+            <span className="vr-input-radio-label">
+              {option.label}
+              {option.description && (
+                <span className="vr-input-radio-desc">{option.description}</span>
+              )}
+            </span>
           </label>
         );
 

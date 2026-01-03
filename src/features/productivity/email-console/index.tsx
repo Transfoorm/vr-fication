@@ -10,7 +10,7 @@ import { useProductivityData } from '@/hooks/useProductivityData';
 import { useEmailSyncIntent } from '@/hooks/useEmailSyncIntent';
 import { useEmailBodySync } from '@/hooks/useEmailBodySync';
 import { useFuse } from '@/store/fuse';
-import { T } from '@/vr';
+import { T, Input } from '@/vr';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useEmailActions } from './useEmailActions';
 import { useViewportPrefetch } from './useViewportPrefetch';
@@ -118,6 +118,18 @@ export function EmailConsole() {
     const saved = localStorage.getItem('email-expanded-folders');
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
+
+  // Content width mode - persisted to localStorage
+  const [contentWidth, setContentWidth] = useState<'full' | 'constrained'>(() => {
+    if (typeof window === 'undefined') return 'full';
+    return (localStorage.getItem('email-content-width') as 'full' | 'constrained') || 'full';
+  });
+
+  const handleWidthChange = (value: string) => {
+    const width = value as 'full' | 'constrained';
+    setContentWidth(width);
+    localStorage.setItem('email-content-width', width);
+  };
 
   // Handle folder selection (canonical folder)
   const handleFolderSelect = (folder: string) => {
@@ -574,11 +586,23 @@ export function EmailConsole() {
     <div className="ft-email">
       <header className="ft-email__header">
         <div className="ft-email__header-left"><T.body weight="medium">Email</T.body></div>
-        <div className="ft-email__header-right" />
+        <div className="ft-email__header-right">
+          <Input.radio
+            value={contentWidth}
+            onChange={handleWidthChange}
+            options={[
+              { value: 'full', label: 'Full' },
+              { value: 'constrained', label: 'Centered' },
+            ]}
+            direction="horizontal"
+            size="sm"
+            weight="light"
+          />
+        </div>
       </header>
 
       <div
-        className="ft-email__body"
+        className={`ft-email__body ${contentWidth === 'constrained' ? 'ft-email__body--constrained' : ''}`}
         ref={containerRef}
         style={{
           gridTemplateColumns: `${mailboxWidth}px 12px ${threadsWidth ? threadsWidth + 'px' : '1fr'} 12px 1fr`,

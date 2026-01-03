@@ -112,6 +112,13 @@
   min-height: 0;
 }
 
+/* Constrained mode - center with max-width */
+.ft-email__body--constrained {
+  max-width: var(--layout-constrained-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    Resize Handles - Invisible until hover
    ───────────────────────────────────────────────────────────────────────────── */
