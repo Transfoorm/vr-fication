@@ -32,12 +32,20 @@ export default function ShadowKing() {
   // Lock body scroll AND hide scrollbar when Shadow King is active
   useEffect(() => {
     if (shouldShow) {
+      // Calculate scrollbar width before hiding it
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
       // Hide scrollbar on both html and body to prevent double scrollbar
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
+
+      // Add padding to compensate for removed scrollbar (prevents layout shift)
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+
       return () => {
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
       };
     }
   }, [shouldShow]);

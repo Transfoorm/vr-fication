@@ -6,6 +6,11 @@ import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { useFuse } from '@/store/fuse';
 
+// Module-level reconciliation queue (survives re-renders, shared across hook instances)
+// Accumulates message IDs from multiple rate-limited batches, runs ONE reconciliation
+let pendingReconcileTimer: NodeJS.Timeout | null = null;
+let pendingReconcileIds: Set<string> = new Set();
+
 interface ContextMenuState {
   x: number;
   y: number;
@@ -19,6 +24,7 @@ interface UseEmailActionsProps {
   contextMenu: ContextMenuState | null;
   selectedMessageIds: Set<string>;
   selectedSubfolderId: string | null;
+  messages: { _id: string }[]; // Filtered messages for current folder
   setContextMenu: (menu: ContextMenuState | null) => void;
   setSelectedMessageIds: (ids: Set<string>) => void;
   setSelectedSubfolderId: (id: string | null) => void;
@@ -31,6 +37,7 @@ export function useEmailActions({
   contextMenu,
   selectedMessageIds,
   selectedSubfolderId,
+  messages,
   setContextMenu,
   setSelectedMessageIds,
   setSelectedSubfolderId,
@@ -42,11 +49,12 @@ export function useEmailActions({
   const archiveMessage = useAction(api.productivity.email.outlookActions.archiveOutlookMessage);
   const deleteFolder = useAction(api.productivity.email.outlookFolderActions.deleteOutlookFolder);
   const batchSyncReadStatus = useAction(api.productivity.email.outlookActions.batchMarkOutlookReadStatus);
-  const updateConvexReadStatus = useMutation(api.productivity.email.outlookActions.updateMessageReadStatus);
+  const batchConvexReadStatus = useMutation(api.productivity.email.outlookActions.batchUpdateMessageReadStatus);
+  const reconcileReadStatus = useAction(api.productivity.email.outlookReconcile.reconcileReadStatus);
 
   // FUSE actions for instant UI update (no round-trip)
-  const updateEmailReadStatus = useFuse((state) => state.updateEmailReadStatus);
-  const clearPendingReadUpdate = useFuse((state) => state.clearPendingReadUpdate);
+  const batchUpdateEmailReadStatus = useFuse((state) => state.batchUpdateEmailReadStatus);
+  const batchClearPendingReadUpdates = useFuse((state) => state.batchClearPendingReadUpdates);
 
   const handleContextAction = useCallback(async (action: string) => {
     const currentContextMenu = contextMenu;
@@ -54,6 +62,14 @@ export function useEmailActions({
 
     if (action === 'refresh') {
       triggerManualSync();
+      return;
+    }
+
+    if (action === 'selectAll') {
+      // Select all messages in current folder
+      const allIds = new Set(messages.map(m => m._id));
+      setSelectedMessageIds(allIds);
+      console.log(`✅ Selected all ${allIds.size} messages`);
       return;
     }
 
@@ -168,44 +184,102 @@ export function useEmailActions({
         return;
       }
 
-      console.log(`📧 Mark ${isRead ? 'READ' : 'UNREAD'}: ${messageIdsToUpdate.length} messages`, messageIdsToUpdate);
+      console.log(`📧 Mark ${isRead ? 'READ' : 'UNREAD'}: ${messageIdsToUpdate.length} messages`);
 
-      // INSTANT UI: Update FUSE store directly (no round-trip)
-      for (const messageId of messageIdsToUpdate) {
-        updateEmailReadStatus(messageId, isRead);
+      // 1. INSTANT UI: Single FUSE update for ALL messages (scales to 1000+)
+      batchUpdateEmailReadStatus(messageIdsToUpdate, isRead);
+
+      // 2. SINGLE Convex mutation for ALL messages (no N+1 queries)
+      try {
+        await batchConvexReadStatus({
+          userId,
+          messageIds: messageIdsToUpdate as Id<'productivity_email_Index'>[],
+          isRead,
+        });
+      } catch (error) {
+        console.error(`❌ Batch Convex update failed:`, error);
       }
 
-      // Update Convex DB and clear pending flag when done
-      await Promise.all(
-        messageIdsToUpdate.map(async (messageId) => {
-          try {
-            await updateConvexReadStatus({
-              userId,
-              messageId: messageId as Id<'productivity_email_Index'>,
-              isRead,
-            });
-          } catch (error) {
-            console.error(`❌ Convex update failed:`, error);
-          } finally {
-            // Delay clearing pending to give sync time to see the protection
-            // The CONVEX_LIVE sync runs immediately on mutation, so we need buffer
-            setTimeout(() => clearPendingReadUpdate(messageId), 500);
-          }
-        })
-      );
+      // 3. Clear pending flags after protection window (10s for Convex live query catch-up)
+      setTimeout(() => batchClearPendingReadUpdates(messageIdsToUpdate), 10000);
 
-      // BACKGROUND: Batch sync to Outlook API (20 messages per request, avoids throttling)
-      batchSyncReadStatus({
-        userId,
-        messageIds: messageIdsToUpdate as Id<'productivity_email_Index'>[],
-        isRead,
-      }).then((result) => {
-        if (result.failed > 0) {
-          console.warn(`⚠️ Outlook batch sync: ${result.processed} success, ${result.failed} failed`);
-        } else {
-          console.log(`✅ Outlook batch sync: ${result.processed} messages synced`);
+      // 4. BACKGROUND: Outlook sync with retry
+      // - Retries up to 3 times with exponential backoff
+      // - WebSocket disconnects trigger retry
+      // - Rate limiting triggers delayed reconciliation
+      const syncToOutlook = async (attempt = 1): Promise<void> => {
+        if (!navigator.onLine) {
+          console.log(`📡 Outlook sync deferred (offline), will retry when online`);
+          // Wait for online event, then retry
+          const onOnline = () => {
+            window.removeEventListener('online', onOnline);
+            syncToOutlook(attempt);
+          };
+          window.addEventListener('online', onOnline);
+          return;
         }
-      }).catch((error) => console.error(`❌ Outlook batch sync failed:`, error));
+
+        try {
+          const result = await batchSyncReadStatus({
+            userId,
+            messageIds: messageIdsToUpdate as Id<'productivity_email_Index'>[],
+            isRead,
+          });
+
+          if (result.failed > 0) {
+            console.log(`📡 Outlook: ${result.processed} ok, ${result.failed} failed, ${result.skipped} skipped`);
+          } else {
+            console.log(`📡 Outlook: ${result.processed} synced`);
+          }
+
+          // Rate limiting detected - queue reconciliation in 2 minutes
+          // Deduplication: accumulate IDs, reset timer, run ONE reconciliation after dust settles
+          if (result.hadRateLimiting) {
+            // Add these IDs to the pending set
+            messageIdsToUpdate.forEach(id => pendingReconcileIds.add(id));
+
+            // Clear existing timer (we'll start a fresh 2-min countdown)
+            if (pendingReconcileTimer) {
+              clearTimeout(pendingReconcileTimer);
+            }
+
+            const pendingCount = pendingReconcileIds.size;
+            console.log(`⚠️ Rate limiting detected - reconciliation queued in 2 minutes (${pendingCount} messages pending)`);
+
+            // Capture userId for the closure
+            const capturedUserId = userId!;
+
+            pendingReconcileTimer = setTimeout(() => {
+              // Grab all accumulated IDs and clear the set
+              const idsToReconcile = [...pendingReconcileIds];
+              pendingReconcileIds = new Set();
+              pendingReconcileTimer = null;
+
+              console.log(`🔄 Running scheduled reconciliation for ${idsToReconcile.length} messages`);
+              reconcileReadStatus({
+                userId: capturedUserId,
+                messageIds: idsToReconcile as Id<'productivity_email_Index'>[],
+              }).then((reconcileResult) => {
+                console.log(`🔄 Reconciliation: ${reconcileResult.reconciled} ok, ${reconcileResult.failed} failed`);
+              }).catch((error) => {
+                console.error(`🔄 Reconciliation failed:`, error);
+              });
+            }, 2 * 60 * 1000); // 2 minutes
+          }
+        } catch (error) {
+          // Retry with exponential backoff (1s, 2s, 4s)
+          if (attempt < 3) {
+            const delay = Math.pow(2, attempt - 1) * 1000;
+            console.log(`📡 Outlook sync failed (attempt ${attempt}/3), retrying in ${delay}ms...`);
+            await new Promise(r => setTimeout(r, delay));
+            return syncToOutlook(attempt + 1);
+          }
+          console.error(`📡 Outlook sync failed after 3 attempts:`, error);
+        }
+      };
+
+      // Fire-and-forget with retry
+      syncToOutlook();
 
       return;
     }
@@ -220,6 +294,7 @@ export function useEmailActions({
     userId,
     selectedMessageIds,
     selectedSubfolderId,
+    messages,
     setContextMenu,
     setSelectedMessageIds,
     setSelectedSubfolderId,
@@ -228,10 +303,11 @@ export function useEmailActions({
     deleteMessage,
     archiveMessage,
     deleteFolder,
-    updateEmailReadStatus,
-    clearPendingReadUpdate,
-    updateConvexReadStatus,
+    batchUpdateEmailReadStatus,
+    batchClearPendingReadUpdates,
+    batchConvexReadStatus,
     batchSyncReadStatus,
+    reconcileReadStatus,
   ]);
 
   return { handleContextAction };

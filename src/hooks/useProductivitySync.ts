@@ -126,24 +126,8 @@ export function useProductivitySync(): void {
       }));
 
       // Transform messages to FUSE format (Doc<productivity_email_Index> → EmailMessage)
-      // IMPORTANT: Preserve local isRead for messages with pending updates
-      // Read pending set directly from store (not as dependency to avoid infinite loop)
-      const { pendingReadUpdates, email: currentEmail } = useFuse.getState().productivity;
-      const currentMessages = currentEmail?.messages;
-
-      // If there are pending read updates, skip this hydration entirely
-      // The local state is correct; we'll hydrate on the next sync after pending clears
-      if (pendingReadUpdates.size > 0) {
-        console.log(`🛡️ SYNC: Skipping hydration - ${pendingReadUpdates.size} pending updates`);
-        return;
-      }
-
-      const messages: EmailMessage[] = liveMessages.map((msg) => {
-        // If this message has a pending read update, preserve the local value
-        const isPending = pendingReadUpdates.has(msg._id);
-        const localMsg = isPending ? currentMessages?.find((m) => m._id === msg._id) : null;
-
-        return {
+      // NOTE: Pending read status protection is handled in hydrateProductivity()
+      const messages: EmailMessage[] = liveMessages.map((msg) => ({
           _id: msg._id,
           externalThreadId: msg.externalThreadId,
           subject: msg.subject,
@@ -168,9 +152,8 @@ export function useProductivitySync(): void {
           } : undefined,
           providerFolderId: msg.providerFolderId,
           canonicalFolder: msg.canonicalFolder,
-          isRead: isPending && localMsg ? localMsg.isRead : msg.isRead,
-        };
-      });
+          isRead: msg.isRead,
+        }));
 
       // Transform folders to FUSE format
       const folders: EmailFolder[] = liveFolders.map((folder) => ({

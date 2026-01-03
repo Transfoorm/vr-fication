@@ -56,6 +56,8 @@ export function EmailContextMenu({
           <>
             <button onClick={() => onAction('open')}>Open</button>
             <hr />
+            <button onClick={() => onAction('selectAll')}>Select All</button>
+            <hr />
             <button onClick={() => onAction('reply')}>Reply</button>
             <button onClick={() => onAction('replyAll')}>Reply All</button>
             <button onClick={() => onAction('forward')}>Forward</button>
@@ -72,6 +74,8 @@ export function EmailContextMenu({
         {contextMenu.area === 'list' && !contextMenu.messageId && selectedMessageIds.size === 0 && (
           <>
             <button onClick={() => onAction('newEmail')}>New Email</button>
+            <button onClick={() => onAction('selectAll')}>Select All</button>
+            <hr />
             <button onClick={() => onAction('refresh')}>Refresh</button>
           </>
         )}

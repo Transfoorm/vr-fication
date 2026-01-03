@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { T, Icon } from '@/vr';
 import { formatThreadDate } from './utils';
@@ -53,12 +53,21 @@ export function EmailMessageList({
   // Own scroll container ref and virtualizer
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const prevVisibleIdsRef = useRef<string>('');
+  const [scrollReady, setScrollReady] = useState(false);
+
+  // Track when scroll container is mounted (avoids flushSync during render)
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      setScrollReady(true);
+    }
+  }, []);
 
   const virtualizer = useVirtualizer({
     count: virtualItems.length,
     getScrollElement: () => scrollContainerRef.current,
     estimateSize: (index) => virtualItems[index].type === 'header' ? 32 : 72,
     overscan: 5,
+    enabled: scrollReady, // Don't measure until scroll container ready
   });
 
   // Extract visible message IDs for prefetch (in effect to avoid flushSync during render)

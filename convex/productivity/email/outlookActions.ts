@@ -1,16 +1,9 @@
-/**
- * Outlook User Actions
- *
- * Message operations initiated by users: trash, archive, delete.
- * Each action: Graph API call → local state update.
- */
-
+// Outlook user actions: trash, archive, delete, mark read/unread
 import { v } from 'convex/values';
 import { mutation, query, action, ActionCtx } from '@/convex/_generated/server';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 
-// Shared helper for token refresh (DRY - used by all actions)
 async function ensureFreshToken(
   ctx: ActionCtx,
   userId: Id<'admin_users'>,
@@ -51,10 +44,6 @@ async function ensureFreshToken(
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// QUERIES
-// ═══════════════════════════════════════════════════════════════════════════
-
 export const getMessageById = query({
   args: {
     userId: v.id('admin_users'),
@@ -76,10 +65,6 @@ export const getMessageById = query({
     };
   },
 });
-
-// ═══════════════════════════════════════════════════════════════════════════
-// TRASH
-// ═══════════════════════════════════════════════════════════════════════════
 
 export const moveMessageToTrash = mutation({
   args: {
@@ -127,7 +112,6 @@ export const deleteOutlookMessage = action({
 
     if (!tokens?.accessToken) return { success: false, error: 'No Outlook access token' };
 
-    // Check if token needs refresh
     const now = Date.now();
     if (tokens.expiresAt && tokens.expiresAt < now + 5 * 60 * 1000) {
       try {
@@ -193,10 +177,6 @@ export const deleteOutlookMessage = action({
   },
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ARCHIVE
-// ═══════════════════════════════════════════════════════════════════════════
-
 export const moveMessageToArchive = mutation({
   args: {
     userId: v.id('admin_users'),
@@ -243,7 +223,6 @@ export const archiveOutlookMessage = action({
 
     if (!tokens?.accessToken) return { success: false, error: 'No Outlook access token' };
 
-    // Check if token needs refresh
     const now = Date.now();
     if (tokens.expiresAt && tokens.expiresAt < now + 5 * 60 * 1000) {
       try {
@@ -309,10 +288,6 @@ export const archiveOutlookMessage = action({
   },
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// MARK READ/UNREAD
-// ═══════════════════════════════════════════════════════════════════════════
-
 export const updateMessageReadStatus = mutation({
   args: {
     userId: v.id('admin_users'),
@@ -332,6 +307,36 @@ export const updateMessageReadStatus = mutation({
     });
 
     return { success: true };
+  },
+});
+
+export const batchUpdateMessageReadStatus = mutation({
+  args: {
+    userId: v.id('admin_users'),
+    messageIds: v.array(v.id('productivity_email_Index')),
+    isRead: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error('User not found');
+
+    const now = Date.now();
+    let updated = 0;
+
+    await Promise.all(
+      args.messageIds.map(async (messageId) => {
+        const message = await ctx.db.get(messageId);
+        if (message) {
+          await ctx.db.patch(messageId, {
+            isRead: args.isRead,
+            updatedAt: now,
+          });
+          updated++;
+        }
+      })
+    );
+
+    return { success: true, updated };
   },
 });
 
@@ -355,7 +360,6 @@ export const markOutlookMessageReadStatus = action({
 
     if (!tokens?.accessToken) return { success: false, error: 'No Outlook access token' };
 
-    // Check if token needs refresh
     const now = Date.now();
     if (tokens.expiresAt && tokens.expiresAt < now + 5 * 60 * 1000) {
       try {
@@ -385,7 +389,6 @@ export const markOutlookMessageReadStatus = action({
     }
 
     try {
-      // PATCH the message to update isRead status
       const response = await fetch(
         `https://graph.microsoft.com/v1.0/me/messages/${message.externalMessageId}`,
         {
@@ -404,7 +407,6 @@ export const markOutlookMessageReadStatus = action({
         return { success: false, error: `Outlook API error: ${response.status}` };
       }
 
-      // Local DB already updated via optimistic update - just confirm API success
       return { success: true };
     } catch (error) {
       console.error('Mark read/unread error:', error);
@@ -413,25 +415,23 @@ export const markOutlookMessageReadStatus = action({
   },
 });
 
-/**
- * BATCH Mark Read/Unread - Uses Microsoft Graph Batch API
- *
- * Handles bulk operations without throttling:
- * - Batches up to 20 requests per API call (Microsoft limit)
- * - 200ms delay between batches to avoid rate limits
- * - Returns summary of successes/failures
- */
 export const batchMarkOutlookReadStatus = action({
   args: {
     userId: v.id('admin_users'),
     messageIds: v.array(v.id('productivity_email_Index')),
     isRead: v.boolean(),
   },
-  handler: async (ctx, args): Promise<{ success: boolean; processed: number; failed: number; errors?: string[] }> => {
-    const BATCH_SIZE = 20; // Microsoft Graph batch limit
-    const BATCH_DELAY_MS = 200; // Delay between batches to avoid throttling
+  handler: async (ctx, args): Promise<{ success: boolean; processed: number; failed: number; skipped: number; hadRateLimiting: boolean; errors?: string[] }> => {
+    const messageCount = args.messageIds.length;
 
-    // Get all messages with their external IDs
+    const BATCH_SIZE = messageCount > 1000 ? 5 : messageCount > 200 ? 10 : 20;
+    const BATCH_DELAY_MS = messageCount > 1000 ? 1000 : messageCount > 200 ? 500 : 300;
+
+    const MAX_RETRIES = 3;
+    const RETRY_DELAYS = [500, 1000, 2000]; // Exponential backoff
+
+    let hadRateLimiting = false;
+
     const messages = await Promise.all(
       args.messageIds.map((id) =>
         ctx.runQuery(api.productivity.email.outlookActions.getMessageById, {
@@ -441,48 +441,44 @@ export const batchMarkOutlookReadStatus = action({
       )
     );
 
-    // Filter out null messages and get external IDs
     const validMessages = messages.filter((m): m is NonNullable<typeof m> => m !== null);
+    const skippedFromDb = args.messageIds.length - validMessages.length;
 
     if (validMessages.length === 0) {
-      return { success: false, processed: 0, failed: args.messageIds.length, errors: ['No valid messages found'] };
+      return { success: false, processed: 0, failed: 0, skipped: skippedFromDb, hadRateLimiting: false, errors: ['No valid messages found in DB'] };
     }
 
-    // Get tokens
     const tokens = await ctx.runQuery(api.productivity.email.outlook.getOutlookTokens, {
       userId: args.userId,
     });
 
     if (!tokens?.accessToken) {
-      return { success: false, processed: 0, failed: validMessages.length, errors: ['No Outlook access token'] };
+      return { success: false, processed: 0, failed: validMessages.length, skipped: skippedFromDb, hadRateLimiting: false, errors: ['No Outlook access token'] };
     }
 
-    // Refresh token if needed
     const accessToken = await ensureFreshToken(ctx, args.userId, tokens);
     if (!accessToken) {
-      return { success: false, processed: 0, failed: validMessages.length, errors: ['Token refresh failed'] };
+      return { success: false, processed: 0, failed: validMessages.length, skipped: skippedFromDb, hadRateLimiting: false, errors: ['Token refresh failed'] };
     }
 
-    // Split into batches of 20
-    const batches: typeof validMessages[] = [];
-    for (let i = 0; i < validMessages.length; i += BATCH_SIZE) {
-      batches.push(validMessages.slice(i, i + BATCH_SIZE));
-    }
-
-    console.log(`📦 Batch sync: ${validMessages.length} messages in ${batches.length} batches`);
+    console.log(`📦 Batch sync: ${validMessages.length} messages (batch=${BATCH_SIZE}, delay=${BATCH_DELAY_MS}ms, ${skippedFromDb} not in DB)`);
 
     let totalProcessed = 0;
     let totalFailed = 0;
+    let totalSkipped = skippedFromDb;
     const errors: string[] = [];
 
-    // Process each batch
-    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-      const batch = batches[batchIndex];
+    const isRetryable = (status: number): boolean => status === 429 || status >= 500;
 
-      // Build batch request body
-      // Microsoft Graph Batch API: https://learn.microsoft.com/en-us/graph/json-batching
+    type BatchResult = { processed: number; failed: number; skipped: number; retryItems: typeof validMessages; sawRateLimit: boolean };
+
+    const processBatch = async (
+      batch: typeof validMessages,
+      attempt: number
+    ): Promise<BatchResult> => {
+      let sawRateLimit = false;
       const batchRequests = batch.map((msg, idx) => ({
-        id: String(idx + 1),
+        id: String(idx),
         method: 'PATCH',
         url: `/me/messages/${msg.externalMessageId}`,
         headers: { 'Content-Type': 'application/json' },
@@ -499,46 +495,102 @@ export const batchMarkOutlookReadStatus = action({
           body: JSON.stringify({ requests: batchRequests }),
         });
 
+        // HTTP-level failure
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`❌ Batch ${batchIndex + 1} failed:`, errorText);
-          totalFailed += batch.length;
-          errors.push(`Batch ${batchIndex + 1}: ${response.status}`);
-          continue;
+          console.error(`❌ Batch HTTP ${response.status}`);
+          if (response.status === 429) sawRateLimit = true;
+          if (isRetryable(response.status) && attempt < MAX_RETRIES) {
+            return { processed: 0, failed: 0, skipped: 0, retryItems: batch, sawRateLimit };
+          }
+          return { processed: 0, failed: batch.length, skipped: 0, retryItems: [], sawRateLimit };
         }
 
-        const data = await response.json() as { responses: Array<{ id: string; status: number; body?: unknown }> };
+        const data = await response.json() as {
+          responses: Array<{ id: string; status: number; body?: { error?: { code?: string; message?: string } } }>
+        };
 
-        // Count successes and failures in this batch
+        let processed = 0;
+        let failed = 0;
+        let skipped = 0;
+        const retryItems: typeof validMessages = [];
+
         for (const res of data.responses) {
+          const msgIndex = parseInt(res.id, 10);
+          const msg = batch[msgIndex];
+
           if (res.status >= 200 && res.status < 300) {
-            totalProcessed++;
+            processed++;
+          } else if (res.status === 404) {
+            // Message deleted on server - skip permanently
+            console.warn(`⚠️ ${msg?.externalMessageId?.slice(-8)} 404 - deleted on server`);
+            skipped++;
+          } else if (isRetryable(res.status) && attempt < MAX_RETRIES) {
+            // Transient error - retry
+            if (res.status === 429) sawRateLimit = true;
+            if (msg) retryItems.push(msg);
           } else {
-            totalFailed++;
-            errors.push(`Message failed: ${res.status}`);
+            // Permanent failure
+            if (res.status === 429) sawRateLimit = true;
+            const code = res.body?.error?.code || 'Unknown';
+            console.error(`❌ ${msg?.externalMessageId?.slice(-8)} (${res.status}): ${code}`);
+            errors.push(`${res.status}: ${code}`);
+            failed++;
           }
         }
 
-        console.log(`✅ Batch ${batchIndex + 1}/${batches.length}: ${batch.length} processed`);
-
-        // Delay before next batch (except for last batch)
-        if (batchIndex < batches.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
-        }
+        return { processed, failed, skipped, retryItems, sawRateLimit };
       } catch (error) {
-        console.error(`❌ Batch ${batchIndex + 1} error:`, error);
-        totalFailed += batch.length;
-        errors.push(`Batch ${batchIndex + 1}: ${String(error)}`);
+        console.error(`❌ Network error:`, error);
+        if (attempt < MAX_RETRIES) {
+          return { processed: 0, failed: 0, skipped: 0, retryItems: batch, sawRateLimit };
+        }
+        return { processed: 0, failed: batch.length, skipped: 0, retryItems: [], sawRateLimit };
+      }
+    };
+
+    const batches: typeof validMessages[] = [];
+    for (let i = 0; i < validMessages.length; i += BATCH_SIZE) {
+      batches.push(validMessages.slice(i, i + BATCH_SIZE));
+    }
+
+    for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
+      let currentBatch = batches[batchIdx];
+
+      for (let attempt = 0; attempt <= MAX_RETRIES && currentBatch.length > 0; attempt++) {
+        if (attempt > 0) {
+          const delay = RETRY_DELAYS[attempt - 1] || 2000;
+          console.log(`🔄 Retry ${attempt}/${MAX_RETRIES}: ${currentBatch.length} msgs after ${delay}ms`);
+          await new Promise(r => setTimeout(r, delay));
+        }
+
+        const result = await processBatch(currentBatch, attempt);
+        totalProcessed += result.processed;
+        totalFailed += result.failed;
+        totalSkipped += result.skipped;
+        if (result.sawRateLimit) hadRateLimiting = true;
+        currentBatch = result.retryItems;
+      }
+
+      if (currentBatch.length > 0) {
+        console.error(`❌ ${currentBatch.length} msgs failed after ${MAX_RETRIES} retries`);
+        totalFailed += currentBatch.length;
+      }
+
+      if (batchIdx < batches.length - 1) {
+        await new Promise(r => setTimeout(r, BATCH_DELAY_MS));
       }
     }
 
-    console.log(`📦 Batch sync complete: ${totalProcessed} success, ${totalFailed} failed`);
+    const icon = totalFailed === 0 ? '✅' : '⚠️';
+    console.log(`${icon} Batch sync: ${totalProcessed} ok, ${totalFailed} failed, ${totalSkipped} skipped${hadRateLimiting ? ' (rate limited)' : ''}`);
 
     return {
       success: totalFailed === 0,
       processed: totalProcessed,
       failed: totalFailed,
-      errors: errors.length > 0 ? errors.slice(0, 5) : undefined, // Limit errors to avoid huge payloads
+      skipped: totalSkipped,
+      hadRateLimiting,
+      errors: errors.length > 0 ? errors.slice(0, 10) : undefined,
     };
   },
 });

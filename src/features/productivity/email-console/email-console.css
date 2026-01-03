@@ -120,6 +120,8 @@
   width: var(--prod-resize-handle);
   cursor: col-resize;
   position: relative;
+  border-radius: var(--radius-full);
+  transition: background var(--prod-transition-fast);
 
   /* Invisible - no background, just the hit area */
 }
@@ -127,20 +129,20 @@
 .ft-email__resize-handle::after {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: var(--prod-space-sm);
+  bottom: var(--prod-space-sm);
   left: 50%;
   width: 1px;
   background: transparent;
-  transition: background 0.15s ease;
+  transition: background var(--prod-transition-fast);
 }
 
 .ft-email__resize-handle:hover {
-  background: rgb(255 255 255 / 100%);
+  background: var(--prod-resize-hover-bg);
 }
 
 .ft-email__resize-handle:hover::after {
-  background: rgb(0 0 0 / 15%);
+  background: var(--prod-resize-line);
 }
 
 
@@ -478,6 +480,11 @@
   color: var(--prod-unread-text);
 }
 
+/* Orange bar on left edge for unread emails */
+.ft-email__thread-item--unread {
+  box-shadow: inset 4px 0 0 var(--prod-unread-dot);
+}
+
 
 .ft-email__thread-date {
   font-size: var(--prod-text-micro);
@@ -562,7 +569,8 @@
    ───────────────────────────────────────────────────────────────────────────── */
 
 .ft-email__loading,
-.ft-email__empty {
+.ft-email__empty,
+.ft-email__error {
   padding: var(--prod-space-3xl);
   text-align: center;
   color: var(--prod-text-faint);

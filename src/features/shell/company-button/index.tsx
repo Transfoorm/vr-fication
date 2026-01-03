@@ -29,6 +29,7 @@ import { formatSubscriptionStatus, type SubscriptionStatus } from '@/fuse/consta
 export default function CompanyButton() {
   const user = useFuse((s) => s.user);
   const navigate = useFuse((s) => s.navigate);
+  const setShadowKingActive = useFuse((s) => s.setShadowKingActive);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuClosing, setIsMenuClosing] = useState(false);
   const [showCountrySelector, setShowCountrySelector] = useState(false);
@@ -347,7 +348,16 @@ export default function CompanyButton() {
               <div className="ft-company-button-menu-header-text">
                 <T.body size="sm">Your Business Info</T.body>
                 {user?.setupStatus !== 'complete' && (
-                  <T.caption size="xs" className="ft-company-button-menu-header-status">Setup incomplete</T.caption>
+                  <button
+                    className="ft-company-button-menu-header-status"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeMenu();
+                      setShadowKingActive(true);
+                    }}
+                  >
+                    <T.caption size="xs">Setup incomplete (click here)</T.caption>
+                  </button>
                 )}
               </div>
             </div>

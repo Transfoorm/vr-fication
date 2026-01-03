@@ -43,6 +43,7 @@ export {
   type ProductivityActions,
   type ProductivityData,
   type ProductivityStore,
+  type EmailBodyStatus,
 } from './productivity';
 
 export {

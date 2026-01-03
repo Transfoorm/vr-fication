@@ -399,6 +399,10 @@
   --prod-unread-text: #ec540e;                                   /* Unread sender orange */
   --prod-unread-dot: #f97550;                                    /* Unread indicator dot */
 
+  /* Resize handles */
+  --prod-resize-hover-bg: #fff;                                  /* Resize handle hover background */
+  --prod-resize-line: rgb(0 0 0 / 15%);                          /* Resize divider line */
+
 }
 
 
@@ -833,6 +837,10 @@
   --prod-section-header: #2a2a2a;                                /* Section headers (Today, Yesterday) */
   --prod-unread-text: #ff8a60;                                   /* Unread sender orange */
   --prod-unread-dot: #ff7a52;                                    /* Unread indicator dot */
+
+  /* Resize handles */
+  --prod-resize-hover-bg: #1a1a1a;                               /* Resize handle hover background (dark) */
+  --prod-resize-line: rgb(255 255 255 / 20%);                    /* Resize divider line (lighter for dark) */
 
 }
 

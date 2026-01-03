@@ -18,9 +18,16 @@
 │  - Fetch is triggered by parent (useEmailBodySync in index.tsx)       │
 │  - This component only displays - receives displayedMessageId         │
 │  - Old email stays visible until new body is ready                    │
+│                                                                        │
+│  LOADING STATES:                                                       │
+│  - loading: "Loading email..."                                        │
+│  - rate_limited: "Loading email (retrying...)"                        │
+│  - error: "Failed to load email"                                      │
+│  - loaded: Shows email body                                           │
 └────────────────────────────────────────────────────────────────────────*/
 
 import { useFuse } from '@/store/fuse';
+import { T } from '@/vr';
 import type { Id } from '@/convex/_generated/dataModel';
 
 interface MessageBodyProps {
@@ -32,14 +39,50 @@ interface MessageBodyProps {
  *
  * Pure display component. Fetch triggered by parent.
  * The iframe is a sandbox - it never affects parent layout.
+ * Shows loading/error states based on emailBodyStatus.
  */
 export function MessageBody({ messageId }: MessageBodyProps) {
   // Read from FUSE (fetch triggered by parent)
   const htmlContent = useFuse((state) => state.productivity.emailBodies?.[messageId]);
+  const status = useFuse((state) => state.productivity.emailBodyStatus?.[messageId]);
 
-  // No content yet - render nothing (no loading message)
-  if (!htmlContent) {
+  // Loading state - show feedback
+  if (status === 'loading') {
+    return (
+      <div className="ft-email__loading">
+        <T.body>Loading email...</T.body>
+      </div>
+    );
+  }
+
+  if (status === 'rate_limited') {
+    return (
+      <div className="ft-email__loading">
+        <T.body>Loading email (retrying...)</T.body>
+      </div>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="ft-email__error">
+        <T.body>Failed to load email. Try selecting another email.</T.body>
+      </div>
+    );
+  }
+
+  // No content and no status - not yet triggered
+  if (!htmlContent && !status) {
     return null;
+  }
+
+  // Empty content but loaded (404 case) - message deleted
+  if (!htmlContent && status === 'loaded') {
+    return (
+      <div className="ft-email__empty">
+        <T.body>This message is no longer available.</T.body>
+      </div>
+    );
   }
 
   // Email HTML with internal scroll + styled scrollbar

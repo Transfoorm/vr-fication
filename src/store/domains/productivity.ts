@@ -22,6 +22,9 @@ import type { ProductivityEmail } from '@/features/productivity/email-console/ty
 
 export type EmailViewMode = 'live' | 'impact';
 
+// Per-message body fetch status (idle = never requested)
+export type EmailBodyStatus = 'loading' | 'loaded' | 'rate_limited' | 'error';
+
 export interface ProductivityData {
   email?: ProductivityEmail;
   calendar: Record<string, unknown>[];
@@ -44,12 +47,16 @@ export interface ProductivitySlice {
   tasks: Record<string, unknown>[];
   // Email bodies (hydrated on-demand, keyed by messageId)
   emailBodies: Record<string, string>;
+  // Email body fetch status (per-message: loading/loaded/rate_limited/error)
+  emailBodyStatus: Record<string, EmailBodyStatus>;
   // LRU order tracking (oldest first, newest last)
   emailBodyOrder: string[];
   // UI preferences (persisted)
   emailViewMode: EmailViewMode;
   // Pending read status updates (skip sync for these messages)
   pendingReadUpdates: Set<string>;
+  // Auto-mark exempt IDs (never auto-mark these again this session)
+  autoMarkExemptIds: Set<string>;
   // ADP Coordination (REQUIRED)
   status: ADPStatus;
   lastFetchedAt?: number;
@@ -59,8 +66,15 @@ export interface ProductivitySlice {
 export interface ProductivityActions {
   hydrateProductivity: (data: Partial<ProductivityData>, source?: ADPSource) => void;
   hydrateEmailBody: (messageId: string, htmlContent: string) => void;
+  setEmailBodyStatus: (messageId: string, status: EmailBodyStatus | null) => void;
   updateEmailReadStatus: (messageId: string, isRead: boolean) => void;
+  batchUpdateEmailReadStatus: (messageIds: string[], isRead: boolean) => void;
   clearPendingReadUpdate: (messageId: string) => void;
+  batchClearPendingReadUpdates: (messageIds: string[]) => void;
+  addAutoMarkExempt: (messageId: string) => void;
+  addAutoMarkExemptBatch: (messageIds: string[]) => void;
+  removeAutoMarkExempt: (messageId: string) => void;
+  removeAutoMarkExemptBatch: (messageIds: string[]) => void;
   clearProductivity: () => void;
   setEmailViewMode: (mode: EmailViewMode) => void;
 }
@@ -77,12 +91,16 @@ const initialProductivityState: ProductivitySlice = {
   tasks: [],
   // Email bodies (on-demand hydration)
   emailBodies: {},
+  // Email body fetch status (per-message)
+  emailBodyStatus: {},
   // LRU order (oldest first)
   emailBodyOrder: [],
   // UI preferences
   emailViewMode: 'live', // Default to Live mode (traditional Outlook-style)
   // Pending read status updates (protected from sync overwrite)
   pendingReadUpdates: new Set(),
+  // Auto-mark exempt IDs
+  autoMarkExemptIds: new Set(),
   // ADP Coordination
   status: 'idle',
   lastFetchedAt: undefined,
@@ -103,13 +121,59 @@ export const createProductivitySlice: StateCreator<
 
   hydrateProductivity: (data, source = 'WARP') => {
     const start = fuseTimer.start('hydrateProductivity');
-    set((state) => ({
-      ...state,
-      ...data,
-      status: 'hydrated',
-      lastFetchedAt: Date.now(),
-      source,
-    }));
+    set((state) => {
+      // CRITICAL: Preserve isRead status for messages with pending updates
+      // This prevents Convex live queries from overwriting optimistic UI updates
+      let finalEmail = data.email;
+      let protectedCount = 0;
+
+      const pendingSize = state.pendingReadUpdates.size;
+      const pendingIds = [...state.pendingReadUpdates].map(id => id.slice(-8)).join(', ');
+
+      // UNCONDITIONAL log to trace hydration calls
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🌊 HYDRATE from ${source}: ${data.email?.messages?.length ?? 0} msgs, pending=${pendingSize} [${pendingIds}]`);
+      }
+
+      if (data.email?.messages && pendingSize > 0) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🛡️ Checking protection: ${pendingSize} pending updates`);
+        }
+        const protectedMessages = data.email.messages.map((msg) => {
+          if (state.pendingReadUpdates.has(msg._id)) {
+            // Find current local state for this message
+            const localMsg = state.email?.messages?.find((m) => m._id === msg._id);
+            if (localMsg) {
+              if (localMsg.isRead !== msg.isRead) {
+                // Server has stale data - preserve local isRead
+                protectedCount++;
+                if (process.env.NODE_ENV === 'development') {
+                  console.log(`🛡️ Protected ${msg._id.slice(-8)}: local=${localMsg.isRead}, server=${msg.isRead}`);
+                }
+                return { ...msg, isRead: localMsg.isRead };
+              } else if (process.env.NODE_ENV === 'development') {
+                console.log(`🛡️ No conflict ${msg._id.slice(-8)}: both=${localMsg.isRead}`);
+              }
+            }
+          }
+          return msg;
+        });
+        finalEmail = { ...data.email, messages: protectedMessages };
+
+        if (protectedCount > 0 && process.env.NODE_ENV === 'development') {
+          console.log(`🛡️ FUSE: Protected ${protectedCount} messages from stale sync`);
+        }
+      }
+
+      return {
+        ...state,
+        ...data,
+        email: finalEmail,
+        status: 'hydrated',
+        lastFetchedAt: Date.now(),
+        source,
+      };
+    });
     if (process.env.NODE_ENV === 'development') {
       console.log(`⚡ FUSE: Productivity domain hydrated via ${source}`, {
         email: data.email ? `${data.email.threads?.length || 0} threads, ${data.email.messages?.length || 0} messages` : 'none',
@@ -133,6 +197,10 @@ export const createProductivitySlice: StateCreator<
       const newPending = new Set(state.pendingReadUpdates);
       newPending.add(messageId);
 
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🔒 PENDING ADD: ${messageId.slice(-8)} (now ${newPending.size} pending)`);
+      }
+
       return {
         ...state,
         email: {
@@ -148,7 +216,92 @@ export const createProductivitySlice: StateCreator<
     set((state) => {
       const newPending = new Set(state.pendingReadUpdates);
       newPending.delete(messageId);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🔓 PENDING CLEAR: ${messageId.slice(-8)} (now ${newPending.size} pending)`);
+      }
       return { ...state, pendingReadUpdates: newPending };
+    });
+  },
+
+  // BATCH: Single state update for N messages (scales to 1000+)
+  batchUpdateEmailReadStatus: (messageIds, isRead) => {
+    set((state) => {
+      if (!state.email?.messages) return state;
+
+      const idsSet = new Set(messageIds);
+      const updatedMessages = state.email.messages.map((msg) =>
+        idsSet.has(msg._id) ? { ...msg, isRead } : msg
+      );
+
+      // Add all to pending set
+      const newPending = new Set(state.pendingReadUpdates);
+      for (const id of messageIds) {
+        newPending.add(id);
+      }
+
+      if (process.env.NODE_ENV === 'development') {
+        const ids = messageIds.map(id => id.slice(-8)).join(', ');
+        console.log(`🔒 PENDING BATCH ADD: [${ids}] (now ${newPending.size} pending)`);
+      }
+
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          messages: updatedMessages,
+        },
+        pendingReadUpdates: newPending,
+      };
+    });
+  },
+
+  // BATCH: Clear multiple pending updates at once
+  batchClearPendingReadUpdates: (messageIds) => {
+    set((state) => {
+      const newPending = new Set(state.pendingReadUpdates);
+      for (const id of messageIds) {
+        newPending.delete(id);
+      }
+      if (process.env.NODE_ENV === 'development') {
+        const ids = messageIds.map(id => id.slice(-8)).join(', ');
+        console.log(`🔓 PENDING BATCH CLEAR: [${ids}] (now ${newPending.size} pending)`);
+      }
+      return { ...state, pendingReadUpdates: newPending };
+    });
+  },
+
+  // Auto-mark exempt: prevents auto-mark-as-read for these IDs this session
+  addAutoMarkExempt: (messageId) => {
+    set((state) => {
+      const newExempt = new Set(state.autoMarkExemptIds);
+      newExempt.add(messageId);
+      return { ...state, autoMarkExemptIds: newExempt };
+    });
+  },
+
+  addAutoMarkExemptBatch: (messageIds) => {
+    set((state) => {
+      const newExempt = new Set(state.autoMarkExemptIds);
+      for (const id of messageIds) {
+        newExempt.add(id);
+      }
+      return { ...state, autoMarkExemptIds: newExempt };
+    });
+  },
+
+  removeAutoMarkExempt: (messageId) => {
+    set((state) => {
+      const newExempt = new Set(state.autoMarkExemptIds);
+      newExempt.delete(messageId);
+      return { ...state, autoMarkExemptIds: newExempt };
+    });
+  },
+
+  removeAutoMarkExemptBatch: (messageIds) => {
+    set((state) => {
+      const newExempt = new Set(state.autoMarkExemptIds);
+      for (const id of messageIds) newExempt.delete(id);
+      return { ...state, autoMarkExemptIds: newExempt };
     });
   },
 
@@ -182,6 +335,18 @@ export const createProductivitySlice: StateCreator<
     if (process.env.NODE_ENV === 'development') {
       console.log(`⚡ FUSE: Email body hydrated for ${messageId.slice(-8)} (cache: ${EMAIL_BODY_LRU_CAP} cap)`);
     }
+  },
+
+  setEmailBodyStatus: (messageId, status) => {
+    set((state) => {
+      const newStatus = { ...state.emailBodyStatus };
+      if (status === null) {
+        delete newStatus[messageId];
+      } else {
+        newStatus[messageId] = status;
+      }
+      return { ...state, emailBodyStatus: newStatus };
+    });
   },
 
   clearProductivity: () => {

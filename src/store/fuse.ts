@@ -29,6 +29,7 @@ import {
   fuseTimer,
   type ProductivitySlice,
   type ProductivityData,
+  type EmailBodyStatus,
   type AdminSlice,
   type AdminData,
   type DashboardSlice,
@@ -62,15 +63,7 @@ import type {
 import { THEME_DEFAULTS, STORAGE_KEYS, DOM_ATTRIBUTES } from '@/fuse/constants/coreThemeConfig';
 import type { AvatarOption } from '@/fuse/constants/coreThemeConfig';
 
-// ══════════════════════════════════════════════════════════════════════════════
-// Convex Client
-// ══════════════════════════════════════════════════════════════════════════════
-
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
-// ══════════════════════════════════════════════════════════════════════════════
-// Store Type
-// ══════════════════════════════════════════════════════════════════════════════
 
 interface FuseStore {
   // ─────────────────────────────────────────────────────────────────────────────
@@ -183,8 +176,15 @@ interface FuseStore {
   // ─────────────────────────────────────────────────────────────────────────────
   hydrateProductivity: (data: Partial<ProductivityData>, source?: ADPSource) => void;
   hydrateEmailBody: (messageId: string, htmlContent: string) => void;
+  setEmailBodyStatus: (messageId: string, status: EmailBodyStatus | null) => void;
   updateEmailReadStatus: (messageId: string, isRead: boolean) => void;
+  batchUpdateEmailReadStatus: (messageIds: string[], isRead: boolean) => void;
   clearPendingReadUpdate: (messageId: string) => void;
+  batchClearPendingReadUpdates: (messageIds: string[]) => void;
+  addAutoMarkExempt: (messageId: string) => void;
+  addAutoMarkExemptBatch: (messageIds: string[]) => void;
+  removeAutoMarkExempt: (messageId: string) => void;
+  removeAutoMarkExemptBatch: (messageIds: string[]) => void;
   clearProductivity: () => void;
   setEmailViewMode: (mode: 'live' | 'impact') => void;
 
@@ -212,16 +212,9 @@ interface FuseStore {
   clearSystem: () => void;
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// THE FUSE STORE
-// ══════════════════════════════════════════════════════════════════════════════
-
 export const useFuse = create<FuseStore>()((set, get) => {
   return {
-    // ════════════════════════════════════════════════════════════════════════
-    // CORE STATE
-    // ════════════════════════════════════════════════════════════════════════
-
+    // Core State
     user: null,
     genome: null,
     rank: undefined,
@@ -248,11 +241,7 @@ export const useFuse = create<FuseStore>()((set, get) => {
     lastActionTiming: undefined,
     navClickTime: undefined,
 
-    // ════════════════════════════════════════════════════════════════════════
-    // 🔱 SOVEREIGN ROUTER STATE - FUSE 6.0
-    // Note: Route is set to 'dashboard' here for SSR. On client, the store
-    // is patched immediately below (after create) with the correct route.
-    // ════════════════════════════════════════════════════════════════════════
+    // Sovereign Router (route patched on client after create)
     sovereign: {
       route: 'dashboard',
       history: [],
@@ -261,10 +250,7 @@ export const useFuse = create<FuseStore>()((set, get) => {
       sidebarCollapsed: false,
     },
 
-    // ════════════════════════════════════════════════════════════════════════
-    // DOMAIN SLICES (state only - actions are spread below)
-    // ════════════════════════════════════════════════════════════════════════
-
+    // Domain Slices
     productivity: {
       email: undefined,
       calendar: [],
@@ -272,9 +258,11 @@ export const useFuse = create<FuseStore>()((set, get) => {
       bookings: [],
       tasks: [],
       emailBodies: {},
+      emailBodyStatus: {},
       emailBodyOrder: [],
       emailViewMode: 'live',
       pendingReadUpdates: new Set(),
+      autoMarkExemptIds: new Set(),
       status: 'idle',
       lastFetchedAt: undefined,
       source: undefined,
@@ -356,40 +344,65 @@ export const useFuse = create<FuseStore>()((set, get) => {
       source: undefined,
     },
 
-    // ════════════════════════════════════════════════════════════════════════
-    // DOMAIN ACTIONS
-    // ════════════════════════════════════════════════════════════════════════
-
-    // Productivity
+    // Domain Actions
     hydrateProductivity: (data, source = 'WARP') => {
       const start = fuseTimer.start('hydrateProductivity');
-      set((state) => ({
-        productivity: {
-          ...state.productivity,
-          ...data,
-          status: 'hydrated',  // TTTS-1 compliant
-          lastFetchedAt: Date.now(),
-          source,
-        },
-      }));
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`📅 FUSE: Productivity hydrated via ${source}`, data);
-      }
+      set((state) => {
+        let mergedEmail = data.email;
+        const pending = state.productivity.pendingReadUpdates;
+
+        if (data.email?.messages && pending.size > 0) {
+          const currentMessages = state.productivity.email?.messages || [];
+          mergedEmail = {
+            ...data.email,
+            messages: data.email.messages.map((incoming) => {
+              if (pending.has(incoming._id)) {
+                const local = currentMessages.find((m) => m._id === incoming._id);
+                if (local && local.isRead !== incoming.isRead) {
+                  return { ...incoming, isRead: local.isRead };
+                }
+              }
+              return incoming;
+            }),
+          };
+        }
+
+        return {
+          productivity: {
+            ...state.productivity,
+            ...data,
+            email: mergedEmail ?? data.email,
+            status: 'hydrated',
+            lastFetchedAt: Date.now(),
+            source,
+          },
+        };
+      });
       fuseTimer.end('hydrateProductivity', start);
     },
     hydrateEmailBody: (messageId, htmlContent) => {
       set((state) => ({
         productivity: {
           ...state.productivity,
-          emailBodies: {
-            ...state.productivity.emailBodies,
-            [messageId]: htmlContent,
-          },
+          emailBodies: { ...state.productivity.emailBodies, [messageId]: htmlContent },
         },
       }));
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`⚡ FUSE: Email body hydrated for ${messageId.slice(-8)}`);
-      }
+    },
+    setEmailBodyStatus: (messageId, status) => {
+      set((state) => {
+        const newStatus = { ...state.productivity.emailBodyStatus };
+        if (status === null) {
+          delete newStatus[messageId];
+        } else {
+          newStatus[messageId] = status;
+        }
+        return {
+          productivity: {
+            ...state.productivity,
+            emailBodyStatus: newStatus,
+          },
+        };
+      });
     },
     updateEmailReadStatus: (messageId, isRead) => {
       set((state) => {
@@ -417,6 +430,61 @@ export const useFuse = create<FuseStore>()((set, get) => {
         return { productivity: { ...state.productivity, pendingReadUpdates: newPending } };
       });
     },
+    batchUpdateEmailReadStatus: (messageIds, isRead) => {
+      set((state) => {
+        if (!state.productivity.email?.messages) return state;
+        const idsSet = new Set(messageIds);
+        const newPending = new Set(state.productivity.pendingReadUpdates);
+        for (const id of messageIds) newPending.add(id);
+        return {
+          productivity: {
+            ...state.productivity,
+            email: {
+              ...state.productivity.email,
+              messages: state.productivity.email.messages.map((msg) =>
+                idsSet.has(msg._id) ? { ...msg, isRead } : msg
+              ),
+            },
+            pendingReadUpdates: newPending,
+          },
+        };
+      });
+    },
+    batchClearPendingReadUpdates: (messageIds) => {
+      set((state) => {
+        const newPending = new Set(state.productivity.pendingReadUpdates);
+        for (const id of messageIds) newPending.delete(id);
+        return { productivity: { ...state.productivity, pendingReadUpdates: newPending } };
+      });
+    },
+    addAutoMarkExempt: (messageId) => {
+      set((state) => {
+        const newExempt = new Set(state.productivity.autoMarkExemptIds);
+        newExempt.add(messageId);
+        return { productivity: { ...state.productivity, autoMarkExemptIds: newExempt } };
+      });
+    },
+    addAutoMarkExemptBatch: (messageIds) => {
+      set((state) => {
+        const newExempt = new Set(state.productivity.autoMarkExemptIds);
+        for (const id of messageIds) newExempt.add(id);
+        return { productivity: { ...state.productivity, autoMarkExemptIds: newExempt } };
+      });
+    },
+    removeAutoMarkExempt: (messageId) => {
+      set((state) => {
+        const newExempt = new Set(state.productivity.autoMarkExemptIds);
+        newExempt.delete(messageId);
+        return { productivity: { ...state.productivity, autoMarkExemptIds: newExempt } };
+      });
+    },
+    removeAutoMarkExemptBatch: (messageIds: string[]) => {
+      set((state) => {
+        const newExempt = new Set(state.productivity.autoMarkExemptIds);
+        for (const id of messageIds) newExempt.delete(id);
+        return { productivity: { ...state.productivity, autoMarkExemptIds: newExempt } };
+      });
+    },
     clearProductivity: () => {
       const start = fuseTimer.start('clearProductivity');
       set({
@@ -427,9 +495,11 @@ export const useFuse = create<FuseStore>()((set, get) => {
           bookings: [],
           tasks: [],
           emailBodies: {},
+          emailBodyStatus: {},
           emailBodyOrder: [],
           emailViewMode: 'live',
           pendingReadUpdates: new Set(),
+          autoMarkExemptIds: new Set(),
           status: 'idle',
           lastFetchedAt: undefined,
           source: undefined,
@@ -438,32 +508,15 @@ export const useFuse = create<FuseStore>()((set, get) => {
       fuseTimer.end('clearProductivity', start);
     },
     setEmailViewMode: (mode) => {
-      set((state) => ({
-        productivity: {
-          ...state.productivity,
-          emailViewMode: mode,
-        },
-      }));
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`⚡ FUSE: Email view mode changed to ${mode}`);
-      }
+      set((state) => ({ productivity: { ...state.productivity, emailViewMode: mode } }));
     },
 
     // Admin
     hydrateAdmin: (data, source = 'WARP') => {
       const start = fuseTimer.start('hydrateAdmin');
       set((state) => ({
-        admin: {
-          ...state.admin,
-          ...data,
-          status: 'hydrated',  // TTTS-1 compliant
-          lastFetchedAt: Date.now(),
-          source,
-        },
+        admin: { ...state.admin, ...data, status: 'hydrated', lastFetchedAt: Date.now(), source },
       }));
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`👑 FUSE: Admin hydrated via ${source}`, data);
-      }
       fuseTimer.end('hydrateAdmin', start);
     },
     clearAdmin: () => {
@@ -485,17 +538,8 @@ export const useFuse = create<FuseStore>()((set, get) => {
     hydrateDashboard: (data, source = 'WARP') => {
       const start = fuseTimer.start('hydrateDashboard');
       set((state) => ({
-        dashboard: {
-          ...state.dashboard,
-          ...data,
-          status: 'hydrated',  // TTTS-1 compliant
-          lastFetchedAt: Date.now(),
-          source,
-        },
+        dashboard: { ...state.dashboard, ...data, status: 'hydrated', lastFetchedAt: Date.now(), source },
       }));
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`📊 FUSE: Dashboard hydrated via ${source}`, data);
-      }
       fuseTimer.end('hydrateDashboard', start);
     },
     clearDashboard: () => {
@@ -543,9 +587,6 @@ export const useFuse = create<FuseStore>()((set, get) => {
           source,
         },
       }));
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`💰 FUSE: Finance hydrated via ${source}`, data);
-      }
       fuseTimer.end('hydrateFinance', start);
     },
     clearFinance: () => {
@@ -587,9 +628,6 @@ export const useFuse = create<FuseStore>()((set, get) => {
           source,
         },
       }));
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`👥 FUSE: Clients hydrated via ${source}`, data);
-      }
       fuseTimer.end('hydrateClients', start);
     },
     clearClients: () => {
@@ -620,9 +658,6 @@ export const useFuse = create<FuseStore>()((set, get) => {
           source,
         },
       }));
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`📋 FUSE: Projects hydrated via ${source}`, data);
-      }
       fuseTimer.end('hydrateProjects', start);
     },
     clearProjects: () => {
@@ -652,9 +687,6 @@ export const useFuse = create<FuseStore>()((set, get) => {
           source,
         },
       }));
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`⚙️ FUSE: Settings hydrated via ${source}`, data);
-      }
       fuseTimer.end('hydrateSettings', start);
     },
     clearSettings: () => {
@@ -684,9 +716,6 @@ export const useFuse = create<FuseStore>()((set, get) => {
           source,
         },
       }));
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🔧 FUSE: System hydrated via ${source}`, data);
-      }
       fuseTimer.end('hydrateSystem', start);
     },
     clearSystem: () => {
@@ -704,10 +733,7 @@ export const useFuse = create<FuseStore>()((set, get) => {
       fuseTimer.end('clearSystem', start);
     },
 
-    // ════════════════════════════════════════════════════════════════════════
-    // CORE ACTIONS
-    // ════════════════════════════════════════════════════════════════════════
-
+    // Core Actions
     setUser: (user: FuseUser | null) => {
       const start = fuseTimer.start('setUser');
 
@@ -836,9 +862,6 @@ export const useFuse = create<FuseStore>()((set, get) => {
     hydrateGenome: (data: GenomeData) => {
       const start = fuseTimer.start('hydrateGenome');
       set({ genome: data, lastActionTiming: performance.now() });
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🧬 FUSE: Genome hydrated', data);
-      }
       fuseTimer.end('hydrateGenome', start);
     },
 
@@ -1199,10 +1222,7 @@ export const useFuse = create<FuseStore>()((set, get) => {
       set({ navClickTime: undefined });
     },
 
-    // ════════════════════════════════════════════════════════════════════════
-    // 🔱 SOVEREIGN ROUTER ACTIONS - FUSE 6.0
-    // ════════════════════════════════════════════════════════════════════════
-
+    // Sovereign Router Actions
     navigate: (route: string) => {
       const start = fuseTimer.start('navigate');
       const current = get().sovereign.route;
@@ -1365,32 +1385,15 @@ export const useFuse = create<FuseStore>()((set, get) => {
   };
 });
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 🔱 FOUC Prevention: Patch initial route on client immediately after store creation
-// ══════════════════════════════════════════════════════════════════════════════
-// This runs ONCE when the module is imported on the CLIENT.
-// The inline script in layout.tsx has already saved the URL to localStorage.
-// We read it here and patch the store BEFORE any component renders.
-
+// FOUC Prevention: Patch initial route on client immediately after store creation
 if (typeof window !== 'undefined') {
   const initialRoute = localStorage.getItem('fuse-initial-route');
   if (initialRoute && initialRoute !== 'dashboard') {
-    // Patch the store synchronously before any React render
     useFuse.setState((state) => ({
-      sovereign: {
-        ...state.sovereign,
-        route: initialRoute,
-      },
+      sovereign: { ...state.sovereign, route: initialRoute },
     }));
-    console.log(`🔱 FUSE: Initial route patched to "${initialRoute}" from localStorage`);
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// Type Export for consumers
-// ══════════════════════════════════════════════════════════════════════════════
-
 export type { FuseStore };
-
-// 🔱 Re-export Sovereign Router types for convenience
 export type { DomainRoute, NavigationSlice } from './domains';
