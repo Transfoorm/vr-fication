@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
+
 interface ContextMenuState {
   x: number;
   y: number;
@@ -21,15 +23,35 @@ export function EmailContextMenu({
   onClose,
   onAction,
 }: EmailContextMenuProps) {
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Native event listener for extra reliability - React synthetic events
+  // can sometimes have timing issues with context menu prevention
+  useEffect(() => {
+    const menu = menuRef.current;
+    if (!menu) return;
+
+    const preventContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    menu.addEventListener('contextmenu', preventContextMenu, true);
+    return () => menu.removeEventListener('contextmenu', preventContextMenu, true);
+  }, []);
+
   return (
     <>
       <div
         className="ft-email__context-backdrop"
         onClick={onClose}
+        onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
       />
       <div
+        ref={menuRef}
         className="ft-email__context-menu"
         style={{ '--ctx-x': `${contextMenu.x}px`, '--ctx-y': `${contextMenu.y}px` } as React.CSSProperties}
+        onContextMenuCapture={(e) => { e.preventDefault(); e.stopPropagation(); }}
       >
         {/* MAILBOX SIDEBAR - folder actions */}
         {contextMenu.area === 'mailbox' && (
@@ -38,6 +60,7 @@ export function EmailContextMenu({
             <button onClick={() => onAction('markAllRead')}>Mark All as Read</button>
             <hr />
             <button onClick={() => onAction('refresh')}>Refresh</button>
+            <button onClick={() => onAction('resetLayout')}>Reset Layout</button>
           </>
         )}
 

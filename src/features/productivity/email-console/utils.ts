@@ -44,15 +44,39 @@ export function formatThreadDate(timestamp: number): string {
   }
 }
 
-// localStorage keys for persisted column widths
-export const STORAGE_KEY_MAILBOX = 'email-column-mailbox';
-export const STORAGE_KEY_THREADS = 'email-column-threads';
+// localStorage keys for persisted column widths (per mode)
+export const STORAGE_KEY_MAILBOX_FULL = 'email-column-mailbox-full';
+export const STORAGE_KEY_THREADS_FULL = 'email-column-threads-full';
+export const STORAGE_KEY_MAILBOX_CENTERED = 'email-column-mailbox-centered';
+export const STORAGE_KEY_THREADS_CENTERED = 'email-column-threads-centered';
+
+// Default column widths per mode
+export const DEFAULTS = {
+  full: { mailbox: 300, threads: 670 },
+  constrained: { mailbox: 200, threads: 450 },
+} as const;
+
+/** Get storage keys for a mode */
+export function getStorageKeys(mode: 'full' | 'constrained') {
+  return mode === 'full'
+    ? { mailbox: STORAGE_KEY_MAILBOX_FULL, threads: STORAGE_KEY_THREADS_FULL }
+    : { mailbox: STORAGE_KEY_MAILBOX_CENTERED, threads: STORAGE_KEY_THREADS_CENTERED };
+}
 
 /** Get saved width from localStorage (SSR-safe) */
 export function getSavedWidth(key: string, defaultValue: number): number {
   if (typeof window === 'undefined') return defaultValue;
   const saved = localStorage.getItem(key);
   return saved ? parseInt(saved, 10) : defaultValue;
+}
+
+/** Reset column widths to defaults for a mode */
+export function resetColumnWidths(mode: 'full' | 'constrained'): void {
+  if (typeof window === 'undefined') return;
+  const keys = getStorageKeys(mode);
+  const defaults = DEFAULTS[mode];
+  localStorage.setItem(keys.mailbox, String(defaults.mailbox));
+  localStorage.setItem(keys.threads, String(defaults.threads));
 }
 
 /** Standard canonical folder types */

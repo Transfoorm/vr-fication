@@ -16,8 +16,9 @@ import { useEmailActions } from './useEmailActions';
 import { useViewportPrefetch } from './useViewportPrefetch';
 import {
   getSavedWidth,
-  STORAGE_KEY_MAILBOX,
-  STORAGE_KEY_THREADS,
+  getStorageKeys,
+  DEFAULTS,
+  resetColumnWidths,
   buildFolderTree,
   computeFolderCounts,
   filterMessages,
@@ -43,12 +44,26 @@ export function EmailConsole() {
     }
   }, [searchParams]);
 
-  // Column widths - initialized from localStorage, persisted on resize
-  const [mailboxWidth, setMailboxWidth] = useState(() => getSavedWidth(STORAGE_KEY_MAILBOX, 180));
-  const [threadsWidth, setThreadsWidth] = useState<number | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const saved = localStorage.getItem(STORAGE_KEY_THREADS);
-    return saved ? parseInt(saved, 10) : null;
+  // Content width mode - persisted to localStorage (declare early for column init)
+  const [contentWidth, setContentWidth] = useState<'full' | 'constrained'>(() => {
+    if (typeof window === 'undefined') return 'full';
+    return (localStorage.getItem('email-content-width') as 'full' | 'constrained') || 'full';
+  });
+
+  // Column widths - initialized from localStorage per mode
+  const [mailboxWidth, setMailboxWidth] = useState(() => {
+    const mode = typeof window !== 'undefined'
+      ? (localStorage.getItem('email-content-width') as 'full' | 'constrained') || 'full'
+      : 'full';
+    const keys = getStorageKeys(mode);
+    return getSavedWidth(keys.mailbox, DEFAULTS[mode].mailbox);
+  });
+  const [threadsWidth, setThreadsWidth] = useState<number>(() => {
+    const mode = typeof window !== 'undefined'
+      ? (localStorage.getItem('email-content-width') as 'full' | 'constrained') || 'full'
+      : 'full';
+    const keys = getStorageKeys(mode);
+    return getSavedWidth(keys.threads, DEFAULTS[mode].threads);
   });
 
   // Get data from FUSE (Golden Bridge pattern)
@@ -119,16 +134,25 @@ export function EmailConsole() {
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
 
-  // Content width mode - persisted to localStorage
-  const [contentWidth, setContentWidth] = useState<'full' | 'constrained'>(() => {
-    if (typeof window === 'undefined') return 'full';
-    return (localStorage.getItem('email-content-width') as 'full' | 'constrained') || 'full';
-  });
-
+  // Handle width mode change - switches column widths to match mode
   const handleWidthChange = (value: string) => {
-    const width = value as 'full' | 'constrained';
-    setContentWidth(width);
-    localStorage.setItem('email-content-width', width);
+    const newMode = value as 'full' | 'constrained';
+
+    // Save current widths to current mode before switching
+    const currentKeys = getStorageKeys(contentWidth);
+    localStorage.setItem(currentKeys.mailbox, String(mailboxWidth));
+    localStorage.setItem(currentKeys.threads, String(threadsWidth));
+
+    // Load widths for new mode
+    const newKeys = getStorageKeys(newMode);
+    const newMailbox = getSavedWidth(newKeys.mailbox, DEFAULTS[newMode].mailbox);
+    const newThreads = getSavedWidth(newKeys.threads, DEFAULTS[newMode].threads);
+
+    // Switch everything
+    setMailboxWidth(newMailbox);
+    setThreadsWidth(newThreads);
+    setContentWidth(newMode);
+    localStorage.setItem('email-content-width', newMode);
   };
 
   // Handle folder selection (canonical folder)
@@ -251,6 +275,11 @@ export function EmailConsole() {
     setContextMenu({ x: event.clientX, y: event.clientY, area: 'folder', messageId: null, folderId });
   };
 
+  // Handle right-click inside email body iframe (called with raw coordinates)
+  const handleIframeContextMenu = useCallback((x: number, y: number) => {
+    setContextMenu({ x, y, area: 'reading', messageId: null, folderId: null });
+  }, []);
+
   // Build folder tree using utility function
   const { folderTree, getChildFolders, rootFolderIds } = useMemo(
     () => buildFolderTree(allFolders, allMessages),
@@ -276,7 +305,7 @@ export function EmailConsole() {
   );
 
   // Email actions hook
-  const { handleContextAction } = useEmailActions({
+  const { handleContextAction: baseHandleContextAction } = useEmailActions({
     userId,
     contextMenu,
     selectedMessageIds,
@@ -288,6 +317,18 @@ export function EmailConsole() {
     setSelectedFolder,
     triggerManualSync,
   });
+
+  // Wrap context action to handle layout reset locally
+  const handleContextAction = useCallback((action: string) => {
+    if (action === 'resetLayout') {
+      resetColumnWidths(contentWidth);
+      setMailboxWidth(DEFAULTS[contentWidth].mailbox);
+      setThreadsWidth(DEFAULTS[contentWidth].threads);
+      setContextMenu(null);
+      return;
+    }
+    baseHandleContextAction(action);
+  }, [baseHandleContextAction, setContextMenu, contentWidth]);
 
   // Auto-select first message when inbox loads (Outlook Web behavior)
   useEffect(() => {
@@ -534,9 +575,8 @@ export function EmailConsole() {
     if (!container) return;
 
     const startX = e.clientX;
-    const containerRect = container.getBoundingClientRect();
     const startMailboxWidth = mailboxWidth;
-    const startThreadsWidth = threadsWidth ?? containerRect.width * 0.25;
+    const startThreadsWidth = threadsWidth;
 
     // Track the new width during drag
     let newMailboxWidth = startMailboxWidth;
@@ -548,12 +588,31 @@ export function EmailConsole() {
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
 
-      if (handle === 'mailbox') {
-        newMailboxWidth = Math.max(120, Math.min(300, startMailboxWidth + deltaX));
-        container.style.gridTemplateColumns = `${newMailboxWidth}px 12px ${threadsWidth ? threadsWidth + 'px' : '1fr'} 12px 1fr`;
+      if (contentWidth === 'full') {
+        // FULL MODE: Original behavior - no max constraints
+        if (handle === 'mailbox') {
+          newMailboxWidth = Math.max(120, Math.min(300, startMailboxWidth + deltaX));
+          container.style.gridTemplateColumns = `${newMailboxWidth}px 12px ${threadsWidth}px 12px 1fr`;
+        } else {
+          newThreadsWidth = Math.max(150, startThreadsWidth + deltaX);
+          container.style.gridTemplateColumns = `${mailboxWidth}px 12px ${newThreadsWidth}px 12px 1fr`;
+        }
       } else {
-        newThreadsWidth = Math.max(150, startThreadsWidth + deltaX);
-        container.style.gridTemplateColumns = `${mailboxWidth}px 12px ${newThreadsWidth}px 12px 1fr`;
+        // CENTERED MODE: Fixed 1320px container - enforce max limits
+        const CONSTRAINED_WIDTH = 1320;
+        const minReadingPane = 250;
+        const handleSpace = 24;
+
+        if (handle === 'mailbox') {
+          const currentThreads = threadsWidth;
+          const maxMailbox = Math.min(300, CONSTRAINED_WIDTH - handleSpace - currentThreads - minReadingPane);
+          newMailboxWidth = Math.max(120, Math.min(maxMailbox, startMailboxWidth + deltaX));
+          container.style.gridTemplateColumns = `${newMailboxWidth}px 12px ${threadsWidth}px 12px 1fr`;
+        } else {
+          const maxThreads = CONSTRAINED_WIDTH - handleSpace - mailboxWidth - minReadingPane;
+          newThreadsWidth = Math.max(150, Math.min(maxThreads, startThreadsWidth + deltaX));
+          container.style.gridTemplateColumns = `${mailboxWidth}px 12px ${newThreadsWidth}px 12px 1fr`;
+        }
       }
     };
 
@@ -566,13 +625,14 @@ export function EmailConsole() {
       // Remove resizing class to restore iframe pointer events
       container.classList.remove('ft-email__body--resizing');
 
-      // Persist to state and localStorage
+      // Persist to state and localStorage (using mode-specific keys)
+      const keys = getStorageKeys(contentWidth);
       if (handle === 'mailbox') {
         setMailboxWidth(newMailboxWidth);
-        localStorage.setItem(STORAGE_KEY_MAILBOX, String(newMailboxWidth));
+        localStorage.setItem(keys.mailbox, String(newMailboxWidth));
       } else {
         setThreadsWidth(newThreadsWidth);
-        localStorage.setItem(STORAGE_KEY_THREADS, String(newThreadsWidth));
+        localStorage.setItem(keys.threads, String(newThreadsWidth));
       }
     };
 
@@ -580,11 +640,11 @@ export function EmailConsole() {
     document.addEventListener('mouseup', onMouseUp);
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
-  }, [mailboxWidth, threadsWidth]);
+  }, [mailboxWidth, threadsWidth, contentWidth]);
 
   return (
     <div className="ft-email">
-      <header className="ft-email__header">
+      <header className={`ft-email__header ${contentWidth === 'constrained' ? 'ft-email__header--constrained' : ''}`}>
         <div className="ft-email__header-left"><T.body weight="medium">Email</T.body></div>
         <div className="ft-email__header-right">
           <Input.radio
@@ -605,7 +665,7 @@ export function EmailConsole() {
         className={`ft-email__body ${contentWidth === 'constrained' ? 'ft-email__body--constrained' : ''}`}
         ref={containerRef}
         style={{
-          gridTemplateColumns: `${mailboxWidth}px 12px ${threadsWidth ? threadsWidth + 'px' : '1fr'} 12px 1fr`,
+          gridTemplateColumns: `${mailboxWidth}px 12px ${threadsWidth}px 12px 1fr`,
         }}
       >
         <EmailSidebar
@@ -670,7 +730,7 @@ export function EmailConsole() {
                   </div>
                   <hr />
                 </div>
-                <MessageBody messageId={displayedMessageId as Id<'productivity_email_Index'>} />
+                <MessageBody messageId={displayedMessageId as Id<'productivity_email_Index'>} onContextMenu={handleIframeContextMenu} />
               </>
             )}
           </div>

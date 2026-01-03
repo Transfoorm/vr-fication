@@ -52,6 +52,15 @@
   gap: var(--prod-space-md);
 }
 
+/* Constrained mode - FIXED width, centered (matches body) */
+.ft-email__header--constrained {
+  width: var(--layout-constrained-width);
+  min-width: var(--layout-constrained-width);
+  max-width: var(--layout-constrained-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .ft-email__refresh-btn {
   display: flex;
   align-items: center;
@@ -112,8 +121,10 @@
   min-height: 0;
 }
 
-/* Constrained mode - center with max-width */
+/* Constrained mode - FIXED width, centered */
 .ft-email__body--constrained {
+  width: var(--layout-constrained-width);
+  min-width: var(--layout-constrained-width);
   max-width: var(--layout-constrained-width);
   margin-left: auto;
   margin-right: auto;
@@ -722,6 +733,7 @@
   position: fixed;
   inset: 0;
   z-index: 999;
+  background: transparent; /* Invisible but captures all pointer events */
 }
 
 .ft-email__context-menu {
