@@ -47,8 +47,8 @@ export function MessageBody({ messageId, onContextMenu }: MessageBodyProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Read from FUSE (fetch triggered by parent)
-  const htmlContent = useFuse((state) => state.productivity.emailBodies?.[messageId]);
-  const status = useFuse((state) => state.productivity.emailBodyStatus?.[messageId]);
+  const htmlContent = useFuse((state) => state.emailBodyCache.emailBodies?.[messageId]);
+  const status = useFuse((state) => state.emailBodyCache.emailBodyStatus?.[messageId]);
 
   // Listen for postMessage from iframe for context menu
   useEffect(() => {

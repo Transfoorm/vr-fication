@@ -13,6 +13,8 @@ interface ContextMenuState {
 interface EmailContextMenuProps {
   contextMenu: ContextMenuState;
   selectedMessageIds: Set<string>;
+  selectedFolder: string;
+  isInTrash: boolean; // True if viewing trash or a subfolder of trash
   onClose: () => void;
   onAction: (action: string) => void;
 }
@@ -20,9 +22,12 @@ interface EmailContextMenuProps {
 export function EmailContextMenu({
   contextMenu,
   selectedMessageIds,
+  selectedFolder,
+  isInTrash,
   onClose,
   onAction,
 }: EmailContextMenuProps) {
+  void selectedFolder; // Reserved for future folder-specific menu options
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Native event listener for extra reliability - React synthetic events
@@ -58,6 +63,12 @@ export function EmailContextMenu({
           <>
             <button onClick={() => onAction('newFolder')}>New Folder</button>
             <button onClick={() => onAction('markAllRead')}>Mark All as Read</button>
+            {isInTrash && (
+              <>
+                <hr />
+                <button onClick={() => onAction('emptyFolder')}>Empty Folder</button>
+              </>
+            )}
             <hr />
             <button onClick={() => onAction('refresh')}>Refresh</button>
             <button onClick={() => onAction('resetLayout')}>Reset Layout</button>
@@ -88,8 +99,12 @@ export function EmailContextMenu({
             <button onClick={() => onAction('markRead')}>Mark as Read</button>
             <button onClick={() => onAction('markUnread')}>Mark as Unread</button>
             <hr />
-            <button onClick={() => onAction('archive')}>Archive</button>
-            <button onClick={() => onAction('delete')}>Delete</button>
+            {!isInTrash && <button onClick={() => onAction('archive')}>Archive</button>}
+            {isInTrash ? (
+              <button onClick={() => onAction('deleteForever')}>Delete Forever</button>
+            ) : (
+              <button onClick={() => onAction('delete')}>Delete</button>
+            )}
           </>
         )}
 
@@ -112,7 +127,11 @@ export function EmailContextMenu({
             <hr />
             <button onClick={() => onAction('print')}>Print</button>
             <hr />
-            <button onClick={() => onAction('delete')}>Delete</button>
+            {isInTrash ? (
+              <button onClick={() => onAction('deleteForever')}>Delete Forever</button>
+            ) : (
+              <button onClick={() => onAction('delete')}>Delete</button>
+            )}
           </>
         )}
       </div>

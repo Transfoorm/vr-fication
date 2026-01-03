@@ -41,8 +41,8 @@ export function useEmailBodySync(
   const user = useFuse((state) => state.user);
   const hydrateEmailBody = useFuse((state) => state.hydrateEmailBody);
   const setEmailBodyStatus = useFuse((state) => state.setEmailBodyStatus);
-  const emailBodies = useFuse((state) => state.productivity.emailBodies);
-  const emailBodyStatus = useFuse((state) => state.productivity.emailBodyStatus);
+  const emailBodies = useFuse((state) => state.emailBodyCache.emailBodies);
+  const emailBodyStatus = useFuse((state) => state.emailBodyCache.emailBodyStatus);
   const userId = user?.convexId as Id<'admin_users'> | undefined;
 
   // Track active retry timers to cancel on unmount

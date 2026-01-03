@@ -156,10 +156,10 @@ export function EmailMessageList({
                     }}
                     onClick={() => onToggleSection(item.bucket)}
                   >
-                    <span>{item.bucket}</span>
                     <span className={`ft-email__section-chevron ${isCollapsed ? 'ft-email__section-chevron--collapsed' : ''}`}>
                       ›
                     </span>
+                    <span className="ft-email__section-label">{item.bucket}</span>
                   </div>
                 );
               }

@@ -46,6 +46,7 @@ export function useEmailActions({
 }: UseEmailActionsProps) {
   // Email actions from Convex
   const deleteMessage = useAction(api.productivity.email.outlookActions.deleteOutlookMessage);
+  const permanentlyDeleteMessage = useAction(api.productivity.email.outlookPermanentDelete.permanentlyDeleteOutlookMessage);
   const archiveMessage = useAction(api.productivity.email.outlookActions.archiveOutlookMessage);
   const deleteFolder = useAction(api.productivity.email.outlookFolderActions.deleteOutlookFolder);
   const batchSyncReadStatus = useAction(api.productivity.email.outlookActions.batchMarkOutlookReadStatus);
@@ -55,6 +56,9 @@ export function useEmailActions({
   // FUSE actions for instant UI update (no round-trip)
   const batchUpdateEmailReadStatus = useFuse((state) => state.batchUpdateEmailReadStatus);
   const batchClearPendingReadUpdates = useFuse((state) => state.batchClearPendingReadUpdates);
+  const removeEmailMessages = useFuse((state) => state.removeEmailMessages);
+  const removeEmailFolder = useFuse((state) => state.removeEmailFolder);
+  const clearBodiesForMessages = useFuse((state) => state.clearBodiesForMessages);
 
   const handleContextAction = useCallback(async (action: string) => {
     const currentContextMenu = contextMenu;
@@ -83,28 +87,29 @@ export function useEmailActions({
         return;
       }
 
+      const folderId = currentContextMenu.folderId;
       console.log(`🗑️ Deleting folder...`);
 
-      try {
-        const result = await deleteFolder({
-          userId,
-          folderId: currentContextMenu.folderId as Id<'productivity_email_Folders'>,
-        });
+      // 1. INSTANT UI: Remove folder from FUSE immediately
+      removeEmailFolder(folderId);
+      if (selectedSubfolderId === folderId) {
+        setSelectedSubfolderId(null);
+        setSelectedFolder('inbox');
+      }
 
+      // 2. BACKGROUND: Fire API call (fire-and-forget)
+      deleteFolder({
+        userId,
+        folderId: folderId as Id<'productivity_email_Folders'>,
+      }).then((result) => {
         if (result.success) {
-          console.log(`✅ Folder deleted`);
-          if (selectedSubfolderId) {
-            setSelectedSubfolderId(null);
-            setSelectedFolder('inbox');
-          }
+          console.log(`✅ Folder deleted from server`);
         } else {
           console.error(`❌ Failed to delete folder:`, result.error);
-          alert(`Failed to delete folder: ${result.error}`);
         }
-      } catch (error) {
+      }).catch((error) => {
         console.error(`❌ Error deleting folder:`, error);
-        alert(`Error deleting folder: ${error}`);
-      }
+      });
       return;
     }
 
@@ -135,6 +140,71 @@ export function useEmailActions({
       }
 
       setSelectedMessageIds(new Set());
+      return;
+    }
+
+    if (action === 'deleteForever') {
+      if (!userId) {
+        console.error('❌ Cannot permanently delete: No user ID');
+        return;
+      }
+
+      const messageIdsToDelete = [...selectedMessageIds];
+      console.log(`🗑️ Permanently deleting ${messageIdsToDelete.length} message(s)...`);
+
+      // 1. INSTANT UI: Remove from FUSE immediately
+      removeEmailMessages(messageIdsToDelete);
+      clearBodiesForMessages(messageIdsToDelete);
+      setSelectedMessageIds(new Set());
+
+      // 2. BACKGROUND: Fire API calls (fire-and-forget)
+      for (const messageId of messageIdsToDelete) {
+        permanentlyDeleteMessage({
+          userId,
+          messageId: messageId as Id<'productivity_email_Index'>,
+        }).then((result) => {
+          if (result.success) {
+            console.log(`✅ Permanently deleted ${messageId.slice(-8)}`);
+          } else {
+            console.error(`❌ Failed to permanently delete ${messageId.slice(-8)}:`, result.error);
+          }
+        }).catch((error) => {
+          console.error(`❌ Error permanently deleting ${messageId.slice(-8)}:`, error);
+        });
+      }
+      return;
+    }
+
+    if (action === 'emptyFolder') {
+      if (!userId) {
+        console.error('❌ Cannot empty folder: No user ID');
+        return;
+      }
+
+      // Get all messages in current folder
+      const messageIdsToDelete = messages.map(m => m._id);
+      console.log(`🗑️ Permanently deleting all ${messageIdsToDelete.length} message(s) in folder...`);
+
+      // 1. INSTANT UI: Remove from FUSE immediately
+      removeEmailMessages(messageIdsToDelete);
+      clearBodiesForMessages(messageIdsToDelete);
+      setSelectedMessageIds(new Set());
+
+      // 2. BACKGROUND: Fire API calls (fire-and-forget)
+      for (const messageId of messageIdsToDelete) {
+        permanentlyDeleteMessage({
+          userId,
+          messageId: messageId as Id<'productivity_email_Index'>,
+        }).then((result) => {
+          if (result.success) {
+            console.log(`✅ Permanently deleted ${messageId.slice(-8)}`);
+          } else {
+            console.error(`❌ Failed to permanently delete ${messageId.slice(-8)}:`, result.error);
+          }
+        }).catch((error) => {
+          console.error(`❌ Error permanently deleting ${messageId.slice(-8)}:`, error);
+        });
+      }
       return;
     }
 
@@ -301,10 +371,14 @@ export function useEmailActions({
     setSelectedFolder,
     triggerManualSync,
     deleteMessage,
+    permanentlyDeleteMessage,
     archiveMessage,
     deleteFolder,
     batchUpdateEmailReadStatus,
     batchClearPendingReadUpdates,
+    removeEmailMessages,
+    removeEmailFolder,
+    clearBodiesForMessages,
     batchConvexReadStatus,
     batchSyncReadStatus,
     reconcileReadStatus,

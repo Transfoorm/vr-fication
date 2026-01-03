@@ -28,6 +28,7 @@ import {
 import { EmailSidebar } from './EmailSidebar';
 import { EmailMessageList } from './EmailMessageList';
 import { EmailContextMenu } from './EmailContextMenu';
+import { ConfirmModal } from './ConfirmModal';
 import { MessageBody } from './MessageBody';
 import type { EmailFolder } from './types';
 import './email-console.css';
@@ -108,7 +109,7 @@ export function EmailConsole() {
   const [anchorMessageId, setAnchorMessageId] = useState<string | null>(null);
 
   // Read email bodies from FUSE to know when content is ready
-  const emailBodies = useFuse((state) => state.productivity.emailBodies);
+  const emailBodies = useFuse((state) => state.emailBodyCache.emailBodies);
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{
@@ -118,6 +119,16 @@ export function EmailConsole() {
     messageId: string | null;
     folderId: string | null; // For folder context menu
   } | null>(null);
+
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
+
+  // Check if currently viewing trash or a subfolder within trash
+  const isInTrash = selectedFolder === 'trash';
 
   // Collapsed sections state (for thread time buckets)
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
@@ -746,8 +757,50 @@ export function EmailConsole() {
         <EmailContextMenu
           contextMenu={contextMenu}
           selectedMessageIds={selectedMessageIds}
+          selectedFolder={selectedFolder}
+          isInTrash={isInTrash}
           onClose={() => setContextMenu(null)}
-          onAction={handleContextAction}
+          onAction={(action) => {
+            // Intercept destructive actions to show confirmation modal
+            if (action === 'deleteForever') {
+              const count = selectedMessageIds.size;
+              setConfirmModal({
+                title: 'Delete Forever',
+                message: `Are you sure you want to permanently delete ${count} message${count !== 1 ? 's' : ''}? This cannot be undone.`,
+                onConfirm: () => {
+                  // Delete FIRST (instant UI), then close modal
+                  handleContextAction('deleteForever');
+                  setConfirmModal(null);
+                },
+              });
+              setContextMenu(null);
+              return;
+            }
+            if (action === 'emptyFolder') {
+              setConfirmModal({
+                title: 'Empty Folder',
+                message: 'Are you sure you want to permanently delete all of the messages in this folder?',
+                onConfirm: () => {
+                  // Delete FIRST (instant UI), then close modal
+                  handleContextAction('emptyFolder');
+                  setConfirmModal(null);
+                },
+              });
+              setContextMenu(null);
+              return;
+            }
+            handleContextAction(action);
+          }}
+        />
+      )}
+
+      {confirmModal && (
+        <ConfirmModal
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmLabel="Delete"
+          onConfirm={confirmModal.onConfirm}
+          onCancel={() => setConfirmModal(null)}
         />
       )}
     </div>

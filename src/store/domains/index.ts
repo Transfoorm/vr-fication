@@ -43,8 +43,18 @@ export {
   type ProductivityActions,
   type ProductivityData,
   type ProductivityStore,
-  type EmailBodyStatus,
 } from './productivity';
+
+// Email body cache (infrastructure - separated from productivity domain)
+export {
+  createEmailBodyCacheSlice,
+  type EmailBodyCacheSlice,
+  type EmailBodyCacheActions,
+  type EmailBodyCacheStore,
+  type EmailBodyStatus,
+  EMAIL_BODY_LRU_CAP,
+  initialEmailBodyCacheState,
+} from './emailBodyCache';
 
 export {
   createAdminSlice,
@@ -104,6 +114,7 @@ export {
 
 // 🔱 SOVEREIGN ROUTER - Navigation domain
 export {
+  createSovereignRouterSlice,
   createNavigationActions,
   initialNavigationState,
   getDomainFromRoute,
@@ -115,3 +126,12 @@ export {
   type NavigationData,
   type DomainRoute,
 } from './navigation';
+
+// Core slice (user, genome, theme, UI state)
+export {
+  createCoreSlice,
+  initialCoreState,
+  type CoreSlice,
+  type CoreActions,
+  type CoreStore,
+} from './core';

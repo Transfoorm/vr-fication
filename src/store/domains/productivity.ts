@@ -8,6 +8,9 @@
  * Backend: /convex/domains/productivity/
  *
  * ADP/PRISM Compliant: Full coordination fields for WARP preloading
+ *
+ * NOTE: Email body caching (LRU, status) is in ./emailBodyCache.ts
+ * This file handles domain logic: messages, folders, read status, optimistic deletes
  * ══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -22,21 +25,13 @@ import type { ProductivityEmail } from '@/features/productivity/email-console/ty
 
 export type EmailViewMode = 'live' | 'impact';
 
-// Per-message body fetch status (idle = never requested)
-export type EmailBodyStatus = 'loading' | 'loaded' | 'rate_limited' | 'error';
-
 export interface ProductivityData {
   email?: ProductivityEmail;
   calendar: Record<string, unknown>[];
   meetings: Record<string, unknown>[];
   bookings: Record<string, unknown>[];
   tasks: Record<string, unknown>[];
-  // Email bodies are hydrated on-demand (large HTML blobs)
-  emailBodies?: Record<string, string>;
 }
-
-// LRU cap for email bodies (memory bound)
-const EMAIL_BODY_LRU_CAP = 50;
 
 export interface ProductivitySlice {
   // Domain data
@@ -45,12 +40,6 @@ export interface ProductivitySlice {
   meetings: Record<string, unknown>[];
   bookings: Record<string, unknown>[];
   tasks: Record<string, unknown>[];
-  // Email bodies (hydrated on-demand, keyed by messageId)
-  emailBodies: Record<string, string>;
-  // Email body fetch status (per-message: loading/loaded/rate_limited/error)
-  emailBodyStatus: Record<string, EmailBodyStatus>;
-  // LRU order tracking (oldest first, newest last)
-  emailBodyOrder: string[];
   // UI preferences (persisted)
   emailViewMode: EmailViewMode;
   // Pending read status updates (skip sync for these messages)
@@ -65,10 +54,10 @@ export interface ProductivitySlice {
 
 export interface ProductivityActions {
   hydrateProductivity: (data: Partial<ProductivityData>, source?: ADPSource) => void;
-  hydrateEmailBody: (messageId: string, htmlContent: string) => void;
-  setEmailBodyStatus: (messageId: string, status: EmailBodyStatus | null) => void;
   updateEmailReadStatus: (messageId: string, isRead: boolean) => void;
   batchUpdateEmailReadStatus: (messageIds: string[], isRead: boolean) => void;
+  removeEmailMessages: (messageIds: string[]) => void;
+  removeEmailFolder: (folderId: string) => void;
   clearPendingReadUpdate: (messageId: string) => void;
   batchClearPendingReadUpdates: (messageIds: string[]) => void;
   addAutoMarkExempt: (messageId: string) => void;
@@ -89,12 +78,6 @@ const initialProductivityState: ProductivitySlice = {
   meetings: [],
   bookings: [],
   tasks: [],
-  // Email bodies (on-demand hydration)
-  emailBodies: {},
-  // Email body fetch status (per-message)
-  emailBodyStatus: {},
-  // LRU order (oldest first)
-  emailBodyOrder: [],
   // UI preferences
   emailViewMode: 'live', // Default to Live mode (traditional Outlook-style)
   // Pending read status updates (protected from sync overwrite)
@@ -305,47 +288,47 @@ export const createProductivitySlice: StateCreator<
     });
   },
 
-  hydrateEmailBody: (messageId, htmlContent) => {
+  // OPTIMISTIC DELETE: Instantly remove messages from UI (API fires in background)
+  // Note: Body cache cleanup is handled by fuse.ts which has access to both slices
+  removeEmailMessages: (messageIds) => {
     set((state) => {
-      const bodies = { ...state.emailBodies };
-      const order = [...state.emailBodyOrder];
+      if (!state.email?.messages) return state;
 
-      // If already cached, remove from order (will re-add at end = touch)
-      const existingIdx = order.indexOf(messageId);
-      if (existingIdx !== -1) {
-        order.splice(existingIdx, 1);
+      const idsSet = new Set(messageIds);
+      const filteredMessages = state.email.messages.filter((msg) => !idsSet.has(msg._id));
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🗑️ FUSE: Removed ${messageIds.length} messages from UI`);
       }
-
-      // Evict oldest if at cap (evict AFTER successful hydrate)
-      while (order.length >= EMAIL_BODY_LRU_CAP) {
-        const oldest = order.shift();
-        if (oldest) delete bodies[oldest];
-      }
-
-      // Add new body at end (most recently used)
-      bodies[messageId] = htmlContent;
-      order.push(messageId);
 
       return {
         ...state,
-        emailBodies: bodies,
-        emailBodyOrder: order,
+        email: {
+          ...state.email,
+          messages: filteredMessages,
+        },
       };
     });
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`⚡ FUSE: Email body hydrated for ${messageId.slice(-8)} (cache: ${EMAIL_BODY_LRU_CAP} cap)`);
-    }
   },
 
-  setEmailBodyStatus: (messageId, status) => {
+  // OPTIMISTIC DELETE: Instantly remove folder from UI (API fires in background)
+  removeEmailFolder: (folderId) => {
     set((state) => {
-      const newStatus = { ...state.emailBodyStatus };
-      if (status === null) {
-        delete newStatus[messageId];
-      } else {
-        newStatus[messageId] = status;
+      if (!state.email?.folders) return state;
+
+      const filteredFolders = state.email.folders.filter((f) => f.externalFolderId !== folderId);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🗑️ FUSE: Removed folder ${folderId.slice(-8)} from UI`);
       }
-      return { ...state, emailBodyStatus: newStatus };
+
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          folders: filteredFolders,
+        },
+      };
     });
   },
 

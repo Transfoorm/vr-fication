@@ -56,7 +56,7 @@ export function useViewportPrefetch(
 
     // GUARD: Skip if already pending or in FUSE
     if (pendingRef.current.has(messageId)) return;
-    const currentBodies = useFuse.getState().productivity.emailBodies;
+    const currentBodies = useFuse.getState().emailBodyCache.emailBodies;
     if (currentBodies?.[messageId]) return;
 
     // Mark as pending BEFORE any async work
@@ -96,7 +96,7 @@ export function useViewportPrefetch(
       : visibleMessageIds;
 
     // Filter to: not in FUSE, not pending
-    const currentBodies = useFuse.getState().productivity.emailBodies;
+    const currentBodies = useFuse.getState().emailBodyCache.emailBodies;
     const toFetch = priority
       .filter((id) => !currentBodies?.[id] && !pendingRef.current.has(id))
       .slice(0, MAX_PREFETCH);
