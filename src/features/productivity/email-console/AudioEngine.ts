@@ -5,7 +5,7 @@
  * Simpler than Web Audio API, works for UI sounds.
  */
 
-type SoundName = 'trash' | 'send' | 'receive' | 'mark' | 'connected';
+type SoundName = 'trash' | 'send' | 'receive' | 'mark' | 'connected' | 'confetti';
 
 // Sound file paths
 const SOUND_PATHS: Record<SoundName, string> = {
@@ -14,6 +14,7 @@ const SOUND_PATHS: Record<SoundName, string> = {
   receive: '/audio/email-receive.mp3',
   mark: '/audio/email-mark.wav',
   connected: '/audio/email-connected.mp3',
+  confetti: '/audio/fx-confetti.mp3',
 };
 
 // Preference keys in localStorage (connected has no preference - always plays)

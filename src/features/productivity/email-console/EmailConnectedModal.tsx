@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useRef, useCallback } from 'react';
 import { Mail, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Button, T } from '@/vr';
@@ -53,21 +53,28 @@ function fireConfetti() {
  * fully connected and ready to use. It only shows ONCE per account.
  */
 export function EmailConnectedModal({ emailAddress, onDismiss }: EmailConnectedModalProps) {
-  // Fire celebration effects when modal appears
-  useEffect(() => {
-    // Prime audio engine first (required for browser autoplay policy), then play
-    sounds.prime().then(() => {
-      sounds.connected();
-    });
+  // Track if confetti has fired (only once per modal)
+  const hasFiredRef = useRef(false);
 
-    // Fire confetti
+  // Fire confetti + sound TOGETHER on first mouse interaction
+  // Mouse enter = user gesture = audio is allowed = perfect sync
+  const triggerCelebration = useCallback(() => {
+    if (hasFiredRef.current) return;
+    hasFiredRef.current = true;
     fireConfetti();
+    sounds.confetti();
   }, []);
+
+  // Handle dismiss with connected sound (user gesture guarantees playback)
+  const handleDismiss = () => {
+    sounds.connected();
+    onDismiss();
+  };
 
   return (
     <>
-      <div className="ft-email__modal-backdrop ft-email__modal-backdrop--celebration" onClick={onDismiss} />
-      <div className="ft-email__modal ft-email__modal--celebration">
+      <div className="ft-email__modal-backdrop ft-email__modal-backdrop--celebration" onClick={handleDismiss} />
+      <div className="ft-email__modal ft-email__modal--celebration" onMouseEnter={triggerCelebration}>
         <div className="ft-email__celebration-icon">
           <Mail size={48} strokeWidth={1.5} />
           <Sparkles className="ft-email__celebration-sparkle" size={24} />
@@ -77,7 +84,7 @@ export function EmailConnectedModal({ emailAddress, onDismiss }: EmailConnectedM
           <T.body><strong className="ft-email__celebration-email">{emailAddress}</strong> is now connected and in sync.</T.body>
           <T.body>Your emails are ready and waiting.</T.body>
         </div>
-        <Button.fire onClick={onDismiss} icon={<Sparkles size={16} />}>
+        <Button.fire onClick={handleDismiss} icon={<Sparkles size={16} />}>
           Let&apos;s Go!
         </Button.fire>
       </div>

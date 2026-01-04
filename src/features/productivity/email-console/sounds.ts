@@ -25,7 +25,8 @@ export const sounds = {
   send: () => audioEngine.play('send'),
   receive: () => audioEngine.play('receive'),
   mark: () => audioEngine.play('mark'),
-  connected: () => audioEngine.play('connected'), // Celebration when email first connects
+  connected: () => audioEngine.play('connected'), // Celebration when clicking "Let's Go!"
+  confetti: () => audioEngine.play('confetti'), // Confetti burst when modal appears
 
   /**
    * Prime the audio engine (call on first user gesture)
