@@ -74,7 +74,7 @@ export function EmailConnectedModal({ emailAddress, onDismiss }: EmailConnectedM
         </div>
         <T.h3 className="ft-email__modal-title">You&apos;re All Set!</T.h3>
         <div className="ft-email__modal-message">
-          <T.body><strong>{emailAddress}</strong> is now connected and in sync.</T.body>
+          <T.body><strong className="ft-email__celebration-email">{emailAddress}</strong> is now connected and in sync.</T.body>
           <T.body>Your emails are ready and waiting.</T.body>
         </div>
         <Button.fire onClick={onDismiss} icon={<Sparkles size={16} />}>
