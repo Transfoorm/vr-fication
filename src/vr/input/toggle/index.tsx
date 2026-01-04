@@ -1,9 +1,12 @@
 /**──────────────────────────────────────────────────────────────────────┐
 │  🤖 VARIANT ROBOT - Input Toggle                                       │
-│  /src/vr/input/toggle/index.tsx                      │
+│  /src/vr/input/toggle/index.tsx                                        │
 │                                                                        │
-│  Toggle switch with label and smooth animation.                       │
+│  Toggle switch with label and smooth animation.                        │
+│  Uses native checkbox input for accessibility.                         │
 └────────────────────────────────────────────────────────────────────────┘ */
+
+import { useId } from 'react';
 
 export interface InputToggleProps {
   /** Current toggle state */
@@ -18,15 +21,13 @@ export interface InputToggleProps {
   size?: 'sm' | 'md' | 'lg';
   /** Disabled state */
   disabled?: boolean;
-  /** Show on/off text */
-  showText?: boolean;
   /** Additional className */
   className?: string;
 }
 
 /**
  * InputToggle - Toggle switch component
- * TTT Gap Model compliant - no external margins
+ * Uses native checkbox for accessibility
  */
 export default function InputToggle({
   enabled,
@@ -35,9 +36,10 @@ export default function InputToggle({
   labelPosition = 'right',
   size = 'md',
   disabled = false,
-  showText = false,
   className = ''
 }: InputToggleProps) {
+  const id = useId();
+
   const wrapperClasses = [
     'vr-input-toggle-wrapper',
     label && `vr-input-toggle-wrapper--${labelPosition}`,
@@ -47,34 +49,32 @@ export default function InputToggle({
 
   const toggleClasses = [
     'vr-input-toggle',
-    `vr-input-toggle--${size}`,
-    enabled && 'vr-input-toggle--enabled'
+    size !== 'md' && `vr-input-toggle--${size}`,
+    disabled && 'vr-input-toggle--disabled'
   ].filter(Boolean).join(' ');
 
-  const handleClick = () => {
+  const handleChange = () => {
     if (!disabled) {
       onChange(!enabled);
     }
   };
 
   const toggle = (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={enabled}
-      onClick={handleClick}
-      disabled={disabled}
-      className={toggleClasses}
-    >
-      <span className="vr-input-toggle-track">
-        {showText && (
-          <span className="vr-input-toggle-text">
-            {enabled ? 'ON' : 'OFF'}
-          </span>
-        )}
-        <span className="vr-input-toggle-thumb" />
-      </span>
-    </button>
+    <div className={toggleClasses}>
+      <input
+        type="checkbox"
+        id={id}
+        checked={enabled}
+        onChange={handleChange}
+        disabled={disabled}
+        className="vr-input-toggle-checkbox"
+      />
+      <label
+        htmlFor={id}
+        className="vr-input-toggle-track"
+        aria-label={label || 'Toggle'}
+      />
+    </div>
   );
 
   if (!label) return toggle;
@@ -82,11 +82,11 @@ export default function InputToggle({
   return (
     <div className={wrapperClasses}>
       {labelPosition === 'left' && (
-        <span className="vr-input-toggle-label">{label}</span>
+        <label htmlFor={id} className="vr-input-toggle-label">{label}</label>
       )}
       {toggle}
       {labelPosition === 'right' && (
-        <span className="vr-input-toggle-label">{label}</span>
+        <label htmlFor={id} className="vr-input-toggle-label">{label}</label>
       )}
     </div>
   );

@@ -1,21 +1,42 @@
 /**
- * Email Sound Effects
+ * Email Sound Effects - PRISM/WARP Sovereign Audio
  *
  * Provides audio feedback for email actions:
  * - trash: Delete, delete forever, empty folder
- * - send: Sending email (future)
+ * - send: Sending email
  * - receive: New email arrives
+ * - mark: Mark as read/unread
+ *
+ * ARCHITECTURE:
+ * Routes all playback through AudioEngine singleton.
+ * Zero-latency after prime() is called on first user gesture.
+ *
+ * All sounds respect user preferences stored in localStorage.
  */
 
-const playSound = (src: string) => {
-  if (typeof window === 'undefined') return;
-  const audio = new Audio(src);
-  audio.volume = 0.5;
-  audio.play().catch(() => {}); // Ignore autoplay restrictions
-};
+import { audioEngine } from './AudioEngine';
 
+/**
+ * Sound effects API
+ * All methods route through sovereign AudioEngine
+ */
 export const sounds = {
-  trash: () => playSound('/audio/email-trash.mp3'),
-  send: () => playSound('/audio/email-send.mp3'),
-  receive: () => playSound('/audio/email-receive.mp3'),
+  trash: () => audioEngine.play('trash'),
+  send: () => audioEngine.play('send'),
+  receive: () => audioEngine.play('receive'),
+  mark: () => audioEngine.play('mark'),
+  connected: () => audioEngine.play('connected'), // Celebration when email first connects
+
+  /**
+   * Prime the audio engine (call on first user gesture)
+   * WARP: This is THE moment we pay the cold-start cost
+   */
+  prime: () => audioEngine.prime(),
+
+  /**
+   * Check if engine is ready for instant playback
+   */
+  get isReady() {
+    return audioEngine.isReady;
+  },
 };

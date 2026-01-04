@@ -549,3 +549,31 @@
     height: 100px;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Theme Tab - Light/Dark Mode Toggle
+   ───────────────────────────────────────────────────────────────────── */
+
+.ft-theme-tab-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  font: inherit;
+  color: inherit;
+}
+
+/* Disable inner toggle click handling - outer button handles it */
+.ft-theme-tab-row .ft-theme-label,
+.ft-theme-tab-row .ft-theme-input {
+  pointer-events: none;
+}
+
+/* When hovering the row, activate the toggle's hover background */
+.ft-theme-tab-row:hover .ft-theme-label {
+  background-color: var(--bg-active);
+}

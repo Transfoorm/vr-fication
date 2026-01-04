@@ -263,6 +263,9 @@ export function useEmailActions({
       // 1. INSTANT UI: Single FUSE update for ALL messages (scales to 1000+)
       batchUpdateEmailReadStatus(messageIdsToUpdate, isRead);
 
+      // Play mark sound
+      sounds.mark();
+
       // 2. SINGLE Convex mutation for ALL messages (no N+1 queries)
       try {
         await batchConvexReadStatus({

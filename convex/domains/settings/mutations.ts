@@ -114,6 +114,10 @@ export const updateEmailSettings = mutation({
       v.literal("departure"),
       v.literal("never")
     )),
+    emailSoundTrash: v.optional(v.boolean()),
+    emailSoundSend: v.optional(v.boolean()),
+    emailSoundReceive: v.optional(v.boolean()),
+    emailSoundMark: v.optional(v.boolean()),
   },
   handler: async (ctx: MutationCtx, args) => {
     const { callerUserId, ...updateFields } = args;

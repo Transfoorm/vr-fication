@@ -1,33 +1,12 @@
 #!/usr/bin/env npx tsx
 /**
- * TTT SCHEMA FIELD SCANNER v3.0
- *
- * Comprehensive schema analysis with multiple checks:
- *
- * PHASE 1: Field Classification (required vs optional)
- *   REQUIRED + INDEXED = ✅ Correct
- *   REQUIRED + FK      = ✅ Correct
- *   REQUIRED + neither = ⚠️ Review
- *   OPTIONAL + INDEXED = 🔶 Review
- *   OPTIONAL + FK      = 🔗 Correct
- *   OPTIONAL + neither = ⚪ Correct
- *
- * PHASE 2: Timestamp Consistency
- *   Every table should have createdAt and updatedAt
- *
- * PHASE 3: Naming Consistency
- *   Detect userId vs user_id vs ownerId drift
- *
- * PHASE 4: String-to-FK Detection
- *   Find v.string() fields that should be v.id("table")
- *
- * Usage:
- *   npx tsx scripts/checkSchemaFields.ts           # Normal scan
- *   npx tsx scripts/checkSchemaFields.ts --nuke    # Post-nuke mode
+ * TTT SCHEMA FIELD SCANNER v3.0 - Schema analysis (fields, timestamps, naming, FKs)
+ * Usage: npx tsx scripts/checkSchemaFields.ts [--nuke]
  */
 
 import fs from 'fs';
 import path from 'path';
+import { isCorrectlyOptional, getUpgradeInfo } from './schemaPatterns';
 
 const SCHEMA_PATH = path.join(process.cwd(), 'convex/schema.ts');
 const isNukeMode = process.argv.includes('--nuke');
@@ -169,6 +148,7 @@ interface AnalysisResult {
   optionalFK: number;
   optionalCorrect: number;
   nukeOpportunities: FieldInfo[];
+  correctlyOptional: FieldInfo[];
   reviewItems: string[];
 }
 
@@ -182,6 +162,7 @@ function analyzeFields(tables: TableInfo[]): AnalysisResult {
     optionalFK: 0,
     optionalCorrect: 0,
     nukeOpportunities: [],
+    correctlyOptional: [],
     reviewItems: [],
   };
 
@@ -230,12 +211,25 @@ function analyzeFields(tables: TableInfo[]): AnalysisResult {
         status = `Optional FK → ${field.idTarget} (nullable)`;
         result.optionalFK++;
       } else if (field.isOptional) {
-        // ⚪ OPTIONAL + neither = Correct (preference/enhancement)
-        // In nuke mode, these are upgrade opportunities
+        // ⚪ OPTIONAL + neither = Check if correctly optional or upgradeable
         if (isNukeMode) {
-          icon = '🎯';
-          status = 'NUKE OPPORTUNITY - could upgrade to required';
-          result.nukeOpportunities.push(field);
+          const upgradeInfo = getUpgradeInfo(field.name);
+          if (upgradeInfo) {
+            // 🎯 This field COULD become required with a default
+            icon = '🎯';
+            status = `UPGRADE → ${upgradeInfo.reason}`;
+            (field as FieldInfo & { upgradeInfo?: typeof upgradeInfo }).upgradeInfo = upgradeInfo;
+            result.nukeOpportunities.push(field);
+          } else if (isCorrectlyOptional(field.name)) {
+            // ✓ This field is correctly optional (null has meaning)
+            icon = '✓';
+            status = 'Correctly optional (null has meaning)';
+            result.correctlyOptional.push(field);
+          } else {
+            // ⚪ Unknown - show as regular optional
+            icon = '⚪';
+            status = 'Optional (review if needed)';
+          }
         } else {
           icon = '⚪';
           status = 'Optional (preference/enhancement)';
@@ -278,32 +272,49 @@ function printSummary(result: AnalysisResult) {
   }
 
   // NUKE OPPORTUNITY section
-  if (isNukeMode && result.nukeOpportunities.length > 0) {
+  if (isNukeMode) {
     console.log('═'.repeat(70));
     console.log('  🎯 NUKE OPPORTUNITIES');
     console.log('═'.repeat(70));
-    console.log(`
-  These ${result.nukeOpportunities.length} optional fields could become REQUIRED now that the DB is empty.
-  No migration needed - just change v.optional(...) to the inner type.
 
-  Ask yourself: "Does this field ALWAYS have a value in practice?"
-  If YES → upgrade to required (stronger schema, better guarantees)
-  If NO  → keep optional (null has meaning)
+    if (result.nukeOpportunities.length === 0) {
+      console.log(`
+  No upgrade opportunities found.
+  All optional fields are correctly optional (null has meaning).
+`);
+    } else {
+      console.log(`
+  Found ${result.nukeOpportunities.length} fields that could become REQUIRED with defaults.
+  These are preferences/settings where a default value makes sense.
 `);
 
-    // Group by table
-    const byTable = new Map<string, FieldInfo[]>();
-    for (const field of result.nukeOpportunities) {
-      const existing = byTable.get(field.tableName) || [];
-      existing.push(field);
-      byTable.set(field.tableName, existing);
+      // Group by table
+      const byTable = new Map<string, FieldInfo[]>();
+      for (const field of result.nukeOpportunities) {
+        const existing = byTable.get(field.tableName) || [];
+        existing.push(field);
+        byTable.set(field.tableName, existing);
+      }
+
+      for (const [tableName, fields] of byTable) {
+        console.log(`  📋 ${tableName}:`);
+        for (const field of fields) {
+          const upgradeInfo = (field as FieldInfo & { upgradeInfo?: { defaultValue: string; reason: string } }).upgradeInfo;
+          if (upgradeInfo) {
+            console.log(`     🎯 ${field.name} → default: ${upgradeInfo.defaultValue}`);
+            console.log(`        ${upgradeInfo.reason}`);
+          } else {
+            console.log(`     🎯 ${field.name} (line ${field.line})`);
+          }
+        }
+        console.log();
+      }
     }
 
-    for (const [tableName, fields] of byTable) {
-      console.log(`  📋 ${tableName}:`);
-      for (const field of fields) {
-        console.log(`     🎯 ${field.name} (line ${field.line})`);
-      }
+    // Show correctly optional count
+    if (result.correctlyOptional.length > 0) {
+      console.log(`  ✓ ${result.correctlyOptional.length} fields are correctly optional (null has meaning)`);
+      console.log(`    These include: error states, conditional timestamps, external IDs, AI results, etc.`);
       console.log();
     }
   }

@@ -31,6 +31,7 @@ import { EmailContextMenu } from './EmailContextMenu';
 import { ConfirmModal } from './ConfirmModal';
 import { MessageBody } from './MessageBody';
 import type { EmailFolder } from './types';
+import { sounds } from './sounds';
 import './email-console.css';
 
 
@@ -45,6 +46,21 @@ export function EmailConsole() {
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, [searchParams]);
+
+  // WARP: Prime audio system on first user interaction (unlocks AudioContext)
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      sounds.prime();
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+    window.addEventListener('click', handleFirstInteraction, { once: true });
+    window.addEventListener('keydown', handleFirstInteraction, { once: true });
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, []);
 
   // Content width mode - persisted to localStorage (declare early for column init)
   const [contentWidth, setContentWidth] = useState<'full' | 'constrained'>(() => {

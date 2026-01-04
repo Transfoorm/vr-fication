@@ -3,17 +3,18 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Toggle Shadows */
-  --toggle-thumb-shadow: 0 2px 4px rgb(0 0 0 / 20%);
-  --toggle-thumb-shadow-hover: 0 2px 6px rgb(0 0 0 / 30%);
+  --toggle-width: 52px;
+  --toggle-height: 28px;
+  --toggle-thumb-size: 24px;
+  --toggle-thumb-offset: 2px;
+  --toggle-transition: 0.3s;
+  --toggle-track-off: #ccc;
 }
 
 .vr-input-toggle-wrapper {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-
-  /* NO external margins - TTT Gap Model compliant */
 }
 
 .vr-input-toggle-wrapper--left {
@@ -24,115 +25,91 @@
   flex-direction: row;
 }
 
-/* Toggle button */
+/* Toggle container */
 .vr-input-toggle {
+  display: inline-block;
   position: relative;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
+  width: var(--toggle-width);
+  height: var(--toggle-height);
 }
 
-/* Toggle track */
+/* Hidden checkbox input */
+.vr-input-toggle-checkbox {
+  display: none;
+}
+
+/* Toggle track (the pill shape) */
 .vr-input-toggle-track {
-  position: relative;
-  display: flex;
-  align-items: center;
-  background-color: var(--gray-300);
-  border-radius: var(--radius-full);
-  transition: background-color 0.3s ease;
-}
-
-/* Size variants */
-.vr-input-toggle--sm .vr-input-toggle-track {
-  width: 36px;
-  height: 20px;
-  padding: 2px;
-}
-
-.vr-input-toggle--md .vr-input-toggle-track {
-  width: 48px;
-  height: 24px;
-  padding: 2px;
-}
-
-.vr-input-toggle--lg .vr-input-toggle-track {
-  width: 60px;
-  height: 28px;
-  padding: 2px;
-}
-
-/* Toggle thumb */
-.vr-input-toggle-thumb {
   position: absolute;
-  background-color: var(--white);
-  border-radius: var(--radius-full);
-  box-shadow: var(--toggle-thumb-shadow);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  top: 0;
+  left: 0;
+  width: var(--toggle-width);
+  height: var(--toggle-height);
+  background-color: var(--toggle-track-off);
+  border-radius: var(--toggle-height);
+  cursor: pointer;
+  transition: background-color var(--toggle-transition);
 }
 
-.vr-input-toggle--sm .vr-input-toggle-thumb {
-  width: 16px;
-  height: 16px;
-  left: 2px;
-}
-
-.vr-input-toggle--md .vr-input-toggle-thumb {
-  width: 20px;
-  height: 20px;
-  left: 2px;
-}
-
-.vr-input-toggle--lg .vr-input-toggle-thumb {
-  width: 24px;
-  height: 24px;
-  left: 2px;
-}
-
-/* On/Off text */
-.vr-input-toggle-text {
+/* Toggle thumb (the circle) */
+.vr-input-toggle-track::before {
+  content: "";
   position: absolute;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--white);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
+  top: var(--toggle-thumb-offset);
+  left: var(--toggle-thumb-offset);
+  width: var(--toggle-thumb-size);
+  height: var(--toggle-thumb-size);
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+  transition: transform var(--toggle-transition);
 }
 
-.vr-input-toggle--sm .vr-input-toggle-text {
-  right: 5px;
+/* Hover state */
+.vr-input-toggle-track:hover {
+  opacity: 0.9;
 }
 
-.vr-input-toggle--md .vr-input-toggle-text {
-  right: 7px;
+.vr-input-toggle-track:hover::before {
+  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
 }
 
-.vr-input-toggle--lg .vr-input-toggle-text {
-  right: 9px;
+/* Disabled state - track */
+.vr-input-toggle--disabled .vr-input-toggle-track {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* Enabled state */
-.vr-input-toggle--enabled .vr-input-toggle-track {
+/* Checked state - track turns orange */
+.vr-input-toggle-checkbox:checked + .vr-input-toggle-track {
   background-color: var(--brand-primary);
 }
 
-.vr-input-toggle--enabled.vr-input-toggle--sm .vr-input-toggle-thumb {
-  transform: translateX(16px);
+/* Checked state - thumb slides right */
+.vr-input-toggle-checkbox:checked + .vr-input-toggle-track::before {
+  transform: translateX(calc(var(--toggle-width) - var(--toggle-thumb-size) - var(--toggle-thumb-offset) * 2));
 }
 
-.vr-input-toggle--enabled.vr-input-toggle--md .vr-input-toggle-thumb {
-  transform: translateX(24px);
+/* Focus state */
+.vr-input-toggle-checkbox:focus-visible + .vr-input-toggle-track {
+  box-shadow: 0 0 0 3px var(--brand-light);
 }
 
-.vr-input-toggle--enabled.vr-input-toggle--lg .vr-input-toggle-thumb {
-  transform: translateX(32px);
+.vr-input-toggle-wrapper--disabled {
+  opacity: 0.5;
 }
 
-.vr-input-toggle--enabled .vr-input-toggle-text {
-  opacity: 1;
-  left: 6px;
-  right: auto;
+/* Size variants */
+.vr-input-toggle--sm {
+  --toggle-width: 40px;
+  --toggle-height: 22px;
+  --toggle-thumb-size: 18px;
+}
+
+.vr-input-toggle--lg {
+  --toggle-width: 60px;
+  --toggle-height: 34px;
+  --toggle-thumb-size: 30px;
 }
 
 /* Label */
@@ -140,32 +117,9 @@
   color: var(--text-primary);
   font-size: var(--font-size-md);
   user-select: none;
+  cursor: pointer;
 }
 
-/* Hover state */
-.vr-input-toggle:hover .vr-input-toggle-track {
-  opacity: 0.9;
-}
-
-.vr-input-toggle:hover .vr-input-toggle-thumb {
-  box-shadow: var(--toggle-thumb-shadow-hover);
-}
-
-/* Focus state */
-.vr-input-toggle:focus-visible .vr-input-toggle-track {
-  box-shadow: 0 0 0 3px var(--brand-light);
-}
-
-/* Disabled state */
-.vr-input-toggle:disabled .vr-input-toggle-track {
-  opacity: 0.5;
-  background-color: var(--gray-200);
-}
-
-.vr-input-toggle-wrapper--disabled {
-  opacity: 0.5;
-}
-
-.vr-input-toggle-wrapper--disabled .vr-input-toggle-label {
-  color: var(--text-tertiary);
+.vr-input-toggle--disabled .vr-input-toggle-label {
+  cursor: not-allowed;
 }

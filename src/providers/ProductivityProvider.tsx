@@ -13,6 +13,7 @@ import { ReactNode, useEffect } from 'react';
 import { useFuse } from '@/store/fuse';
 import type { ProductivitySlice } from '@/store/types';
 import { useProductivitySync } from '@/hooks/useProductivitySync';
+import { EmailConnectedModal } from '@/features/productivity/email-console/EmailConnectedModal';
 
 interface ProductivityProviderProps {
   children: ReactNode;
@@ -25,14 +26,15 @@ interface ProductivityProviderProps {
  * Architecture:
  * - Receives initialData from section layout's WARP preload function
  * - Hydrates FUSE store work slice on mount
- * - Zero UI - pure state hydration
+ * - Zero UI - pure state hydration (except celebration modal)
  * - Children render with instant data access
  */
 export function ProductivityProvider({ children, initialData }: ProductivityProviderProps) {
   const hydrateProductivity = useFuse((state) => state.hydrateProductivity);
 
   // 🌉 GOLDEN BRIDGE: Real-time Convex → FUSE sync
-  useProductivitySync();
+  // Also returns email connected modal state
+  const { showConnectedModal, dismissConnectedModal, connectedEmail } = useProductivitySync();
 
   useEffect(() => {
     if (initialData) {
@@ -44,7 +46,16 @@ export function ProductivityProvider({ children, initialData }: ProductivityProv
     }
   }, [hydrateProductivity, initialData]); // Only run on mount - initialData comes from server preload
 
-  // Zero UI - just wrap children
-  // All domain data now available via useFuse() hooks
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      {/* 🎉 Email Connected Celebration Modal */}
+      {showConnectedModal && connectedEmail && (
+        <EmailConnectedModal
+          emailAddress={connectedEmail}
+          onDismiss={dismissConnectedModal}
+        />
+      )}
+    </>
+  );
 }

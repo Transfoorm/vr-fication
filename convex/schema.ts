@@ -52,11 +52,11 @@ export default defineSchema({
     secondaryEmail: v.optional(v.string()),
     avatarUrl: v.optional(v.union(v.string(), v.id("_storage"))),
     brandLogoUrl: v.optional(v.union(v.string(), v.id("_storage"))),
-    entityName: v.optional(v.string()),
-    socialName: v.optional(v.string()),
-    orgSlug: v.optional(v.string()),
+    entityName: v.string(), // Default: "" (empty string)
+    socialName: v.string(), // Default: "" (empty string)
+    orgSlug: v.string(), // Default: "" (empty string)
     phoneNumber: v.optional(v.string()),
-    businessCountry: v.optional(v.string()),
+    businessCountry: v.string(), // Default: "" (empty string)
 
     // Naval Rank System (required)
     rank: v.union(
@@ -78,7 +78,7 @@ export default defineSchema({
     // Theme preferences (required with defaults)
     themeDark: v.boolean(), // Default: false (light mode)
 
-    // Miror AI avatar preference (optional - user configures)
+    // Miror AI avatar preference (optional - user picks from 9 avatars)
     // f=female, m=male, i=inclusive × 1=caucasian, 2=dark, 3=oriental
     mirorAvatarProfile: v.optional(v.union(
       v.literal("f-1"),
@@ -91,20 +91,25 @@ export default defineSchema({
       v.literal("i-2"),
       v.literal("i-3")
     )),
-    mirorEnchantmentEnabled: v.optional(v.boolean()),
+    mirorEnchantmentEnabled: v.boolean(), // Default: false (off)
     mirorEnchantmentTiming: v.optional(v.union(
       v.literal("subtle"),
       v.literal("magical"),
       v.literal("playful")
     )),
 
-    // Email preferences (optional - defaults to 'timer')
+    // Email preferences
     // timer = mark read after 3 seconds, departure = mark read on click away, never = manual only
-    emailMarkReadMode: v.optional(v.union(
+    emailMarkReadMode: v.union(
       v.literal("timer"),
       v.literal("departure"),
       v.literal("never")
-    )),
+    ), // Default: "timer"
+    // Email sound effects
+    emailSoundTrash: v.boolean(), // Default: true (on)
+    emailSoundSend: v.boolean(), // Default: true (on)
+    emailSoundReceive: v.boolean(), // Default: true (on)
+    emailSoundMark: v.boolean(), // Default: true (on)
 
     // Timestamps (required)
     createdAt: v.number(),
@@ -166,9 +171,9 @@ export default defineSchema({
     setupStatus: v.string(),
     subscriptionStatus: v.string(),
 
-    // Optional profile fields (may not have been set)
-    entityName: v.optional(v.string()),
-    socialName: v.optional(v.string()),
+    // Profile fields (required with defaults)
+    entityName: v.string(), // Default: "" (empty string)
+    socialName: v.string(), // Default: "" (empty string)
 
     // Deletion metadata (required)
     /**
@@ -702,6 +707,12 @@ export default defineSchema({
      * Initial sync MUST use standard /messages endpoint.
      */
     initialSyncComplete: v.optional(v.boolean()),
+    /**
+     * Timestamp when new emails were last detected during sync.
+     * Client watches this field to play notification sound.
+     * Updated IMMEDIATELY after inbox sync (before other folders).
+     */
+    newEmailsDetectedAt: v.optional(v.number()),
 
     // Sync lock (prevents parallel syncs)
     /** When current sync started (null = not syncing) */

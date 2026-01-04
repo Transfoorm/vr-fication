@@ -126,8 +126,8 @@
   --bg-hover: #f3efee;                                           /* Hover state for buttons/interactive elements */
   --bg-active: #ebe7e6;                                          /* Active/pressed state for buttons/interactive */
   --bg-sideline: #dad0cd;                                       
-  --bg-tab-hover: #f1efef;  
-  --bg-tab-rest: #fafafa;  
+  --bg-tab-hover: #f1efef;
+  --bg-tab-rest: #fdfdfd;  
 
   /* Field box backgrounds */
   --bg-fieldbox-primary: #fafbda;                                /* f2f39e */
@@ -566,6 +566,8 @@
   --bg-hover: #4b5563;                                           /* Hover state for buttons/interactive elements */
   --bg-active: #374151;                                          /* Active/pressed state for buttons/interactive elements */
   --bg-sideline: #4b5563;                                        /* Vertical line indicator for active state */
+  --bg-tab-hover: #3d4756;                                       /* Tab hover - between container and active */
+  --bg-tab-rest: #4f5d6f;                                        /* Active tab - lighter to stand out */
 
   /* Field box backgrounds */
   --bg-fieldbox-primary: #1a2332;

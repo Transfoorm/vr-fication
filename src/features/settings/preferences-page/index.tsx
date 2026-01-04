@@ -22,9 +22,9 @@ export function PreferencesPageFeature() {
     <Stack>
       <Tabs.panels
         tabs={[
+          { id: 'email', label: 'Email', icon: <Icon variant="mail" />, content: <EmailTab /> },
           { id: 'miror-ai', label: 'Miror AI', icon: <Icon variant="sparkles" />, content: <MirorAiTab /> },
           { id: 'theme', label: 'Theme', icon: <Icon variant="palette" />, content: <ThemeTab /> },
-          { id: 'email', label: 'Email', icon: <Icon variant="mail" />, content: <EmailTab /> },
           { id: 'controls', label: 'Controls', icon: <Icon variant="sliders" />, content: <ControlsTab /> },
         ]}
       />

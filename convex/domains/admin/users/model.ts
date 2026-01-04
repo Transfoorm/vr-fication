@@ -62,10 +62,19 @@ export class UsersModel {
       lastName: args.lastName || '', // Empty string shows "Setup Incomplete" in UI
       avatarUrl: args.avatarUrl,
       // brandLogoUrl: NOT set by default - only when user uploads custom logo
+      entityName: '', // Default: empty (user fills in later)
+      socialName: '', // Default: empty (user fills in later)
+      orgSlug: '', // Default: empty (user fills in later)
       rank: RANK_SYSTEM_DEFAULTS.DEFAULT_RANK, // Default rank from system constants
       setupStatus: args.setupStatus || "pending", // Default setup status
       businessCountry: args.businessCountry || "AU", // Default business country
       themeDark: defaultMode, // Default mode (required field)
+      mirorEnchantmentEnabled: false, // Default: off
+      emailMarkReadMode: "timer", // Default: mark read after 3 seconds
+      emailSoundTrash: true, // Default: on
+      emailSoundSend: true, // Default: on
+      emailSoundReceive: true, // Default: on
+      emailSoundMark: true, // Default: on
       // RANK-AWARE SYSTEM: Set trial period on signup
       subscriptionStatus: RANK_SYSTEM_DEFAULTS.DEFAULT_SUBSCRIPTION_STATUS,
       trialStartedAt: now,

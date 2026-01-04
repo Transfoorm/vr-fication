@@ -874,3 +874,73 @@
 .ft-email__modal-btn--confirm:hover {
   opacity: 0.9;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CELEBRATION MODAL - Email Connected Success
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ft-email__modal--celebration {
+  text-align: center;
+  padding: 32px 48px;
+  border-radius: 16px;
+  animation: ft-email-celebration-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes ft-email-celebration-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.ft-email__modal--celebration .ft-email__modal-title {
+  font-size: var(--prod-text-heading);
+  margin-bottom: var(--prod-space-md);
+}
+
+.ft-email__modal--celebration .ft-email__modal-message {
+  margin-bottom: var(--prod-space-2xl);
+}
+
+.ft-email__celebration-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--prod-space-xl);
+  background: linear-gradient(140deg, #ec540e 15%, #d6361f 100%);
+  border-radius: 50%;
+  color: #fff;
+  box-shadow: 0 8px 24px rgb(236 84 14 / 35%);
+}
+
+.ft-email__celebration-sparkle {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  color: #ffec4d;
+  filter: drop-shadow(0 0 4px rgb(255 236 77 / 70%));
+  animation: ft-email-sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes ft-email-sparkle {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2) rotate(15deg);
+  }
+}
+
+/* Fire button is used via VR component - no custom button styles needed */

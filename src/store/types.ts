@@ -134,6 +134,10 @@ export type FuseUser = {
   mirorEnchantmentTiming?: 'subtle' | 'magical' | 'playful';
   // Email preferences
   emailMarkReadMode?: 'timer' | 'departure' | 'never';
+  emailSoundTrash?: boolean;
+  emailSoundSend?: boolean;
+  emailSoundReceive?: boolean;
+  emailSoundMark?: boolean;
   // Professional Genome fields
   phoneNumber?: string | null;
   jobTitle?: string | null;

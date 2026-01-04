@@ -18,6 +18,7 @@ import { ButtonsTab } from './_tabs/ButtonsTab';
 import { CardsTab } from './_tabs/CardsTab';
 import { FieldsTab } from './_tabs/FieldsTab';
 import { RadiosTab } from './_tabs/RadiosTab';
+import { TogglesTab } from './_tabs/TogglesTab';
 import { TooltipsTab } from './_tabs/TooltipsTab';
 import { TypographyTab } from './_tabs/TypographyTab';
 
@@ -32,6 +33,7 @@ export function ShowcasePageFeature() {
           { id: 'cards', label: 'Cards', content: <CardsTab /> },
           { id: 'fields', label: 'Fields', content: <FieldsTab /> },
           { id: 'radios', label: 'Radios', content: <RadiosTab /> },
+          { id: 'toggles', label: 'Toggles', content: <TogglesTab /> },
           { id: 'tooltips', label: 'Tooltips', content: <TooltipsTab /> },
           { id: 'typography', label: 'Typography', content: <TypographyTab /> },
         ]}

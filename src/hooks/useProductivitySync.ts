@@ -12,7 +12,7 @@
 
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
@@ -25,6 +25,9 @@ import type {
   EmailFolder,
   Participant,
 } from '@/features/productivity/email-console/types';
+
+// Track accounts that have completed initial sync (for connected celebration)
+const completedAccountsSet = new Set<string>();
 
 /**
  * Productivity Domain Sync Hook
@@ -42,13 +45,35 @@ import type {
  * - email.threads (thread metadata with derived states)
  * - email.messages (individual email messages)
  */
-export function useProductivitySync(): void {
+/**
+ * Return type for sync hook - includes callback for modal trigger
+ */
+type ProductivitySyncResult = {
+  /** Whether the email connected modal should be shown */
+  showConnectedModal: boolean;
+  /** Callback to dismiss the modal */
+  dismissConnectedModal: () => void;
+  /** Email address that just connected (for modal display) */
+  connectedEmail: string | null;
+};
+
+export function useProductivitySync(): ProductivitySyncResult {
   const hydrateProductivity = useFuse((state) => state.hydrateProductivity);
   const user = useFuse((state) => state.user);
   const callerUserId = user?.convexId as Id<'admin_users'> | undefined;
 
-  // Track message count for new email sound
-  const prevMessageCountRef = useRef<number | null>(null);
+  // Track newEmailsDetectedAt for inbox-first sound notification
+  // This fires IMMEDIATELY after inbox sync, not after all folders
+  const prevNewEmailsDetectedAtRef = useRef<number | null>(null);
+
+  // Email connected modal state
+  const [showConnectedModal, setShowConnectedModal] = useState(false);
+  const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
+
+  const dismissConnectedModal = useCallback(() => {
+    setShowConnectedModal(false);
+    setConnectedEmail(null);
+  }, []);
 
   // ═══════════════════════════════════════════════════════════════════════
   // 🛡️ IDENTITY GATE: No queries until user identity is stable
@@ -170,17 +195,50 @@ export function useProductivitySync(): void {
         provider: folder.provider as 'outlook' | 'gmail',
       }));
 
-      // 🛡️ MONOTONIC HYDRATION: Never overwrite good data with empty data
-      // This ensures WARP-preloaded data survives until live queries return real data
-      // Empty data can only occur from timing issues, never from intentional clearing
-      if (messages.length === 0 && accounts.length === 0) return;
+      // ═══════════════════════════════════════════════════════════════════════
+      // 🔔 EMAIL SOUND LOGIC
+      // ═══════════════════════════════════════════════════════════════════════
+      //
+      // 1. CONNECTED SOUND: Plays when an account completes initial sync for first time
+      //    - Only plays ONCE per account (tracked in completedAccountsSet)
+      //    - Shows celebration modal
+      //
+      // 2. RECEIVE SOUND: Plays when new emails arrive (newEmailsDetectedAt changes)
+      //    - SUPPRESSED during initial sync (would fire many times)
+      //    - Only plays after ALL accounts have completed initial sync
+      // ═══════════════════════════════════════════════════════════════════════
 
-      // 🔔 NEW EMAIL SOUND: Play when message count increases (not on initial load)
-      const currentCount = messages.length;
-      if (prevMessageCountRef.current !== null && currentCount > prevMessageCountRef.current) {
-        sounds.receive();
+      // Check for accounts that just completed initial sync
+      for (const acc of liveEmailAccounts) {
+        const typedAcc = acc as { _id: string; emailAddress: string; initialSyncComplete?: boolean };
+        if (typedAcc.initialSyncComplete && !completedAccountsSet.has(typedAcc._id)) {
+          // First time this account completed sync!
+          completedAccountsSet.add(typedAcc._id);
+          // Sound + confetti fired from modal's useEffect for reliable timing
+          setConnectedEmail(typedAcc.emailAddress);
+          setShowConnectedModal(true);
+        }
       }
-      prevMessageCountRef.current = currentCount;
+
+      // Check if ALL accounts have completed initial sync
+      const allAccountsSynced = liveEmailAccounts.every((acc) => {
+        const typedAcc = acc as { initialSyncComplete?: boolean };
+        return typedAcc.initialSyncComplete === true;
+      });
+
+      // Only play receive sound if all accounts are fully synced
+      // This prevents the sound firing many times during initial download
+      if (allAccountsSynced) {
+        const latestDetectedAt = liveEmailAccounts.reduce((max, acc) => {
+          const ts = (acc as { newEmailsDetectedAt?: number }).newEmailsDetectedAt ?? 0;
+          return ts > max ? ts : max;
+        }, 0);
+
+        if (prevNewEmailsDetectedAtRef.current !== null && latestDetectedAt > prevNewEmailsDetectedAtRef.current) {
+          sounds.receive();
+        }
+        prevNewEmailsDetectedAtRef.current = latestDetectedAt;
+      }
 
       // Hydrate FUSE with complete email data
       hydrateProductivity({
@@ -188,4 +246,10 @@ export function useProductivitySync(): void {
       }, 'CONVEX_LIVE');
     }
   }, [liveEmailAccounts, liveThreads, liveMessages, liveFolders, hydrateProductivity, isIdentityStable, callerUserId]);
+
+  return {
+    showConnectedModal,
+    dismissConnectedModal,
+    connectedEmail,
+  };
 }
