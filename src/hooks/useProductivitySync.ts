@@ -62,9 +62,10 @@ export function useProductivitySync(): ProductivitySyncResult {
   const user = useFuse((state) => state.user);
   const callerUserId = user?.convexId as Id<'admin_users'> | undefined;
 
-  // Track newEmailsDetectedAt for inbox-first sound notification
-  // This fires IMMEDIATELY after inbox sync, not after all folders
-  const prevNewEmailsDetectedAtRef = useRef<number | null>(null);
+  // Track known message IDs for genuine new email detection
+  // Only play sound when ACTUALLY new messages appear, not on every poll
+  const knownMessageIdsRef = useRef<Set<string>>(new Set());
+  const hasInitializedRef = useRef(false);
 
   // Email connected modal state
   const [showConnectedModal, setShowConnectedModal] = useState(false);
@@ -202,11 +203,13 @@ export function useProductivitySync(): ProductivitySyncResult {
       //
       // 1. CONNECTED SOUND: Plays when an account completes initial sync for first time
       //    - Only plays ONCE per account (tracked in completedAccountsSet)
-      //    - Shows celebration modal
+      //    - Shows celebration modal with confetti
       //
-      // 2. RECEIVE SOUND: Plays when new emails arrive (newEmailsDetectedAt changes)
-      //    - SUPPRESSED during initial sync (would fire many times)
-      //    - Only plays after ALL accounts have completed initial sync
+      // 2. RECEIVE SOUND: Plays when genuinely NEW emails arrive
+      //    - Tracks actual message IDs (not server timestamp)
+      //    - Only plays if new IDs appear that weren't in previous hydration
+      //    - SUPPRESSED on first load (hasInitializedRef)
+      //    - SUPPRESSED during initial sync (allAccountsSynced check)
       // ═══════════════════════════════════════════════════════════════════════
 
       // Check for accounts that just completed initial sync
@@ -227,18 +230,28 @@ export function useProductivitySync(): ProductivitySyncResult {
         return typedAcc.initialSyncComplete === true;
       });
 
-      // Only play receive sound if all accounts are fully synced
-      // This prevents the sound firing many times during initial download
+      // Only check for new emails after all accounts are fully synced
+      // AND after we've done at least one hydration (skip initial load)
       if (allAccountsSynced) {
-        const latestDetectedAt = liveEmailAccounts.reduce((max, acc) => {
-          const ts = (acc as { newEmailsDetectedAt?: number }).newEmailsDetectedAt ?? 0;
-          return ts > max ? ts : max;
-        }, 0);
+        const currentMessageIds = new Set(messages.map((m) => m._id));
 
-        if (prevNewEmailsDetectedAtRef.current !== null && latestDetectedAt > prevNewEmailsDetectedAtRef.current) {
-          sounds.receive();
+        // Check for genuinely new messages (IDs we haven't seen before)
+        if (hasInitializedRef.current) {
+          let hasNewMessages = false;
+          for (const id of currentMessageIds) {
+            if (!knownMessageIdsRef.current.has(id)) {
+              hasNewMessages = true;
+              break;
+            }
+          }
+          if (hasNewMessages) {
+            sounds.receive();
+          }
         }
-        prevNewEmailsDetectedAtRef.current = latestDetectedAt;
+
+        // Update known message IDs
+        knownMessageIdsRef.current = currentMessageIds;
+        hasInitializedRef.current = true;
       }
 
       // Hydrate FUSE with complete email data

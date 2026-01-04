@@ -20,6 +20,7 @@ import { useEffect, useCallback, useRef, useState } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useFuse } from '@/store/fuse';
+import { sounds } from '@/features/productivity/email-console/sounds';
 import type { Id } from '@/convex/_generated/dataModel';
 
 type SyncIntent = 'focus' | 'inbox_open' | 'manual' | 'reconnect';
@@ -131,6 +132,9 @@ export function useEmailSyncIntent(): UseEmailSyncIntentReturn {
 
   useEffect(() => {
     if (!callerUserId) return;
+
+    // PRISM: Prime all email sounds for instant playback
+    sounds.prime();
 
     // Window focus handler
     const handleFocus = () => {

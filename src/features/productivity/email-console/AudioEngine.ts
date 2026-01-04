@@ -1,8 +1,8 @@
 /**
- * 🔊 AUDIO ENGINE - Simple HTMLAudioElement Implementation
+ * 🔊 AUDIO ENGINE - Pooled HTMLAudioElement Implementation
  *
- * Uses native browser Audio API for sound effects.
- * Simpler than Web Audio API, works for UI sounds.
+ * Uses pre-loaded audio element pools for instant playback.
+ * No clone-on-play delays - elements are ready to fire.
  */
 
 type SoundName = 'trash' | 'send' | 'receive' | 'mark' | 'connected' | 'confetti';
@@ -25,51 +25,88 @@ const PREF_KEYS: Partial<Record<SoundName, string>> = {
   mark: 'emailSoundMark',
 };
 
+// Pool size per sound (allows overlapping plays)
+const POOL_SIZE = 3;
+
 class AudioEngine {
-  private audioElements: Map<SoundName, HTMLAudioElement> = new Map();
+  private audioPools: Map<SoundName, HTMLAudioElement[]> = new Map();
+  private poolIndexes: Map<SoundName, number> = new Map();
   private isInitialized = false;
+  private isPrimed = false;
   private volume = 0.5;
 
   /**
-   * Initialize audio elements (SSR-safe)
+   * Initialize audio element pools (SSR-safe)
    */
   init(): void {
     if (typeof window === 'undefined') return;
     if (this.isInitialized) return;
 
-    // Create Audio elements for each sound (browser handles loading)
+    // Create pool of Audio elements for each sound
     for (const [name, path] of Object.entries(SOUND_PATHS) as [SoundName, string][]) {
-      const audio = new Audio(path);
-      audio.preload = 'auto';
-      audio.volume = this.volume;
-      this.audioElements.set(name, audio);
+      const pool: HTMLAudioElement[] = [];
+      for (let i = 0; i < POOL_SIZE; i++) {
+        const audio = new Audio(path);
+        audio.preload = 'auto';
+        audio.volume = this.volume;
+        pool.push(audio);
+      }
+      this.audioPools.set(name, pool);
+      this.poolIndexes.set(name, 0);
     }
 
     this.isInitialized = true;
   }
 
   /**
-   * Prime the audio engine (required for autoplay policy)
-   * Call on first user gesture
+   * Prime the audio engine - load all sounds into memory
+   * Call early for instant playback (PRISM)
    */
   async prime(): Promise<void> {
     if (!this.isInitialized) this.init();
+    if (this.isPrimed) return;
+
+    // Force load all audio elements and wait for them to be ready
+    const loadPromises: Promise<void>[] = [];
+
+    for (const pool of this.audioPools.values()) {
+      for (const audio of pool) {
+        loadPromises.push(
+          new Promise<void>((resolve) => {
+            if (audio.readyState >= 4) {
+              resolve();
+            } else {
+              audio.addEventListener('canplaythrough', () => resolve(), { once: true });
+              audio.load();
+            }
+          })
+        );
+      }
+    }
+
+    await Promise.all(loadPromises);
+    this.isPrimed = true;
   }
 
   /**
-   * Play a sound
+   * Play a sound - uses pooled elements for instant playback
    */
   play(name: SoundName): void {
     if (!this.isInitialized) this.init();
     if (!this.isEnabled(name)) return;
 
-    const audio = this.audioElements.get(name);
-    if (!audio) return;
+    const pool = this.audioPools.get(name);
+    if (!pool || pool.length === 0) return;
 
-    // Clone to allow overlapping sounds
-    const clone = audio.cloneNode() as HTMLAudioElement;
-    clone.volume = this.volume;
-    clone.play().catch(() => {});
+    // Get next audio element from pool (round-robin)
+    const index = this.poolIndexes.get(name) ?? 0;
+    const audio = pool[index];
+    this.poolIndexes.set(name, (index + 1) % pool.length);
+
+    // Reset and play (instant - already loaded)
+    audio.currentTime = 0;
+    audio.volume = this.volume;
+    audio.play().catch(() => {});
   }
 
   /**
@@ -88,16 +125,18 @@ class AudioEngine {
    */
   setVolume(vol: number): void {
     this.volume = Math.max(0, Math.min(1, vol));
-    for (const audio of this.audioElements.values()) {
-      audio.volume = this.volume;
+    for (const pool of this.audioPools.values()) {
+      for (const audio of pool) {
+        audio.volume = this.volume;
+      }
     }
   }
 
   /**
-   * Check if engine is ready
+   * Check if engine is primed and ready
    */
   get isReady(): boolean {
-    return this.isInitialized;
+    return this.isPrimed;
   }
 }
 

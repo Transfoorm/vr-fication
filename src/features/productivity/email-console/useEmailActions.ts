@@ -60,6 +60,7 @@ export function useEmailActions({
   const removeEmailMessages = useFuse((state) => state.removeEmailMessages);
   const removeEmailFolder = useFuse((state) => state.removeEmailFolder);
   const clearBodiesForMessages = useFuse((state) => state.clearBodiesForMessages);
+  const allMessages = useFuse((state) => state.productivity.email?.messages ?? []);
 
   const handleContextAction = useCallback(async (action: string) => {
     const currentContextMenu = contextMenu;
@@ -243,34 +244,29 @@ export function useEmailActions({
     }
 
     if (action === 'markRead' || action === 'markUnread') {
-      console.log(`📧 Mark action triggered:`, { action, userId, selectedCount: selectedMessageIds.size });
-
-      if (!userId) {
-        console.error('❌ Cannot mark read/unread: No user ID');
-        return;
-      }
+      if (!userId || selectedMessageIds.size === 0) return;
 
       const isRead = action === 'markRead';
-      const messageIdsToUpdate = [...selectedMessageIds];
 
-      if (messageIdsToUpdate.length === 0) {
-        console.error('❌ Cannot mark read/unread: No messages selected');
-        return;
-      }
+      // Only update messages that actually need state change
+      const messagesNeedingUpdate = [...selectedMessageIds].filter((id) => {
+        const msg = allMessages.find((m) => m._id === id);
+        return msg && msg.isRead !== isRead;
+      });
 
-      console.log(`📧 Mark ${isRead ? 'READ' : 'UNREAD'}: ${messageIdsToUpdate.length} messages`);
+      if (messagesNeedingUpdate.length === 0) return;
 
-      // 1. INSTANT UI: Single FUSE update for ALL messages (scales to 1000+)
-      batchUpdateEmailReadStatus(messageIdsToUpdate, isRead);
+      // 1. INSTANT UI: Single FUSE update for messages that need it
+      batchUpdateEmailReadStatus(messagesNeedingUpdate, isRead);
 
-      // Play mark sound
+      // Play mark sound (only if state actually changed)
       sounds.mark();
 
-      // 2. SINGLE Convex mutation for ALL messages (no N+1 queries)
+      // 2. SINGLE Convex mutation for messages that need it
       try {
         await batchConvexReadStatus({
           userId,
-          messageIds: messageIdsToUpdate as Id<'productivity_email_Index'>[],
+          messageIds: messagesNeedingUpdate as Id<'productivity_email_Index'>[],
           isRead,
         });
       } catch (error) {
@@ -278,7 +274,7 @@ export function useEmailActions({
       }
 
       // 3. Clear pending flags after protection window (10s for Convex live query catch-up)
-      setTimeout(() => batchClearPendingReadUpdates(messageIdsToUpdate), 10000);
+      setTimeout(() => batchClearPendingReadUpdates(messagesNeedingUpdate), 10000);
 
       // 4. BACKGROUND: Outlook sync with retry
       // - Retries up to 3 times with exponential backoff
@@ -299,7 +295,7 @@ export function useEmailActions({
         try {
           const result = await batchSyncReadStatus({
             userId,
-            messageIds: messageIdsToUpdate as Id<'productivity_email_Index'>[],
+            messageIds: messagesNeedingUpdate as Id<'productivity_email_Index'>[],
             isRead,
           });
 
@@ -313,7 +309,7 @@ export function useEmailActions({
           // Deduplication: accumulate IDs, reset timer, run ONE reconciliation after dust settles
           if (result.hadRateLimiting) {
             // Add these IDs to the pending set
-            messageIdsToUpdate.forEach(id => pendingReconcileIds.add(id));
+            messagesNeedingUpdate.forEach(id => pendingReconcileIds.add(id));
 
             // Clear existing timer (we'll start a fresh 2-min countdown)
             if (pendingReconcileTimer) {
@@ -372,6 +368,7 @@ export function useEmailActions({
     selectedMessageIds,
     selectedSubfolderId,
     messages,
+    allMessages,
     setContextMenu,
     setSelectedMessageIds,
     setSelectedSubfolderId,
