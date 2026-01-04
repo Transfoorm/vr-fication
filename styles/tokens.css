@@ -336,9 +336,10 @@
   --prod-text-micro: var(--font-size-xs);          /* Dates, counts, section labels */
 
   /* Icon sizes - productivity-specific (no global equivalent) */
-  --prod-icon-sm: 13px;                            /* Folder icons, inline icons */
-  --prod-icon-md: 14px;                            /* Section chevrons, action icons */
-  --prod-icon-lg: 16px;                            /* Primary action icons */
+  --prod-icon-xs: 14px;                            /* Subfolder icons */
+  --prod-icon-sm: 16px;                            /* Folder icons, inline icons */
+  --prod-icon-md: 18px;                            /* Section chevrons, action icons */
+  --prod-icon-lg: 20px;                            /* Primary action icons */
 
   /* Font weights - derived from global --font-weight-* */
   --prod-weight-normal: var(--font-weight-normal);

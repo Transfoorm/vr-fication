@@ -1,27 +1,11 @@
-/**
- * ══════════════════════════════════════════════════════════════════════════════
- * PRODUCTIVITY DOMAIN SLICE
- * ══════════════════════════════════════════════════════════════════════════════
- *
- * Handles: email, calendar, meetings, bookings, tasks
- * Route: /app/domains/productivity/*
- * Backend: /convex/domains/productivity/
- *
- * ADP/PRISM Compliant: Full coordination fields for WARP preloading
- *
- * NOTE: Email body caching (LRU, status) is in ./emailBodyCache.ts
- * This file handles domain logic: messages, folders, read status, optimistic deletes
- * ══════════════════════════════════════════════════════════════════════════════
- */
+/** Productivity Domain Slice - email, calendar, meetings, bookings, tasks */
 
 import type { StateCreator } from 'zustand';
 import type { ADPSource, ADPStatus } from './_template';
 import { fuseTimer } from './_template';
 import type { ProductivityEmail } from '@/features/productivity/email-console/types';
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Types
-// ─────────────────────────────────────────────────────────────────────────────
 
 export type EmailViewMode = 'live' | 'impact';
 
@@ -44,6 +28,8 @@ export interface ProductivitySlice {
   emailViewMode: EmailViewMode;
   // Pending read status updates (skip sync for these messages)
   pendingReadUpdates: Set<string>;
+  // Pending move updates (protect folder moves from sync overwrite)
+  pendingMoveUpdates: Map<string, { canonicalFolder: string; providerFolderId: string }>;
   // Auto-mark exempt IDs (never auto-mark these again this session)
   autoMarkExemptIds: Set<string>;
   // ADP Coordination (REQUIRED)
@@ -57,9 +43,11 @@ export interface ProductivityActions {
   updateEmailReadStatus: (messageId: string, isRead: boolean) => void;
   batchUpdateEmailReadStatus: (messageIds: string[], isRead: boolean) => void;
   removeEmailMessages: (messageIds: string[]) => void;
+  moveEmailsToTrash: (messageIds: string[]) => void;
   removeEmailFolder: (folderId: string) => void;
   clearPendingReadUpdate: (messageId: string) => void;
   batchClearPendingReadUpdates: (messageIds: string[]) => void;
+  batchClearPendingMoves: (messageIds: string[]) => void;
   addAutoMarkExempt: (messageId: string) => void;
   addAutoMarkExemptBatch: (messageIds: string[]) => void;
   removeAutoMarkExempt: (messageId: string) => void;
@@ -68,9 +56,7 @@ export interface ProductivityActions {
   setEmailViewMode: (mode: EmailViewMode) => void;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Initial State
-// ─────────────────────────────────────────────────────────────────────────────
 
 const initialProductivityState: ProductivitySlice = {
   email: undefined,
@@ -82,6 +68,8 @@ const initialProductivityState: ProductivitySlice = {
   emailViewMode: 'live', // Default to Live mode (traditional Outlook-style)
   // Pending read status updates (protected from sync overwrite)
   pendingReadUpdates: new Set(),
+  // Pending move updates (protected from sync overwrite)
+  pendingMoveUpdates: new Map(),
   // Auto-mark exempt IDs
   autoMarkExemptIds: new Set(),
   // ADP Coordination
@@ -90,9 +78,7 @@ const initialProductivityState: ProductivitySlice = {
   source: undefined,
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Slice Creator
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const createProductivitySlice: StateCreator<
   ProductivitySlice & ProductivityActions,
@@ -105,47 +91,40 @@ export const createProductivitySlice: StateCreator<
   hydrateProductivity: (data, source = 'WARP') => {
     const start = fuseTimer.start('hydrateProductivity');
     set((state) => {
-      // CRITICAL: Preserve isRead status for messages with pending updates
-      // This prevents Convex live queries from overwriting optimistic UI updates
+      // CRITICAL: Preserve optimistic updates from being overwritten by stale sync
+      // - pendingReadUpdates: protect isRead status
+      // - pendingMoveUpdates: protect canonicalFolder/providerFolderId
       let finalEmail = data.email;
-      let protectedCount = 0;
+      const pendingReadSize = state.pendingReadUpdates.size;
+      const pendingMoveSize = state.pendingMoveUpdates.size;
 
-      const pendingSize = state.pendingReadUpdates.size;
-      const pendingIds = [...state.pendingReadUpdates].map(id => id.slice(-8)).join(', ');
 
-      // UNCONDITIONAL log to trace hydration calls
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🌊 HYDRATE from ${source}: ${data.email?.messages?.length ?? 0} msgs, pending=${pendingSize} [${pendingIds}]`);
-      }
-
-      if (data.email?.messages && pendingSize > 0) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`🛡️ Checking protection: ${pendingSize} pending updates`);
-        }
+      if (data.email?.messages && (pendingReadSize > 0 || pendingMoveSize > 0)) {
         const protectedMessages = data.email.messages.map((msg) => {
+          let protectedMsg = msg;
+
+          // Protect pending read status
           if (state.pendingReadUpdates.has(msg._id)) {
-            // Find current local state for this message
             const localMsg = state.email?.messages?.find((m) => m._id === msg._id);
-            if (localMsg) {
-              if (localMsg.isRead !== msg.isRead) {
-                // Server has stale data - preserve local isRead
-                protectedCount++;
-                if (process.env.NODE_ENV === 'development') {
-                  console.log(`🛡️ Protected ${msg._id.slice(-8)}: local=${localMsg.isRead}, server=${msg.isRead}`);
-                }
-                return { ...msg, isRead: localMsg.isRead };
-              } else if (process.env.NODE_ENV === 'development') {
-                console.log(`🛡️ No conflict ${msg._id.slice(-8)}: both=${localMsg.isRead}`);
-              }
+            if (localMsg && localMsg.isRead !== msg.isRead) {
+              protectedMsg = { ...protectedMsg, isRead: localMsg.isRead };
             }
           }
-          return msg;
+
+          // Protect pending folder moves
+          const pendingMove = state.pendingMoveUpdates.get(msg._id);
+          if (pendingMove && msg.canonicalFolder !== pendingMove.canonicalFolder) {
+            protectedMsg = {
+              ...protectedMsg,
+              canonicalFolder: pendingMove.canonicalFolder as typeof msg.canonicalFolder,
+              providerFolderId: pendingMove.providerFolderId,
+            };
+          }
+
+          return protectedMsg;
         });
         finalEmail = { ...data.email, messages: protectedMessages };
 
-        if (protectedCount > 0 && process.env.NODE_ENV === 'development') {
-          console.log(`🛡️ FUSE: Protected ${protectedCount} messages from stale sync`);
-        }
       }
 
       return {
@@ -157,14 +136,6 @@ export const createProductivitySlice: StateCreator<
         source,
       };
     });
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`⚡ FUSE: Productivity domain hydrated via ${source}`, {
-        email: data.email ? `${data.email.threads?.length || 0} threads, ${data.email.messages?.length || 0} messages` : 'none',
-        calendar: data.calendar?.length || 0,
-        meetings: data.meetings?.length || 0,
-        bookings: data.bookings?.length || 0,
-      });
-    }
     fuseTimer.end('hydrateProductivity', start);
   },
 
@@ -253,6 +224,20 @@ export const createProductivitySlice: StateCreator<
     });
   },
 
+  // BATCH: Clear multiple pending move updates at once
+  batchClearPendingMoves: (messageIds) => {
+    set((state) => {
+      const newPendingMoves = new Map(state.pendingMoveUpdates);
+      for (const id of messageIds) {
+        newPendingMoves.delete(id);
+      }
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🔓 PENDING MOVES CLEAR: ${messageIds.length} messages (now ${newPendingMoves.size} pending)`);
+      }
+      return { ...state, pendingMoveUpdates: newPendingMoves };
+    });
+  },
+
   // Auto-mark exempt: prevents auto-mark-as-read for these IDs this session
   addAutoMarkExempt: (messageId) => {
     set((state) => {
@@ -311,6 +296,57 @@ export const createProductivitySlice: StateCreator<
     });
   },
 
+  // OPTIMISTIC MOVE TO TRASH: Instantly moves messages to Deleted folder in UI
+  // Same message, different folder - appears in Deleted immediately
+  moveEmailsToTrash: (messageIds) => {
+    set((state) => {
+      if (!state.email?.messages || !state.email?.folders) return state;
+
+      // Find the trash folder
+      const trashFolder = state.email.folders.find((f) => f.canonicalFolder === 'trash');
+      if (!trashFolder) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error(`🗑️ FUSE: Cannot move to trash - no trash folder found`);
+        }
+        return state;
+      }
+
+      const idsSet = new Set(messageIds);
+      const updatedMessages = state.email.messages.map((msg) => {
+        if (idsSet.has(msg._id)) {
+          return {
+            ...msg,
+            canonicalFolder: 'trash' as const,
+            providerFolderId: trashFolder.externalFolderId,
+          };
+        }
+        return msg;
+      });
+
+      // Add to pending moves - protect from sync overwrite
+      const newPendingMoves = new Map(state.pendingMoveUpdates);
+      for (const id of messageIds) {
+        newPendingMoves.set(id, {
+          canonicalFolder: 'trash',
+          providerFolderId: trashFolder.externalFolderId,
+        });
+      }
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🗑️ FUSE: Moved ${messageIds.length} messages to trash (protected from sync)`);
+      }
+
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          messages: updatedMessages,
+        },
+        pendingMoveUpdates: newPendingMoves,
+      };
+    });
+  },
+
   // OPTIMISTIC DELETE: Instantly remove folder from UI (API fires in background)
   removeEmailFolder: (folderId) => {
     set((state) => {
@@ -349,8 +385,6 @@ export const createProductivitySlice: StateCreator<
   },
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Exports
-// ─────────────────────────────────────────────────────────────────────────────
 
 export type ProductivityStore = ProductivitySlice & ProductivityActions;

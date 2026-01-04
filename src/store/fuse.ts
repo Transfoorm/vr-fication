@@ -93,9 +93,11 @@ interface FuseStore extends CoreSlice, CoreActions {
   updateEmailReadStatus: ProductivityActions['updateEmailReadStatus'];
   batchUpdateEmailReadStatus: ProductivityActions['batchUpdateEmailReadStatus'];
   removeEmailMessages: ProductivityActions['removeEmailMessages'];
+  moveEmailsToTrash: ProductivityActions['moveEmailsToTrash'];
   removeEmailFolder: ProductivityActions['removeEmailFolder'];
   clearPendingReadUpdate: ProductivityActions['clearPendingReadUpdate'];
   batchClearPendingReadUpdates: ProductivityActions['batchClearPendingReadUpdates'];
+  batchClearPendingMoves: ProductivityActions['batchClearPendingMoves'];
   addAutoMarkExempt: ProductivityActions['addAutoMarkExempt'];
   addAutoMarkExemptBatch: ProductivityActions['addAutoMarkExemptBatch'];
   removeAutoMarkExempt: ProductivityActions['removeAutoMarkExempt'];
@@ -216,6 +218,7 @@ export const useFuse = create<FuseStore>()((set, get, store): FuseStore => {
       tasks: productivitySlice.tasks,
       emailViewMode: productivitySlice.emailViewMode,
       pendingReadUpdates: productivitySlice.pendingReadUpdates,
+      pendingMoveUpdates: productivitySlice.pendingMoveUpdates,
       autoMarkExemptIds: productivitySlice.autoMarkExemptIds,
       status: productivitySlice.status,
       lastFetchedAt: productivitySlice.lastFetchedAt,
@@ -308,9 +311,11 @@ export const useFuse = create<FuseStore>()((set, get, store): FuseStore => {
     updateEmailReadStatus: productivitySlice.updateEmailReadStatus,
     batchUpdateEmailReadStatus: productivitySlice.batchUpdateEmailReadStatus,
     removeEmailMessages: productivitySlice.removeEmailMessages,
+    moveEmailsToTrash: productivitySlice.moveEmailsToTrash,
     removeEmailFolder: productivitySlice.removeEmailFolder,
     clearPendingReadUpdate: productivitySlice.clearPendingReadUpdate,
     batchClearPendingReadUpdates: productivitySlice.batchClearPendingReadUpdates,
+    batchClearPendingMoves: productivitySlice.batchClearPendingMoves,
     addAutoMarkExempt: productivitySlice.addAutoMarkExempt,
     addAutoMarkExemptBatch: productivitySlice.addAutoMarkExemptBatch,
     removeAutoMarkExempt: productivitySlice.removeAutoMarkExempt,

@@ -90,7 +90,7 @@ export function EmailSidebar({
         className={`ft-email__folder ${selectedFolder === 'sent' ? 'ft-email__folder--selected' : ''}`}
         onClick={() => onFolderSelect('sent')}
       >
-        <span className="ft-email__folder-icon">📩</span>
+        <span className="ft-email__folder-icon">📤</span>
         <span className="ft-email__folder-label">Sent</span>
         {folderCounts.sent > 0 && (
           <span className="ft-email__folder-count">{folderCounts.sent}</span>

@@ -52,15 +52,17 @@ export function useEmailActions({
   const deleteFolder = useAction(api.productivity.email.outlookFolderActions.deleteOutlookFolder);
   const batchSyncReadStatus = useAction(api.productivity.email.outlookActions.batchMarkOutlookReadStatus);
   const batchConvexReadStatus = useMutation(api.productivity.email.outlookActions.batchUpdateMessageReadStatus);
+  const batchMoveToTrashInDb = useMutation(api.productivity.email.outlookStore.batchMoveToTrashInDb);
   const reconcileReadStatus = useAction(api.productivity.email.outlookReconcile.reconcileReadStatus);
 
   // FUSE actions for instant UI update (no round-trip)
   const batchUpdateEmailReadStatus = useFuse((state) => state.batchUpdateEmailReadStatus);
   const batchClearPendingReadUpdates = useFuse((state) => state.batchClearPendingReadUpdates);
+  const batchClearPendingMoves = useFuse((state) => state.batchClearPendingMoves);
   const removeEmailMessages = useFuse((state) => state.removeEmailMessages);
+  const moveEmailsToTrash = useFuse((state) => state.moveEmailsToTrash);
   const removeEmailFolder = useFuse((state) => state.removeEmailFolder);
   const clearBodiesForMessages = useFuse((state) => state.clearBodiesForMessages);
-  const allMessages = useFuse((state) => state.productivity.email?.messages ?? []);
 
   const handleContextAction = useCallback(async (action: string) => {
     const currentContextMenu = contextMenu;
@@ -123,26 +125,29 @@ export function useEmailActions({
 
       const messageIdsToDelete = [...selectedMessageIds];
       console.log(`🗑️ Deleting ${messageIdsToDelete.length} message(s)...`);
+
+      // 1. INSTANT UI: Move to trash in FUSE + play sound immediately
+      moveEmailsToTrash(messageIdsToDelete);
+      setSelectedMessageIds(new Set());
       sounds.trash();
 
+      // 2. IMMEDIATE DB UPDATE: Move to trash in Convex BEFORE Outlook
+      // This prevents sync from creating duplicates while Outlook processes with 429 retries
+      batchMoveToTrashInDb({
+        userId,
+        messageIds: messageIdsToDelete as Id<'productivity_email_Index'>[],
+      }).catch((error) => {
+        console.error(`❌ Batch DB move failed:`, error);
+      });
+
+      // 3. Clear pending move protection after server has time to finish
+      setTimeout(() => batchClearPendingMoves(messageIdsToDelete), 15000);
+
+      // 4. BACKGROUND: Fire Outlook API calls (fire-and-forget)
       for (const messageId of messageIdsToDelete) {
-        try {
-          const result = await deleteMessage({
-            userId,
-            messageId: messageId as Id<'productivity_email_Index'>,
-          });
-
-          if (result.success) {
-            console.log(`✅ Deleted message ${messageId}`);
-          } else {
-            console.error(`❌ Failed to delete ${messageId}:`, result.error);
-          }
-        } catch (error) {
-          console.error(`❌ Error deleting ${messageId}:`, error);
-        }
+        deleteMessage({ userId, messageId: messageId as Id<'productivity_email_Index'> })
+          .catch((e) => console.error(`❌ Delete error:`, e));
       }
-
-      setSelectedMessageIds(new Set());
       return;
     }
 
@@ -163,110 +168,66 @@ export function useEmailActions({
 
       // 2. BACKGROUND: Fire API calls (fire-and-forget)
       for (const messageId of messageIdsToDelete) {
-        permanentlyDeleteMessage({
-          userId,
-          messageId: messageId as Id<'productivity_email_Index'>,
-        }).then((result) => {
-          if (result.success) {
-            console.log(`✅ Permanently deleted ${messageId.slice(-8)}`);
-          } else {
-            console.error(`❌ Failed to permanently delete ${messageId.slice(-8)}:`, result.error);
-          }
-        }).catch((error) => {
-          console.error(`❌ Error permanently deleting ${messageId.slice(-8)}:`, error);
-        });
+        permanentlyDeleteMessage({ userId, messageId: messageId as Id<'productivity_email_Index'> })
+          .catch((e) => console.error(`❌ Permanent delete error:`, e));
       }
       return;
     }
 
     if (action === 'emptyFolder') {
-      if (!userId) {
-        console.error('❌ Cannot empty folder: No user ID');
-        return;
-      }
-
-      // Get all messages in current folder
+      if (!userId) return;
       const messageIdsToDelete = messages.map(m => m._id);
-      console.log(`🗑️ Permanently deleting all ${messageIdsToDelete.length} message(s) in folder...`);
-
-      // 1. INSTANT UI: Remove from FUSE immediately
       removeEmailMessages(messageIdsToDelete);
       clearBodiesForMessages(messageIdsToDelete);
       setSelectedMessageIds(new Set());
       sounds.trash();
-
-      // 2. BACKGROUND: Fire API calls (fire-and-forget)
       for (const messageId of messageIdsToDelete) {
-        permanentlyDeleteMessage({
-          userId,
-          messageId: messageId as Id<'productivity_email_Index'>,
-        }).then((result) => {
-          if (result.success) {
-            console.log(`✅ Permanently deleted ${messageId.slice(-8)}`);
-          } else {
-            console.error(`❌ Failed to permanently delete ${messageId.slice(-8)}:`, result.error);
-          }
-        }).catch((error) => {
-          console.error(`❌ Error permanently deleting ${messageId.slice(-8)}:`, error);
-        });
+        permanentlyDeleteMessage({ userId, messageId: messageId as Id<'productivity_email_Index'> })
+          .catch((e) => console.error(`❌ Empty folder error:`, e));
       }
       return;
     }
 
     if (action === 'archive') {
-      if (!userId) {
-        console.error('❌ Cannot archive: No user ID');
-        return;
-      }
-
+      if (!userId) return;
       const messageIdsToArchive = [...selectedMessageIds];
-      console.log(`📁 Archiving ${messageIdsToArchive.length} message(s)...`);
-
       for (const messageId of messageIdsToArchive) {
-        try {
-          const result = await archiveMessage({
-            userId,
-            messageId: messageId as Id<'productivity_email_Index'>,
-          });
-
-          if (result.success) {
-            console.log(`✅ Archived message ${messageId}`);
-          } else {
-            console.error(`❌ Failed to archive ${messageId}:`, result.error);
-          }
-        } catch (error) {
-          console.error(`❌ Error archiving ${messageId}:`, error);
-        }
+        archiveMessage({ userId, messageId: messageId as Id<'productivity_email_Index'> })
+          .catch((e) => console.error(`❌ Archive error:`, e));
       }
-
       setSelectedMessageIds(new Set());
       return;
     }
 
     if (action === 'markRead' || action === 'markUnread') {
-      if (!userId || selectedMessageIds.size === 0) return;
+      console.log(`📧 Mark action triggered:`, { action, userId, selectedCount: selectedMessageIds.size });
+
+      if (!userId) {
+        console.error('❌ Cannot mark read/unread: No user ID');
+        return;
+      }
 
       const isRead = action === 'markRead';
+      const messageIdsToUpdate = [...selectedMessageIds];
 
-      // Only update messages that actually need state change
-      const messagesNeedingUpdate = [...selectedMessageIds].filter((id) => {
-        const msg = allMessages.find((m) => m._id === id);
-        return msg && msg.isRead !== isRead;
-      });
+      if (messageIdsToUpdate.length === 0) {
+        console.error('❌ Cannot mark read/unread: No messages selected');
+        return;
+      }
 
-      if (messagesNeedingUpdate.length === 0) return;
+      console.log(`📧 Mark ${isRead ? 'READ' : 'UNREAD'}: ${messageIdsToUpdate.length} messages`);
 
-      // 1. INSTANT UI: Single FUSE update for messages that need it
-      batchUpdateEmailReadStatus(messagesNeedingUpdate, isRead);
+      // 1. INSTANT UI: Single FUSE update for ALL messages (scales to 1000+)
+      batchUpdateEmailReadStatus(messageIdsToUpdate, isRead);
 
-      // Play mark sound (only if state actually changed)
+      // Play mark sound
       sounds.mark();
 
-      // 2. SINGLE Convex mutation for messages that need it
+      // 2. SINGLE Convex mutation for ALL messages (no N+1 queries)
       try {
         await batchConvexReadStatus({
           userId,
-          messageIds: messagesNeedingUpdate as Id<'productivity_email_Index'>[],
+          messageIds: messageIdsToUpdate as Id<'productivity_email_Index'>[],
           isRead,
         });
       } catch (error) {
@@ -274,7 +235,7 @@ export function useEmailActions({
       }
 
       // 3. Clear pending flags after protection window (10s for Convex live query catch-up)
-      setTimeout(() => batchClearPendingReadUpdates(messagesNeedingUpdate), 10000);
+      setTimeout(() => batchClearPendingReadUpdates(messageIdsToUpdate), 10000);
 
       // 4. BACKGROUND: Outlook sync with retry
       // - Retries up to 3 times with exponential backoff
@@ -295,7 +256,7 @@ export function useEmailActions({
         try {
           const result = await batchSyncReadStatus({
             userId,
-            messageIds: messagesNeedingUpdate as Id<'productivity_email_Index'>[],
+            messageIds: messageIdsToUpdate as Id<'productivity_email_Index'>[],
             isRead,
           });
 
@@ -309,7 +270,7 @@ export function useEmailActions({
           // Deduplication: accumulate IDs, reset timer, run ONE reconciliation after dust settles
           if (result.hadRateLimiting) {
             // Add these IDs to the pending set
-            messagesNeedingUpdate.forEach(id => pendingReconcileIds.add(id));
+            messageIdsToUpdate.forEach(id => pendingReconcileIds.add(id));
 
             // Clear existing timer (we'll start a fresh 2-min countdown)
             if (pendingReconcileTimer) {
@@ -368,7 +329,6 @@ export function useEmailActions({
     selectedMessageIds,
     selectedSubfolderId,
     messages,
-    allMessages,
     setContextMenu,
     setSelectedMessageIds,
     setSelectedSubfolderId,
@@ -380,11 +340,14 @@ export function useEmailActions({
     deleteFolder,
     batchUpdateEmailReadStatus,
     batchClearPendingReadUpdates,
+    batchClearPendingMoves,
     removeEmailMessages,
+    moveEmailsToTrash,
     removeEmailFolder,
     clearBodiesForMessages,
     batchConvexReadStatus,
     batchSyncReadStatus,
+    batchMoveToTrashInDb,
     reconcileReadStatus,
   ]);
 

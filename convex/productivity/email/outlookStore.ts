@@ -441,3 +441,98 @@ export const storeOutlookFolders = mutation({
     return { created, updated, deleted };
   },
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TRASH OPERATIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+// IMMEDIATE Convex update - call BEFORE Outlook API to prevent sync duplicates
+export const batchMoveToTrashInDb = mutation({
+  args: {
+    userId: v.id('admin_users'),
+    messageIds: v.array(v.id('productivity_email_Index')),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error('User not found');
+
+    let trashFolderId: string | undefined;
+    let movedCount = 0;
+
+    for (const messageId of args.messageIds) {
+      const message = await ctx.db.get(messageId);
+      if (!message) continue;
+
+      // Find trash folder (cache after first lookup)
+      if (!trashFolderId) {
+        const trashFolder = await ctx.db
+          .query('productivity_email_Folders')
+          .withIndex('by_account', (q) => q.eq('accountId', message.accountId))
+          .filter((q) => q.eq(q.field('canonicalFolder'), 'trash'))
+          .first();
+        trashFolderId = trashFolder?.externalFolderId;
+      }
+
+      // Update record to be in trash IMMEDIATELY
+      // This prevents sync from creating duplicates while Outlook processes
+      await ctx.db.patch(messageId, {
+        canonicalFolder: 'trash',
+        providerFolderId: trashFolderId ?? message.providerFolderId,
+      });
+      movedCount++;
+    }
+
+    console.log(`🗑️ Convex: Moved ${movedCount} messages to trash (before Outlook)`);
+    return { moved: movedCount };
+  },
+});
+
+export const moveMessageToTrash = mutation({
+  args: {
+    userId: v.id('admin_users'),
+    messageId: v.id('productivity_email_Index'),
+    newExternalMessageId: v.optional(v.string()),
+    newProviderFolderId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error('User not found');
+
+    const message = await ctx.db.get(args.messageId);
+    if (!message) throw new Error('Message not found');
+
+    // Find the trash folder for this account
+    const trashFolder = await ctx.db
+      .query('productivity_email_Folders')
+      .withIndex('by_account', (q) => q.eq('accountId', message.accountId))
+      .filter((q) => q.eq(q.field('canonicalFolder'), 'trash'))
+      .first();
+
+    // RACE CONDITION FIX: If sync already created a record with the new ID, delete it
+    // This happens when sync runs between Outlook move and our update
+    const newExtId = args.newExternalMessageId;
+    if (newExtId) {
+      const duplicate = await ctx.db
+        .query('productivity_email_Index')
+        .withIndex('by_external_message_id', (q) => q.eq('externalMessageId', newExtId))
+        .filter((q) => q.eq(q.field('accountId'), message.accountId))
+        .first();
+
+      if (duplicate && duplicate._id !== args.messageId) {
+        console.log(`🧹 Deleting duplicate created by sync race: ${duplicate._id}`);
+        await ctx.db.delete(duplicate._id);
+      }
+    }
+
+    // UPDATE the record with new Outlook ID (Outlook assigns new ID when moving)
+    // This prevents duplicates - we keep our record and update its externalMessageId
+    await ctx.db.patch(args.messageId, {
+      canonicalFolder: 'trash',
+      providerFolderId: args.newProviderFolderId ?? trashFolder?.externalFolderId ?? message.providerFolderId,
+      // Update externalMessageId if Outlook gave us a new one
+      ...(args.newExternalMessageId ? { externalMessageId: args.newExternalMessageId } : {}),
+    });
+
+    return { success: true };
+  },
+});

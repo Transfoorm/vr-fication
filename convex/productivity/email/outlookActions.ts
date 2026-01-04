@@ -52,10 +52,8 @@ export const getMessageById = query({
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
     if (!user) return null;
-
     const message = await ctx.db.get(args.messageId);
     if (!message) return null;
-
     return {
       _id: message._id,
       externalMessageId: message.externalMessageId,
@@ -63,33 +61,6 @@ export const getMessageById = query({
       subject: message.subject,
       canonicalFolder: message.canonicalFolder,
     };
-  },
-});
-
-export const moveMessageToTrash = mutation({
-  args: {
-    userId: v.id('admin_users'),
-    messageId: v.id('productivity_email_Index'),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    if (!user) throw new Error('User not found');
-
-    const message = await ctx.db.get(args.messageId);
-    if (!message) throw new Error('Message not found');
-
-    const trashFolder = await ctx.db
-      .query('productivity_email_Folders')
-      .withIndex('by_account', (q) => q.eq('accountId', message.accountId))
-      .filter((q) => q.eq(q.field('canonicalFolder'), 'trash'))
-      .first();
-
-    await ctx.db.patch(args.messageId, {
-      canonicalFolder: 'trash',
-      providerFolderId: trashFolder?.externalFolderId ?? message.providerFolderId,
-    });
-
-    return { success: true };
   },
 });
 
@@ -140,7 +111,8 @@ export const deleteOutlookMessage = action({
       } catch { /* continue with existing token */ }
     }
 
-    try {
+    // Retry helper for 429 rate limiting
+    const moveWithRetry = async (attempt = 1): Promise<Response> => {
       const response = await fetch(
         `https://graph.microsoft.com/v1.0/me/messages/${message.externalMessageId}/move`,
         {
@@ -153,6 +125,21 @@ export const deleteOutlookMessage = action({
         }
       );
 
+      // 429 = rate limited - retry with exponential backoff
+      if (response.status === 429 && attempt < 4) {
+        const retryAfter = response.headers.get('Retry-After');
+        const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, attempt) * 1000;
+        console.log(`⏳ Delete rate limited (429), retry ${attempt}/3 in ${delay}ms`);
+        await new Promise(r => setTimeout(r, delay));
+        return moveWithRetry(attempt + 1);
+      }
+
+      return response;
+    };
+
+    try {
+      const response = await moveWithRetry();
+
       // 404 = already deleted from Outlook - still clean up our DB
       if (!response.ok && response.status !== 404) {
         const errorText = await response.text();
@@ -160,13 +147,29 @@ export const deleteOutlookMessage = action({
         return { success: false, error: `Outlook API error: ${response.status}` };
       }
 
-      if (response.status === 404) {
+      // Capture the new message ID from Outlook's response
+      // When Outlook moves a message, it assigns a NEW ID
+      let newExternalMessageId: string | undefined;
+      let newProviderFolderId: string | undefined;
+
+      if (response.ok) {
+        try {
+          const movedMessage = await response.json() as { id: string; parentFolderId: string };
+          newExternalMessageId = movedMessage.id;
+          newProviderFolderId = movedMessage.parentFolderId;
+          console.log(`Outlook moved message: old=${message.externalMessageId.slice(-8)}, new=${newExternalMessageId.slice(-8)}`);
+        } catch {
+          console.log('Could not parse move response, proceeding without new ID');
+        }
+      } else if (response.status === 404) {
         console.log(`Message ${message.externalMessageId} already deleted from Outlook, cleaning up DB`);
       }
 
-      await ctx.runMutation(api.productivity.email.outlookActions.moveMessageToTrash, {
+      await ctx.runMutation(api.productivity.email.outlookStore.moveMessageToTrash, {
         userId: args.userId,
         messageId: args.messageId,
+        newExternalMessageId,
+        newProviderFolderId,
       });
 
       return { success: true };
