@@ -79,6 +79,8 @@ export interface EmailAccount {
   lastSyncError?: string;
   /** Whether a sync is currently in progress (for UI spinner) */
   isSyncing?: boolean;
+  /** Whether initial sync has completed (first-time email download finished) */
+  initialSyncComplete?: boolean;
 }
 
 /**

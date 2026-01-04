@@ -134,6 +134,7 @@ export function useProductivitySync(): ProductivitySyncResult {
         lastSyncAt: account.lastSyncAt,
         lastSyncError: account.lastSyncError,
         isSyncing: account.isSyncing,
+        initialSyncComplete: (account as { initialSyncComplete?: boolean }).initialSyncComplete,
       }));
 
       // Transform threads to FUSE format (ThreadMetadata → EmailThread)

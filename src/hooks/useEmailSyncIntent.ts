@@ -51,12 +51,26 @@ export function useEmailSyncIntent(): UseEmailSyncIntentReturn {
   const user = useFuse((state) => state.user);
   const callerUserId = user?.convexId as Id<'admin_users'> | undefined;
 
-  // LOCAL spinner state - immediate feedback, not tied to slow DB updates
+  // LOCAL spinner state - immediate feedback for manual refresh
   const [isSpinning, setIsSpinning] = useState(false);
   const spinTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // isSyncing is now local - spins briefly on click for instant feedback
-  const isSyncing = isSpinning;
+  // Get accounts from FUSE to check for active syncs
+  const emailAccounts = useFuse((state) => state.productivity.email?.accounts);
+
+  // Check if any account is actively syncing (server-side sync in progress)
+  // OR if any account hasn't completed initial sync yet
+  const isAccountSyncing = emailAccounts?.some((acc) => {
+    // Server says it's syncing
+    if (acc.isSyncing) return true;
+    // Account exists but hasn't completed initial sync (still downloading)
+    const typedAcc = acc as { initialSyncComplete?: boolean };
+    if (typedAcc.initialSyncComplete === false) return true;
+    return false;
+  }) ?? false;
+
+  // isSyncing: spin for manual refresh OR actual account sync
+  const isSyncing = isSpinning || isAccountSyncing;
 
   const requestSync = useMutation(api.productivity.email.sync.requestImmediateSync);
 

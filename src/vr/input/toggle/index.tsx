@@ -43,6 +43,7 @@ export default function InputToggle({
   const wrapperClasses = [
     'vr-input-toggle-wrapper',
     label && `vr-input-toggle-wrapper--${labelPosition}`,
+    size !== 'md' && `vr-input-toggle-wrapper--${size}`,
     disabled && 'vr-input-toggle-wrapper--disabled',
     className
   ].filter(Boolean).join(' ');

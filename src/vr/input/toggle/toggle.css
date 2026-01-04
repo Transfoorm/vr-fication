@@ -27,8 +27,10 @@
 
 /* Toggle container */
 .vr-input-toggle {
-  display: inline-block;
+  display: block;
   position: relative;
+  flex-shrink: 0;
+  align-self: center;
   width: var(--toggle-width);
   height: var(--toggle-height);
 }
@@ -114,10 +116,22 @@
 
 /* Label */
 .vr-input-toggle-label {
+  margin: 0;
+  padding: 0;
+  align-self: center;
   color: var(--text-primary);
   font-size: var(--font-size-md);
   user-select: none;
   cursor: pointer;
+}
+
+/* Size-based label styling */
+.vr-input-toggle-wrapper--sm .vr-input-toggle-label {
+  font-size: var(--font-size-sm);
+}
+
+.vr-input-toggle-wrapper--lg .vr-input-toggle-label {
+  font-size: var(--font-size-lg);
 }
 
 .vr-input-toggle--disabled .vr-input-toggle-label {
